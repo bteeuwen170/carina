@@ -1,0 +1,51 @@
+/*
+ *
+ * Carina
+ * Linker
+ *
+ * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ */
+
+VMA = 0xFFFFFFFF80000000;
+
+SECTIONS
+{
+	.mboot (0x100000 + VMA + SIZEOF_HEADERS) : AT(ADDR(.mboot) - VMA) {
+		*(.mboot)
+		. = ALIGN(0x1000);
+	}
+
+	.text : AT(ADDR(.text) - VMA) {
+		*(.text)
+		*(.rodata)
+	}
+
+	.data : AT(ADDR(.data) - VMA) {
+		*(.padata)
+		*(.data)
+	}
+
+	.bss : AT(ADDR(.bss) - VMA) {
+		bss = .;
+		*(COMMON)
+		*(.bss)
+	}
+
+	end = 0x2000 + .;
+}
