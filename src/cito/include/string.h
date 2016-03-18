@@ -25,19 +25,18 @@
 #ifndef __STRING_H_
 #define __STRING_H_
 
-#include <stdint.h>
-#include <stddef.h>
+#include <stdlib.h>
 
-void *memcpy(void *dest, void *src, size_t len);
+void *memcpy(void *dest, void *src, uint64 len);
 
-void *memset(void *dest, uint8_t val, size_t len);
+void *memset(void *dest, char val, uint64 len);
 
-char *strcat(char *dest, char *src);
+string strcat(string dest, string src);
 
-char *strcpy(char *dest, char *src);
+string strcpy(string dest, string src);
 
-size_t strlen(char *str);
+uint64 strlen(string str);
 
-char *strrev(char *str);
+string strrev(string str);
 
 #endif

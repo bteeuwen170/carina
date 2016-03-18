@@ -22,7 +22,7 @@
  *
  */
 
-#include <stdint.h>
+#include <stdlib.h>
 
 #include <fb.h>
 #include <kbd.h>
@@ -35,7 +35,7 @@ void printc(char c)
 	printcc(c, fb_fgcolor);
 }
 
-void printcc(char c, char color)
+void printcc(char c, uint8 color)
 {
 	if (c != 0) {
 		switch (c) {
@@ -71,16 +71,16 @@ void printcc(char c, char color)
 	}
 }
 
-void prints(char *string)
+void prints(string str)
 {
-	uint32_t length = 0;
-	while (string[length]) printc(string[length++]);
+	uint32 length = 0;
+	while (str[length]) printc(str[length++]);
 }
 
-void printsc(char *string, char color)
+void printsc(string str, uint8 color)
 {
-	uint32_t length = 0;
-	while (string[length]) printcc(string[length++], color);
+	uint32 length = 0;
+	while (str[length]) printcc(str[length++], color);
 }
 
 /*void scans(char *ptr)

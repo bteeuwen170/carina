@@ -28,15 +28,13 @@
 #include <fb.h>
 #include <kbd.h>
 #include <multiboot.h>
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <system.h>
 #include <vga.h>
 
-void kernel_panic(char *reason, uint64_t err_code)
+void kernel_panic(string reason, uint64 err_code)
 {
 	asm volatile ("cli");
 	
@@ -52,7 +50,7 @@ void kernel_panic(char *reason, uint64_t err_code)
 	for (;;) asm ("hlt");
 }
 
-void kernel_status(char *type, char *message, const bool print)
+void kernel_status(string type, string message, const bool print)
 {
 	if (print) {
 		if (type) {
@@ -67,7 +65,7 @@ void kernel_status(char *type, char *message, const bool print)
 		prints("\n");
 	}
 
-	for (uint32_t i = 0; i < 18; i++) serial_out(COM0, message[i]);
+	for (uint32 i = 0; i < 18; i++) serial_out(COM0, message[i]);
 	serial_out(COM0, 0x0A);
 	serial_out(COM0, 0x0D); //What the fuck, this ain't Windows right?
 	/* !!!HACK!!! */
@@ -116,7 +114,7 @@ void kernel_main(mbis_t *mbis)
 	printsc(itoa(cmos_in(CMOS_SECONDS), 16), COLOR_WHITE);
 	printsc(" UTC\nTotal RAM: ", COLOR_WHITE);
 
-	uint64_t mem = mbis-> mem_lower + mbis->mem_higher;
+	uint64 mem = mbis-> mem_lower + mbis->mem_higher;
 	printsc(itoa(mem / 1024 + 1, 10), COLOR_WHITE); //TODO Don't do + 1
 	printsc(" MB (", COLOR_WHITE);
 	printsc(itoa(mem, 10), COLOR_WHITE);
@@ -150,7 +148,7 @@ void kernel_main(mbis_t *mbis)
 		prints(" s.\n$ ");
 	}
 	// </TEMP>
-	//uint8_t *input;
+	//char *input;
 	//scans(input);
 	//kbd_init();
 	for(;;) asm volatile("hlt");

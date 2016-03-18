@@ -25,11 +25,10 @@
 #ifndef __CITO_H__
 #define __CITO_H__
 
-#include <stdbool.h>
-#include <stdint.h>
+#include <stdlib.h>
 
-void kernel_panic(char *reason, uint64_t err_code);
+void kernel_panic(string reason, uint64 err_code);
 
-void kernel_status(char *type, char *message, const bool print);
+void kernel_status(string type, string message, const bool print);
 
 #endif

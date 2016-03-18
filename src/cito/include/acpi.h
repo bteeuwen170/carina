@@ -25,18 +25,18 @@
 #ifndef __ACPI_H_
 #define __ACPI_H_
 
-#include <stdint.h>
+#include <stdlib.h>
 
 struct rsdp {
-	char				signature[8];
-	uint8_t				checksum;
-	char				oemid;
-	uint8_t				revision;
-	uint32_t			rsdt_addr;
-	uint32_t			length;
-	uint64_t			xsdt_addr;
-	uint8_t				checksum_ext;
-	uint8_t				reserved[3];
+	uint8				signature[8];
+	uint8				checksum;
+	uint8				oemid;
+	uint8				revision;
+	uint32				rsdt_addr;
+	uint32				length;
+	uint64				xsdt_addr;
+	uint8				checksum_ext;
+	uint8				reserved[3];
 } __attribute__ ((packed));
 
 

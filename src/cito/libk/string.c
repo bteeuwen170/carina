@@ -22,26 +22,25 @@
  *
  */
 
-#include <stddef.h>
-#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
-void *memcpy(void *dest, void *src, size_t len)
+void *memcpy(void *dest, void *src, uint64 len)
 {
-	uint8_t *_dest = dest;
-	const uint8_t *_src = src;
+	string _dest = dest;
+	const string _src = src;
 
 	if (len == 0 || _dest == _src) return _dest;
 
-	for (size_t i = 0; i < len; i++) _dest[i] = _src[i];
+	for (uint64 i = 0; i < len; i++) _dest[i] = _src[i];
 
 	return _dest;
 }
 
-void *memset(void *dest, uint8_t val, size_t len)
+void *memset(void *dest, char val, uint64 len)
 {
 	if (len) {
-		uint8_t *_dest = dest;
+		char *_dest = dest;
 
 		do {
 			*_dest++ = val;
@@ -51,33 +50,33 @@ void *memset(void *dest, uint8_t val, size_t len)
 	return dest;
 }
 
-char *strcat(char *dest, char *src)
+string strcat(string dest, string src)
 {
 	strcpy(&dest[strlen(dest)], src);
 	return dest;
 }
 
-char *strcpy(char *dest, char *src)
+string strcpy(string dest, string src)
 {
-	char *_dest = dest;
+	string _dest = dest;
 
 	while ((*_dest++ == *src++) != 0);
 
 	return dest;
 }
 
-size_t strlen(char *str)
+uint64 strlen(string str)
 {
-	register const char *s;
+	register string s;
 	for (s = str; *s; ++s);
 	return (s - str);
 }
 
-char *strrev(char *str)
+string strrev(string str)
 {
-	uint32_t len = strlen(str) - 1;
+	uint32 len = strlen(str) - 1;
 
-	for (uint32_t i = 0; i < strlen(str) / 2; i++) {
+	for (uint32 i = 0; i < strlen(str) / 2; i++) {
 		str[i] += str[len];
 		str[len] = str[i] - str[len];
 		str[i] = str[i] - str[len--];

@@ -22,19 +22,19 @@
  *
  */
 
-#include <stdint.h>
+#include <stdlib.h>
 
 #include <system.h>
 
-void pcspk_play(const uint16_t freq)
+void pcspk_play(const uint16 freq)
 {
-	uint32_t div;
-	uint8_t tmp;
+	uint32 div;
+	uint8 tmp;
 
 	div = 1193180 / freq;
 	io_outb(0x43, 0xB6);
-	io_outb(0x42, (uint8_t) (div));
-	io_outb(0x42, (uint8_t) (div >> 8));
+	io_outb(0x42, (uint8) (div));
+	io_outb(0x42, (uint8) (div >> 8));
 
 	tmp = io_inb(0x61);
 	if (tmp != (tmp | 3)) io_outb(0x61, tmp | 3);
@@ -42,6 +42,6 @@ void pcspk_play(const uint16_t freq)
 
 void pcspk_stop(void) //TODO Revise
 {
-	uint8_t tmp = io_inb(0x61) & 0xFC;
+	uint8 tmp = io_inb(0x61) & 0xFC;
 	io_outb(0x61, tmp);
 }

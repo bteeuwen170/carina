@@ -25,25 +25,25 @@
 #ifndef __FB_H__
 #define __FB_H__
 
-#include <stdint.h>
+#include <stdlib.h>
 
 #define FB_CNT			4
 
-uint8_t fb_focus;
+uint8 fb_focus;
 
-uint16_t *fb_buffer;
-uint16_t fb_buffers[FB_CNT];
+uint16 *fb_buffer;
+uint16 fb_buffers[FB_CNT];
 
-uint16_t fb_x[FB_CNT];
-uint16_t fb_y[FB_CNT];
+uint16 fb_x[FB_CNT];
+uint16 fb_y[FB_CNT];
 
-uint8_t fb_fgcolor;
-uint8_t fb_bgcolor;
+uint8 fb_fgcolor;
+uint8 fb_bgcolor;
 
-void fb_init(const uint8_t fb);
+void fb_init(const uint8 fb);
 
 void fb_cur_set(void);
-void fb_cur_style(const uint8_t style);
+void fb_cur_style(const uint8 style);
 
 void fb_clr(void);
 void fb_scrl_dwn(void);

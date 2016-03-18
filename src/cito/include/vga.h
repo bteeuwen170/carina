@@ -25,7 +25,7 @@
 #ifndef __VGA_H__
 #define __VGA_H__
 
-#include <stdint.h>
+#include <stdlib.h>
 
 #define VGA_WIDTH		80
 #define VGA_HEIGHT		25
@@ -57,13 +57,13 @@ enum VGA_CURSORS {
 
 #define TAB_SIZE		4
 
-static inline uint16_t vga_create_entry(const uint8_t _character,
-										const uint8_t _fgcolor,
-										const uint8_t _bgcolor)
+static inline uint16 vga_create_entry(const uint8 character,
+										const uint8 fgcolor,
+										const uint8 bgcolor)
 {
-	uint16_t character = _character;
-	uint16_t color = _fgcolor | _bgcolor << 4;
-	return character | color << 8;
+	uint16 _character = character;
+	uint16 _color = fgcolor | bgcolor << 4;
+	return _character | _color << 8;
 }
 
 #endif

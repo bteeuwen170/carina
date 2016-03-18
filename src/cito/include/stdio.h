@@ -25,17 +25,19 @@
 #ifndef __STDIO_H_
 #define __STDIO_H_
 
+#include <stdlib.h>
+
 void printc(char c);
-void printcc(char c, char color);
+void printcc(char c, uint8 color);
 
-//void printl(const uint32_t u_int);
-//void printlc(const uint32_t u_int, char color);
+//void printl(const uint32 u_int);
+//void printlc(const uint32 u_int, uint8 color);
 
-void prints(char *string);
-void printsc(char *string, char color);
+void prints(string str);
+void printsc(string str, uint8 color);
 
 //void scanc(const *ptr);
 
-//void scans(char *ptr);
+//void scans(string ptr);
 
 #endif

@@ -25,22 +25,22 @@
 #ifndef __MB_H__
 #define __MB_H__
 
-#include <stdint.h>
+#include <stdlib.h>
 
 typedef struct {
-	uint32_t flags;
-	uint32_t mem_lower, mem_higher;
-	uint32_t root;
-	uint32_t cmd;
-	uint32_t mods_cnt, mods_addr;
-	uint32_t sym[4];
-	uint32_t mmap_len, mmap_addr;
-	uint32_t drives_len, drives_addr;
-	uint32_t cfg_table;
-	uint32_t boot_loader;
-	uint32_t apm_table;
-	uint32_t vbe_ctrl_info, vbe_mode_info, vbe_info;
-	uint32_t vbe_iface_seg, vbe_iface_base, vbe_iface_len;
+	uint32 flags;
+	uint32 mem_lower, mem_higher;
+	uint32 root;
+	uint32 cmd;
+	uint32 mods_cnt, mods_addr;
+	uint32 sym[4];
+	uint32 mmap_len, mmap_addr;
+	uint32 drives_len, drives_addr;
+	uint32 cfg_table;
+	uint32 boot_loader;
+	uint32 apm_table;
+	uint32 vbe_ctrl_info, vbe_mode_info, vbe_info;
+	uint32 vbe_iface_seg, vbe_iface_base, vbe_iface_len;
 } mbis_t;
 
 #endif

@@ -22,34 +22,31 @@
  *
  */
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-/*static const int64_t hext[] = {
+/*static const int64 hext[] = {
 	[0 ... 255] = -1,
 	['0'] = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 	['A'] = 10, 11, 12, 13, 14, 15,
 	['a'] = 10, 11, 12, 13, 14, 15
 };
 
-int64_t hexdec(const uint8_t *hex)
+int64 hexdec(const string hex)
 {
-	int64_t dec = 0;
+	int64 dec = 0;
 
-	//for (uint64_t dec = 0; *hex && dec >= 0; *hex++)
+	//for (uint64 dec = 0; *hex && dec >= 0; *hex++)
 	//	 dec = (dec << 4) | hext[*hex];
 	while (*hex && dec >= 0) dec = (dec << 4) | hext[*hex++];
 
 	return dec;
 }*/
 
-char *itoa(size_t num, const uint32_t base) //FIXME No support for negative integers
+string itoa(uint64 num, const uint32 base) //FIXME No support for negative integers
 {
 	static char str[22];
-	int32_t i = 0;
+	int32 i = 0;
 
 	if (num == 0) {
 		str[i++] = '0';
@@ -58,7 +55,7 @@ char *itoa(size_t num, const uint32_t base) //FIXME No support for negative inte
 	}
 
 	while (num != 0) {
-		int32_t rem = num % base;
+		int32 rem = num % base;
 		str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
 		num = num / base;
 	}

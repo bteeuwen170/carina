@@ -22,11 +22,11 @@
  *
  */
 
-#include <stdint.h>
+#include <stdlib.h>
 
 #include <system.h>
 
-void serial_init(const uint16_t port) //TODO Constants
+void serial_init(const uint16 port) //TODO Constants
 {
 	io_outb(port + 1, 0x00);
 	io_outb(port + 3, 0x80);
@@ -39,23 +39,23 @@ void serial_init(const uint16_t port) //TODO Constants
 	//TODO Register the serial input handler
 }
 
-uint16_t serial_read(const uint16_t port)
+uint16 serial_read(const uint16 port)
 {
 	return io_inb(port + 5) & 0x01;
 }
 
-uint16_t serial_in(const uint16_t port)
+uint16 serial_in(const uint16 port)
 {
 	while (serial_read(port) == 0);
 	return io_inb(port);
 }
 
-uint16_t serial_free(const uint16_t port)
+uint16 serial_free(const uint16 port)
 {
 	return io_inb(port + 5) & 0x20;
 }
 
-void serial_out(const uint16_t port, const uint8_t value)
+void serial_out(const uint16 port, const uint8 value)
 {
 	while (serial_free(port) == 0);
 	io_outb(port, value);

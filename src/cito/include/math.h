@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * Header for PS/2 Keyboard Driver
+ * Header for math Library
  *
  * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,31 +22,13 @@
  *
  */
 
-#ifndef __KBDPS2_H__
-#define __KBDPS2_H__
+#ifndef __MATH_H_
+#define __MATH_H_
 
 #include <stdlib.h>
 
-#define KEYMAP_SIZE		128
+#define M_E				2.7182818284590452354
 
-#define KBD_KEY_UP		0x80
-
-#define KBD_CMD			0x64
-#define KBD_IO			0x60
-
-#define KBD_RESET		0xFE
-
-enum INPUT_LENGTH {
-	INPUT_CHAR			= 0x01,
-	INPUT_LINE			= 0x02
-};
-
-char kbuf;
-
-//void kbd_init(void);
-
-void kbd_enable(void);
-
-void kbd_disable(void);
+#define M_PI			3.14159265358979323846
 
 #endif

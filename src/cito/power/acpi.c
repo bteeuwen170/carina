@@ -22,7 +22,7 @@
  *
  */
 
-#include <stdint.h>
+#include <stdlib.h>
 
 #include <kbd.h>
 #include <system.h>
@@ -32,7 +32,7 @@
 
 void reboot(void)
 {
-	uint8_t trash;
+	uint8 trash;
 
 	asm volatile ("cli");
 

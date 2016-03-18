@@ -22,17 +22,16 @@
  *
  */
 
-#include <stdbool.h>
-#include <stdint.h>
+#include <stdlib.h>
 
 #include <system.h>
 
-uint64_t ticks;
+uint64 ticks;
 
 volatile bool done;
-uint64_t target;
+uint64 target;
 
-uint64_t uptime(void)
+uint64 uptime(void)
 {
 	return ticks;
 }
@@ -48,7 +47,7 @@ void pit_handler(registers_t *registers)
 
 void pit_init() //TODO Constants in system
 {
-	uint32_t freq = 11932; //TODO Var scale
+	uint32 freq = 11932; //TODO Var scale
 
 	io_outb(PIT_IO, 0x36);
 	io_outb(PIT_CH0_CMD, freq & 0xFF);
@@ -57,7 +56,7 @@ void pit_init() //TODO Constants in system
 	irq_register(IRQ_PIT, &pit_handler);
 }
 
-void sleep(const uint64_t delay) //FIXME Not working
+void sleep(const uint64 delay) //FIXME Not working
 {
 	done = false;
 	target = delay;

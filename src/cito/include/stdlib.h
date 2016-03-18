@@ -25,16 +25,43 @@
 #ifndef __STDLIB_H_
 #define __STDLIB_H_
 
-#include <stddef.h>
 #include <stdint.h>
+
+#define NULL			((void *) 0)
+
+/* Boolean */
+typedef enum {
+	false = 0,
+	true = 1
+} bool;
+
+/* Unsigned Data Types */
+typedef uint8_t			uint8;
+typedef uint16_t		uint16;
+typedef uint32_t		uint32;
+typedef uint64_t		uint64;
+
+/* Signed Data Types */
+typedef int8_t			int8;
+typedef int16_t			int16;
+typedef int32_t			int32;
+typedef int64_t			int64;
+
+/* Floating-Point Types */
+typedef float			float32;
+typedef double			float64;
+
+/* String */
+//typedef int8			char;
+typedef char*			string;
 
 #define EXIT_SUCCESS	0x00
 #define EXIT_FAILURE	0x01
 
-//int64_t hexdec(const uint8_t *hex);
+//int64 hexdec(const string hex);
 
-char *itoa(size_t num, const uint32_t base);
+string itoa(uint64 num, const uint32 base);
 
-//uint64_t strtol(const char **str, uint8_t **ptr, uint32_t base);
+//uint64 strtol(const string *str, string *ptr, uint32 base);
 
 #endif

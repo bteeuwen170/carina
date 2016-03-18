@@ -12,7 +12,7 @@ MKFS				= mkfs.cfs
 QEMU				= qemu-system-$(ARCH)
 LD					= $(CRC)ld
 
-CFLAGS				= -g -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -std=gnu11 -O2 -ffreestanding -nostdlib -lgcc -mcmodel=kernel -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow
+CFLAGS				= -g -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -std=gnu99 -O2 -ffreestanding -nostdlib -lgcc -mcmodel=kernel -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow
 BFLAGS				= -f cfg/bochs.rc -q
 DFLAGS				= -s -d cpu_reset,cpu,exec,int,in_asm
 KFLAGS				= -enable-kvm

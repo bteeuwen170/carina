@@ -23,11 +23,11 @@
  */
 
 #include <cito.h>
-#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <system.h>
 
-static char *exceptions[ISR_ENTRIES] = {
+static string exceptions[ISR_ENTRIES] = {
 	"Divide Error Exception (0x00)\n",
 	"Debug Exception (0x01)\n",
 	"NMI Interrupt (0x02)\n",
@@ -134,62 +134,62 @@ void idt_init(void)
 
 	memset(&idt, 0, IDT_ENTRIES * sizeof(idt_t));
 
-	idt_set(0, (uint64_t) & _isr0, 0x8E);
-	idt_set(1, (uint64_t) & _isr1, 0x8E);
-	idt_set(2, (uint64_t) & _isr2, 0x8E);
-	idt_set(3, (uint64_t) & _isr3, 0x8E);
-	idt_set(4, (uint64_t) & _isr4, 0x8E);
-	idt_set(5, (uint64_t) & _isr5, 0x8E);
-	idt_set(6, (uint64_t) & _isr6, 0x8E);
-	idt_set(7, (uint64_t) & _isr7, 0x8E);
-	idt_set(8, (uint64_t) & _isr8, 0x8E);
-	idt_set(9, (uint64_t) & _isr9, 0x8E);
-	idt_set(10, (uint64_t) & _isr10, 0x8E);
-	idt_set(11, (uint64_t) & _isr11, 0x8E);
-	idt_set(12, (uint64_t) & _isr12, 0x8E);
-	idt_set(13, (uint64_t) & _isr13, 0x8E);
-	idt_set(14, (uint64_t) & _isr14, 0x8E);
-	idt_set(15, (uint64_t) & _isr15, 0x8E);
-	idt_set(16, (uint64_t) & _isr16, 0x8E);
-	idt_set(17, (uint64_t) & _isr17, 0x8E);
-	idt_set(18, (uint64_t) & _isr18, 0x8E);
-	idt_set(19, (uint64_t) & _isr19, 0x8E);
-	idt_set(20, (uint64_t) & _isr20, 0x8E);
-	idt_set(21, (uint64_t) & _isr21, 0x8E);
-	idt_set(22, (uint64_t) & _isr22, 0x8E);
-	idt_set(23, (uint64_t) & _isr23, 0x8E);
-	idt_set(24, (uint64_t) & _isr24, 0x8E);
-	idt_set(25, (uint64_t) & _isr25, 0x8E);
-	idt_set(26, (uint64_t) & _isr26, 0x8E);
-	idt_set(27, (uint64_t) & _isr27, 0x8E);
-	idt_set(28, (uint64_t) & _isr28, 0x8E);
-	idt_set(29, (uint64_t) & _isr29, 0x8E);
-	idt_set(30, (uint64_t) & _isr30, 0x8E);
-	idt_set(31, (uint64_t) & _isr31, 0x8E);
+	idt_set(0, (uint64) & _isr0, 0x8E);
+	idt_set(1, (uint64) & _isr1, 0x8E);
+	idt_set(2, (uint64) & _isr2, 0x8E);
+	idt_set(3, (uint64) & _isr3, 0x8E);
+	idt_set(4, (uint64) & _isr4, 0x8E);
+	idt_set(5, (uint64) & _isr5, 0x8E);
+	idt_set(6, (uint64) & _isr6, 0x8E);
+	idt_set(7, (uint64) & _isr7, 0x8E);
+	idt_set(8, (uint64) & _isr8, 0x8E);
+	idt_set(9, (uint64) & _isr9, 0x8E);
+	idt_set(10, (uint64) & _isr10, 0x8E);
+	idt_set(11, (uint64) & _isr11, 0x8E);
+	idt_set(12, (uint64) & _isr12, 0x8E);
+	idt_set(13, (uint64) & _isr13, 0x8E);
+	idt_set(14, (uint64) & _isr14, 0x8E);
+	idt_set(15, (uint64) & _isr15, 0x8E);
+	idt_set(16, (uint64) & _isr16, 0x8E);
+	idt_set(17, (uint64) & _isr17, 0x8E);
+	idt_set(18, (uint64) & _isr18, 0x8E);
+	idt_set(19, (uint64) & _isr19, 0x8E);
+	idt_set(20, (uint64) & _isr20, 0x8E);
+	idt_set(21, (uint64) & _isr21, 0x8E);
+	idt_set(22, (uint64) & _isr22, 0x8E);
+	idt_set(23, (uint64) & _isr23, 0x8E);
+	idt_set(24, (uint64) & _isr24, 0x8E);
+	idt_set(25, (uint64) & _isr25, 0x8E);
+	idt_set(26, (uint64) & _isr26, 0x8E);
+	idt_set(27, (uint64) & _isr27, 0x8E);
+	idt_set(28, (uint64) & _isr28, 0x8E);
+	idt_set(29, (uint64) & _isr29, 0x8E);
+	idt_set(30, (uint64) & _isr30, 0x8E);
+	idt_set(31, (uint64) & _isr31, 0x8E);
 
-	idt_set(32, (uint64_t) & _irq0, 0x8E);
-	idt_set(33, (uint64_t) & _irq1, 0x8E);
-	idt_set(34, (uint64_t) & _irq2, 0x8E);
-	idt_set(35, (uint64_t) & _irq3, 0x8E);
-	idt_set(36, (uint64_t) & _irq4, 0x8E);
-	idt_set(37, (uint64_t) & _irq5, 0x8E);
-	idt_set(38, (uint64_t) & _irq6, 0x8E);
-	idt_set(39, (uint64_t) & _irq7, 0x8E);
-	idt_set(40, (uint64_t) & _irq8, 0x8E);
-	idt_set(41, (uint64_t) & _irq9, 0x8E);
-	idt_set(42, (uint64_t) & _irq10, 0x8E);
-	idt_set(43, (uint64_t) & _irq11, 0x8E);
-	idt_set(44, (uint64_t) & _irq12, 0x8E);
-	idt_set(45, (uint64_t) & _irq13, 0x8E);
-	idt_set(46, (uint64_t) & _irq14, 0x8E);
-	idt_set(47, (uint64_t) & _irq15, 0x8E);
+	idt_set(32, (uint64) & _irq0, 0x8E);
+	idt_set(33, (uint64) & _irq1, 0x8E);
+	idt_set(34, (uint64) & _irq2, 0x8E);
+	idt_set(35, (uint64) & _irq3, 0x8E);
+	idt_set(36, (uint64) & _irq4, 0x8E);
+	idt_set(37, (uint64) & _irq5, 0x8E);
+	idt_set(38, (uint64) & _irq6, 0x8E);
+	idt_set(39, (uint64) & _irq7, 0x8E);
+	idt_set(40, (uint64) & _irq8, 0x8E);
+	idt_set(41, (uint64) & _irq9, 0x8E);
+	idt_set(42, (uint64) & _irq10, 0x8E);
+	idt_set(43, (uint64) & _irq11, 0x8E);
+	idt_set(44, (uint64) & _irq12, 0x8E);
+	idt_set(45, (uint64) & _irq13, 0x8E);
+	idt_set(46, (uint64) & _irq14, 0x8E);
+	idt_set(47, (uint64) & _irq15, 0x8E);
 
 	idt_load(&idt, IDT_ENTRIES * sizeof(idt_t) - 1);
 
 	memset(irq_handlers, 0, IRQ_ENTRIES * sizeof(void)); //TODO Typedef
 }
 
-void idt_set(const uint8_t gate, const uint64_t ba, const uint8_t flags)
+void idt_set(const uint8 gate, const uint64 ba, const uint8 flags)
 {
 	idt[gate].ba_low		= ba & 0xFFFF;
 	idt[gate].ba_mid		= (ba >> 16) & 0xFFFF;
@@ -227,12 +227,12 @@ void _int_handler(registers_t *registers) //FIXME HACKS DETECTED
 
 //void int_start(
 
-void irq_register(const uint16_t irq, void (*handler) (registers_t *registers))
+void irq_register(const uint16 irq, void (*handler) (registers_t *registers))
 {
 	irq_handlers[irq] = handler;
 }
 
-void irq_deregister(const uint16_t irq)
+void irq_deregister(const uint16 irq)
 {
 	irq_handlers[irq] = 0x00;
 }

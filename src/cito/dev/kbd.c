@@ -22,7 +22,7 @@
  *
  */
 
-#include <stdint.h>
+#include <stdlib.h>
 
 #include <kbd.h>
 #include <stdio.h> //TEMP
@@ -103,7 +103,7 @@ const char kbd_keymap_shift[KEYMAP_SIZE] = {
 void kbd_in(registers_t *registers)
 {
 	(void) registers;
-	uint8_t scancode = io_inb(KBD_IO);
+	uint8 scancode = io_inb(KBD_IO);
 
 	if (scancode & KBD_KEY_UP) {
 		switch (scancode) {

@@ -22,11 +22,11 @@
  *
  */
 
-#include <stdint.h>
+#include <stdlib.h>
 
 #include <system.h>
 
-uint8_t cmos_in(const uint8_t reg) //TODO Make get_time function or something and check if not updating using CMOS_A
+uint8 cmos_in(const uint8 reg) //TODO Make get_time function or something and check if not updating using CMOS_A
 {
 	io_outb(CMOS_CMD, reg);
 	return io_inb(CMOS_IO);
