@@ -35,7 +35,7 @@ void printc(char c)
 	printcc(c, fb_fgcolor);
 }
 
-void printcc(char c, uint8 color)
+void printcc(char c, u8 color)
 {
 	if (c != 0) {
 		switch (c) {
@@ -73,13 +73,13 @@ void printcc(char c, uint8 color)
 
 void prints(string str)
 {
-	uint32 length = 0;
+	u32 length = 0;
 	while (str[length]) printc(str[length++]);
 }
 
-void printsc(string str, uint8 color)
+void printsc(string str, u8 color)
 {
-	uint32 length = 0;
+	u32 length = 0;
 	while (str[length]) printcc(str[length++], color);
 }
 

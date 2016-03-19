@@ -22,8 +22,9 @@
  *
  */
 
-.set VMA,			0xFFFFFFFF80000000
+.code32
 
+.set VMA,			0xFFFFFFFF80000000
 
 .section .mboot
 
@@ -43,9 +44,22 @@ mboot_header:
 
 .section .text
 
-.code32
 bootstrap:
-	movl %ebx, %edi
+	mov %ebx, %edi
+
+	mov $0x0A, %al //FIXME Doesn't work
+	outb %al, $0x3D4
+	mov $0x1D, %al
+	outb %al, $0x3D5
+
+	mov $0x80000000, %eax
+	cpuid
+	cmp $0x80000001, %eax
+	jz nolongmode
+	mov $0x80000001, %eax
+	cpuid
+	test $(1 << 29), %edx
+	jz nolongmode
 
 	movl %cr4, %eax
 	bts $5, %eax
@@ -66,45 +80,25 @@ bootstrap:
 	lgdt (gdt_ptr - VMA)
 	ljmp $0x08, $(start - VMA)
 
-.code64
-start:
-	cli
-
-	movq $(end), %rsp
-
-	mov $0x10, %ax
-	mov %ax, %ds
-	mov %ax, %es
-	mov %ax, %fs
-	mov %ax, %gs
-	xor %ax, %ax
-	mov %ax, %ss
-
-	call kernel_main
-
-	cli
-
-halt:
+nolongmode:
+	movl $(0b111000001001000), 0xB8000
 	hlt
-	jmp halt
-
-
-.code32
-
 
 .section .data
 
 .align 0x1000
 gdt:
 	.quad 0x0000000000000000
-	.quad 0x00AF9A000000FFFF	/* 0x08 - Code Kernel */
-	.quad 0x00CF92000000FFFF	/* 0x10 - Data Kernel */
-	.quad 0x00CFF2000000FFFF	/* 0x18 - Code Userspace */
-	.quad 0x00AFFA000000FFFF	/* 0x20 - Data Userspace */ 
+//	.quad 0x0020980000000000	/* 0x08 - Code SV mode */
+//	.quad 0x0000920000000000	/* 0x10 - Data SV mode */
+	.quad 0x00AF9A0000000000	/* 0x08 - Code SV mode */
+	.quad 0x00CF920000000000	/* 0x10 - Data SV mode */
+	.quad 0x0000000000000000
+	.quad 0x00CFF20000000000	/* 0x18 - Code USR mode */
+	.quad 0x00AFFA0000000000	/* 0x20 - Data USR mode */ 
 gdt_ptr:
 	.word . - gdt - 1		/* Limit */
 	.quad gdt - VMA			/* Base */
-
 
 .section .padata
 
@@ -131,3 +125,30 @@ pml1:
 	.quad (i + 0x03)
 	i = i + 0x1000
 	.endr
+
+
+.code64
+
+.section .text
+
+start:
+	movq $(end), %rsp
+
+	mov $0x10, %ax
+	mov %ax, %ds
+	mov %ax, %es
+	mov %ax, %fs
+	mov %ax, %gs
+	xor %ax, %ax
+	mov %ax, %ss
+
+	call kernel_main
+
+	cli
+
+	hlt
+
+.section .rodata
+
+csnolong:
+	.ascii "Hi"

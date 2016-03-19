@@ -32,7 +32,7 @@
 
 void reboot(void)
 {
-	uint8 trash;
+	u8 trash;
 
 	asm volatile ("cli");
 

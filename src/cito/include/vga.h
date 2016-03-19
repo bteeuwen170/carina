@@ -57,12 +57,12 @@ enum VGA_CURSORS {
 
 #define TAB_SIZE		4
 
-static inline uint16 vga_create_entry(const uint8 character,
-										const uint8 fgcolor,
-										const uint8 bgcolor)
+static inline u16 vga_create_entry(const u8 character,
+										const u8 fgcolor,
+										const u8 bgcolor)
 {
-	uint16 _character = character;
-	uint16 _color = fgcolor | bgcolor << 4;
+	u16 _character = character;
+	u16 _color = fgcolor | bgcolor << 4;
 	return _character | _color << 8;
 }
 

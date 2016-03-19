@@ -50,11 +50,11 @@ enum CMOS_REGISTERS {
 	CMOS_PERIF			= 0x14
 };
 
-uint8 cmos_in(const uint8 reg);
+u8 cmos_in(const u8 reg);
 
 
 /* CPUID */
-static inline void cpuid(uint32 code, uint32 *eax, uint32 *edx)
+static inline void cpuid(u32 code, u32 *eax, u32 *edx)
 {
 	asm volatile ("cpuid" :
 				  "=a" (*eax), "=d" (*edx) :
@@ -69,21 +69,21 @@ static inline void cpuid(uint32 code, uint32 *eax, uint32 *edx)
 #define IRQ_ENTRIES		16
 
 typedef struct {
-	uint16 ba_low;
-	uint16 ss;
-	uint8 zero;
-	uint8 flags;
-	uint16 ba_mid;
-	uint32 ba_high;
-	uint32 reserved;
+	u16 ba_low;
+	u16 ss;
+	u8 zero;
+	u8 flags;
+	u16 ba_mid;
+	u32 ba_high;
+	u32 reserved;
 } __attribute__ ((packed)) idt_t;
 
 typedef struct {
-	uint64 ds;
-	uint64 rdi, rsi, rbp, rbx, rdx, rcx, rax;
-	uint64 r8, r9, r10, r11, r12, r13, r14, r15;
-	uint64 int_no, err_code;
-	uint64 rip, cs, rflags, rsp, ss;
+	u64 ds;
+	u64 rdi, rsi, rbp, rbx, rdx, rcx, rax;
+	u64 r8, r9, r10, r11, r12, r13, r14, r15;
+	u64 int_no, err_code;
+	u64 rip, cs, rflags, rsp, ss;
 } registers_t;
 
 enum IRQS {
@@ -99,15 +99,15 @@ enum IRQS {
 
 void idt_init(void);
 
-void idt_set(const uint8 gate, const uint64 ba, const uint8 type);
+void idt_set(const u8 gate, const u64 ba, const u8 type);
 
-void irq_register(const uint16 irq, void (*handler) (registers_t *regs));
-void irq_deregister(const uint16 irq);
+void irq_register(const u16 irq, void (*handler) (registers_t *regs));
+void irq_deregister(const u16 irq);
 
-static inline void idt_load(void *idt_ptr, uint16 limit)
+static inline void idt_load(void *idt_ptr, u16 limit)
 {
 	struct {
-		uint16 limit;
+		u16 limit;
 		void *base;
 	} __attribute__ ((packed)) _idt_ptr = {
 		limit,
@@ -119,35 +119,35 @@ static inline void idt_load(void *idt_ptr, uint16 limit)
 
 
 /* IO */
-static inline uint8 io_inb(uint16 port)
+static inline u8 io_inb(u16 port)
 {
-	uint8 value;
+	u8 value;
 
 	asm volatile ("inb %1, %0" : "=a" (value) : "dN" (port));
 	return value;
 }
 
-static inline uint16 io_inw(uint16 port)
+static inline u16 io_inw(u16 port)
 {
-	uint16 value;
+	u16 value;
 
 	asm volatile ("inw %1, %0" : "=a" (value) : "dN" (port));
 	return value;
 }
 
-static inline void io_outb(uint16 port, uint8 value)
+static inline void io_outb(u16 port, u8 value)
 {
 	asm volatile ("outb %0, %1" : : "a" (value), "dN" (port));
 }
 
-static inline void io_outw(uint16 port, uint16 value)
+static inline void io_outw(u16 port, u16 value)
 {
 	asm volatile ("outw %0, %1" : : "a" (value), "dN" (port));
 }
 
 
 /* PC Speaker */
-void pcspk_play(const uint16 freq);
+void pcspk_play(const u16 freq);
 
 void pcspk_stop(void);
 
@@ -175,16 +175,20 @@ void reboot(void);
 
 
 /* Programmable Interrupt Timer */
+#define PIT_RATE		0b00110110 //XXX Or 00110100?
+#define PIT_SPKR		0b10110110
+
+#define PIT_FREQ		1193182
+
 #define PIT_CH0_CMD		0x40
-#define PIT_CH1_CMD		0x41
 #define PIT_CH2_CMD		0x42
 #define PIT_IO			0x43
 
-uint64 uptime(void);
+u64 uptime(void);
 
-void pit_init();
+void pit_init(void);
 
-void sleep(const uint64 delay);
+void sleep(const u64 delay);
 
 
 /* Serial Interface */
@@ -193,11 +197,11 @@ void sleep(const uint64 delay);
 #define COM2			0x3E8
 #define COM3			0x2E8
 
-void serial_init(const uint16 port);
+void serial_init(const u16 port);
 
-uint16 serial_in(const uint16 port);
+u16 serial_in(const u16 port);
 
-void serial_out(const uint16 port, const uint8 value);
+void serial_out(const u16 port, const u8 value);
 
 
 /* Software Multitasking */

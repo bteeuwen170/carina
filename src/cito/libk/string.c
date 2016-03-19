@@ -25,19 +25,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-void *memcpy(void *dest, void *src, uint64 len)
+void *memcpy(void *dest, void *src, u64 len)
 {
 	string _dest = dest;
 	const string _src = src;
 
 	if (len == 0 || _dest == _src) return _dest;
 
-	for (uint64 i = 0; i < len; i++) _dest[i] = _src[i];
+	for (u64 i = 0; i < len; i++) _dest[i] = _src[i];
 
 	return _dest;
 }
 
-void *memset(void *dest, char val, uint64 len)
+void *memset(void *dest, char val, u64 len)
 {
 	if (len) {
 		char *_dest = dest;
@@ -65,7 +65,7 @@ string strcpy(string dest, string src)
 	return dest;
 }
 
-uint64 strlen(string str)
+u64 strlen(string str)
 {
 	register string s;
 	for (s = str; *s; ++s);
@@ -74,9 +74,9 @@ uint64 strlen(string str)
 
 string strrev(string str)
 {
-	uint32 len = strlen(str) - 1;
+	u32 len = strlen(str) - 1;
 
-	for (uint32 i = 0; i < strlen(str) / 2; i++) {
+	for (u32 i = 0; i < strlen(str) / 2; i++) {
 		str[i] += str[len];
 		str[len] = str[i] - str[len];
 		str[i] = str[i] - str[len--];

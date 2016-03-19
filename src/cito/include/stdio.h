@@ -28,13 +28,13 @@
 #include <stdlib.h>
 
 void printc(char c);
-void printcc(char c, uint8 color);
+void printcc(char c, u8 color);
 
-//void printl(const uint32 u_int);
-//void printlc(const uint32 u_int, uint8 color);
+//void printl(const u32 u_int);
+//void printlc(const u32 u_int, u8 color);
 
 void prints(string str);
-void printsc(string str, uint8 color);
+void printsc(string str, u8 color);
 
 //void scanc(const *ptr);
 

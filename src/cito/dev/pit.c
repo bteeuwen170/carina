@@ -26,12 +26,12 @@
 
 #include <system.h>
 
-uint64 ticks;
+u64 ticks;
 
 volatile bool done;
-uint64 target;
+u64 target;
 
-uint64 uptime(void)
+u64 uptime(void)
 {
 	return ticks;
 }
@@ -45,18 +45,18 @@ void pit_handler(registers_t *registers)
 	if (target == 0) done = true;
 }
 
-void pit_init() //TODO Constants in system
+void pit_init(void)
 {
-	uint32 freq = 11932; //TODO Var scale
+	u16 freq = PIT_FREQ / 1000;
 
-	io_outb(PIT_IO, 0x36);
-	io_outb(PIT_CH0_CMD, freq & 0xFF);
-	io_outb(PIT_CH0_CMD, (freq >> 8) & 0xFF);
+	io_outb(PIT_IO, PIT_RATE);
+	io_outb(PIT_CH0_CMD, freq);
+	io_outb(PIT_CH0_CMD, freq >> 8);
 
 	irq_register(IRQ_PIT, &pit_handler);
 }
 
-void sleep(const uint64 delay) //FIXME Not working
+void sleep(const u64 delay)
 {
 	done = false;
 	target = delay;

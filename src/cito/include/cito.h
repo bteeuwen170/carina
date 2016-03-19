@@ -27,7 +27,7 @@
 
 #include <stdlib.h>
 
-void kernel_panic(string reason, uint64 err_code);
+void kernel_panic(string reason, u64 err_code);
 
 void kernel_status(string type, string message, const bool print);
 

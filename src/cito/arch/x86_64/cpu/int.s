@@ -103,7 +103,7 @@ IRQ		13, 45
 IRQ		14, 46
 IRQ		15, 47
 
-.align 0x04
+.align 0x1000
 int_handler:
 	push %rax
 	push %rbx

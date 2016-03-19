@@ -34,15 +34,23 @@
 #include <system.h>
 #include <vga.h>
 
-void kernel_panic(string reason, uint64 err_code)
+void kernel_panic(string reason, u64 err_code)
 {
 	asm volatile ("cli");
 	
 	fb_cur_style(CURSOR_GONE);
 
 	prints("\nKernel Panic: ");
-	prints(reason);
-	prints("Error code: 0x");
+	prints(reason); //TODO First do check for specific erro, say page fault or GPF
+	if ((err_code >> 1) & 0b00)
+		prints(" in GDT.");
+	else if ((err_code >> 1) & 0b01)
+		prints(" in IDT.");
+	else if ((err_code >> 1) & 0b10)
+		prints(" in LDT.");
+	else if ((err_code >> 1) & 0b11)
+		prints(" in IDT.");
+	prints("\nError code: 0x");
 	prints(itoa(err_code, 16)); //TODO Don't always print error code
 	printc('\n');
 	prints("The system has been halted.");
@@ -65,7 +73,7 @@ void kernel_status(string type, string message, const bool print)
 		prints("\n");
 	}
 
-	for (uint32 i = 0; i < 18; i++) serial_out(COM0, message[i]);
+	for (u32 i = 0; i < 18; i++) serial_out(COM0, message[i]);
 	serial_out(COM0, 0x0A);
 	serial_out(COM0, 0x0D); //What the fuck, this ain't Windows right?
 	/* !!!HACK!!! */
@@ -96,10 +104,10 @@ void kernel_main(mbis_t *mbis)
 
 	printsc("Starting ", COLOR_WHITE);
 	printsc("Carina ", COLOR_LIGHT_BLUE);
-	//printlc(CARINA_VER, COLOR_WHITE);
+	//printsc(itoa(CARINA_VER, 10), COLOR_WHITE);
 	kernel_status(0, "Welcome to Carina!", false); //TODO Display version
 
-	printsc("on ", COLOR_WHITE);
+	printsc(" on ", COLOR_WHITE);
 	printsc(itoa(cmos_in(CMOS_CENTURY), 16), COLOR_WHITE);
 	printsc(itoa(cmos_in(CMOS_YEAR), 16), COLOR_WHITE);
 	printcc('/', COLOR_WHITE);
@@ -112,16 +120,26 @@ void kernel_main(mbis_t *mbis)
 	printsc(itoa(cmos_in(CMOS_MINUTES), 16), COLOR_WHITE);
 	printcc(':', COLOR_WHITE);
 	printsc(itoa(cmos_in(CMOS_SECONDS), 16), COLOR_WHITE);
-	printsc(" UTC\nTotal RAM: ", COLOR_WHITE);
+	printsc(" UTC", COLOR_WHITE);
 
-	uint64 mem = mbis-> mem_lower + mbis->mem_higher;
-	printsc(itoa(mem / 1024 + 1, 10), COLOR_WHITE); //TODO Don't do + 1
-	printsc(" MB (", COLOR_WHITE);
-	printsc(itoa(mem, 10), COLOR_WHITE);
-	printsc(" KB)\n", COLOR_WHITE);
+	//u32 slo, shi;
+	//u32 elo, ehi;
+	//u64 start = 0, end = 0, result;
+
+	//asm ("rdsc\t\n" : "=a" (slo), "=d" (shi) : );
+
+	//sleep(1);
+
+	
+
+	printsc("\nBase memory:     ", COLOR_WHITE);
+	printsc(itoa(mbis->mem_lower, 10), COLOR_WHITE);
+	printsc(" KB\nExtended memory: ", COLOR_WHITE);
+	printsc(itoa(mbis->mem_higher, 10), COLOR_WHITE);
+	printsc(" KB\n", COLOR_WHITE);
 
 	//pcspk_play(90);
-	//sleep(50);
+	//sleep(1000);
 	//pcspk_stop();
 
 	// <TEMP>
@@ -129,7 +147,6 @@ void kernel_main(mbis_t *mbis)
 	fb_cur_style(CURSOR_FLAT);
 	kbd_enable();
 	//usrmode_enter();
-	//for (;;) asm volatile ("hlt");
 	for (;;) {
 		for (;;) {
 			if (kbuf == '\n') {

@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * Header for Framebuffer Driver
+ * PIT Driver
  *
  * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,30 +22,41 @@
  *
  */
 
-#ifndef __FB_H__
-#define __FB_H__
-
 #include <stdlib.h>
 
-#define FB_CNT			4
+#include <system.h>
 
-u8 fb_focus;
+u64 ticks;
 
-u16 *fb_buffer;
-u16 fb_buffers[FB_CNT];
+u64 uptime(void)
+{
+	return ticks;
+}
 
-u16 fb_x[FB_CNT];
-u16 fb_y[FB_CNT];
+void pit_handler(registers_t *registers)
+{
+	(void) registers;
+	ticks++;
+}
 
-u8 fb_fgcolor;
-u8 fb_bgcolor;
+void pit_init() //TODO Constants in system
+{
+	irq_register(IRQ_PIT, &pit_handler);
+	u32 freq = 11931; //TODO Var scale /* 100 Hz */
 
-void fb_init(const u8 fb);
+	io_outb(PIT_IO, 0x36);
+	io_outb(PIT_CH0_CMD, freq & 0xFF);
+	io_outb(PIT_CH0_CMD, (freq >> 8) & 0xFF);
 
-void fb_cur_set(void);
-void fb_cur_style(const u8 style);
+}
 
-void fb_clr(void);
-void fb_scrl_dwn(void);
-
-#endif
+void sleep(const u64 delay)
+{
+	u64 end = ticks + delay;
+	for (;;) {
+		if (ticks > end)
+			break;
+		else
+			asm volatile ("hlt");
+	}
+}

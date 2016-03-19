@@ -25,28 +25,28 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*static const int64 hext[] = {
+/*static const i64 hext[] = {
 	[0 ... 255] = -1,
 	['0'] = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 	['A'] = 10, 11, 12, 13, 14, 15,
 	['a'] = 10, 11, 12, 13, 14, 15
 };
 
-int64 hexdec(const string hex)
+i64 hexdec(const string hex)
 {
-	int64 dec = 0;
+	i64 dec = 0;
 
-	//for (uint64 dec = 0; *hex && dec >= 0; *hex++)
+	//for (u64 dec = 0; *hex && dec >= 0; *hex++)
 	//	 dec = (dec << 4) | hext[*hex];
 	while (*hex && dec >= 0) dec = (dec << 4) | hext[*hex++];
 
 	return dec;
 }*/
 
-string itoa(uint64 num, const uint32 base) //FIXME No support for negative integers
+string itoa(u64 num, const u32 base) //FIXME No support for negative integers
 {
 	static char str[22];
-	int32 i = 0;
+	i32 i = 0;
 
 	if (num == 0) {
 		str[i++] = '0';
@@ -55,7 +55,7 @@ string itoa(uint64 num, const uint32 base) //FIXME No support for negative integ
 	}
 
 	while (num != 0) {
-		int32 rem = num % base;
+		i32 rem = num % base;
 		str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
 		num = num / base;
 	}

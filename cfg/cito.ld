@@ -33,6 +33,9 @@ SECTIONS
 
 	.text : AT(ADDR(.text) - VMA) {
 		*(.text)
+	}
+
+	.rodata : AT(ADDR(.rodata) - VMA) {
 		*(.rodata)
 	}
 

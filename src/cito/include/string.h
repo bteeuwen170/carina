@@ -27,15 +27,15 @@
 
 #include <stdlib.h>
 
-void *memcpy(void *dest, void *src, uint64 len);
+void *memcpy(void *dest, void *src, u64 len);
 
-void *memset(void *dest, char val, uint64 len);
+void *memset(void *dest, char val, u64 len);
 
 string strcat(string dest, string src);
 
 string strcpy(string dest, string src);
 
-uint64 strlen(string str);
+u64 strlen(string str);
 
 string strrev(string str);
 

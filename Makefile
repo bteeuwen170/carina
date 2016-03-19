@@ -18,7 +18,7 @@ DFLAGS				= -s -d cpu_reset,cpu,exec,int,in_asm
 KFLAGS				= -enable-kvm
 LFLAGS				= -nostdlib -nodefaultlibs -z max-page-size=0x1000
 MFLAGS				= -F 32 -v
-QFLAGS				= -m 16M --serial vc -soundhw pcspk -vga std
+QFLAGS				= -m 16M --serial vc -soundhw pcspk,sb16 -vga std
 
 include ./src/cito/arch/$(ARCH)/Makefile
 include ./src/cito/Makefile
@@ -106,6 +106,7 @@ cito: $(OBJS_CITO) cfg/cito.ld
 #	@dd if=/dev/zero of=./bin/carina.img bs=1M count=40
 #	@$(MKFS) $(MFLAGS) ./bin/carina.img
 
+#FIXME Don't call this if iso is already present
 iso: ./bin/cito.bin
 	@echo -e "\033[1m> Copying cito kernel to system root...\033[0m"
 	@cp ./bin/cito.bin ./hdd/boot/.

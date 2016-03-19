@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * Header for Framebuffer Driver
+ * Header for limits Library
  *
  * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,30 +22,16 @@
  *
  */
 
-#ifndef __FB_H__
-#define __FB_H__
+#ifndef __LIMITS_H_
+#define __LIMITS_H_
 
 #include <stdlib.h>
 
-#define FB_CNT			4
+//TODO Define max and min of data types
 
-u8 fb_focus;
+#define SECTOR_SIZE		512	/* Sector size */
 
-u16 *fb_buffer;
-u16 fb_buffers[FB_CNT];
-
-u16 fb_x[FB_CNT];
-u16 fb_y[FB_CNT];
-
-u8 fb_fgcolor;
-u8 fb_bgcolor;
-
-void fb_init(const u8 fb);
-
-void fb_cur_set(void);
-void fb_cur_style(const u8 style);
-
-void fb_clr(void);
-void fb_scrl_dwn(void);
+#define FILES_MAX		8	/* Maximum number of open files at once */
+#define PATH_MAX		255	/* Maximum length of a pathname */
 
 #endif

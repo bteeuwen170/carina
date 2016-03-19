@@ -28,15 +28,15 @@
 #include <stdlib.h>
 
 struct rsdp {
-	uint8				signature[8];
-	uint8				checksum;
-	uint8				oemid;
-	uint8				revision;
-	uint32				rsdt_addr;
-	uint32				length;
-	uint64				xsdt_addr;
-	uint8				checksum_ext;
-	uint8				reserved[3];
+	u8				signature[8];
+	u8				checksum;
+	u8				oemid;
+	u8				revision;
+	u32				rsdt_addr;
+	u32				length;
+	u64				xsdt_addr;
+	u8				checksum_ext;
+	u8				reserved[3];
 } __attribute__ ((packed));
 
 

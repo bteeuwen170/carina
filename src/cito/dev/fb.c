@@ -28,9 +28,9 @@
 #include <system.h>
 #include <vga.h>
 
-static uint16 *VGA_MEMORY = (uint16 *) 0xB8000;
+static u16 *VGA_MEMORY = (u16 *) 0xB8000;
 
-void fb_init(const uint8 fb)
+void fb_init(const u8 fb)
 {
 	fb_x[fb_focus] = 0;
 	fb_y[fb_focus] = 0;
@@ -44,8 +44,8 @@ void fb_init(const uint8 fb)
 	fb_fgcolor = COLOR_LIGHT_GREY; //TODO Individual fb colors
 	fb_bgcolor = COLOR_BLACK;
 
-	for (uint8 y = 0; y < VGA_HEIGHT; y++)
-		for (uint8 x = 0; x < VGA_WIDTH; x++)
+	for (u8 y = 0; y < VGA_HEIGHT; y++)
+		for (u8 x = 0; x < VGA_WIDTH; x++)
 			 fb_buffer[y * VGA_WIDTH + x] =
 					vga_create_entry(' ', fb_fgcolor, fb_bgcolor);
 }
@@ -55,13 +55,13 @@ void fb_init(const uint8 fb)
 	//TODO WIP
 	
 	fb_y[fb_focus] = 1;
-	for (uint16 i = 0; i < VGA_WIDTH; i++)
+	for (u16 i = 0; i < VGA_WIDTH; i++)
 		fb_buffer[i] = vga_create_entry(' ', 0, COLOR_LIGHT_GREY);
 }*/
 
 void fb_cur_set(void)
 {
-	uint16 location = fb_y[fb_focus] * VGA_WIDTH + fb_x[fb_focus];
+	u16 location = fb_y[fb_focus] * VGA_WIDTH + fb_x[fb_focus];
 
 	io_outb(0x3D4, 0x0E);
 	io_outb(0x3D5, location >> 8);
@@ -69,16 +69,16 @@ void fb_cur_set(void)
 	io_outb(0x3D5, location);
 }
 
-void fb_cur_style(const uint8 style)
+void fb_cur_style(const u8 style)
 {
 	switch (style) {
 		case CURSOR_GONE:
 			io_outb(0x3D4, 0x0A);
-			io_outb(0x3D5, 0x20);
+			io_outb(0x3D5, 0x1D);
 			break;
 		case CURSOR_FLAT:
 			io_outb(0x3D4, 0x0A);
-			io_outb(0x3D5, 0x0E);
+			io_outb(0x3D5, 0x0D);
 			break;
 		case CURSOR_BLOCK:
 			io_outb(0x3D4, 0x0A);
@@ -92,8 +92,8 @@ void fb_clr(void)
 	fb_x[fb_focus] = 0;
 	fb_y[fb_focus] = 0;
 
-	for (uint8 y = 0; y < VGA_HEIGHT; y++) {
-		for (uint8 x = 0; x < VGA_WIDTH; x++) {
+	for (u8 y = 0; y < VGA_HEIGHT; y++) {
+		for (u8 x = 0; x < VGA_WIDTH; x++) {
 			 fb_buffer[y * VGA_WIDTH + x] =
 					vga_create_entry(' ', fb_fgcolor, fb_bgcolor);
 		}
@@ -106,10 +106,10 @@ void fb_scrl_dwn(void)
 {
 	fb_y[fb_focus] = VGA_HEIGHT - 1;
 
-	for (uint16 i = 0; i < (VGA_HEIGHT - 1) * VGA_WIDTH; i++) fb_buffer[i] =
+	for (u16 i = 0; i < (VGA_HEIGHT - 1) * VGA_WIDTH; i++) fb_buffer[i] =
 		 fb_buffer[i + VGA_WIDTH];
 
-	for (uint16 i = (VGA_HEIGHT - 1) * VGA_WIDTH;
+	for (u16 i = (VGA_HEIGHT - 1) * VGA_WIDTH;
 		 i < VGA_HEIGHT * VGA_WIDTH; i++)
 		fb_buffer[i] = vga_create_entry(' ', fb_fgcolor, fb_bgcolor);
 }
