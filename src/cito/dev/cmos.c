@@ -22,8 +22,8 @@
  *
  */
 
+#include <cmos.h>
 #include <stdlib.h>
-
 #include <system.h>
 
 u8 cmos_in(const u8 reg) //TODO Make get_time function or something and check if not updating using CMOS_A

@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * Software Multitasking Handler
+ * I/O APIC Handler
  *
  * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -24,26 +24,8 @@
 
 #include <system.h>
 
-void svmode_enter(void) {
+void ioapic_init(void)
+{
 	
 }
 
-void usrmode_enter(void) {
-	asm volatile (" \
-				   cli; \
-				   mov $0x23, %ax; \
-				   mov %ax, %dx; \
-				   mov %ax, %es; \
-				   mov %ax, %fs; \
-				   mov %ax, %gs; \
-				   \
-				   mov %rsp, %rax; \
-				   push $0x23; \
-				   push %rax; \
-				   pushf; \
-				   push $0x1B; \
-				   push $1f; \
-				   iretq; \
-				   1: \
-				   ");
-}

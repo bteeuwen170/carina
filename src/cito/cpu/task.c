@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * Header for stdio Library
+ * Software Multitasking Handler
  *
  * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,47 +22,30 @@
  *
  */
 
-#ifndef __STDIO_H_
-#define __STDIO_H_
+#include <system.h>
 
-#include <stdlib.h>
+void svmode_enter(void)
+{
+	
+}
 
-//TODO This is crap
-#define FAIL			-1
-#define NONE			0
-#define OK				1
-
-#define EOF				-1
-
-typedef struct {
-	i32		flags;
-	string	read_base;
-	string	read_ptr;
-	string	read_end;
-	string	write_base;
-	string	write_ptr;
-	string	write_end;
-	string	buf_base;
-	string	buf_end;
-	i64		size;
-	i64		len;
-} file_t;
-
-void info(string msg, i8 status, bool print);
-void panic(string reason, u64 err_code);
-void status(i8 status, bool print);
-
-void printc(char c);
-void printcc(char c, u8 color);
-
-//void printl(const u32 u_int);
-//void printlc(const u32 u_int, u8 color);
-
-void prints(string str);
-void printsc(string str, u8 color);
-
-//void scanc(const *ptr);
-
-//void scans(string ptr);
-
-#endif
+void usrmode_enter(void)
+{
+	asm volatile (" \
+				   cli; \
+				   mov $0x23, %ax; \
+				   mov %ax, %dx; \
+				   mov %ax, %es; \
+				   mov %ax, %fs; \
+				   mov %ax, %gs; \
+				   \
+				   mov %rsp, %rax; \
+				   push $0x23; \
+				   push %rax; \
+				   pushf; \
+				   push $0x1B; \
+				   push $1f; \
+				   iretq; \
+				   1: \
+				   ");
+}

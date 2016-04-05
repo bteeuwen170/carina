@@ -22,13 +22,67 @@
  *
  */
 
-#include <stdlib.h>
-
 #include <fb.h>
 #include <kbd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <system.h>
 #include <vga.h>
+
+void info(string msg, i8 status, bool print)
+{
+	if (print) {
+		prints("\n");
+		prints(msg);
+
+		switch (status) {
+			case FAIL:
+				prints(" ");
+				printsc("FAIL", COLOR_LIGHT_MAGENTA);
+				break;
+			case OK:
+				prints(" ");
+				printsc("OK", COLOR_GREEN);
+				break;
+			/*case FATAL:
+				panic(msg, 0);
+				break;*/ //TODO Different
+		}
+	}
+
+	for (u32 i = 0; i < strlen(msg); i++) serial_out(COM0, msg[i]);
+	serial_out(COM0, 0x0A);
+	serial_out(COM0, 0x0D);
+}
+
+void panic(string reason, u64 err_code)
+{
+	asm volatile ("cli");
+
+	fb_cur_style(CURSOR_GONE);
+
+	prints("\nKernel Panic: ");
+	prints(reason); //TODO First do check for specific erro, say page fault or GPF
+
+	if (err_code) {
+		if ((err_code >> 1) & 0b00)
+			prints(" in GDT.");
+		else if ((err_code >> 1) & 0b01)
+			prints(" in IDT.");
+		else if ((err_code >> 1) & 0b10)
+			prints(" in LDT.");
+		else if ((err_code >> 1) & 0b11)
+			prints(" in IDT.");
+	}
+
+	prints("\nError code: 0x");
+	prints(itoa(err_code, 16)); //TODO Don't always print error code
+	printc('\n');
+	prints("The system has been halted.");
+
+	for (;;) asm ("hlt");
+}
 
 void printc(char c)
 {
@@ -89,3 +143,23 @@ void printsc(string str, u8 color)
 		if (kbuf == '\n') break;
 	}
 }*/
+
+void status(i8 status, bool print)
+{
+	if (print) {
+		switch (status) {
+			case FAIL:
+				prints(" ");
+				printsc("FAIL", COLOR_LIGHT_MAGENTA);
+				break;
+			case OK:
+				prints(" ");
+				printsc("OK", COLOR_GREEN);
+				break;
+		}
+	}
+
+	//for (u32 i = 0; i < strlen(msg); i++) serial_out(COM0, msg[i]);
+	//serial_out(COM0, 0x0A);
+	//serial_out(COM0, 0x0D);
+}

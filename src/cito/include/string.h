@@ -27,16 +27,22 @@
 
 #include <stdlib.h>
 
+#define NULL			((void *) 0)
+
+/* Copying */
 void *memcpy(void *dest, void *src, u64 len);
-
-void *memset(void *dest, char val, u64 len);
-
-string strcat(string dest, string src);
-
+//void *memmv(void *dest, void *src, u64 len);
 string strcpy(string dest, string src);
 
-u64 strlen(string str);
+/* Concatenation */
+string strcat(string dest, string src);
 
+/* Searching */
+//void *memchr(const void *s, i32 c, u64 len);
+
+/* Other */
+void *memset(void *dest, i32 src, u64 len);
+u64 strlen(string str);
 string strrev(string str);
 
 #endif

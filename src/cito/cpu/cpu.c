@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * Header for Cito Kernel
+ * Software Multitasking Handler
  *
  * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,13 +22,37 @@
  *
  */
 
-#ifndef __CITO_H__
-#define __CITO_H__
-
+#include <cpu.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <system.h>
 
-void kernel_panic(string reason, u64 err_code);
+void cpu_info(void)
+{
+	u32 eax, ebx, ecx, edx;
+	char brand[48];
 
-void kernel_status(string type, string message, const bool print);
+	cpuid(0x80000002, &eax, &ebx, &ecx, &edx);
+	memcpy(brand, &eax, 4);
+	memcpy(brand + 4, &ebx, 4);
+	memcpy(brand + 8, &ecx, 4);
+	memcpy(brand + 12, &edx, 4);
 
-#endif
+	cpuid(0x80000003, &eax, &ebx, &ecx, &edx);
+	memcpy(brand + 16, &eax, 4);
+	memcpy(brand + 20, &ebx, 4);
+	memcpy(brand + 24, &ecx, 4);
+	memcpy(brand + 28, &edx, 4);
+
+	cpuid(0x80000004, &eax, &ebx, &ecx, &edx);
+	memcpy(brand + 32, &eax, 4);
+	memcpy(brand + 36, &ebx, 4);
+	memcpy(brand + 40, &ecx, 4);
+	memcpy(brand + 44, &edx, 4);
+
+	char *name = brand;
+	while (*name == ' ') ++name; //TODO Right and left justify function
+
+	prints(name);
+}

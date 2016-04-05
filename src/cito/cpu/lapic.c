@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * Header for stdio Library
+ * Local APIC Handler
  *
  * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,47 +22,35 @@
  *
  */
 
-#ifndef __STDIO_H_
-#define __STDIO_H_
-
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <system.h>
 
-//TODO This is crap
-#define FAIL			-1
-#define NONE			0
-#define OK				1
+bool lapic_avail(void) {
+	u32 eax, edx;
+	cpuid(1, &eax, NULL, NULL, &edx);
 
-#define EOF				-1
+	return edx & 0x200;
+}
 
-typedef struct {
-	i32		flags;
-	string	read_base;
-	string	read_ptr;
-	string	read_end;
-	string	write_base;
-	string	write_ptr;
-	string	write_end;
-	string	buf_base;
-	string	buf_end;
-	i64		size;
-	i64		len;
-} file_t;
+i8 lapic_init(void)
+{
+	//TODO Check if LAPICs are present
 
-void info(string msg, i8 status, bool print);
-void panic(string reason, u64 err_code);
-void status(i8 status, bool print);
+	u64 flags = msr_in(0x1B) & 0x0F00;
+	flags |= (u64) lapic_avail() << 10;
+	flags |= 1 << 11;
+	msr_out(0x1B, 0xFEE00000 | flags);
 
-void printc(char c);
-void printcc(char c, u8 color);
+	return OK;
+}
 
-//void printl(const u32 u_int);
-//void printlc(const u32 u_int, u8 color);
+//static i8 lapic_timer_calibrate(u64 
 
-void prints(string str);
-void printsc(string str, u8 color);
+i8 lapic_timer_init(void *master)
+{
+	asm volatile ("sti");
 
-//void scanc(const *ptr);
-
-//void scans(string ptr);
-
-#endif
+	asm volatile ("cli");
+}

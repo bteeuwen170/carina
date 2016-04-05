@@ -22,7 +22,7 @@
  *
  */
 
-#include <cito.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <system.h>
@@ -115,7 +115,7 @@ extern void _irq13();
 extern void _irq14();
 extern void _irq15();
 
-void idt_init(void)
+i8 idt_init(void)
 {
 	io_outb(PIC_M_CMD, ICW1_INIT);
 	io_outb(PIC_S_CMD, ICW1_INIT);
@@ -187,6 +187,8 @@ void idt_init(void)
 	idt_load(&idt, IDT_ENTRIES * sizeof(idt_t) - 1);
 
 	memset(irq_handlers, 0, IRQ_ENTRIES * sizeof(void)); //TODO Typedef
+
+	return OK;
 }
 
 void idt_set(const u8 gate, const u64 ba, const u8 flags)
@@ -211,7 +213,7 @@ void _int_handler(registers_t *registers) //FIXME HACKS DETECTED
 			break;
 		default:
 			if (registers->int_no < ISR_ENTRIES) { //TODO Don't always halt
-				kernel_panic(exceptions[registers->int_no], registers->err_code);
+				panic(exceptions[registers->int_no], registers->err_code);
 			} else if (registers->int_no < ISR_ENTRIES + IRQ_ENTRIES) {
 				void (*handler) (registers_t *registers) =
 						irq_handlers[registers->int_no - ISR_ENTRIES];

@@ -29,37 +29,12 @@
 
 #include <stdlib.h>
 
-/* CMOS */
-#define CMOS_CMD		0x70
-#define CMOS_IO			0x71
-
-enum CMOS_REGISTERS {
-	CMOS_CENTURY		= 0x32,
-	CMOS_YEAR			= 0x09,
-	CMOS_MONTH			= 0x08,
-	CMOS_DAY			= 0x07,
-	CMOS_HOURS			= 0x04,
-	CMOS_MINUTES		= 0x02,
-	CMOS_SECONDS		= 0x00,
-	CMOS_A				= 0x0A,
-	CMOS_B				= 0x0B,
-	CMOS_C				= 0x0C,
-	CMOS_D				= 0x0D,
-	CMOS_CONFIG			= 0x11,
-	CMOS_DIAG			= 0x0E,
-	CMOS_PERIF			= 0x14
-};
-
-u8 cmos_in(const u8 reg);
-
-
 /* CPUID */
-static inline void cpuid(u32 code, u32 *eax, u32 *edx)
+static inline void cpuid(u32 code, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
 {
 	asm volatile ("cpuid" :
-				  "=a" (*eax), "=d" (*edx) :
-				  "0" (code) :
-				  "ebx", "ecx");
+				  "=a" (*eax), "=b" (*ebx), "=c" (*ecx), "=d" (*edx) :
+				  "0" (code));
 }
 
 
@@ -97,7 +72,7 @@ enum IRQS {
 	IRQ_ATA1			= 0x0F
 };
 
-void idt_init(void);
+i8 idt_init(void);
 
 void idt_set(const u8 gate, const u64 ba, const u8 type);
 
@@ -115,6 +90,36 @@ static inline void idt_load(void *idt_ptr, u16 limit)
 	};
 
 	asm volatile ("lidt %0" : : "m"(_idt_ptr));
+}
+
+static inline bool int_state(void)
+{
+	register u64 rflags = 0; //TODO Use registers_t
+
+	asm volatile ("pushf; popq %0" : "=r" (rflags));
+
+	return (rflags & (1 << 9));
+}
+
+/* Local APIC */
+
+i8 lapic_init();
+
+i8 lapic_timer_init();
+
+static inline u64 msr_in(u32 msr)
+{
+	register u32 lo, hi;
+
+	asm volatile ("rdmsr" : "=d" (hi), "=a" (lo) : "c" (msr));
+
+	return (hi << 31) | lo;
+}
+
+static inline void msr_out(u32 msr, u64 value)
+{
+	asm volatile ("wrmsr" ::
+			"c" (msr), "d" ((u64) value >> 31), "a" ((u64) value));
 }
 
 
@@ -146,7 +151,7 @@ static inline void io_outw(u16 port, u16 value)
 }
 
 
-/* PC Speaker */
+/* PC Speaker */ //TODO Seperate
 void pcspk_play(const u16 freq);
 
 void pcspk_stop(void);
@@ -174,7 +179,7 @@ void reboot(void);
 #define ICW1_8086		0x01
 
 
-/* Programmable Interrupt Timer */
+/* Programmable Interrupt Timer */ //TODO Seperate and in pcspkr.h
 #define PIT_RATE		0b00110110 //XXX Or 00110100?
 #define PIT_SPKR		0b10110110
 

@@ -47,10 +47,10 @@ mboot_header:
 bootstrap:
 	mov %ebx, %edi
 
-	mov $0x0A, %al //FIXME Doesn't work
+	/*mov $0x0A, %al //FIXME Doesn't work
 	outb %al, $0x3D4
 	mov $0x1D, %al
-	outb %al, $0x3D5
+	outb %al, $0x3D5*/
 
 	mov $0x80000000, %eax
 	cpuid
@@ -60,6 +60,10 @@ bootstrap:
 	cpuid
 	test $(1 << 29), %edx
 	jz nolongmode
+
+	mov $0xFF, %al
+	outb %al, $0xA1
+	outb %al, $0x21
 
 	movl %cr4, %eax
 	bts $5, %eax

@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __KBDPS2_H__
-#define __KBDPS2_H__
+#ifndef __KBD_H__
+#define __KBD_H__
 
 #include <stdlib.h>
 

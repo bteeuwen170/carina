@@ -22,75 +22,24 @@
  *
  */
 
-
-#include <cito.h>
+#include <cmos.h>
+#include <multiboot.h>
 #include <issue.h>
+#include <cpu.h>
 #include <fb.h>
 #include <kbd.h>
-#include <multiboot.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <system.h>
 #include <vga.h>
 
-void kernel_panic(string reason, u64 err_code)
-{
-	asm volatile ("cli");
-	
-	fb_cur_style(CURSOR_GONE);
-
-	prints("\nKernel Panic: ");
-	prints(reason); //TODO First do check for specific erro, say page fault or GPF
-	if ((err_code >> 1) & 0b00)
-		prints(" in GDT.");
-	else if ((err_code >> 1) & 0b01)
-		prints(" in IDT.");
-	else if ((err_code >> 1) & 0b10)
-		prints(" in LDT.");
-	else if ((err_code >> 1) & 0b11)
-		prints(" in IDT.");
-	prints("\nError code: 0x");
-	prints(itoa(err_code, 16)); //TODO Don't always print error code
-	printc('\n');
-	prints("The system has been halted.");
-
-	for (;;) asm ("hlt");
-}
-
-void kernel_status(string type, string message, const bool print)
-{
-	if (print) {
-		if (type) {
-			printc('[');
-			printsc(type, COLOR_LIGHT_MAGENTA);
-			prints("] ");
-		} else {
-			prints("      ");
-		}
-
-		prints(message);
-		prints("\n");
-	}
-
-	for (u32 i = 0; i < 18; i++) serial_out(COM0, message[i]);
-	serial_out(COM0, 0x0A);
-	serial_out(COM0, 0x0D); //What the fuck, this ain't Windows right?
-	/* !!!HACK!!! */
-	//TODO In seperate function
-	//FIXME Get size of message and not of pointer
-	//TODO Dmesg > kmesg
-}
-
 void kernel_main(mbis_t *mbis)
 {
 	fb_cur_style(CURSOR_GONE);
 	serial_init(COM0); //TODO Is this even required?
 	fb_init(0);
-	idt_init();
-	pit_init();
-
-	asm volatile ("sti");
 
 	//unsigned eax, edx;
 	//eax = 1;
@@ -102,12 +51,33 @@ void kernel_main(mbis_t *mbis)
 	printc(' ');
 	printsc(__TIME__, COLOR_WHITE);*/ //TODO Maybe in klog but not here
 
-	printsc("Starting ", COLOR_WHITE);
+	cpu_info();
+	prints("\nBase memory:     ");
+	prints(itoa(mbis->mem_lower, 10));
+	prints(" KB\nExtended memory: ");
+	prints(itoa(mbis->mem_higher, 10));
+	prints(" KB\n");
+
+	info("Setting up IDT...", NONE, true);
+	status(idt_init(), true);
+	info("Setting up Local APICs...", NONE, true);
+	status(lapic_init(), true);
+	info("Setting up time...", NONE, true);
+	//status(time_init(), true);
+	char time[4];
+	time_nice(&time);
+	info("Setting up I/O APIC...", NONE, true);
+	//status(ioapic_init(), true);
+
+	asm volatile ("sti");
+
+	info("Welcome to Carina!", NONE, false);
+	printsc("\n\nStarting ", COLOR_WHITE);
 	printsc("Carina ", COLOR_LIGHT_BLUE);
 	//printsc(itoa(CARINA_VER, 10), COLOR_WHITE);
-	kernel_status(0, "Welcome to Carina!", false); //TODO Display version
+	printsc("on ", COLOR_WHITE);
+	prints(time);
 
-	printsc(" on ", COLOR_WHITE);
 	printsc(itoa(cmos_in(CMOS_CENTURY), 16), COLOR_WHITE);
 	printsc(itoa(cmos_in(CMOS_YEAR), 16), COLOR_WHITE);
 	printcc('/', COLOR_WHITE);
@@ -120,7 +90,7 @@ void kernel_main(mbis_t *mbis)
 	printsc(itoa(cmos_in(CMOS_MINUTES), 16), COLOR_WHITE);
 	printcc(':', COLOR_WHITE);
 	printsc(itoa(cmos_in(CMOS_SECONDS), 16), COLOR_WHITE);
-	printsc(" UTC", COLOR_WHITE);
+	printsc(" UTC\n", COLOR_WHITE);
 
 	//u32 slo, shi;
 	//u32 elo, ehi;
@@ -132,18 +102,12 @@ void kernel_main(mbis_t *mbis)
 
 	
 
-	printsc("\nBase memory:     ", COLOR_WHITE);
-	printsc(itoa(mbis->mem_lower, 10), COLOR_WHITE);
-	printsc(" KB\nExtended memory: ", COLOR_WHITE);
-	printsc(itoa(mbis->mem_higher, 10), COLOR_WHITE);
-	printsc(" KB\n", COLOR_WHITE);
-
 	//pcspk_play(90);
 	//sleep(1000);
 	//pcspk_stop();
 
 	// <TEMP>
-	prints("\n$ ");
+	prints("\n\n$ ");
 	fb_cur_style(CURSOR_FLAT);
 	kbd_enable();
 	//usrmode_enter();

@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * stdlib Library
+ * Time
  *
  * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,34 +22,43 @@
  *
  */
 
+#include <cmos.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
-string itoa(u64 num, const u32 base) //FIXME No support for negative integers
+i8 time_init(void)
 {
-	static char str[22];
-	i32 i = 0;
-
-	if (num == 0) {
-		str[i++] = '0';
-		str[i] = '\0';
-		return str;
-	}
-
-	while (num != 0) {
-		i32 rem = num % base;
-		str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
-		num = num / base;
-	}
-
-	str[i] = '\0';
-
-	return strrev(str);
+	return OK;
 }
 
-//void *malloc_zone(
-
-/*void *malloc(u64 size)
+void time_nice(void *str)
 {
+	static char weekdays[7][3] = {
+		"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
+	};
 
-}*/
+	static char months[12][3] = {
+		"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+		"Aug", "Sep", "Oct", "Nov", "Dec"
+	};
+
+	memcpy(&str, "test", 4);
+	//char str[26];
+	/*strcpy(str, weekdays[7]);
+	strcat(str, " ");
+	strcat(str, months[cmos_in(CMOS_MONTH), 10]);
+	strcat(str, " ");
+	strcat(str, itoa(cmos_in(CMOS_DAY), 10));
+	strcat(str, " ");
+	strcat(str, itoa(cmos_in(CMOS_HOURS), 10));
+	strcat(str, ":");
+	strcat(str, itoa(cmos_in(CMOS_MINUTES), 10));
+	strcat(str, ":");
+	strcat(str, itoa(cmos_in(CMOS_SECONDS), 10));
+	strcat(str, " ");
+	strcat(str, "UTC");
+	strcat(str, " ");
+	strcat(str, itoa(cmos_in(CMOS_YEAR), 10));*/
+}

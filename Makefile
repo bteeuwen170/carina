@@ -3,16 +3,16 @@
 ##
 
 ARCH				= x86_64
-CRC					= $(ARCH)-elf-
 
-AS					= $(CRC)as
+AS					= $(ARCH)-elf-as
 BOCHS				= bochs
-CC					= $(CRC)gcc
+CC					= ./$(ARCH)-ccc
 MKFS				= mkfs.cfs
 QEMU				= qemu-system-$(ARCH)
-LD					= $(CRC)ld
+LD					= $(CC)
 
-CFLAGS				= -g -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -std=gnu99 -O2 -ffreestanding -nostdlib -lgcc -mcmodel=kernel -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow
+#CFLAGS				= -g -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -std=gnu99 -O2 -ffreestanding -nostdlib -lgcc -mcmodel=kernel -mno-red-zone -mno-mmx -mno-3dnow
+CFLAGS				= -g -Wall -Wextra -nostdlib -mcmodel=kernel #-O2
 BFLAGS				= -f cfg/bochs.rc -q
 DFLAGS				= -s -d cpu_reset,cpu,exec,int,in_asm
 KFLAGS				= -enable-kvm
@@ -20,10 +20,9 @@ LFLAGS				= -nostdlib -nodefaultlibs -z max-page-size=0x1000
 MFLAGS				= -F 32 -v
 QFLAGS				= -m 16M --serial vc -soundhw pcspk,sb16 -vga std
 
-include ./src/cito/arch/$(ARCH)/Makefile
 include ./src/cito/Makefile
 
-.PHONY: all bochs carina cito clean fs help iso kvm kvmd qemu qemud
+.PHONY: all clean bochs carina cito fs help iso kvm kvmd qemu qemud
 
 all: carina iso qemu
 
@@ -84,10 +83,6 @@ help:
 ## Building
 ##
 
-cito: $(OBJS_CITO) cfg/cito.ld
-	@echo -e "\033[1m> Linking the Cito kernel...\033[0m"
-	@$(LD) $(LFLAGS) -T ./cfg/cito.ld -o ./bin/cito.bin $(OBJS_CITO)
-
 %.o: %.c
 	@echo -e "\033[1m> Compiling \033[0;32m$<\033[1m...\033[0m"
 	@$(CC) $(CFLAGS) -c $< -I $(INC_CITO) -o $@
@@ -95,6 +90,15 @@ cito: $(OBJS_CITO) cfg/cito.ld
 %.o: %.s
 	@echo -e "\033[1m> Assembling \033[0;32m$<\033[1m...\033[0m"
 	@$(AS) $< -o $@
+
+
+##
+## Cito
+##
+
+cito: $(OBJS_CITO) cfg/cito.ld
+	@echo -e "\033[1m> Linking $@ with $(CC)...\033[0m"
+	@$(LD) $(LFLAGS) -T ./cfg/cito.ld -o ./bin/cito.bin $(OBJS_CITO)
 
 
 ##

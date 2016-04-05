@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * Header for stdio Library
+ * Header for CMOS Driver
  *
  * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,47 +22,31 @@
  *
  */
 
-#ifndef __STDIO_H_
-#define __STDIO_H_
+#ifndef __CMOS_H_
+#define __CMOS_H_
 
 #include <stdlib.h>
 
-//TODO This is crap
-#define FAIL			-1
-#define NONE			0
-#define OK				1
+#define CMOS_CMD		0x70
+#define CMOS_IO			0x71
 
-#define EOF				-1
+enum CMOS_REGISTERS {
+	CMOS_CENTURY		= 0x32,
+	CMOS_YEAR			= 0x09,
+	CMOS_MONTH			= 0x08,
+	CMOS_DAY			= 0x07,
+	CMOS_HOURS			= 0x04,
+	CMOS_MINUTES		= 0x02,
+	CMOS_SECONDS		= 0x00,
+	CMOS_A				= 0x0A,
+	CMOS_B				= 0x0B,
+	CMOS_C				= 0x0C,
+	CMOS_D				= 0x0D,
+	CMOS_CONFIG			= 0x11,
+	CMOS_DIAG			= 0x0E,
+	CMOS_PERIF			= 0x14
+};
 
-typedef struct {
-	i32		flags;
-	string	read_base;
-	string	read_ptr;
-	string	read_end;
-	string	write_base;
-	string	write_ptr;
-	string	write_end;
-	string	buf_base;
-	string	buf_end;
-	i64		size;
-	i64		len;
-} file_t;
-
-void info(string msg, i8 status, bool print);
-void panic(string reason, u64 err_code);
-void status(i8 status, bool print);
-
-void printc(char c);
-void printcc(char c, u8 color);
-
-//void printl(const u32 u_int);
-//void printlc(const u32 u_int, u8 color);
-
-void prints(string str);
-void printsc(string str, u8 color);
-
-//void scanc(const *ptr);
-
-//void scans(string ptr);
+u8 cmos_in(const u8 reg);
 
 #endif

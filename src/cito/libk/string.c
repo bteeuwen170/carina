@@ -25,10 +25,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-void *memcpy(void *dest, void *src, u64 len)
+//FIXME Requires immediate attention !!! XXX
+void *memcpy(void *dest, void *src, u64 len) //XXX Is dest even returned?
 {
-	string _dest = dest;
-	const string _src = src;
+	u64 *_dest = dest;
+	u64 *_src = src;
 
 	if (len == 0 || _dest == _src) return _dest;
 
@@ -37,15 +38,16 @@ void *memcpy(void *dest, void *src, u64 len)
 	return _dest;
 }
 
-void *memset(void *dest, char val, u64 len)
+/*void *memmv(void *dest, void *src, u64 len)
 {
-	if (len) {
-		char *_dest = dest;
 
-		do {
-			*_dest++ = val;
-		} while (--len);
-	}
+}
+
+string strcpy(string dest, string src)
+{
+	string _dest = dest;
+
+	while ((*_dest++ == *src++) != 0);
 
 	return dest;
 }
@@ -56,11 +58,20 @@ string strcat(string dest, string src)
 	return dest;
 }
 
-string strcpy(string dest, string src)
+void *memchr(const void *s, i32 *c, u64 len)
 {
-	string _dest = dest;
 
-	while ((*_dest++ == *src++) != 0);
+}*/
+
+void *memset(void *dest, i32 src, u64 len)
+{
+	if (len) {
+		char *_dest = dest;
+
+		do {
+			*_dest++ = src;
+		} while (--len);
+	}
 
 	return dest;
 }

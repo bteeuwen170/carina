@@ -29,9 +29,10 @@
 
 //TODO Define max and min of data types
 
-#define SECTOR_SIZE		512	/* Sector size */
+#define BLOCK_SIZE		1024		/* Block size */
+#define SECTOR_SIZE		512			/* Sector size */
 
-#define FILES_MAX		8	/* Maximum number of open files at once */
-#define PATH_MAX		255	/* Maximum length of a pathname */
+#define FILES_MAX		8			/* Maximum number of open files at once */
+#define PATH_MAX		255			/* Maximum length of a pathname */
 
 #endif
