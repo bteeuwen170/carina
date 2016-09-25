@@ -1,0 +1,54 @@
+ TODO
+======
+General (AKA angry notes to self)
+- No typdeffing for kernelspace structures
+- No string typedef, WTF
+- RESERVED IS ___NOT___ THE SAME AS UNUSED!!!
+
+Bootloader
+- Write own bootloader
+
+Kernel
+- Fix unable to fit without stripping kernel
+. Finish PCI driver
+. Finish AC97 driver
+- Finish ext2 driver
+- Scrollbuffer 64KB size
+- Check mboot flags before using them
+- deregister -> unregister (WTF)
+- Recursive kprintf
+- Make #includes look nicer
+- cdrom driver
+- Use bool in some places instead of i32 or char or u8 or i8
+- Move sys directory
+- NO ITOA
+- Typedef certain file types like uid_t and gid_t
+- Change *_out and *_in functions to the right byte size
+  - *b for bytes (8b)
+  - *w for words (16b)
+  - *d for double words (32b)
+  - *q for quad words (64b)
+  - *o for octa words (128b)
+- Write parser for pci.ids file
+- Script to get latest pci.ids
+
+Makefile
+- Seperate kernel-o and kernel-l (objects and libs)
+
+Paranoide
+- Remove the extra blank line after the header
+- Don't use "unused*" but instead just mention that the field is unused in
+		a comment
+
+
+ Legend
+========
+- = TODO
+! = Important TODO
+. = In progress
+? = Probably done
+x = Done
+n = Cancelled
+p = Postponed
+
+> = Sidenote

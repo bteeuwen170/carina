@@ -2,28 +2,45 @@
 ## Variable Definitions
 ##
 
-ARCH				= x86_64
+ARCH				:= x86_64
+ARCH32				= $(ARCH)
+ARCHQEMU			= $(ARCH)
+ARCHFLAG			= -D ARCH_$(ARCH)
 
-AS					= $(ARCH)-elf-as
-BOCHS				= bochs
-CC					= ./$(ARCH)-ccc
-MKFS				= mkfs.cfs
-QEMU				= qemu-system-$(ARCH)
-LD					= $(CC)
+ifeq ($(ARCH),x86_64)
+ARCHT				= x86
+ARCH32				= i686
+endif
 
-#CFLAGS				= -g -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -std=gnu99 -O2 -ffreestanding -nostdlib -lgcc -mcmodel=kernel -mno-red-zone -mno-mmx -mno-3dnow
-CFLAGS				= -g -Wall -Wextra -nostdlib -mcmodel=kernel #-O2
-BFLAGS				= -f cfg/bochs.rc -q
-DFLAGS				= -s -d cpu_reset,cpu,exec,int,in_asm
-KFLAGS				= -enable-kvm
-LFLAGS				= -nostdlib -nodefaultlibs -z max-page-size=0x1000
-MFLAGS				= -F 32 -v
-QFLAGS				= -m 16M --serial vc -soundhw pcspk,sb16 -vga std
+ifeq ($(ARCH),i686)
+ARCHT				= x86
+ARCHQEMU			= i386
+endif
 
-include ./src/cito/Makefile
+CC					:= $(ARCH)-elf-gcc
+CC32				:= $(ARCH32)-elf-gcc
+AS					:= $(ARCH)-elf-as
+LD					:= $(ARCH)-elf-ld
+BOCHS				:= bochs
+QEMU				:= qemu-system-$(ARCHQEMU)
 
-.PHONY: all clean bochs carina cito fs help iso kvm kvmd qemu qemud
+# TODO Relocate in arch directory
+# TEMP
+TYPES				= src/kernel/include/kernel/types.h
+# TEMP
+ASFLAGS				:= $(ARCHFLAG)
+CFLAGS				:= $(ARCHFLAG) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
+CFLAGS32			:= $(ARCH32FLAG) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
+LDFLAGS				:= -nostdlib -z max-page-size=4096 #-s #-Os
+BOCHSFLAGS			:= -f cfg/bochs.rc -q
+QEMUFLAGS			:= -m 16M --serial vc -soundhw pcspk,ac97 #-vga std #-curses #-cpu qemu32 //To test no long mode message
+QEMUDBGFLAGS		:= -s -d cpu_reset,int#,cpu,exec,in_asm
+KVMFLAGS			:= -enable-kvm
 
+include src/Makefile
+
+PHONY += all
+# TODO Remove qemu in final versions
 all: carina iso qemu
 
 
@@ -31,28 +48,37 @@ all: carina iso qemu
 ## Base System
 ##
 
-carina: cito
+PHONY += carina
+carina: kernel
 
 
 ##
 ## Clean
 ##
 
+PHONY += clean
 clean:
 	@echo -e "\033[1m> Cleaning the serial output file...\033[0m"
-	@truncate -s 0 ./dbg/serial
+	@truncate -s 0 dbg/serial
 	@echo -e "\033[1m> Removing binaries...\033[0m"
-	@find ./src -type f -name '*.o' -exec rm {} \;
+	@find src -type f -name '*.o' -exec rm {} \;
+	@echo -e "\033[1m> Removing GRUB images...\033[0m"
+	@if [ -a bin/grub.img ]; then \
+		 rm bin/grub.img; \
+	 fi;
+	@if [ -a root/grub.img ]; then \
+		 rm root/grub.img; \
+	 fi;
 	@echo -e "\033[1m> Removing Carina iso...\033[0m"
-	@if [ -a ./bin/carina.iso ]; then \
-		 rm ./bin/carina.iso; \
+	@if [ -a bin/carina.iso ]; then \
+		 rm bin/carina.iso; \
 	 fi;
-	@echo -e "\033[1m> Removing the Cito kernel binaries...\033[0m"
-	@if [ -a ./bin/cito.bin ]; then \
-		 rm ./bin/cito.bin; \
+	@echo -e "\033[1m> Removing the kernel binaries...\033[0m"
+	@if [ -a bin/kernel ]; then \
+		 rm bin/kernel; \
 	 fi;
-	@if [ -a ./hdd/boot/cito.bin ]; then \
-		 rm ./hdd/boot/cito.bin; \
+	@if [ -a root/boot/kernel ]; then \
+		 rm root/boot/kernel; \
 	 fi;
 	@echo -e "\033[1mDone!\033[0m"
 
@@ -61,18 +87,21 @@ clean:
 ## Help
 ##
 
+PHONY += help
 help:
 	@echo -e "\033[1mMakefile for Carina\033[0m"
 	@echo
 	@echo "Targets:"
 	@echo " - all       Compile the Cito kernel and all userspace applications"
+ifeq ($(ARCHT),x86)
 	@echo " - bochs     Boot the Live CD iso in Bochs and launch the debugger"
+endif
 	@echo " - carina    Compile the Cito kernel and required userspace applications"
-	@echo " - cito      Compile the Cito kernel"
+	@echo " - kernel      Compile the Cito kernel"
 	@echo " - clean     Remove all binaries and carina.iso"
-	@#echo " - fs        Convert the hdd directory into a FAT32 img image"
+	@#echo " - fs        Convert the root directory into a FAT32 img image"
 	@echo " - help      Show this help text"
-	@echo " - iso       Convert the hdd directory into a LiveCD iso image"
+	@echo " - iso       Convert the root directory into a LiveCD iso image"
 	@echo " - kvm       Boot the Live CD iso in QEMU with KVM support"
 	@echo " - kvmd      Boot the Live CD iso in QEMU with KVM support and debugging flags"
 	@echo " - qemu      Boot the Live CD iso in QEMU"
@@ -80,64 +109,85 @@ help:
 
 
 ##
-## Building
+## Building TODO Move to kernel ?
 ##
+
+%32.o: %32.c
+	@echo -e "\033[1;37m> Compiling \033[0;32m$<\033[1m...\033[0m"
+	@$(CC32) $(CFLAGS32) -c $< $(kernel-i) -o $@
+	@objcopy -O elf64-x86-64 $@ $@.64
+	@mv $@.64 $@
 
 %.o: %.c
-	@echo -e "\033[1m> Compiling \033[0;32m$<\033[1m...\033[0m"
-	@$(CC) $(CFLAGS) -c $< -I $(INC_CITO) -o $@
+	@echo -e "\033[1;37m> Compiling \033[0;32m$<\033[1m...\033[0m"
+	@$(CC) $(CFLAGS) -c $< $(kernel-i) -o $@
 
-%.o: %.s
-	@echo -e "\033[1m> Assembling \033[0;32m$<\033[1m...\033[0m"
-	@$(AS) $< -o $@
+%.o: %.S
+	@echo -e "\033[1;37m> Assembling \033[0;32m$<\033[1m...\033[0m"
+	@$(CC) $(ASFLAGS) -c $< -o $@
 
 
 ##
-## Cito
+## Kernel
 ##
 
-cito: $(OBJS_CITO) cfg/cito.ld
-	@echo -e "\033[1m> Linking $@ with $(CC)...\033[0m"
-	@$(LD) $(LFLAGS) -T ./cfg/cito.ld -o ./bin/cito.bin $(OBJS_CITO)
+PHONY += kernel
+kernel: bin/kernel
+bin/kernel: $(kernel-o) $(kernel-o32)
+	@echo -e "\033[1m> Linking \033[0;32m$@\033[1m...\033[0m"
+	@$(LD) $(LDFLAGS) -T src/kernel/link.ld -o bin/kernel $(kernel-o) $(kernel-o32)
 
 
 ##
 ## Make ISO Image
 ##
 
-#fs: hdd/boot/cito.bin
+#fs: root/boot/kernel
 #	@echo -e "\033[1m> Creating FAT32 img...\033[0m"
-#	@dd if=/dev/zero of=./bin/carina.img bs=1M count=40
-#	@$(MKFS) $(MFLAGS) ./bin/carina.img
+#	@dd if=/dev/zero of=bin/carina.img bs=1M count=40
+#	@$(MKFS) $(MFLAGS) bin/carina.img
 
 #FIXME Don't call this if iso is already present
-iso: ./bin/cito.bin
-	@echo -e "\033[1m> Copying cito kernel to system root...\033[0m"
-	@cp ./bin/cito.bin ./hdd/boot/.
+PHONY += iso
+iso: bin/kernel
+	@echo -e "\033[1m> Copying kernel to system root...\033[0m"
+	@cp bin/kernel root/boot/.
+	@echo -e "\033[1m> Creating GRUB image...\033[0m"
+	@grub-mkimage -p root/boot/grub -c root/boot/grub/grub.cfg -o bin/grub.img -O i386-pc biosdisk iso9660 normal multiboot ext2 boot
+	@cat /usr/lib/grub/i386-pc/cdboot.img bin/grub.img > root/grub.img
 	@echo -e "\033[1m> Creating Carina iso...\033[0m"
-	@grub-mkrescue -o ./bin/carina.iso ./hdd
+	@genisoimage -A "Carina" -input-charset "iso8859-1" -R -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/carina.iso root
 
 
 ##
 ## QEMU
 ##
 
+ifeq ($(ARCHT),x86)
+PHONY += bochs
 bochs: iso
 	@echo -e "\033[1m> Starting Bochs...\033[0m"
-	@$(BOCHS) $(BFLAGS)
+	@$(BOCHS) $(BOCHSFLAGS)
+endif
 
+PHONY += qemu
 qemu: iso
 	@echo -e "\033[1m> Starting QEMU...\033[0m"
-	@$(QEMU) $(QFLAGS) -cdrom ./bin/carina.iso
+	@$(QEMU) $(QEMUFLAGS) -cdrom bin/carina.iso
 
+PHONY += qemud
 qemud: iso
 	@echo -e "\033[1m> Starting QEMU...\033[0m"
-	@$(QEMU) $(QFLAGS) $(DFLAGS) -cdrom ./bin/carina.iso
+	@$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -cdrom bin/carina.iso
 
+PHONY += kvm
 kvm: iso
 	@echo -e "\033[1m> Starting QEMU...\033[0m"
-	@$(QEMU) $(QFLAGS) $(KFLAGS) -cdrom ./bin/carina.iso
+	@$(QEMU) $(QEMUFLAGS) $(KVMFLAGS) -cdrom bin/carina.iso
 
+PHONY += kvmd
 kvmd: iso
 	@echo -e "\033[1m> Starting QEMU...\033[0m"
-	@$(QEMU) $(QFLAGS) $(DFLAGS) $(KFLAGS) -cdrom ./bin/carina.iso
+	@$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) $(KVMFLAGS) -cdrom bin/carina.iso
+
+.PHONY: $(PHONY)
