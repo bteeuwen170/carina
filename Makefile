@@ -58,29 +58,24 @@ carina: kernel
 
 PHONY += clean
 clean:
-	@echo -e "\033[1m> Cleaning the serial output file...\033[0m"
-	@truncate -s 0 dbg/serial
 	@echo -e "\033[1m> Removing binaries...\033[0m"
 	@find src -type f -name '*.o' -exec rm {} \;
-	@echo -e "\033[1m> Removing GRUB images...\033[0m"
-	@if [ -a bin/grub.img ]; then \
-		 rm bin/grub.img; \
+	@if [ -n "$(shell ls bin)" ]; then \
+		 echo -e "\033[1m> Removing binaries from bin/...\033[0m"; \
+		 rm bin/* > /dev/null; \
+	 fi;
+	@if [ -n "$(shell ls dbg)" ]; then \
+		 echo -e "\033[1m> Removing debugging information from dbg/...\033[0m"; \
+		 rm dbg/* > /dev/null; \
 	 fi;
 	@if [ -a root/grub.img ]; then \
-		 rm root/grub.img; \
-	 fi;
-	@echo -e "\033[1m> Removing Carina iso...\033[0m"
-	@if [ -a bin/carina.iso ]; then \
-		 rm bin/carina.iso; \
-	 fi;
-	@echo -e "\033[1m> Removing the kernel binaries...\033[0m"
-	@if [ -a bin/kernel ]; then \
-		 rm bin/kernel; \
+		 echo -e "\033[1m> Removing GRUB image from root/...\033[0m"; \
+		 rm root/grub.img > /dev/null; \
 	 fi;
 	@if [ -a root/boot/kernel ]; then \
-		 rm root/boot/kernel; \
+		 echo -e "\033[1m> Removing the kernel binary from root/...\033[0m"; \
+		 rm root/boot/kernel > /dev/null; \
 	 fi;
-	@echo -e "\033[1mDone!\033[0m"
 
 
 ##

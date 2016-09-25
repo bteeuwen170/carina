@@ -1,4 +1,10 @@
 *.o
+*.img
+*.iso
 *.swp
+
 bin/*
+!bin/.dummy
+dbg/*
+!dbg/.dummy
 bx_enh_dbg.ini
