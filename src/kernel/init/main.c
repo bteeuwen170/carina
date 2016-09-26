@@ -40,6 +40,8 @@
 #include <video/vesa.h>
 #include <sound/ac97.h>
 
+extern void usrmode_enter();
+
 void kernel_main(struct mboot_info *mboot)
 {
 	/* Initialize early video and debugging hardware */

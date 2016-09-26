@@ -31,6 +31,7 @@ Kernel
   - *o for octa words (128b)
 - Write parser for pci.ids file
 - Script to get latest pci.ids
+- Always return void from initialization functions
 
 Makefile
 - Seperate kernel-o and kernel-l (objects and libs)

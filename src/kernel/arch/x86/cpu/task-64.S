@@ -1,9 +1,9 @@
 /*
  *
  * Carina
- * Software Multitasking Handler
+ * src/kernel/arch/x86/cpu/task.S
  *
- * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,36 +22,28 @@
  *
  */
 
-#include <system.h>
+/* XXX This is temporary */
 
-void svmode_enter(void)
-{
-	
-}
+.code64
 
-void usrmode_func(void)
-{
-	for (;;)
-		asm volatile ("hlt");
-}
+.section .text
 
-void usrmode_enter(void)
-{
-	asm volatile (" \
-				   cli; \
-				   mov $0x20, %ax; \
-				   mov %ax, %dx; \
-				   mov %ax, %es; \
-				   mov %ax, %fs; \
-				   mov %ax, %gs; \
-				   \
-				   mov %rsp, %rax; \
-				   push $0x20; \
-				   push %rax; \
-				   pushf; \
-				   push $0x18; \
-				   push $0; \
-				   iretq; \
-				   1: \
-				   ");
-}
+.extern acpi_init
+
+usrmode_enter:
+	cli
+	mov $0x20, %ax
+	mov %ax, %dx
+	mov %ax, %es
+	mov %ax, %fs
+	mov %ax, %gs
+
+	mov %rsp, %rax
+	push $0x20
+	push %rax
+	pushf
+	push $0x18
+	//call acpi_init
+	iretq
+
+1:

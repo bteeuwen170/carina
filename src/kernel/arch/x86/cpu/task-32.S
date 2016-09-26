@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/dev/acpi/acpi.c
+ * src/kernel/arch/x86/cpu/task.S
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,10 +22,22 @@
  *
  */
 
-#include <system.h>
+/* TODO UPDATE */
 
-void acpi_init(void)
-{
-	for (;;)
-		asm volatile ("hlt");
-}
+usrmode_enter:
+	cli
+	mov $0x20, %ax
+	mov %ax, %dx
+	mov %ax, %es
+	mov %ax, %fs
+	mov %ax, %gs
+
+	mov %rsp, %rax
+	push $0x20
+	push %rax
+	pushf
+	push $0x18
+	push $0
+	iretq
+
+1:

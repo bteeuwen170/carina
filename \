@@ -10,11 +10,13 @@ ARCHFLAG			= -D ARCH_$(ARCH)
 ifeq ($(ARCH),x86_64)
 ARCHT				= x86
 ARCH32				= i686
+ARCHOBJTGT			= elf64-x86_64
 endif
 
 ifeq ($(ARCH),i686)
 ARCHT				= x86
 ARCHQEMU			= i386
+ARCHOBJTGT			= elf32-i386
 endif
 
 CC					:= $(ARCH)-elf-gcc
@@ -110,10 +112,8 @@ endif
 %32.o: %32.c
 	@echo -e "\033[1;37m> Compiling \033[0;32m$<\033[1m...\033[0m"
 	@$(CC32) $(CFLAGS32) -c $< $(kernel-i) -o $@
-ifeq ($(ARCH),x86_64)
-	@objcopy -O elf64-x86-64 $@ $@.64
-	@mv $@.64 $@
-endif
+	@objcopy -O $(ARCHOBJ) $@ $@.obj
+	@mv $@.obj $@
 
 %.o: %.c
 	@echo -e "\033[1;37m> Compiling \033[0;32m$<\033[1m...\033[0m"

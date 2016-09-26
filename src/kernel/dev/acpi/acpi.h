@@ -198,4 +198,6 @@ struct apic_iso {
 	u16					flags; /* TODO table 5-24 ACPIv2b */
 } __attribute__ ((packed));
 
+void acpi_init(void);
+
 #endif
