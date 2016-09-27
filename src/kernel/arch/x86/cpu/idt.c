@@ -153,58 +153,58 @@ static void idt_set(const u8 gate, const u8 type, const u64 offset)
 void idt_init(void)
 {
 	/* Nonmaskable interrupts */
-	idt_set(0, 0x0E, (u64) &_int0);
-	idt_set(1, 0x0E, (u64) &_int1);
-	idt_set(2, 0x0E, (u64) &_int2);
-	idt_set(3, 0x0E, (u64) &_int3);
-	idt_set(4, 0x0E, (u64) &_int4);
-	idt_set(5, 0x0E, (u64) &_int5);
-	idt_set(6, 0x0E, (u64) &_int6);
-	idt_set(7, 0x0E, (u64) &_int7);
-	idt_set(8, 0x0E, (u64) &_int8);
-	idt_set(9, 0x0E, (u64) &_int9);
-	idt_set(10, 0x0E, (u64) &_int10);
-	idt_set(11, 0x0E, (u64) &_int11);
-	idt_set(12, 0x0E, (u64) &_int12);
-	idt_set(13, 0x0E, (u64) &_int13);
-	idt_set(14, 0x0E, (u64) &_int14);
-	idt_set(15, 0x0E, (u64) &_int15);
-	idt_set(16, 0x0E, (u64) &_int16);
-	idt_set(17, 0x0E, (u64) &_int17);
-	idt_set(18, 0x0E, (u64) &_int18);
-	idt_set(19, 0x0E, (u64) &_int19);
-	idt_set(20, 0x0E, (u64) &_int20);
-	idt_set(21, 0x0E, (u64) &_int21);
-	idt_set(22, 0x0E, (u64) &_int22);
-	idt_set(23, 0x0E, (u64) &_int23);
-	idt_set(24, 0x0E, (u64) &_int24);
-	idt_set(25, 0x0E, (u64) &_int25);
-	idt_set(26, 0x0E, (u64) &_int26);
-	idt_set(27, 0x0E, (u64) &_int27);
-	idt_set(28, 0x0E, (u64) &_int28);
-	idt_set(29, 0x0E, (u64) &_int29);
-	idt_set(30, 0x0E, (u64) &_int30);
-	idt_set(31, 0x0E, (u64) &_int31);
+	idt_set(0, 0x0E, (unsigned long) &_int0);
+	idt_set(1, 0x0E, (unsigned long) &_int1);
+	idt_set(2, 0x0E, (unsigned long) &_int2);
+	idt_set(3, 0x0E, (unsigned long) &_int3);
+	idt_set(4, 0x0E, (unsigned long) &_int4);
+	idt_set(5, 0x0E, (unsigned long) &_int5);
+	idt_set(6, 0x0E, (unsigned long) &_int6);
+	idt_set(7, 0x0E, (unsigned long) &_int7);
+	idt_set(8, 0x0E, (unsigned long) &_int8);
+	idt_set(9, 0x0E, (unsigned long) &_int9);
+	idt_set(10, 0x0E, (unsigned long) &_int10);
+	idt_set(11, 0x0E, (unsigned long) &_int11);
+	idt_set(12, 0x0E, (unsigned long) &_int12);
+	idt_set(13, 0x0E, (unsigned long) &_int13);
+	idt_set(14, 0x0E, (unsigned long) &_int14);
+	idt_set(15, 0x0E, (unsigned long) &_int15);
+	idt_set(16, 0x0E, (unsigned long) &_int16);
+	idt_set(17, 0x0E, (unsigned long) &_int17);
+	idt_set(18, 0x0E, (unsigned long) &_int18);
+	idt_set(19, 0x0E, (unsigned long) &_int19);
+	idt_set(20, 0x0E, (unsigned long) &_int20);
+	idt_set(21, 0x0E, (unsigned long) &_int21);
+	idt_set(22, 0x0E, (unsigned long) &_int22);
+	idt_set(23, 0x0E, (unsigned long) &_int23);
+	idt_set(24, 0x0E, (unsigned long) &_int24);
+	idt_set(25, 0x0E, (unsigned long) &_int25);
+	idt_set(26, 0x0E, (unsigned long) &_int26);
+	idt_set(27, 0x0E, (unsigned long) &_int27);
+	idt_set(28, 0x0E, (unsigned long) &_int28);
+	idt_set(29, 0x0E, (unsigned long) &_int29);
+	idt_set(30, 0x0E, (unsigned long) &_int30);
+	idt_set(31, 0x0E, (unsigned long) &_int31);
 
 	/* Master PIC */
-	idt_set(32, 0x0E, (u64) &_int32); irq_mask(IRQ_PIT);
-	idt_set(33, 0x0E, (u64) &_int33); irq_mask(IRQ_KBD);
-	idt_set(34, 0x0E, (u64) &_int34); irq_mask(IRQ_CAS);
-	idt_set(35, 0x0E, (u64) &_int35); irq_mask(IRQ_COM1);
-	idt_set(36, 0x0E, (u64) &_int36); irq_mask(IRQ_COM0);
-	idt_set(37, 0x0E, (u64) &_int37); irq_mask(IRQ_SND);
-	idt_set(38, 0x0E, (u64) &_int38); irq_mask(IRQ_FDD);
-	idt_set(39, 0x0E, (u64) &_int39); irq_mask(IRQ_PRT);
+	idt_set(32, 0x0E, (unsigned long) &_int32); irq_mask(IRQ_PIT);
+	idt_set(33, 0x0E, (unsigned long) &_int33); irq_mask(IRQ_KBD);
+	idt_set(34, 0x0E, (unsigned long) &_int34); irq_mask(IRQ_CAS);
+	idt_set(35, 0x0E, (unsigned long) &_int35); irq_mask(IRQ_COM1);
+	idt_set(36, 0x0E, (unsigned long) &_int36); irq_mask(IRQ_COM0);
+	idt_set(37, 0x0E, (unsigned long) &_int37); irq_mask(IRQ_SND);
+	idt_set(38, 0x0E, (unsigned long) &_int38); irq_mask(IRQ_FDD);
+	idt_set(39, 0x0E, (unsigned long) &_int39); irq_mask(IRQ_PRT);
 
 	/* Slave PIC */
-	idt_set(40, 0x0E, (u64) &_int40); irq_mask(IRQ_RTC);
-	idt_set(41, 0x0E, (u64) &_int41); irq_mask(IRQ_ACPI);
-	idt_set(42, 0x0E, (u64) &_int42); irq_mask(IRQ_OPT0);
-	idt_set(43, 0x0E, (u64) &_int43); irq_mask(IRQ_OPT1);
-	idt_set(44, 0x0E, (u64) &_int44); irq_mask(IRQ_PS2);
-	idt_set(45, 0x0E, (u64) &_int45); irq_mask(IRQ_FPU);
-	idt_set(46, 0x0E, (u64) &_int46); irq_mask(IRQ_ATA0);
-	idt_set(47, 0x0E, (u64) &_int47); irq_mask(IRQ_ATA1);
+	idt_set(40, 0x0E, (unsigned long) &_int40); irq_mask(IRQ_RTC);
+	idt_set(41, 0x0E, (unsigned long) &_int41); irq_mask(IRQ_ACPI);
+	idt_set(42, 0x0E, (unsigned long) &_int42); irq_mask(IRQ_OPT0);
+	idt_set(43, 0x0E, (unsigned long) &_int43); irq_mask(IRQ_OPT1);
+	idt_set(44, 0x0E, (unsigned long) &_int44); irq_mask(IRQ_PS2);
+	idt_set(45, 0x0E, (unsigned long) &_int45); irq_mask(IRQ_FPU);
+	idt_set(46, 0x0E, (unsigned long) &_int46); irq_mask(IRQ_ATA0);
+	idt_set(47, 0x0E, (unsigned long) &_int47); irq_mask(IRQ_ATA1);
 
 	idt_load(&idt, IDT_ENTRIES * sizeof(struct idt_desc) - 1);
 

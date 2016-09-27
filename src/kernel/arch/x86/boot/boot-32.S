@@ -40,6 +40,7 @@ bootstrap:
 
 	/* XXX Do we have to load the segment registers as well? */
 
+	/* TODO Use gdt_init */
 	lgdt gdt
 
 	jmp start

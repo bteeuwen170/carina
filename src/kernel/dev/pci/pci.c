@@ -234,10 +234,13 @@ static void pci_config(u16 bus, u16 dev, u16 func)
 		goto err;
 
 	for (i = 0; i < 64; i += 16) {
-		*(u32 *) ((u64) cfg + i) = pci_ini(bus, dev, func, i);
-		*(u32 *) ((u64) cfg + i + 4) = pci_ini(bus, dev, func, i + 4);
-		*(u32 *) ((u64) cfg + i + 8) = pci_ini(bus, dev, func, i + 8);
-		*(u32 *) ((u64) cfg + i + 12) = pci_ini(bus, dev, func, i + 12);
+		*(u32 *) ((unsigned long) cfg + i) = pci_ini(bus, dev, func, i);
+		*(u32 *) ((unsigned long) cfg + i + 4) =
+			pci_ini(bus, dev, func, i + 4);
+		*(u32 *) ((unsigned long) cfg + i + 8) =
+			pci_ini(bus, dev, func, i + 8);
+		*(u32 *) ((unsigned long) cfg + i + 12) =
+			pci_ini(bus, dev, func, i + 12);
 	}
 
 	for (i = 0; i < PCI_DEVTABLE_SIZE; i++) {

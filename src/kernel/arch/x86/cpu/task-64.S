@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/arch/x86/cpu/task.S
+ * src/kernel/arch/x86/cpu/task-64.S
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -45,5 +45,3 @@ usrmode_enter:
 	push $0x18
 	//call acpi_init
 	iretq
-
-1:

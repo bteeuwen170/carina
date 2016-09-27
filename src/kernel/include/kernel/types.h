@@ -65,8 +65,10 @@ typedef u64					time_t;			/* Time in seconds since epoch */
 /* Addresses */
 typedef u32					paddr32_t;		/* Physical address (32-bit) */
 typedef u32					vaddr32_t;		/* Virtual address (32-bit) */
-typedef u64					paddr_t;		/* Physical address */
-typedef u64					vaddr_t;		/* Virtual address */
+typedef u64					paddr64_t;		/* Physical address (64-bit) */
+typedef u64					vaddr64_t;		/* Virtual address (64-bit) */
+typedef unsigned long		paddr_t;		/* Physical address */
+typedef unsigned long		vaddr_t;		/* Virtual address */
 
 //TODO In uuid.h
 #define UUID_SIZE			16

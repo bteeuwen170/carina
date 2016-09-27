@@ -28,9 +28,11 @@
 #include <kernel/print.h>
 
 /* TODO Should store as 10ms */
-u64 ticks;
+/* TODO Change to u64 again once support for 64-bit division on i686 */
+u32 ticks;
 
-u64 uptime(void)
+//u64 uptime(void)
+u32 uptime(void)
 {
 	return ticks / 1000;
 	//return do_div(ticks, 1000);

@@ -103,7 +103,5 @@ isr:
 
 	popa
 
-	/* Exit the interrupt handler */
 	add $0x10, %esp
-	//hlt
 	iret

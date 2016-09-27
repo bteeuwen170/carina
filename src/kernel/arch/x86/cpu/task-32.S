@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/arch/x86/cpu/task.S
+ * src/kernel/arch/x86/cpu/task-32.S
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -32,12 +32,10 @@ usrmode_enter:
 	mov %ax, %fs
 	mov %ax, %gs
 
-	mov %rsp, %rax
+	mov %esp, %eax
 	push $0x20
-	push %rax
+	push %eax
 	pushf
 	push $0x18
 	push $0
-	iretq
-
-1:
+	iret

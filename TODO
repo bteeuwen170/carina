@@ -32,6 +32,8 @@ Kernel
 - Write parser for pci.ids file
 - Script to get latest pci.ids
 - Always return void from initialization functions
+- Introduce new type that defines u32 on i686 systems, u64 on amd64 systems and
+  the native cpu address bus width type on other systems.
 
 Makefile
 - Seperate kernel-o and kernel-l (objects and libs)

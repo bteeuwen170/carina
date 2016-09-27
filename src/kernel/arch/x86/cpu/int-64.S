@@ -119,7 +119,5 @@ isr:
 	pop %rsi
 	pop %rdi
 
-	/* Exit the interrupt handler */
 	add $0x10, %rsp
-	//hlt
 	iretq

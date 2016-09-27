@@ -168,7 +168,7 @@ void reboot(void);
 #define PIT_CH2_CMD		0x42
 #define PIT_CH2_IO		0x61
 
-u64 uptime(void);
+u32 uptime(void);
 
 void pit_init(void);
 
