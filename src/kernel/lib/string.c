@@ -26,9 +26,9 @@
 #include "string.h"
 
 //FIXME Requires immediate attention !!! XXX
-void *memcpy(void *dest, void *src, u64 len) //XXX Is dest even returned?
+void *memcpy(void *dest, void *src, size_t len) //XXX Is dest even returned?
 {
-	u64 i, *_dest = dest, *_src = src;
+	size_t i, *_dest = dest, *_src = src;
 
 	if (len == 0 || _dest == _src)
 		return _dest;
@@ -39,7 +39,7 @@ void *memcpy(void *dest, void *src, u64 len) //XXX Is dest even returned?
 	return _dest;
 }
 
-//void *memmv(void *dest, void *src, u64 len)
+//void *memmv(void *dest, void *src, size_t len)
 //{
 //
 //}
@@ -69,12 +69,12 @@ i32 strcmp(const char *str1, const char *str2)
 	return ((*(u8 *) str1 < *(u8 *) str2) ? -1 : 1);
 }
 
-//void *memchr(const void *s, i32 *c, u64 len)
+//void *memchr(const void *s, i32 *c, size_t len)
 //{
 //
 //}
 
-void *memset(void *dest, i32 src, u64 len)
+void *memset(void *dest, i32 src, size_t len)
 {
 	if (len) {
 		char *_dest = dest;
@@ -87,7 +87,7 @@ void *memset(void *dest, i32 src, u64 len)
 	return dest;
 }
 
-u64 strlen(char *str)
+size_t strlen(char *str)
 {
 	register char *s;
 

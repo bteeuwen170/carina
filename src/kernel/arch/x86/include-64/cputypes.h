@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/lib/stdlib.h
+ * src/kernel/arch/x86/include-64/cputypes.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,33 +22,9 @@
  *
  */
 
-#ifndef __STDLIB_H_
-#define __STDLIB_H_
+#ifndef __CPUTYPES_H__
+#define __CPUTYPES_H__
 
-/* Type conversion */
-char *itoa(size_t num, const u32 base);
-//size_t strtol(const string *str, string *ptr, u32 base);
-
-/* Pseudo-random sequence generation */
-
-/* Memory allocation and deallocation */
-#define HEAP_SIZE			(1 * 1024 * 1024)
-
-//void *heap = NULL;
-//void 
-
-void *malloc(size_t size);
-void *kmalloc(size_t size);
-//void *calloc(size_t src, size_t size);
-//void *realloc(void *ptr, size_t size);
-void kfree(void *ptr);
-
-void mm_init(void);
-
-/* Process control */
-
-/* Sorting, searching and comparison */
-
-/* Mathematics */ //XXX move to math.h
+typedef unsigned long long	size_t;
 
 #endif

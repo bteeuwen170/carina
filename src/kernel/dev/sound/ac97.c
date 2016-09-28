@@ -121,7 +121,7 @@ static int pci_handler(struct pci_dev *card)
 	if (!bar_nam || !bar_nabm)
 		goto err;
 
-	irq_reghandler(ISR_ENTRIES + card->cfg->int_line, &int_handler);
+	irq_reghandler(SINT_ENTRIES + card->cfg->int_line, &int_handler);
 
 	ac97_volume(3);
 

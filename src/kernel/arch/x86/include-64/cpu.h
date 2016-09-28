@@ -25,7 +25,7 @@
 #ifndef __CPU_H__
 #define __CPU_H__
 
-#define GDT_ENTRIES	6
+#define GDT_ENTRIES		6
 
 /*
  * Can't use the long mode version because we're lazy and don't load a seperate
@@ -45,9 +45,11 @@ struct desc_register {
 	void	*base;
 } __attribute__ ((packed));
 
-#define IDT_ENTRIES	256
-#define ISR_ENTRIES	32
-#define IRQ_ENTRIES	16
+/* IDT_ENTIRES to INT_ENTRIES */
+#define IDT_ENTRIES		256
+#define SINT_ENTRIES	32
+#define HINT_ENTRIES	(IDT_ENTRIES - SIN_ENTRIES)
+#define IRQ_ENTRIES		16
 
 struct idt_desc {
 	u16		offset_lo;
@@ -74,7 +76,7 @@ struct int_stack {
 	u16		reserved3[3];
 } __attribute__ ((packed));
 
-#define TSS_ENTRIES	1
+#define TSS_ENTRIES		1
 
 struct tss_entry {
 	u32		reserved0;

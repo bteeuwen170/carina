@@ -49,7 +49,7 @@ char *itoa(u32 num, const u32 base) //FIXME No support for negative integers
 
 //void *malloc_zone(
 
-/*void *malloc(u64 size)
+/*void *malloc(size_t size)
 {
 
 }*/

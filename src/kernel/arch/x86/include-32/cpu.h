@@ -41,9 +41,10 @@ struct desc_register {
 	void	*base;
 } __attribute__ ((packed));
 
-#define IDT_ENTRIES	256
-#define ISR_ENTRIES	32
-#define IRQ_ENTRIES	16
+#define IDT_ENTRIES		256
+#define SINT_ENTRIES	32
+#define HINT_ENTRIES	(IDT_ENTRIES - SIN_ENTRIES)
+#define IRQ_ENTRIES		16
 
 struct idt_desc {
 	u16		offset_lo;

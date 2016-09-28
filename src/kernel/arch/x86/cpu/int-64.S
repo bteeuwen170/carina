@@ -83,7 +83,7 @@ INT			31
 
 /* IRQs */
 i = 32
-.rept 223
+.rept 224
 	INT		%i
 	i = i + 1
 .endr

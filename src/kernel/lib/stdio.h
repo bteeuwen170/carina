@@ -47,7 +47,7 @@ struct file {
 	i64		len;
 };
 
-void panic(char *reason, u64 err_code);
+void panic(char *reason, u32 err_code);
 
 void printc(char c);
 void printcc(char c, u8 color);

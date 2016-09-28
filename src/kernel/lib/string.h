@@ -25,18 +25,18 @@
 #ifndef __STRING_H_
 #define __STRING_H_
 
-void *memcpy(void *dest, void *src, u64 len);
-//void *memmv(void *dest, void *src, u64 len);
+void *memcpy(void *dest, void *src, size_t len);
+//void *memmv(void *dest, void *src, size_t len);
 char *strcpy(char *dest, const char *src);
 
 char *strcat(char *dest, char *src);
 
 i32 strcmp(const char *str1, const char *str2);
 
-//void *memchr(const void *s, i32 c, u64 len);
+//void *memchr(const void *s, i32 c, size_t len);
 
-void *memset(void *dest, i32 src, u64 len);
-u64 strlen(char *str);
+void *memset(void *dest, i32 src, size_t len);
+size_t strlen(char *str);
 char *strrev(char *str);
 
 #endif
