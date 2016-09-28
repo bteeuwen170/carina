@@ -22,19 +22,17 @@
  *
  */
 
-#ifndef __KBD_H__
-#define __KBD_H__
+#ifndef _KBD_H
+#define _KBD_H
 
-
-#define MOD_SHIFT		(1 << 0)
-#define MOD_CTRL		(1 << 1)
-#define MOD_ALT			(1 << 2)
-#define MOD_SUPER		(1 << 3)
+#define MOD_SHIFT	(1 << 0)
+#define MOD_CTRL	(1 << 1)
+#define MOD_ALT		(1 << 2)
+#define MOD_SUPER	(1 << 3)
 
 //void kbd_init(void);
 
 void kbd_enable(void);
-
 void kbd_disable(void);
 
 #endif

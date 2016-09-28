@@ -22,24 +22,24 @@
  *
  */
 
-#ifndef __KERNEL_TYPES_H_
-#define __KERNEL_TYPES_H_
+#ifndef _KERNEL_TYPES_H
+#define _KERNEL_TYPES_H
 
 #include <cputypes.h>
 
 /* Boolean */
 typedef enum {
-	false =					0,
-	true =					1
+	false =	0,
+	true =	1
 } bool;
 
 /* NULL */
-#define NULL				((void *) 0)
+#define NULL	((void *) 0)
 
 /* Signed Data Types */
-typedef signed char			i8;
+typedef signed char		i8;
 typedef signed short		i16;
-typedef signed int			i32;
+typedef signed int		i32;
 typedef signed long long	i64;
 
 /* Unsigned Data Types */
@@ -49,28 +49,28 @@ typedef unsigned int		u32;
 typedef unsigned long long	u64;
 
 /* Floating-Point Types */
-//typedef float				f32;
-//typedef double				f64;
-//typedef long double			f128;
+//typedef float			f32;
+//typedef double		f64;
+//typedef long double		f128;
 
 /* Users and groups */
-typedef u32					uid_t;			/* User ID */
-typedef u32					gid_t;			/* Group ID */
+typedef u32	uid_t;			/* User ID */
+typedef u32	gid_t;			/* Group ID */
 
 /* Other Data Types */ //TODO In types.h
-typedef u64					fsize_t;		/* File size */
-typedef u64					time_t;			/* Time in seconds since epoch */
+typedef u64	fsize_t;		/* File size */
+typedef u64	time_t;			/* Time in seconds since epoch */
 
 /* Addresses */
-typedef u32					paddr32_t;		/* Physical address (32-bit) */
-typedef u32					vaddr32_t;		/* Virtual address (32-bit) */
-typedef u64					paddr64_t;		/* Physical address (64-bit) */
-typedef u64					vaddr64_t;		/* Virtual address (64-bit) */
-typedef size_t				paddr_t;		/* Physical address */
-typedef size_t				vaddr_t;		/* Virtual address */
+typedef u32	paddr32_t;		/* Physical address (32-bit) */
+typedef u32	vaddr32_t;		/* Virtual address (32-bit) */
+typedef u64	paddr64_t;		/* Physical address (64-bit) */
+typedef u64	vaddr64_t;		/* Virtual address (64-bit) */
+typedef size_t	paddr_t;		/* Physical address */
+typedef size_t	vaddr_t;		/* Virtual address */
 
 //TODO In uuid.h
-//#define UUID_SIZE			16
-//typedef u8					uuid_t[16];		/* UUID */
+//#define UUID_SIZE	16
+//typedef u8		uuid_t[16];	/* UUID */
 
 #endif

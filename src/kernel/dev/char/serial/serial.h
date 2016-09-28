@@ -22,13 +22,13 @@
  *
  */
 
-#ifndef __SERIAL_H_
-#define __SERIAL_H_
+#ifndef _SERIAL_H
+#define _SERIAL_H
 
-#define COM0			0x3F8
-#define COM1			0x2F8
-#define COM2			0x3E8
-#define COM3			0x2E8
+#define COM0	0x3F8
+#define COM1	0x2F8
+#define COM2	0x3E8
+#define COM3	0x2E8
 
 void serial_init(const u16 port);
 

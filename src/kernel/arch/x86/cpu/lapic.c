@@ -40,7 +40,7 @@ void lapic_eoi(void)
 
 i8 lapic_init(void)
 {
-	//TODO Check if LAPICs are present
+	/* TODO Check if LAPICs are present */
 
 	u64 flags = msr_in(0x1B) & 0x0F00;
 	flags |= (u64) lapic_avail() << 10;
@@ -50,7 +50,7 @@ i8 lapic_init(void)
 	return OK;
 }
 
-//static i8 lapic_timer_calibrate(u64 
+/* static i8 lapic_timer_calibrate(u64  */
 
 i8 lapic_timer_init(void *master)
 {

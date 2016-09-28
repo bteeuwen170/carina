@@ -32,7 +32,7 @@ extern u64 kern_end;
 static vaddr_t position;
 
 struct mem_block {
-	u8					allocated;
+	u8			allocated;
 	struct mem_block	*prev;
 	struct mem_block	*next;
 } *blocks;

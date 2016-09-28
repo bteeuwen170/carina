@@ -22,9 +22,9 @@
  *
  */
 
-#ifndef __KERNEL_ISSUE_H__
-#define __KERNEL_ISSUE_H__
+#ifndef _KERNEL_ISSUE_H
+#define _KERNEL_ISSUE_H
 
-#define CARINA_VER		0.1
+#define CARINA_VER 0.1
 
 #endif

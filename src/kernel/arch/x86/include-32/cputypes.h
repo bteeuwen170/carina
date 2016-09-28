@@ -22,9 +22,9 @@
  *
  */
 
-#ifndef __CPUTYPES_H__
-#define __CPUTYPES_H__
+#ifndef _CPUTYPES_H
+#define _CPUTYPES_H
 
-typedef unsigned int		size_t;
+typedef unsigned int size_t;
 
 #endif

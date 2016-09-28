@@ -22,19 +22,19 @@
  *
  */
 
-#ifndef __STDIO_H_
-#define __STDIO_H_
+#ifndef _STDIO_H
+#define _STDIO_H
 
 
 //TODO This is crap
-#define FAIL			-1
-#define NONE			0
-#define OK				1
+#define FAIL	-1
+#define NONE	0
+#define OK	1
 
-#define EOF				-1
+#define EOF	-1
 
-struct file {
-	i32		flags;
+/*struct file {
+	i32	flags;
 	char	*read_base;
 	char	*read_ptr;
 	char	*read_end;
@@ -43,9 +43,9 @@ struct file {
 	char	*write_end;
 	char	*buf_base;
 	char	*buf_end;
-	i64		size;
-	i64		len;
-};
+	i64	size;
+	i64	len;
+};*/
 
 void panic(char *reason, u32 err_code);
 

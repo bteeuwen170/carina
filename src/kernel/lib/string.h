@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __STRING_H_
-#define __STRING_H_
+#ifndef _STRING_H
+#define _STRING_H
 
 void *memcpy(void *dest, void *src, size_t len);
 //void *memmv(void *dest, void *src, size_t len);

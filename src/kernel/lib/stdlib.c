@@ -23,8 +23,8 @@
  */
 
 #include <string.h>
-#include <div64.h>
 
+/* XXX I hate this function */
 char *itoa(u32 num, const u32 base) //FIXME No support for negative integers
 {
 	static char str[22];
@@ -39,7 +39,7 @@ char *itoa(u32 num, const u32 base) //FIXME No support for negative integers
 	while (num != 0) {
 		i32 rem = num % base;
 		str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
-		num = do_div(num, base);
+		num = num / base;
 	}
 
 	str[i] = '\0';

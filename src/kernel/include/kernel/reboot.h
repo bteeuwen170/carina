@@ -22,8 +22,14 @@
  *
  */
 
-#ifndef __REBOOT_H_
-#define __REBOOT_H_
+#ifndef _KERNEL_REBOOT_H
+#define _KERNEL_REBOOT_H
+
+#define REBOOT_HALT	0x01	/* Halt the system */
+#define REBOOT_POWEROFF	0x02	/* Power the system off (if supported) */
+#define REBOOT_RESTART	0x03	/* Restart the system */
+#define REBOOT_PANIC	0x04	/* Force a kernel panic */
+#define REBOOT_KALL	0x05	/* Kill all processes */
 
 void reboot(void);
 

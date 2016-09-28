@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * Main Cito Kernel
+ * src/kernel/init/main.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,6 +22,7 @@
  *
  */
 
+/* TODO Clean up this mess */
 #include <rtc/cmos.h>
 #include <kernel/mboot.h>
 #include <kernel/issue.h>
@@ -69,9 +70,12 @@ void kernel_main(struct mboot_info *mboot)
 
 	/* TODO Move */
 	kprintf(KP_INFO, "mem", "%u KB base memory\n", mboot->mem_lower);
-	kprintf(KP_INFO, "mem", "%u MB extended memory\n", mboot->mem_upper / 1024);
+	kprintf(KP_INFO, "mem",
+			"%u MB extended memory\n", mboot->mem_upper / 1024);
 
 #if 0
+	/* TODO Move */
+	/* TODO This is a mess */
 	/* Get memory map from Multiboot structure */
 	kprintf(KP_INFO, 0, "Carina has been loaded by %s\n", mboot->boot_loader_name);
 	struct mboot_mmap *mmap = (struct mboot_mmap *) mboot->mmap_addr;
@@ -97,7 +101,8 @@ void kernel_main(struct mboot_info *mboot)
 	/* TODO Switch */
 	if (mboot->framebuffer_type == 1) {
 		u64 *fb = (u64 *) (u64) mboot->framebuffer_addr;
-		u32 color = ((1 << mboot->framebuffer_blue_mask_size) - 1) << mboot->framebuffer_blue_field_position;
+		u32 color = ((1 << mboot->framebuffer_blue_mask_size) - 1) <<
+			mboot->framebuffer_blue_field_position;
 		u8 *pixel;
 		u16 i, j;
 
@@ -112,7 +117,8 @@ void kernel_main(struct mboot_info *mboot)
 			case 24:
 				break;
 			case 32:
-				pixel = fb + mboot->framebuffer_pitch * i + 4 * i;
+				pixel = fb + mboot->framebuffer_pitch *
+					i + 4 * i;
 				*pixel = color;
 				break;
 			default:
@@ -122,7 +128,8 @@ void kernel_main(struct mboot_info *mboot)
 		}
 
 		for (j = 0; j < 1024; j++) {
-			u32 v = j * (mboot->framebuffer_bpp / 8) + 2 * mboot->framebuffer_pitch;
+			u32 v = j * (mboot->framebuffer_bpp / 8) + 2 *
+				mboot->framebuffer_pitch;
 			//u32 i = j * 4 + 32 * 3200;
 			fb[v + 0] = 0 & 255;
 			fb[v + 1] = 255 & 255;

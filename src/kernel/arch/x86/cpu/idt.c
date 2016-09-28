@@ -87,10 +87,10 @@ void *irq_handlers[IRQ_ENTRIES];
 /* TODO Add parameter for privilege level */
 static void idt_set(const u8 gate, const u8 type, const u64 offset)
 {
-	idt[gate].offset_lo		= offset & 0xFFFF;
-	idt[gate].segment		= 0x08;
-	idt[gate].zero			= 0;
-	idt[gate].flags			= type | 0b10000000;
+	idt[gate].offset_lo	= offset & 0xFFFF;
+	idt[gate].segment	= 0x08;
+	idt[gate].zero		= 0;
+	idt[gate].flags		= type | 0b10000000;
 	idt[gate].offset_hi[0]	= (offset >> 16) & 0xFFFF;
 	idt[gate].offset_hi[1]	= (offset >> 32) & 0xFFFF;
 	idt[gate].offset_hi[2]	= (offset >> 48) & 0xFFFF;
@@ -123,8 +123,9 @@ void _isr(struct int_stack *regs)
 		if (regs->int_no < SINT_ENTRIES) { //TODO Don't always halt
 			panic(exceptions[regs->int_no], regs->err_code);
 		} else if (regs->int_no < SINT_ENTRIES + IRQ_ENTRIES) {
-			void (*handler) (struct int_stack *regs) =
-					irq_handlers[regs->int_no - SINT_ENTRIES];
+			void (*handler) (struct int_stack *regs);
+
+			handler = irq_handlers[regs->int_no - SINT_ENTRIES];
 
 			if (handler)
 				handler(regs);
@@ -133,6 +134,7 @@ void _isr(struct int_stack *regs)
 				io_outc(PIC_S_CMD, PIC_EOI);
 			io_outc(PIC_M_CMD, PIC_EOI);
 		}
+
 		break;
 	}
 }

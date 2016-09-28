@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __FB_H__
-#define __FB_H__
+#ifndef _FB_H
+#define _FB_H
 
 
 #endif

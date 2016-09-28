@@ -47,10 +47,10 @@ static void *data;
 
 struct buffer {
 	void	*buf;
-	u16		len;
-	u16		reserve	:14;
-	u8		bup		:1;
-	u8		ioc		:1;
+	u16	len;
+	u16	reserve :14;
+	u8	bup :1;
+	u8	ioc :1;
 } __attribute__ ((packed));
 
 struct buffer *buf;

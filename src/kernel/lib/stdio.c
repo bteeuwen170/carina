@@ -42,7 +42,7 @@ void panic(char *reason, u32 err_code)
 
 	//TODO Hide cursor
 
-	kprintf(KP_CRIT, "panic", "%s", reason); //TODO First do check for specific err
+	kprintf(KP_CRIT, "panic", "%s", reason);
 
 	if ((err_code >> 1) & 0x00)
 		prints(" in GDT\n");

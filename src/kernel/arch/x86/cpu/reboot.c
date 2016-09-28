@@ -42,5 +42,6 @@ void reboot(void)
 
 	io_outc(PS2_CMD, PS2_RESET);
 
-	for (;;) asm volatile ("hlt");
+	for (;;)
+		asm volatile ("hlt");
 }

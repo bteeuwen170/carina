@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __KERNEL_IPC_H_
-#define __KERNEL_IPC_H_
+#ifndef _KERNEL_IPC_H
+#define _KERNEL_IPC_H
 
 /* Global pipes */
 struct inode *kbd_pipe;

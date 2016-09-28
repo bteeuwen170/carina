@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __CPUB_H__
-#define __CPUB_H__
+#ifndef _CPUB_H
+#define _CPUB_H
 
 /*
  * Can't use the long mode version because we're lazy and don't load a seperate
@@ -32,10 +32,10 @@
  */
 
 struct segment_desc {
-	u16		limit_lo;
-	u8		base_lo[3];
-	u16		flags;
-	u8		base_hi;
+	u16	limit_lo;
+	u8	base_lo[3];
+	u16	flags;
+	u8	base_hi;
 } __attribute__ ((packed));
 
 struct desc_register {
@@ -44,37 +44,37 @@ struct desc_register {
 } __attribute__ ((packed));
 
 struct idt_desc {
-	u16		offset_lo;
-	u16		segment;
-	u8		zero;
-	u8		flags;
-	u16		offset_hi[3];
-	u32		reserved0;
+	u16	offset_lo;
+	u16	segment;
+	u8	zero;
+	u8	flags;
+	u16	offset_hi[3];
+	u32	reserved0;
 } __attribute__ ((packed));
 
 struct int_stack {
-	u16		ds;
-	u16		reserved0[3];
-	u64		rdi, rsi, rdx, rcx, rax, r8, r9, r10, r11;
-	u64		int_no;
-	u32		err_code;
-	u32		reserved1;
-	u64		rip;
-	u16		cs;
-	u16		reserved2[3];
-	u64		rflags;
-	u64		rsp;
-	u16		ss;
-	u16		reserved3[3];
+	u16	ds;
+	u16	reserved0[3];
+	u64	rdi, rsi, rdx, rcx, rax, r8, r9, r10, r11;
+	u64	int_no;
+	u32	err_code;
+	u32	reserved1;
+	u64	rip;
+	u16	cs;
+	u16	reserved2[3];
+	u64	rflags;
+	u64	rsp;
+	u16	ss;
+	u16	reserved3[3];
 } __attribute__ ((packed));
 
 struct tss_entry {
-	u32		reserved0;
-	u64		rsp0, rsp1, rsp2;
-	u64		reserved1;
-	u64		ist1, ist2, ist3, ist4, ist5, ist6, ist7;
-	u16		reserved2[5];
-	u16		iomap_base;
+	u32	reserved0;
+	u64	rsp0, rsp1, rsp2;
+	u64	reserved1;
+	u64	ist1, ist2, ist3, ist4, ist5, ist6, ist7;
+	u16	reserved2[5];
+	u16	iomap_base;
 } __attribute__ ((packed));
 
 void cpu_info(void);

@@ -22,19 +22,18 @@
  *
  */
 
-#ifndef __ISO9660_H_
-#define __ISO9660_H_
-
+#ifndef _ISO9660_H
+#define _ISO9660_H
 
 struct iso9660_sb {
-	u8		unused0[8];
+	u8	unused0[8];
 	char	sys_indent[32];
 	char	vol_indent[32];
-	u8		reserved0[8];
-	u8		reserved1[8];
-	u64		blocks;
-	u8		reserved2[32];
-	u32		unused1[2];
+	u8	reserved0[8];
+	u8	reserved1[8];
+	u64	blocks;
+	u8	reserved2[32];
+	u32	unused1[2];
 	//TODO
 };
 

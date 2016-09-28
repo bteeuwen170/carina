@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __CPU_H_
-#define __CPU_H_
+#ifndef _CPU_H
+#define _CPU_H
 
 #include <cpub.h>
 
@@ -31,37 +31,38 @@
 
 /* TODO IDT_ENTIRES to INT_ENTRIES */
 
-#define IDT_ENTRIES		256
+#define IDT_ENTRIES	256
 #define SINT_ENTRIES	32
 #define HINT_ENTRIES	(IDT_ENTRIES - SIN_ENTRIES)
-#define IRQ_ENTRIES		16
+#define IRQ_ENTRIES	16
 
-#define TSS_ENTRIES		1
+#define TSS_ENTRIES	1
 
-enum IRQS {
+enum irqs {
 	/* Master PIC */
-	IRQ_PIT				= 0x00,
-	IRQ_KBD				= 0x01,
-	IRQ_CAS				= 0x02,
-	IRQ_COM1			= 0x03,
-	IRQ_COM0			= 0x04,
-	IRQ_SND				= 0x05,
-	IRQ_FDD				= 0x06,
-	IRQ_PRT				= 0x07,
+	IRQ_PIT		= 0x00,
+	IRQ_KBD		= 0x01,
+	IRQ_CAS		= 0x02,
+	IRQ_COM1	= 0x03,
+	IRQ_COM0	= 0x04,
+	IRQ_SND		= 0x05,
+	IRQ_FDD		= 0x06,
+	IRQ_PRT		= 0x07,
 	/* Slave PIC */
-	IRQ_RTC				= 0x08,
-	IRQ_ACPI			= 0x09,
-	IRQ_OPT0			= 0x0A,
-	IRQ_OPT1			= 0x0B,
-	IRQ_PS2				= 0x0C,
-	IRQ_FPU				= 0x0D,
-	IRQ_ATA0			= 0x0E,
-	IRQ_ATA1			= 0x0F,
+	IRQ_RTC		= 0x08,
+	IRQ_ACPI	= 0x09,
+	IRQ_OPT0	= 0x0A,
+	IRQ_OPT1	= 0x0B,
+	IRQ_PS2		= 0x0C,
+	IRQ_FPU		= 0x0D,
+	IRQ_ATA0	= 0x0E,
+	IRQ_ATA1	= 0x0F,
 };
 
 static inline void cpuid(u32 code, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
 {
-	asm volatile ("cpuid" : "=a" (*eax), "=b" (*ebx), "=c" (*ecx), "=d" (*edx) :
+	asm volatile ("cpuid" :
+			"=a" (*eax), "=b" (*ebx), "=c" (*ecx), "=d" (*edx) :
 			"0" (code));
 }
 

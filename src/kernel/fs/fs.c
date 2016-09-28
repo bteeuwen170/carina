@@ -24,7 +24,5 @@
 
 void file_read(struct inode *inode, size_t size)
 {
-	
-
 	inode->atime = 0; /* TODO Only if noatime is not set */
 }

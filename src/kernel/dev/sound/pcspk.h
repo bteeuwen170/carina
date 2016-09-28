@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __PCSPK_H_
-#define __PCSPK_H_
+#ifndef _PCSPK_H
+#define _PCSPK_H
 
 void pcspk_play(const u16 freq);
 

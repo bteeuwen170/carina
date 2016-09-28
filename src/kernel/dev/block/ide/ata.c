@@ -22,7 +22,6 @@
  *
  */
 
-
 #include "ata.h"
 
 void ide_init(void)

@@ -24,18 +24,18 @@
 
 /* TODO Relocate in seperate files and delete this */
 
-#ifndef __KENREL_LIMITS_H_
-#define __KENREL_LIMITS_H_
+#ifndef _KERNEL_LIMITS_H
+#define _KERNEL_LIMITS_H
 
 
 //TODO Define max and min of data types
 
-#define BLOCK_SIZE		1024		/* Block size */
-#define SECTOR_SIZE		512			/* Sector size */
+#define BLOCK_SIZE	1024	/* Block size */
+#define SECTOR_SIZE	512	/* Sector size */
 
-#define FILES_MAX		8			/* Maximum number of open files at once */
-#define PATH_MAX		255			/* Maximum length of a pathname */
+#define FILES_MAX	8	/* Maximum number of open files at once */
+#define PATH_MAX	255	/* Maximum length of a pathname */
 
-#define LINKS_MAX		127			/* Maximum number of links for a file */
+#define LINKS_MAX	127	/* Maximum number of links for a file */
 
 #endif

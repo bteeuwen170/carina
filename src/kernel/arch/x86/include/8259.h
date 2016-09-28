@@ -22,24 +22,24 @@
  *
  */
 
-#ifndef __8259_H_
-#define __8259_H_
+#ifndef _8259_H
+#define _8259_H
 
-#define PIC_M_CMD		0x20
-#define PIC_M_IO		0x21
-#define PIC_M_OFF		0x20
+#define PIC_M_CMD	0x20
+#define PIC_M_IO	0x21
+#define PIC_M_OFF	0x20
 
-#define PIC_S_CMD		0xA0
-#define PIC_S_IO		0xA1
-#define PIC_S_OFF		0x28
+#define PIC_S_CMD	0xA0
+#define PIC_S_IO	0xA1
+#define PIC_S_OFF	0x28
 
-#define PIC_EOI			0x20
+#define PIC_EOI		0x20
 
-#define ICW1_PIC_M		0x02
-#define ICW1_PIC_S		0x04
+#define ICW1_PIC_M	0x02
+#define ICW1_PIC_S	0x04
 
-#define ICW1_INIT		0x11
-#define ICW1_8086		0x01
+#define ICW1_INIT	0x11
+#define ICW1_8086	0x01
 
 void pic_remap(void);
 

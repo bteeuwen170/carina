@@ -38,5 +38,5 @@ void tss_init(u32 *limit, u32 *base)
 	*base = TSS_ENTRIES * sizeof(struct tss_entry);
 
 	//kprintf(KP_INFO, devname,
-	//		"%d entries entered (FIXME hardcoded lies)\n", IDT_ENTRIES);
+	//"%d entries entered (FIXME hardcoded lies)\n", IDT_ENTRIES);
 }

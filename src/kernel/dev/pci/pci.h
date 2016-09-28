@@ -22,11 +22,11 @@
  *
  */
 
-#ifndef __PCI_H_
-#define __PCI_H_
+#ifndef _PCI_H
+#define _PCI_H
 
-#define PCI_BUSES		256
-#define PCI_DEVICES		32
+#define PCI_BUSES	256
+#define PCI_DEVICES	32
 #define PCI_FUNCTIONS	8
 
 /* PCI Config space structure */
@@ -61,21 +61,21 @@ struct pci_config_space {
 
 /* PCI device structure */
 struct pci_dev {
-	u16						bus, dev, func;
+	u16			bus, dev, func;
 	struct pci_config_space	*cfg;
 	
 	/* Device specific structure */
-	void					*device;
+	void			*device;
 
-	struct pci_dev			*next;
+	struct pci_dev		*next;
 };
 
 /* PCI handler structure */
 struct pci_handler {
-	int					calls, max_calls;
+	int			calls, max_calls;
 
-	u16					vendor, device;
-	int					(*handler) (struct pci_dev *);
+	u16			vendor, device;
+	int			(*handler) (struct pci_dev *);
 	
 	struct pci_handler	*next;
 };

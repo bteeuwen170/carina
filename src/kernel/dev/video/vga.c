@@ -22,6 +22,8 @@
  *
  */
 
+/* TODO Rewrite this crap */
+
 #include <cpu.h>
 #include <kernel/print.h>
 
@@ -39,8 +41,8 @@ void vga_init(void)
 
 	vga_x = vga_y = 0;
 
-	vga_fgcolor = COLOR_LIGHT_GREY;
-	vga_bgcolor = COLOR_BLACK;
+	vga_fgcolor = VGA_COLOR_LIGHT_GREY;
+	vga_bgcolor = VGA_COLOR_BLACK;
 
 	for (y = 0; y < VGA_HEIGHT; y++)
 		for (x = 0; x < VGA_WIDTH; x++)

@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __KERNEL_PRINT_H_
-#define __KERNEL_PRINT_H_
+#ifndef _KERNEL_PRINT_H
+#define _KERNEL_PRINT_H
 
 /* Loglevels */
 typedef enum {

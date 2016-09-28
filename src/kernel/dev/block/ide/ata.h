@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __IDE_ATA_H_
-#define __IDE_ATA_H_
+#ifndef _IDE_ATA_H
+#define _IDE_ATA_H
 
 
 

@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * Header for AC97 Driver
+ * src/kernel/dev/sound/ac97.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __AC97_H_
-#define __AC97_H_
+#ifndef _AC97_H
+#define _AC97_H
 
 #include <pci/pci.h>
 

@@ -23,10 +23,10 @@
  *
  */
 
-#ifndef __FS_H_
-#define __FS_H_
+#ifndef _FS_H
+#define _FS_H
 
-enum FTYPE {
+enum ftype {
 	FTYPE_FILE,
 	FTYPE_LINK,
 	FTYPE_DIR,
@@ -35,7 +35,7 @@ enum FTYPE {
 	FTYPE_PIPE
 };
 
-enum FMODE {
+enum fmode {
 	FMODE_UR,	/* Owner read */
 	FMODE_UW,	/* Owner write */
 	FMODE_UE,	/* Owner execute */

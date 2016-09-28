@@ -3,7 +3,7 @@
  * Carina
  * src/kernel/include/kernel/time.h
  *
- * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,10 +22,10 @@
  *
  */
 
-#ifndef __KERNEL_TIME_H_
-#define __KERNEL_TIME_H_
+#ifndef _KERNEL_TIME_H
+#define _KERNEL_TIME_H
 
-typedef u64				time_t;
+typedef u64 time_t;
 
 i8 time_init(void);
 

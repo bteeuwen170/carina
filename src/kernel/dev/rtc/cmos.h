@@ -22,28 +22,27 @@
  *
  */
 
-#ifndef __CMOS_H_
-#define __CMOS_H_
+#ifndef _CMOS_H
+#define _CMOS_H
 
+#define CMOS_CMD	0x70
+#define CMOS_IO		0x71
 
-#define CMOS_CMD		0x70
-#define CMOS_IO			0x71
-
-enum CMOS_REGISTERS {
-	CMOS_CENTURY		= 0x32,
-	CMOS_YEAR			= 0x09,
-	CMOS_MONTH			= 0x08,
-	CMOS_DAY			= 0x07,
-	CMOS_HOURS			= 0x04,
-	CMOS_MINUTES		= 0x02,
-	CMOS_SECONDS		= 0x00,
-	CMOS_A				= 0x0A,
-	CMOS_B				= 0x0B,
-	CMOS_C				= 0x0C,
-	CMOS_D				= 0x0D,
-	CMOS_CONFIG			= 0x11,
-	CMOS_DIAG			= 0x0E,
-	CMOS_PERIF			= 0x14
+enum cmos_registers {
+	CMOS_CENTURY	= 0x32,
+	CMOS_YEAR	= 0x09,
+	CMOS_MONTH	= 0x08,
+	CMOS_DAY	= 0x07,
+	CMOS_HOURS	= 0x04,
+	CMOS_MINUTES	= 0x02,
+	CMOS_SECONDS	= 0x00,
+	CMOS_A		= 0x0A,
+	CMOS_B		= 0x0B,
+	CMOS_C		= 0x0C,
+	CMOS_D		= 0x0D,
+	CMOS_CONFIG	= 0x11,
+	CMOS_DIAG	= 0x0E,
+	CMOS_PERIF	= 0x14
 };
 
 void rtc_init(void);

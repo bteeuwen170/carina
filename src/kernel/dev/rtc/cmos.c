@@ -41,7 +41,8 @@ void rtc_init(void)
 {
 	kprintf(KP_INFO, devname,
 			"current time is %02x%02x/%02x/%02x %02x:%02x:%02x UTC\n",
-			cmos_in(CMOS_CENTURY), cmos_in(CMOS_YEAR), cmos_in(CMOS_MONTH),
-			cmos_in(CMOS_DAY), cmos_in(CMOS_HOURS), cmos_in(CMOS_MINUTES),
+			cmos_in(CMOS_CENTURY), cmos_in(CMOS_YEAR),
+			cmos_in(CMOS_MONTH), cmos_in(CMOS_DAY),
+			cmos_in(CMOS_HOURS), cmos_in(CMOS_MINUTES),
 			cmos_in(CMOS_SECONDS));
 }

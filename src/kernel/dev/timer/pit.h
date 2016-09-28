@@ -22,20 +22,22 @@
  *
  */
 
-#ifndef __PIT_H_
-#define __PIT_H_
+#ifndef _PIT_H
+#define _PIT_H
 
-#define PIT_RATE		0b00110110
-#define PIT_SPKR		0b10110110
+#include <kernel/time.h>
 
-#define PIT_FREQ		0x1234DE
+#define PIT_RATE	0b00110110
+#define PIT_SPKR	0b10110110
 
-#define PIT_IO			0x43
-#define PIT_CH0_CMD		0x40
-#define PIT_CH2_CMD		0x42
-#define PIT_CH2_IO		0x61
+#define PIT_FREQ	0x1234DE
 
-u32 uptime(void);
+#define PIT_IO		0x43
+#define PIT_CH0_CMD	0x40
+#define PIT_CH2_CMD	0x42
+#define PIT_CH2_IO	0x61
+
+time_t uptime(void);
 
 void pit_init(void);
 

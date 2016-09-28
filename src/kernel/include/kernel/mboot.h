@@ -22,14 +22,14 @@
  *
  */
 
-#ifndef __KERNEL_MBOOT_H__
-#define __KERNEL_MBOOT_H__
+#ifndef _KERNEL_MBOOT_H
+#define _KERNEL_MBOOT_H
 
 
 struct mboot_mmap {
-	u32 size;
-	u64 addr;
-	u64 len;
+	u32	size;
+	u64	addr;
+	u64	len;
 	u32	type;
 } __attribute__ ((packed));
 
@@ -46,10 +46,10 @@ struct mboot_info {
 	u32	mods_count;
 	u32	mods_addr;
 
-	u32 elf_num;
-	u32 elf_size;
-	u32 elf_addr;
-	u32 elf_shndx;
+	u32	elf_num;
+	u32	elf_size;
+	u32	elf_addr;
+	u32	elf_shndx;
 
 	u32	mmap_length;
 	u32	mmap_addr;

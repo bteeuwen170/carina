@@ -56,33 +56,33 @@ gdt_sd:
 	.word 0x0000
 	.word 0x0000
 	.byte 0x00
-	.byte 0b10011000		/* P,  DPL, 1, 1, C, -, - */
-	.byte 0b00000000		/* -, D, L, -, -, -, -, - */
+	.byte 0b10011000	/* P,  DPL, 1, 1, C, -, - */
+	.byte 0b00000000	/* -, D, L, -, -, -, -, - */
 	.byte 0x00
 /* 0x10 - Data SV */
 	.word 0x0000
 	.word 0x0000
 	.byte 0x00
-	.byte 0b10010000		/* P, -, -, 1, 0, -, -, - */
-	.byte 0b00000000		/* -, -, -, -, -, -, -, - */
+	.byte 0b10010000	/* P, -, -, 1, 0, -, -, - */
+	.byte 0b00000000	/* -, -, -, -, -, -, -, - */
 	.byte 0x00
 /* 0x18 - Code USR */
 	.word 0x0000
 	.word 0x0000
 	.byte 0x00
-	.byte 0b11111000		/* P,  DPL, 1, 1, C, -, - */
-	.byte 0b00000000		/* -, D, L, -, -, -, -, - */
+	.byte 0b11111000	/* P,  DPL, 1, 1, C, -, - */
+	.byte 0b00000000	/* -, D, L, -, -, -, -, - */
 	.byte 0x00
 /* 0x20 - Data USR */
 	.word 0x0000
 	.word 0x0000
 	.byte 0x00
-	.byte 0b10010010		/* P, -, -, 1, 0, -, -, - */
-	.byte 0b00000000		/* -, -, -, -, -, -, -, - */
+	.byte 0b10010010	/* P, -, -, 1, 0, -, -, - */
+	.byte 0b00000000	/* -, -, -, -, -, -, -, - */
 	.byte 0x00
 gdt:
 	.word . - gdt_sd - 1	/* Limit */
-	.long gdt_sd			/* Base address */
+	.long gdt_sd		/* Base address */
 
 .align 4096
 /* Controls 1 GB */

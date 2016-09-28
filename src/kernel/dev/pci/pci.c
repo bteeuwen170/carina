@@ -35,10 +35,10 @@ struct pci_dev *pci_devices = 0;
 struct pci_handler *pci_handlers = 0;
 
 struct {
-	u8			base_class;
-	u8			sub_class;
-	u8			prog_if;
-	char		*device;
+	u8	base_class;
+	u8	sub_class;
+	u8	prog_if;
+	char	*device;
 } pci_device_table[] = {
 	/* Unclassified Controllers */
 	{ 0x00, 0x00, 0x00, "Non-VGA compatible device" },
@@ -252,8 +252,8 @@ static void pci_config(u16 bus, u16 dev, u16 func)
 				break;
 
 		/* TODO More verbose */
-		kprintf(KP_INFO, devname, "detected %#x %#x %s\n",
-				cfg->vendor, cfg->device, pci_device_table[j].device);
+		kprintf(KP_INFO, devname, "detected %#x %#x %s\n", cfg->vendor,
+				cfg->device, pci_device_table[j].device);
 
 		break;
 	}

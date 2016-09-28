@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __STDLIB_H_
-#define __STDLIB_H_
+#ifndef _STDLIB_H
+#define _STDLIB_H
 
 /* Type conversion */
 char *itoa(size_t num, const u32 base);
@@ -32,7 +32,7 @@ char *itoa(size_t num, const u32 base);
 /* Pseudo-random sequence generation */
 
 /* Memory allocation and deallocation */
-#define HEAP_SIZE			(1 * 1024 * 1024)
+#define HEAP_SIZE (1 * 1024 * 1024)
 
 //void *heap = NULL;
 //void 
