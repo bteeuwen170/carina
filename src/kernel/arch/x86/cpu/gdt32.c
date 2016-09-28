@@ -22,8 +22,8 @@
  *
  */
 
-#include <system.h>
-#include <kernel/print.h>
+#include <cpu.h>
+//#include <kernel/print.h>
 
 //static char *devname = "gdt";
 

@@ -22,8 +22,6 @@
  *
  */
 
-#include <system.h>
-
 void acpi_init(void)
 {
 	for (;;)

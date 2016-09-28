@@ -22,9 +22,8 @@
  *
  */
 
-
+#include <cpu.h>
 #include <kernel/print.h>
-#include <system.h>
 
 #include "vga.h"
 

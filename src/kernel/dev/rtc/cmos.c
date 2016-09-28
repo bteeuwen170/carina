@@ -1,9 +1,9 @@
 /*
  *
  * Carina
- * CMOS Driver
+ * src/kernel/dev/rtc/cmos.c
  *
- * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,13 +22,15 @@
  *
  */
 
-#include "cmos.h"
-#include <system.h>
+#include <cpu.h>
 #include <kernel/print.h>
+
+#include "cmos.h"
 
 static char *devname = "rtc";
 
-static u8 cmos_in(const u8 reg) //TODO Make get_time function or something and check if not updating using CMOS_A
+/* TODO Make get_time function + check if not updating using CMOS_A */
+static u8 cmos_in(const u8 reg)
 {
 	io_outc(CMOS_CMD, reg);
 

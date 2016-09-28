@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/arch/x86/cpu/reboot.c
+ * src/kernel/dev/char/serial/serial.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,25 +22,18 @@
  *
  */
 
-#include <cpu.h>
-#include <kbd/ps2.h>
+#ifndef __SERIAL_H_
+#define __SERIAL_H_
 
-#define bit(n) (1 << (n))
-#define check_flag(flags, n) ((flags) & bit(n))
+#define COM0			0x3F8
+#define COM1			0x2F8
+#define COM2			0x3E8
+#define COM3			0x2E8
 
-void reboot(void)
-{
-	u8 trash;
+void serial_init(const u16 port);
 
-	asm volatile ("cli");
+u16 serial_in(const u16 port);
 
-	do {
-		trash = io_inc(PS2_CMD);
-		if (check_flag(trash, 0) != 0)
-			io_inc(PS2_IO);
-	} while (check_flag(trash, 1) != 0);
+void serial_out(const u16 port, const u8 value);
 
-	io_outc(PS2_CMD, PS2_RESET);
-
-	for (;;) asm volatile ("hlt");
-}
+#endif

@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/arch/x86/include-64/cpu.h
+ * src/kernel/arch/x86/include-32/cpub.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,16 +22,10 @@
  *
  */
 
-#ifndef __CPU_H__
-#define __CPU_H__
+#ifndef __CPUB_H__
+#define __CPUB_H__
 
-#define GDT_ENTRIES		6
-
-/*
- * Can't use the long mode version because we're lazy and don't load a seperate
- * GDT for long mode. This shouldn't be an issue however, as the address of the
- * TSS probably won't exceed the 32-bit address space.
- */
+/* TODO Right now just a copy of the 64-bit file */
 
 struct segment_desc {
 	u16		limit_lo;
@@ -45,12 +39,6 @@ struct desc_register {
 	void	*base;
 } __attribute__ ((packed));
 
-/* IDT_ENTIRES to INT_ENTRIES */
-#define IDT_ENTRIES		256
-#define SINT_ENTRIES	32
-#define HINT_ENTRIES	(IDT_ENTRIES - SIN_ENTRIES)
-#define IRQ_ENTRIES		16
-
 struct idt_desc {
 	u16		offset_lo;
 	u16		segment;
@@ -62,21 +50,18 @@ struct idt_desc {
 
 struct int_stack {
 	u16		ds;
-	u16		reserved0[3];
-	u64		rdi, rsi, rdx, rcx, rax, r8, r9, r10, r11;
-	u64		int_no;
+	u16		reserved0;
+	u32		eax, ecx, edx, ebx, ebp, esi, edi;
+	u32		int_no;
 	u32		err_code;
-	u32		reserved1;
-	u64		rip;
+	u32		eip;
 	u16		cs;
-	u16		reserved2[3];
-	u64		rflags;
-	u64		rsp;
+	u16		reserved2;
+	u32		eflags;
+	u32		esp;
 	u16		ss;
-	u16		reserved3[3];
+	u16		reserved3;
 } __attribute__ ((packed));
-
-#define TSS_ENTRIES		1
 
 struct tss_entry {
 	u32		reserved0;

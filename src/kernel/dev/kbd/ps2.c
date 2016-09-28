@@ -22,8 +22,7 @@
  *
  */
 
-#include <stdio.h> //TEMP
-#include <system.h>
+#include <cpu.h>
 
 #include "kbd.h"
 #include "ps2.h"

@@ -3,7 +3,7 @@
  * Carina
  * src/kernel/arch/x86/cpu/lapic.c
  *
- * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,7 +24,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <system.h>
 #include <sys/lapic.h>
 
 static i8 lapic_avail(void) {

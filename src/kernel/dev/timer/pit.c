@@ -22,10 +22,10 @@
  *
  */
 
-
-#include <system.h>
-#include <div64.h>
+#include <cpu.h>
 #include <kernel/print.h>
+
+#include "pit.h"
 
 /* TODO Should store as 10ms */
 /* TODO Change to u64 again once support for 64-bit division on i686 */

@@ -26,13 +26,16 @@
 #include <kernel/mboot.h>
 #include <kernel/issue.h>
 #include <cpu.h>
+#include <char/serial/serial.h>
+#include <kernel/reboot.h>
+#include <timer/pit.h>
+#include <sound/pcspk.h>
 #include <video/fb.h>
 #include <kbd/kbd.h>
 #include <kernel/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <system.h>
 #include <8259.h>
 #include <video/vga.h>
 #include <pci/pci.h>

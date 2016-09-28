@@ -26,7 +26,6 @@
 
 #include <stdint.h> //TEMP
 #include <stdlib.h>
-#include <system.h>
 #include <cpu.h>
 #include <kernel/print.h>
 #include <pci/pci.h>

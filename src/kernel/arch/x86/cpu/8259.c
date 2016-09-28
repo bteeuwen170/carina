@@ -22,7 +22,6 @@
  *
  */
 
-#include <system.h>
 #include <cpu.h>
 #include <8259.h>
 #include <kernel/print.h>

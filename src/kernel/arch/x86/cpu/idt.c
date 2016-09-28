@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <cpu.h>
-#include <system.h>
 #include <kernel/print.h>
 #include <8259.h>
 #include <int.h>

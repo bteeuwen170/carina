@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/arch/x86/cpu/reboot.c
+ * src/kernel/include/kernel/reboot.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,25 +22,9 @@
  *
  */
 
-#include <cpu.h>
-#include <kbd/ps2.h>
+#ifndef __REBOOT_H_
+#define __REBOOT_H_
 
-#define bit(n) (1 << (n))
-#define check_flag(flags, n) ((flags) & bit(n))
+void reboot(void);
 
-void reboot(void)
-{
-	u8 trash;
-
-	asm volatile ("cli");
-
-	do {
-		trash = io_inc(PS2_CMD);
-		if (check_flag(trash, 0) != 0)
-			io_inc(PS2_IO);
-	} while (check_flag(trash, 1) != 0);
-
-	io_outc(PS2_CMD, PS2_RESET);
-
-	for (;;) asm volatile ("hlt");
-}
+#endif

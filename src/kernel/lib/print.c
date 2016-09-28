@@ -1,9 +1,4 @@
 /*
- * TODO Write own version!
- * TODO Implement color
- */
-
-/*
  *
  * vsprintf.c -- Lars Wirzenius & Linus Torvalds.
  *
@@ -14,14 +9,19 @@
  *
  */
 
+/*
+ * TODO Write own version!
+ * TODO Implement color
+ */
+
 #include <video/fb.h>
 #include <kbd/kbd.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <system.h>
 #include <video/vga.h>
 #include <kernel/print.h>
+#include <char/serial/serial.h>
 
 /* we use this so that we can do without the ctype library */
 #define is_digit(c)	((c) >= '0' && (c) <= '9')

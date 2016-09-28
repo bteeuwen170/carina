@@ -25,7 +25,6 @@
 #include <cpu.h>
 #include <stdio.h>
 #include <string.h>
-#include <system.h>
 
 /* CRAP */
 void cpu_info(void)

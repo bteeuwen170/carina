@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/arch/x86/cpu/reboot.c
+ * src/kernel/dev/sound/pcspk.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,25 +22,16 @@
  *
  */
 
-#include <cpu.h>
-#include <kbd/ps2.h>
+#ifndef __PCSPK_H_
+#define __PCSPK_H_
 
-#define bit(n) (1 << (n))
-#define check_flag(flags, n) ((flags) & bit(n))
+void pcspk_play(const u16 freq);
 
-void reboot(void)
-{
-	u8 trash;
+void pcspk_stop(void);
 
-	asm volatile ("cli");
+void pcspk_fj(void); /* Frere Jacques */
+void pcspk_mi(void); /* The Secret Of Monkey Island intro */
+void pcspk_hc(void); /* Eagles - Hotel California */
+void pcspk_acri(void); /* Bob Acri - Sleep Away */
 
-	do {
-		trash = io_inc(PS2_CMD);
-		if (check_flag(trash, 0) != 0)
-			io_inc(PS2_IO);
-	} while (check_flag(trash, 1) != 0);
-
-	io_outc(PS2_CMD, PS2_RESET);
-
-	for (;;) asm volatile ("hlt");
-}
+#endif

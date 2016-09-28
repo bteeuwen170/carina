@@ -2,7 +2,7 @@
 # src/kernel/dev/char/Makefile
 #
 
-kernel-o += src/kernel/dev/char/serial.o
+include src/kernel/dev/char/serial/Makefile
 
 #kernel-o += src/kernel/dev/char/null.o \
 			src/kernel/dev/char/random.o \

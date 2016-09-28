@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/arch/x86/cpu/reboot.c
+ * src/kernel/dev/timer/pit.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,25 +22,23 @@
  *
  */
 
-#include <cpu.h>
-#include <kbd/ps2.h>
+#ifndef __PIT_H_
+#define __PIT_H_
 
-#define bit(n) (1 << (n))
-#define check_flag(flags, n) ((flags) & bit(n))
+#define PIT_RATE		0b00110110
+#define PIT_SPKR		0b10110110
 
-void reboot(void)
-{
-	u8 trash;
+#define PIT_FREQ		0x1234DE
 
-	asm volatile ("cli");
+#define PIT_IO			0x43
+#define PIT_CH0_CMD		0x40
+#define PIT_CH2_CMD		0x42
+#define PIT_CH2_IO		0x61
 
-	do {
-		trash = io_inc(PS2_CMD);
-		if (check_flag(trash, 0) != 0)
-			io_inc(PS2_IO);
-	} while (check_flag(trash, 1) != 0);
+u32 uptime(void);
 
-	io_outc(PS2_CMD, PS2_RESET);
+void pit_init(void);
 
-	for (;;) asm volatile ("hlt");
-}
+void sleep(const u64 delay);
+
+#endif

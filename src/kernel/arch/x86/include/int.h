@@ -22,6 +22,9 @@
  *
  */
 
+#ifndef __INT_H_
+#define __INT_H_
+
 /* Software interrupts */
 extern void _int0(void);
 extern void _int1(void);
@@ -543,3 +546,5 @@ void (*ints[IDT_ENTRIES]) (void) = {
 	_int254,
 	_int255
 };
+
+#endif

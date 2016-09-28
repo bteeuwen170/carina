@@ -1,9 +1,9 @@
 /*
  *
  * Carina
- * Header for CMOS Driver
+ * src/kernel/dev/rtc/cmos.h
  *
- * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

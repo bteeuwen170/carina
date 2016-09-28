@@ -22,9 +22,8 @@
  *
  */
 
+#include <cpu.h>
 #include <kernel/print.h>
-
-#include <system.h>
 
 static char *devname = "serial";
 

@@ -1,9 +1,9 @@
 /*
  *
  * Carina
- * PC Speaker Driver
+ * src/kernel/dev/sound/pcspk.c
  *
- * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,8 +22,8 @@
  *
  */
 
-
-#include <system.h>
+#include <cpu.h>
+#include <timer/pit.h>
 
 void pcspk_play(const u16 freq)
 {
