@@ -30,8 +30,8 @@
 bootstrap:
 	/* TODO Enable SSE and SSE2 */
 
-	mov $pml4e, %eax
 	//call paging_init
+	mov $pml4e, %eax
 	//mov $0x200000, %eax
 	mov %eax, %cr3
 

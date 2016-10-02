@@ -7,4 +7,6 @@ bin/*
 !bin/.dummy
 dbg/*
 !dbg/.dummy
+root/boot/kernel
+
 bx_enh_dbg.ini

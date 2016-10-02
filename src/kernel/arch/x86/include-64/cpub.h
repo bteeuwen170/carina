@@ -39,7 +39,7 @@ struct segment_desc {
 } __attribute__ ((packed));
 
 struct desc_register {
-	u16		limit;
+	u16	limit;
 	void	*base;
 } __attribute__ ((packed));
 

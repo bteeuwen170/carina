@@ -28,20 +28,20 @@
 
 .section .text
 
-.extern acpi_init
+.global usrmode_enter
 
 usrmode_enter:
 	cli
-	mov $0x20, %ax
+	mov $0x23, %ax
 	mov %ax, %dx
 	mov %ax, %es
 	mov %ax, %fs
 	mov %ax, %gs
 
 	mov %rsp, %rax
-	push $0x20
+	push $0x23
 	push %rax
 	pushf
-	push $0x18
-	//call acpi_init
+	push $0x1B
+	push usermode_main
 	iretq

@@ -34,11 +34,15 @@ Kernel
 - Always return void from initialization functions
 - Introduce new type that defines u32 on i686 systems, u64 on amd64 systems and
   the native cpu address bus width type on other systems.
+- Native support for MS-DOS executables using some kind of low-level vm,
+  if implementable...
+- Move paging file to cpu/
+- Don't include arch specific files outside of arch dir
 
 Makefile
 - Seperate kernel-o and kernel-l (objects and libs)
 
-Paranoide
+OCD
 - Remove the extra blank line after the header
 - Don't use "unused*" but instead just mention that the field is unused in
 		a comment

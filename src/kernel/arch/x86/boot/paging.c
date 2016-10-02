@@ -38,7 +38,14 @@
 
 static u32 div_round(u32 num, u32 denom)
 {
-	return (num + (denom / 2)) / denom;
+	u32 res = num / denom;
+
+	if (num % denom)
+		res++;
+
+	return res;
+
+	//return (num + denom - 1) / denom; /* XXX Floating point operation */
 }
 
 void paging_init(struct mboot_info *mboot)
@@ -55,23 +62,23 @@ void paging_init(struct mboot_info *mboot)
 	ac = mboot->mem_lower + mboot->mem_upper;
 
 	/* Only the first 4GB */
-	pages	= ((ac > (1 << 22)) ? 1 << 20 : ac >> 2) + 0x100;
-	pte		= div_round(pages, ENTRY_CNT);
+	//pages	= ((ac > (1 << 22)) ? 1 << 20 : ac >> 2) + 0x100;
+	pages	= (1 << 20) + 0x100;
+	pte	= div_round(pages, ENTRY_CNT);
 	pdte	= div_round(pte, ENTRY_CNT);
-	pdpte	= div_round(pdte, ENTRY_CNT);
+	//pdpte	= div_round(pdte, ENTRY_CNT);
 	//pml4e	= div_round(pdpte, ENTRY_CNT);
-	pml4e	= 1;
+	pdpte	= 1; //TEMP
+	pml4e	= 1; //TEMP
 	total	= pml4e + pdpte + pdte + pte * PAGE_SIZE;
-
-	pdpte = pdte = pte = pages = 1;
 
 	pml4		= (u64 *) PML4_OFF;
 	pdpt_off	= pml4e * STRUCT_SIZE;
 	pdpt		= (u64 *) PML4_OFF + pdpt_off;
 	pdt_off		= (pml4e + pdpte) * STRUCT_SIZE;
-	pdt			= (u64 *) PML4_OFF + pdt_off;
+	pdt		= (u64 *) PML4_OFF + pdt_off;
 	pt_off		= (pml4e + pdpte + pdte) * STRUCT_SIZE;
-	pt			= (u64 *) PML4_OFF + pt_off;
+	pt		= (u64 *) PML4_OFF + pt_off;
 
 	off = 0;
 	for (i = 0; i < 512; i++) {
@@ -98,8 +105,8 @@ void paging_init(struct mboot_info *mboot)
 	}
 
 	/* Zero out the whole thing just in case */
-	for (i = 0; i < total; i++)
-		pml4[i] = 0;
+	//for (i = 0; i < total; i++)
+	//	pml4[i] = 0;
 
 	///* PT Entries (4 KB each) */
 	//off = BITS;

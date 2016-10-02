@@ -29,13 +29,12 @@
 
 static struct tss_entry tss[TSS_ENTRIES];
 
-void tss_init(u32 *limit, u32 *base)
+void tss_init(u32 *base, u32 *limit)
 {
 	/* TODO Fill in the TSS for user mode */
 
-	/* TODO Prevent warning from casting to wrong size */
-	*limit = (u32) &tss;
-	*base = TSS_ENTRIES * sizeof(struct tss_entry);
+	*base = (u32) &tss;
+	*limit = TSS_ENTRIES * sizeof(struct tss_entry);
 
 	//kprintf(KP_INFO, devname,
 	//"%d entries entered (FIXME hardcoded lies)\n", IDT_ENTRIES);

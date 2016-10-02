@@ -245,3 +245,11 @@ void kernel_main(struct mboot_info *mboot)
 	} 
 #endif
 }
+
+void usermode_main(void)
+{
+	asm volatile ("cli");
+	kprintf(KP_DBG, "x86", "User mode\n");
+	for (;;)
+		asm volatile ("hlt");
+}
