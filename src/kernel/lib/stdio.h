@@ -1,9 +1,9 @@
 /*
  *
  * Carina
- * Header for stdio Library
+ * src/kernel/lib/stdio.h
  *
- * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,7 +24,6 @@
 
 #ifndef _STDIO_H
 #define _STDIO_H
-
 
 //TODO This is crap
 #define FAIL	-1

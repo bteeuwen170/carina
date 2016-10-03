@@ -25,30 +25,19 @@
 #ifndef _STDLIB_H
 #define _STDLIB_H
 
-/* Type conversion */
-char *itoa(size_t num, const u32 base);
-//size_t strtol(const string *str, string *ptr, u32 base);
-
-/* Pseudo-random sequence generation */
-
-/* Memory allocation and deallocation */
-#define HEAP_SIZE (1 * 1024 * 1024)
-
-//void *heap = NULL;
-//void 
-
 void *malloc(size_t size);
-void *kmalloc(size_t size);
 //void *calloc(size_t src, size_t size);
 //void *realloc(void *ptr, size_t size);
+void *free(void *ptr);
+//void *aligned_alloc(size_t align, size_t size);
+
+/* XXX TEMP */
+#define HEAP_SIZE (1 * 1024 * 1024)
+
+void *kmalloc(size_t size);
 void kfree(void *ptr);
 
 void mm_init(void);
-
-/* Process control */
-
-/* Sorting, searching and comparison */
-
-/* Mathematics */ //XXX move to math.h
+/* XXX / TEMP */
 
 #endif

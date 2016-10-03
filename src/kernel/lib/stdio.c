@@ -24,7 +24,6 @@
 
 #include <kbd/kbd.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <video/vga.h>
 #include <kernel/print.h>

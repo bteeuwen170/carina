@@ -1,9 +1,9 @@
 /*
  *
  * Carina
- * src/kernel/cpu/cpu.c
+ * src/kernel/arch/x86/cpu/cpu.c
  *
- * Copyright (C) 2015 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

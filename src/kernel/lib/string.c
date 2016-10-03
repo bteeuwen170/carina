@@ -22,89 +22,137 @@
  *
  */
 
-#include "stdlib.h"
 #include "string.h"
 
-//FIXME Requires immediate attention !!! XXX
-void *memcpy(void *dest, void *src, size_t len) //XXX Is dest even returned?
+void *memcpy(void *dest, const void *src, size_t n)
 {
-	size_t i, *_dest = dest, *_src = src;
+	unsigned char *d = dest;
+	const unsigned char *s = src;
 
-	if (len == 0 || _dest == _src)
-		return _dest;
+	for (; n; n--)
+		*d++ = *s++;
 
-	for (i = 0; i < len; i++)
-		_dest[i] = _src[i];
-
-	return _dest;
-}
-
-//void *memmv(void *dest, void *src, size_t len)
-//{
-//
-//}
-
-char *strcpy(char *dest, const char *src)
-{
-	char *_dest = dest;
-
-	while (*src)
-		*dest++ = *src++;
-
-	*dest = 0;
-	return _dest;
-}
-
-char *strcat(char *dest, char *src)
-{
-	strcpy(&dest[strlen(dest)], src);
 	return dest;
 }
 
-i32 strcmp(const char *str1, const char *str2)
+void *memmove(void *dest, const void *src, size_t n)
 {
-	for (; *str1 == *str2; str1++, str2++)
-		if (*str1 == '\0')
-			return 0;
-	return ((*(u8 *) str1 < *(u8 *) str2) ? -1 : 1);
-}
+	char *d = dest;
+	const char *s = src;
 
-//void *memchr(const void *s, i32 *c, size_t len)
-//{
-//
-//}
+	if (d == s)
+		return dest;
 
-void *memset(void *dest, i32 src, size_t len)
-{
-	if (len) {
-		char *_dest = dest;
+	if (s > d) {
+		while (n--)
+			*d++ = *s++;
+	} else {
+		d += n - 1;
+		s += n - 1;
 
-		do {
-			*_dest++ = src;
-		} while (--len);
+		while (n--)
+			*d-- = *s--;
 	}
 
 	return dest;
 }
 
-size_t strlen(char *str)
+void *memset(void *dest, int c, size_t n)
 {
-	register char *s;
+	unsigned char *d = dest;
 
-	for (s = str; *s; ++s);
+	n++;
+
+	while (--n)
+		*d++ = c;
+
+	return dest;
+}
+
+//TODO memcmp
+
+void *memchr(const void *src, int c, size_t n)
+{
+	const unsigned char *s = src;
+
+	for (; n--; s++)
+		if (*s == c)
+			return (void *) s;
+
+	return 0;
+}
+
+char *strcpy(char *dest, const char *src)
+{
+	char *d = dest;
+	const char *s = src;
+
+	while ((*d++ = *s++));
+
+	return dest;
+}
+
+//TODO strncpy
+
+char *strcat(char *dest, const char *src)
+{
+	strcpy(dest + strlen(dest), src);
+
+	return dest;
+}
+
+//TODO strncat
+
+int strcmp(const char *src1, const char *src2)
+{
+	for (; *src1 == *src2 && *src1; src1++, src2++);
+
+	return *(unsigned char *) src1 - *(unsigned char *) src2;
+}
+
+//TODO strncmp
+
+size_t strlen(const char *str)
+{
+	const char *s = str;
+
+	for (; *s; ++s);
 
 	return (s - str);
 }
 
 char *strrev(char *str)
 {
-	u32 i, len = strlen(str) - 1;
+	unsigned int i;
+	unsigned int n = strlen(str) - 1;
 
 	for (i = 0; i < strlen(str) / 2; i++) {
-		str[i] += str[len];
-		str[len] = str[i] - str[len];
-		str[i] = str[i] - str[len--];
+		str[i] += str[n];
+		str[n] = str[i] - str[n];
+		str[i] = str[i] - str[n--];
 	}
 
 	return str;
+}
+
+//TODO See header file
+
+int itostr(const char *ptr)
+{
+	int n = 0, sign = -1;
+
+	while (*ptr == ' ')
+		ptr++;
+
+	switch (*ptr) {
+	case '+':
+		sign = 1;
+	case '-':
+		ptr++;
+	}
+
+	while ((unsigned int) (*ptr - '0') < 10)
+		n = 10 * n - (*ptr++ - '0');
+
+	return n * sign;
 }

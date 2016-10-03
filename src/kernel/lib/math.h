@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/lib/stdlib.c
+ * src/kernel/lib/math.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,34 +22,24 @@
  *
  */
 
-#include <string.h>
+#ifndef _MATH_H
+#define _MATH_H
 
-/* XXX I hate this function */
-char *itoa(u32 num, const u32 base) //FIXME No support for negative integers
-{
-	static char str[22];
-	i32 i = 0;
-
-	if (num == 0) {
-		str[i++] = '0';
-		str[i] = '\0';
-		return str;
-	}
-
-	while (num != 0) {
-		i32 rem = num % base;
-		str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
-		num = num / base;
-	}
-
-	str[i] = '\0';
-
-	return strrev(str);
+typedef struct {
+	int quot;	/* Quotient */
+	int rem;	/* Remainder */
 }
 
-//void *malloc_zone(
+//double sin(double sin);
+//double cos(double cos);
+//double tan(double tan);
 
-/*void *malloc(size_t size)
-{
+double log(double val);
 
-}*/
+int abs(int val);
+int div(int num, int denom);
+
+//double ceil(double val);
+//double floor(double val);
+
+#endif

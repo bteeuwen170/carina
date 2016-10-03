@@ -25,18 +25,36 @@
 #ifndef _STRING_H
 #define _STRING_H
 
-void *memcpy(void *dest, void *src, size_t len);
-//void *memmv(void *dest, void *src, size_t len);
+void *memcpy(void *dest, const void *src, size_t n);
+void *memmove(void *dest, const void *src, size_t n);
+void *memset(void *dest, int c, size_t n);
+//int memcmp (const void *, const void *, size_t);
+void *memchr(const void *src, int c, size_t n);
+
 char *strcpy(char *dest, const char *src);
+//char *strncpy(char *dest, const char *src, size_t n);
 
-char *strcat(char *dest, char *src);
+char *strcat(char *dest, const char *src);
+//char *strncat(char *dest, const char *src, size_t n);
 
-i32 strcmp(const char *str1, const char *str2);
+int strcmp(const char *src1, const char *src2);
+//int strncmp(const char *src1, const char *src2, size_t n);
 
-//void *memchr(const void *s, i32 c, size_t len);
+size_t strlen(const char *str);
 
-void *memset(void *dest, i32 src, size_t len);
-size_t strlen(char *str);
 char *strrev(char *str);
+
+/* int atoi(const char *str); */
+/* char *itoa(char *dest, const int src, const int base); */
+
+//int strtoi(const char *str, char **ptr, int base);
+//long strtol(const char *str, char **ptr, int base);
+//long long strtoll(const char *str, char **ptr, int base);
+
+//unsigned int strtoui(const string *str, string *ptr, u32 base);
+//unsigned long strtoul(const string *str, string *ptr, u32 base);
+//unsigned long long strtoull(const string *str, string *ptr, u32 base);
+
+int itostr(const char *ptr);
 
 #endif

@@ -38,6 +38,7 @@ Kernel
   if implementable...
 - Move paging file to cpu/
 - Don't include arch specific files outside of arch dir
+- Use sse + sse2 on > x86_64 and use mmx (+ sse) or sse + sse2 on i686
 
 Makefile
 - Seperate kernel-o and kernel-l (objects and libs)
