@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/dev/rtc/cmos.c
+ * src/kernel/fs/ramfs/ramfs.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,27 +22,11 @@
  *
  */
 
-#include <cpu.h>
-#include <kernel/print.h>
+#ifndef _FS_RAMFS_H
+#define _FS_RAMFS_H
 
-#include "cmos.h"
+#include <sys/fs.h>
 
-static char *devname = "rtc";
+int ramfs_create(u64 size, u32 *dev);
 
-/* TODO Make get_time function + check if not updating using CMOS_A */
-static u8 cmos_in(const u8 reg)
-{
-	io_outb(CMOS_CMD, reg);
-
-	return io_inb(CMOS_IO);
-}
-
-void rtc_init(void)
-{
-	kprintf(KP_INFO, devname,
-			"current time is %02x%02x/%02x/%02x %02x:%02x:%02x UTC\n",
-			cmos_in(CMOS_CENTURY), cmos_in(CMOS_YEAR),
-			cmos_in(CMOS_MONTH), cmos_in(CMOS_DAY),
-			cmos_in(CMOS_HOURS), cmos_in(CMOS_MINUTES),
-			cmos_in(CMOS_SECONDS));
-}
+#endif

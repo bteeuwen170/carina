@@ -27,15 +27,19 @@
 #ifndef _KERNEL_LIMITS_H
 #define _KERNEL_LIMITS_H
 
+/* FIXME Not here */
+//#define BLOCK_SIZE	1024	/* Block size */
+//#define SECTOR_SIZE	512	/* Sector size */
 
-//TODO Define max and min of data types
+#define CPUS_MAX	8	/* Max. number of CPUs */
 
-#define BLOCK_SIZE	1024	/* Block size */
-#define SECTOR_SIZE	512	/* Sector size */
+#define INODES_MAX	64	/* Max. inodes in memory */
+#define LINKS_MAX	128	/* Max. number of links for a file */
+#define NAME_MAX	256	/* Max. length of a file name */
+#define PATH_MAX	4096	/* Max. length of a path name */
 
-#define FILES_MAX	8	/* Maximum number of open files at once */
-#define PATH_MAX	255	/* Maximum length of a pathname */
-
-#define LINKS_MAX	127	/* Maximum number of links for a file */
+#define PROC_MAX	512	/* Max. number of processes */
+#define PFILES_MAX	16	/* Max. open files per process */
+#define SFILE_MAX	1024	/* Max. open files */
 
 #endif

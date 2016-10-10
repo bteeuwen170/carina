@@ -21,7 +21,7 @@
  * USA.
  *
  */
-
+#include <stdlib.h>
 #include "string.h"
 
 void *memcpy(void *dest, const void *src, size_t n)
@@ -92,7 +92,28 @@ char *strcpy(char *dest, const char *src)
 	return dest;
 }
 
-//TODO strncpy
+/* FIXME Does this work like it's supposed to? */
+char *strncpy(char *dest, const char *src, size_t n)
+{
+#if 1
+	/* Copied from "man strncpy" */
+	size_t i;
+
+	for (i = 0; i < n && src[i] != '\0'; i++)
+		dest[i] = src[i];
+
+	while (i < n)
+		dest[++i] = '\0';
+
+	return dest;
+#else
+	char *d = dest;
+
+	while (n-- && (*dest++ = *src++));
+
+	return d;
+#endif
+}
 
 char *strcat(char *dest, const char *src)
 {
@@ -105,7 +126,10 @@ char *strcat(char *dest, const char *src)
 
 int strcmp(const char *src1, const char *src2)
 {
-	for (; *src1 == *src2 && *src1; src1++, src2++);
+	while (*src1 == *src2 && *src1) {
+		src1++;
+		src2++;
+	}
 
 	return *(unsigned char *) src1 - *(unsigned char *) src2;
 }
@@ -116,9 +140,17 @@ size_t strlen(const char *str)
 {
 	const char *s = str;
 
-	for (; *s; ++s);
+	while (*s)
+		s++;
 
 	return (s - str);
+}
+
+size_t strnlen(const char *str, size_t n)
+{
+	const char *s = memchr(str, 0, n);
+
+	return s ? s - str : n;
 }
 
 char *strrev(char *str)

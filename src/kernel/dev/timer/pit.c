@@ -51,9 +51,9 @@ void pit_init(void)
 	val = PIT_FREQ / 1000;
 	ticks = 0;
 
-	io_outc(PIT_IO, PIT_RATE);
-	io_outc(PIT_CH0_CMD, val & 0xFF);
-	io_outc(PIT_CH0_CMD, (val >> 8) & 0xFF);
+	io_outb(PIT_CMD, PIT_RATE);
+	io_outb(PIT_CH0_IO, val & 0xFF);
+	io_outb(PIT_CH0_IO, (val >> 8) & 0xFF);
 
 	irq_reghandler(IRQ_PIT, &int_handler);
 }

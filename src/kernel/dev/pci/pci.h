@@ -80,9 +80,9 @@ struct pci_handler {
 	struct pci_handler	*next;
 };
 
-u32 pci_ini(u16 bus, u16 dev, u16 func, u32 reg);
+u32 pci_ind(u16 bus, u16 dev, u16 func, u32 reg);
 
-void pci_outi(u16 bus, u16 dev, u16 func, u32 reg, u32 val);
+void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val);
 
 struct pci_dev *pci_get(u16 bus, u16 dev, u16 func);
 

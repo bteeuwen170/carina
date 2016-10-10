@@ -57,9 +57,9 @@ typedef unsigned long long	u64;
 typedef u32	uid_t;			/* User ID */
 typedef u32	gid_t;			/* Group ID */
 
-/* Other Data Types */ //TODO In types.h
+/* Other Data Types */
 typedef u64	fsize_t;		/* File size */
-typedef u64	time_t;			/* Time in seconds since epoch */
+typedef i64	time_t;			/* Time in seconds since epoch */
 
 /* Addresses */
 typedef u32	paddr32_t;		/* Physical address (32-bit) */

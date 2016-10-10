@@ -32,10 +32,9 @@
 
 #define PIT_FREQ	0x1234DE
 
-#define PIT_IO		0x43
-#define PIT_CH0_CMD	0x40
-#define PIT_CH2_CMD	0x42
-#define PIT_CH2_IO	0x61
+#define PIT_CMD		0x43
+#define PIT_CH0_IO	0x40
+#define PIT_CH2_IO	0x42
 
 time_t uptime(void);
 

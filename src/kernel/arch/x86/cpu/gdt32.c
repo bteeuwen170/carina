@@ -27,7 +27,8 @@
 
 //static char *devname = "gdt";
 
-static struct segment_desc gdt[GDT_ENTRIES];
+//static struct segment_desc gdt[GDT_ENTRIES];
+static struct segment_desc gdt[GDT_ENTRIES - 1];
 
 static void gdt_set(const u8 gate, const u32 base, const u32 limit,
 		const u8 type, const bool lm)
@@ -37,11 +38,11 @@ static void gdt_set(const u8 gate, const u32 base, const u32 limit,
 	gdt[gate].base_lo[1]	= (base >> 8) & 0xFF;
 	gdt[gate].base_lo[2]	= (base >> 16) & 0xFF;
 	gdt[gate].flags		= (lm << 13) | type | 0b10000000 |
-			(((limit >> 16) | 0xF) << 8);
+			(((limit >> 16) & 0xF) << 8);
 	gdt[gate].base_hi	= (base >> 24) & 0xFF;
 }
 
-/* Not i686 compatible ! */
+/* FIXME Not i686 compatible ! */
 void gdt_init(void)
 {
 	u32 tss_base, tss_limit;
@@ -51,11 +52,14 @@ void gdt_init(void)
 	gdt_set(3, 0, 0, 0b1111000, true);		  /* 0x18 - Code USR */
 	gdt_set(4, 0, 0, 0b1110010, false);		  /* 0x20 - Data USR */
 
-	tss_init(&tss_base, &tss_limit);
+	//tss_init(&tss_base, &tss_limit);
 
-	gdt_set(5, tss_base, tss_limit, 0b0001001, true); /* 0x28 - TSS */
+	//gdt_set(5, tss_base, tss_limit, 0b0001001, true);	/* 0x28 - TSS */
 
-	gdt_load(&gdt, GDT_ENTRIES * sizeof(struct segment_desc) - 1);
+	//gdt_load(&gdt, GDT_ENTRIES * sizeof(struct segment_desc) - 1);
+	gdt_load(&gdt, 5 * sizeof(struct segment_desc) - 1);
+
+	//tss_load();
 
 	//kprintf32(KP_INFO, devname,
 	//"%d entries entered (FIXME hardcoded lies)\n", IDT_ENTRIES);

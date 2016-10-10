@@ -39,9 +39,13 @@ usrmode_enter:
 	mov %ax, %gs
 
 	mov %rsp, %rax
-	push $0x23
-	push %rax
-	pushf
-	push $0x1B
-	push usermode_main
+	push $0x23		/* SS */
+	push %rax		/* RSP */
+	pushf			/* RFLAGS */
+	push $0x1B		/* CS */
+	push usermodes_main
 	iretq
+
+usermodes_main:
+	hlt
+	jmp usermodes_main

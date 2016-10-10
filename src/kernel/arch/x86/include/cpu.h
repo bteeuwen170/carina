@@ -66,7 +66,7 @@ static inline void cpuid(u32 code, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
 			"0" (code));
 }
 
-static inline u8 io_inc(u16 port)
+static inline u8 io_inb(u16 port)
 {
 	u8 val;
 
@@ -74,7 +74,7 @@ static inline u8 io_inc(u16 port)
 	return val;
 }
 
-static inline u16 io_ins(u16 port)
+static inline u16 io_inw(u16 port)
 {
 	u16 val;
 
@@ -90,29 +90,19 @@ static inline u32 io_ini(u16 port)
 	return val;
 }
 
-static inline void io_outc(u16 port, u8 val)
+static inline void io_outb(u16 port, u8 val)
 {
 	asm volatile ("outb %0, %1" : : "a" (val), "dN" (port));
 }
 
-static inline void io_outs(u16 port, u16 val)
+static inline void io_outw(u16 port, u16 val)
 {
 	asm volatile ("outw %0, %1" : : "a" (val), "dN" (port));
 }
 
-static inline void io_outi(u16 port, u32 val)
+static inline void io_outd(u16 port, u32 val)
 {
 	asm volatile ("outl %0, %1" : : "a" (val), "dN" (port));
-}
-
-static inline void idt_load(void *base, u16 limit)
-{
-	struct desc_register idt_ptr = {
-		limit,
-		base
-	};
-
-	asm volatile ("lidt %0" : : "m"(idt_ptr));
 }
 
 static inline void gdt_load(void *base, u16 limit)
@@ -122,17 +112,34 @@ static inline void gdt_load(void *base, u16 limit)
 		base
 	};
 
-	asm volatile ("lgdt %0" : : "m"(gdt_ptr));
+	asm volatile ("lgdt %0" : : "m" (gdt_ptr));
 }
 
-static inline bool int_state(void)
+static inline void idt_load(void *base, u16 limit)
+{
+	struct desc_register idt_ptr = {
+		limit,
+		base
+	};
+
+	asm volatile ("lidt %0" : : "m" (idt_ptr));
+}
+
+static inline void tss_load(void)
+{
+	register u16 ax = 0x2B;
+
+	asm volatile ("ltr %0" : : "r" (ax));
+}
+
+/*static inline bool int_state(void)
 {
 	register u64 rflags = 0;
 
 	asm volatile ("pushf; popq %0" : "=r" (rflags));
 
 	return (rflags & (1 << 9));
-}
+}*/
 
 void idt_init(void);
 

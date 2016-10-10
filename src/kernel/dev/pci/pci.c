@@ -122,27 +122,27 @@ struct {
 #define	PCI_DEVTABLE_SIZE \
 		(sizeof(pci_device_table) / sizeof(pci_device_table[0]))
 
-u32 pci_ini(u16 bus, u16 dev, u16 func, u32 reg)
+u32 pci_ind(u16 bus, u16 dev, u16 func, u32 reg)
 {
-	io_outi(0xCF8, 0x80000000L | ((u32) bus << 16) | ((u32) dev << 11) |
+	io_outd(0xCF8, 0x80000000L | ((u32) bus << 16) | ((u32) dev << 11) |
 			((u32) func << 8) | (reg & ~3));
 
 	return io_ini(0xCFC + (reg & 3));
 }
 
-void pci_outi(u16 bus, u16 dev, u16 func, u32 reg, u32 val)
+void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val)
 {
-	io_outi(0xCF8, 0x80000000L | ((u32) bus << 16) | ((u32) dev << 11) |
+	io_outd(0xCF8, 0x80000000L | ((u32) bus << 16) | ((u32) dev << 11) |
 			((u32) func << 8) | (reg & ~3));
 
-	io_outi(0xCFC, val);
+	io_outd(0xCFC, val);
 }
 
-static void pci_add(struct pci_dev *device)
+static void pci_add(struct pci_dev *dp)
 {
-	device->next = pci_devices;
+	dp->next = pci_devices;
 
-	pci_devices = device;
+	pci_devices = dp;
 }
 
 struct pci_dev *pci_get(u16 bus, u16 dev, u16 func)
@@ -220,12 +220,12 @@ int pci_unreghandler(const u16 vendor, const u16 device)
 
 static void pci_config(u16 bus, u16 dev, u16 func)
 {
-	struct pci_dev *device;
+	struct pci_dev *dp;
 	struct pci_config_space *cfg;
 	struct pci_handler *handler;
 	u8 i, j;
 
-	if ((pci_ini(bus, dev, func, 0) & 0xFFFF) == 0xFFFF)
+	if ((pci_ind(bus, dev, func, 0) & 0xFFFF) == 0xFFFF)
 		return;
 
 	cfg = kmalloc(sizeof(struct pci_config_space));
@@ -233,14 +233,23 @@ static void pci_config(u16 bus, u16 dev, u16 func)
 	if (!cfg)
 		goto err;
 
+	/*
+	 * Copyright 2011 Daniel Bittman
+	 * This is from
+	 * https://github.com/dbittman/seakernel/blob/master/
+	 * 		arch/x86_64/drivers/bus/pci.c
+	 * It's just so sexy!
+	 *
+	 * TODO Replace with own elegant version
+	 */
 	for (i = 0; i < 64; i += 16) {
-		*(u32 *) ((unsigned long) cfg + i) = pci_ini(bus, dev, func, i);
+		*(u32 *) ((unsigned long) cfg + i) = pci_ind(bus, dev, func, i);
 		*(u32 *) ((unsigned long) cfg + i + 4) =
-			pci_ini(bus, dev, func, i + 4);
+			pci_ind(bus, dev, func, i + 4);
 		*(u32 *) ((unsigned long) cfg + i + 8) =
-			pci_ini(bus, dev, func, i + 8);
+			pci_ind(bus, dev, func, i + 8);
 		*(u32 *) ((unsigned long) cfg + i + 12) =
-			pci_ini(bus, dev, func, i + 12);
+			pci_ind(bus, dev, func, i + 12);
 	}
 
 	for (i = 0; i < PCI_DEVTABLE_SIZE; i++) {
@@ -258,27 +267,28 @@ static void pci_config(u16 bus, u16 dev, u16 func)
 		break;
 	}
 
-	device = kmalloc(sizeof(struct pci_dev));
+	dp = kmalloc(sizeof(struct pci_dev));
 
-	if (!device)
+	if (!dp)
 		goto err;
 
-	device->bus = bus;
-	device->dev = dev;
-	device->func = func;
-	device->cfg = cfg;
+	dp->bus = bus;
+	dp->dev = dev;
+	dp->func = func;
+	dp->cfg = cfg;
 
-	pci_add(device);
+	pci_add(dp);
 
 	handler = pci_gethandler(cfg->vendor, cfg->device);
 
 	if (handler->handler && handler->calls < handler->max_calls) {
-		handler->handler(device);
+		handler->handler(dp);
 		handler->calls++;
 	}
 
 	return;
 
+	/* TODO Provide error information */
 err:
 	kprintf(KP_ERR, devname, "Out of memory");
 }

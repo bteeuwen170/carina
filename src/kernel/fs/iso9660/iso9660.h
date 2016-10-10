@@ -37,4 +37,15 @@ struct iso9660_sb {
 	//TODO
 };
 
+struct iso9660_date {
+	char	year[4];
+	char	month[2];
+	char	day[2];
+	char	hour[2];
+	char	minute[2];
+	char	second[2];
+	char	centisecond[2];
+	i8	timezone;
+};
+
 #endif

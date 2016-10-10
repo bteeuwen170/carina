@@ -25,8 +25,6 @@
 #ifndef _KERNEL_TIME_H
 #define _KERNEL_TIME_H
 
-typedef u64 time_t;
-
 i8 time_init(void);
 
 void time_nice(void *str);

@@ -139,6 +139,19 @@ bin/kernel: $(kernel-o) $(kernel-o32)
 ## Make ISO Image
 ##
 
+# TODO Rethink and do this differently
+mktree:
+	@echo -e "\033[1m> Creating Carina root filesystem tree...\033[0m"
+	@mkdir root/app
+	@mkdir root/app/bin
+	@mkdir root/app/cfg
+	@mkdir root/app/inc
+	@mkdir root/app/lib
+	@mkdir root/cfg
+	@mkdir root/dev
+	@mkdir root/home
+	@mkdir root/sys
+
 #fs: root/boot/kernel
 #	@echo -e "\033[1m> Creating FAT32 img...\033[0m"
 #	@dd if=/dev/zero of=bin/carina.img bs=1M count=40

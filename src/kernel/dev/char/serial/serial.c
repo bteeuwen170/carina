@@ -34,33 +34,33 @@ static i8 serial_chip_detect(const u16 addr)
 	i32 od;
 
 	/* Check for UART presence */
-	od = io_inc(addr + 4);
+	od = io_inb(addr + 4);
 
-	io_outc(addr + 4, 0x10);
-	if (io_inc(addr + 6) & 0xF0)
+	io_outb(addr + 4, 0x10);
+	if (io_inb(addr + 6) & 0xF0)
 		return 0;
-	io_outc(addr + 4, 0x1F);
-	if ((io_inc(addr + 6) & 0xF0) != 0xF0)
+	io_outb(addr + 4, 0x1F);
+	if ((io_inb(addr + 6) & 0xF0) != 0xF0)
 		return 0;
 
-	io_outc(addr + 4, od);
+	io_outb(addr + 4, od);
 
 	/* Check if 8250 */
-	od = io_inc(addr + 7);
+	od = io_inb(addr + 7);
 
-	io_outc(addr + 7, 0x55);
-	if (io_inc(addr + 7) != 0x55)
+	io_outb(addr + 7, 0x55);
+	if (io_inb(addr + 7) != 0x55)
 		return 1;
-	io_outc(addr + 7, 0xAA);
-	if (io_inc(addr + 7) != 0xAA)
+	io_outb(addr + 7, 0xAA);
+	if (io_inb(addr + 7) != 0xAA)
 		return 1;
 
-	io_outc(addr + 7, od);
+	io_outb(addr + 7, od);
 
 	/* Check for FIFO */
-	io_outc(addr + 2, 0x01);
-	od = io_inc(addr + 2);
-	io_outc(addr + 2, 0x00);
+	io_outb(addr + 2, 0x01);
+	od = io_inb(addr + 2);
+	io_outb(addr + 2, 0x00);
 
 	/* Check if 8250 or 16450 with scratch regs */
 	if (!(od & 0x80))
@@ -97,34 +97,34 @@ void serial_init(const u16 port)
 		break;
 	}
 
-	io_outc(port + 1, 0x00);
-	io_outc(port + 3, 0x80);
-	io_outc(port + 0, 0x03);
-	io_outc(port + 1, 0x00);
-	io_outc(port + 3, 0x03);
-	io_outc(port + 2, 0xC7);
-	io_outc(port + 4, 0x0B);
+	io_outb(port + 1, 0x00);
+	io_outb(port + 3, 0x80);
+	io_outb(port + 0, 0x03);
+	io_outb(port + 1, 0x00);
+	io_outb(port + 3, 0x03);
+	io_outb(port + 2, 0xC7);
+	io_outb(port + 4, 0x0B);
 	//TODO Register the serial input handler
 }
 
 u16 serial_read(const u16 port)
 {
-	return io_inc(port + 5) & 0x01;
+	return io_inb(port + 5) & 0x01;
 }
 
 u16 serial_in(const u16 port)
 {
 	while (serial_read(port) == 0);
-	return io_inc(port);
+	return io_inb(port);
 }
 
 u16 serial_free(const u16 port)
 {
-	return io_inc(port + 5) & 0x20;
+	return io_inb(port + 5) & 0x20;
 }
 
 void serial_out(const u16 port, const u8 value)
 {
 	while (serial_free(port) == 0);
-	io_outc(port, value);
+	io_outb(port, value);
 }

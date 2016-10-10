@@ -2,4 +2,6 @@
 # src/kernel/fs/Makefile
 #
 
-#kernel-o += src/kernel/fs/vfs.o
+include src/kernel/fs/ramfs/Makefile
+
+kernel-o += src/kernel/fs/fs.o

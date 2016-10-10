@@ -71,23 +71,23 @@
 #define EXT2_TYPE_SOCKET	0xC000
 
 /* Permissions */
-#define EXT2_TYPE_UR	0x0100	/* Owner read */
-#define EXT2_TYPE_UW	0x0080	/* Owner write */
-#define EXT2_TYPE_UE	0x0040	/* Owner execute */
-#define EXT2_TYPE_GR	0x0020	/* Group read */
-#define EXT2_TYPE_GW	0x0010	/* Group write */
-#define EXT2_TYPE_GE	0x0008	/* Group execute */
-#define EXT2_TYPE_OR	0x0004	/* Other read */
-#define EXT2_TYPE_OW	0x0002	/* Other write */
-#define EXT2_TYPE_OE	0x0001	/* Other execute */
-#define EXT2_TYPE_SUID	0x0001	/* Other execute */
-#define EXT2_TYPE_SGID	0x0001	/* Other execute */
+#define EXT2_TYPE_UR	0x0100		/* Owner read */
+#define EXT2_TYPE_UW	0x0080		/* Owner write */
+#define EXT2_TYPE_UE	0x0040		/* Owner execute */
+#define EXT2_TYPE_GR	0x0020		/* Group read */
+#define EXT2_TYPE_GW	0x0010		/* Group write */
+#define EXT2_TYPE_GE	0x0008		/* Group execute */
+#define EXT2_TYPE_OR	0x0004		/* Other read */
+#define EXT2_TYPE_OW	0x0002		/* Other write */
+#define EXT2_TYPE_OE	0x0001		/* Other execute */
+//#define EXT2_TYPE_SUID	0x0001	/* Set UID on execution */
+//#define EXT2_TYPE_SGID	0x0001	/* Set GID on execution */
 
 /* Flags */
 #define EXT2_FLAGS_SYNC		0x0008	/* Synchronous updates */
 #define EXT2_FLAGS_IMMUTABLE	0x0010	/* Immutable */
-#define EXT2_FLAGS_AO		0x0020	/* Only allow appending */
-#define EXT2_FLAGS_NOATIME	0x0080	/* Don't update atime */
+#define EXT2_FLAGS_AO		0x0020	/* Appending only */
+#define EXT2_FLAGS_NOATIME	0x0080	/* Do not update access time */
 
 struct ext2_sb {
 	u32	inodes;			/* Inodes */
@@ -127,18 +127,19 @@ struct ext2_inode {
 	u32	atime;
 	u32	ctime;
 	u32	mtime;
-	u8	unused0[4];		/* Reserved for Carina */
+	u8	unused0[4];
 	u16	gid;
 	u16	links;
 	u32	sectors;
 	u32	flags;			/* File flags */
 	u8	unused1[4];
 	u32	block[EXT2_BLOCKS];	/* Pointer to blocks */
-	u8	unused2[28];		/* Reserved for Carina */
+	u8	unused2[28];
 } __attribute__ ((packed));
 
 struct ext2_inode_info {
 	u32	block[EXT2_BLOCKS];
+	u32	flags;
 };
 
 struct ext2_dir_entry {

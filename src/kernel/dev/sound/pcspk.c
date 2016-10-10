@@ -29,19 +29,19 @@ void pcspk_play(const u16 freq)
 {
 	u16 val = PIT_FREQ / freq;
 
-	io_outc(PIT_IO, PIT_SPKR);
-	io_outc(PIT_CH2_CMD, val & 0xFF);
-	io_outc(PIT_CH2_CMD, (val >> 8) & 0xFF);
+	io_outb(PIT_CMD, PIT_SPKR);
+	io_outb(PIT_CH2_IO, val & 0xFF);
+	io_outb(PIT_CH2_IO, (val >> 8) & 0xFF);
 
-	u8 spkr = io_inc(0x61);
+	u8 spkr = io_inb(0x61);
 	if (spkr != (spkr | 3))
-		io_outc(0x61, spkr | 3);
+		io_outb(0x61, spkr | 3);
 }
 
 void pcspk_stop(void)
 {
-	u8 spkr = io_inc(0x61) & 0xFC;
-	io_outc(0x61, spkr);
+	u8 spkr = io_inb(0x61) & 0xFC;
+	io_outb(0x61, spkr);
 }
 
 /*

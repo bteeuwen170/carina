@@ -46,7 +46,7 @@
 	i64	len;
 };*/
 
-void panic(char *reason, u32 err_code);
+void panic(char *reason, u32 err_code, paddr_t ip);
 
 void printc(char c);
 void printcc(char c, u8 color);

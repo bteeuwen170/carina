@@ -121,7 +121,8 @@ void _isr(struct int_stack *regs)
 		break;
 	default:
 		if (regs->int_no < SINT_ENTRIES) { //TODO Don't always halt
-			panic(exceptions[regs->int_no], regs->err_code);
+			panic(exceptions[regs->int_no],
+					regs->err_code, regs->rip);
 		} else if (regs->int_no < SINT_ENTRIES + IRQ_ENTRIES) {
 			void (*handler) (struct int_stack *regs);
 
@@ -131,8 +132,8 @@ void _isr(struct int_stack *regs)
 				handler(regs);
 
 			if (regs->int_no >= SINT_ENTRIES + (IRQ_ENTRIES / 2))
-				io_outc(PIC_S_CMD, PIC_EOI);
-			io_outc(PIC_M_CMD, PIC_EOI);
+				io_outb(PIC_S_CMD, PIC_EOI);
+			io_outb(PIC_M_CMD, PIC_EOI);
 		}
 
 		break;

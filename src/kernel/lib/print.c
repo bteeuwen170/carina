@@ -24,15 +24,13 @@
 #include <char/serial/serial.h>
 
 /* we use this so that we can do without the ctype library */
-#define is_digit(c)	((c) >= '0' && (c) <= '9')
-
-/* TODO Use built in functions for performing strtoi and such */
+#define isdigit(c)	((c) >= '0' && (c) <= '9')
 
 static int skip_atoi(const char **s)
 {
 	int i = 0;
 
-	while (is_digit(**s))
+	while (isdigit(**s))
 		i = i * 10 + *((*s)++) - '0';
 	return i;
 }
@@ -42,181 +40,136 @@ static int skip_atoi(const char **s)
 #define PLUS	4		/* show plus */
 #define SPACE	8		/* space if plus */
 #define LEFT	16		/* left justified */
-#define SPECIAL	32		/* 0x */
+#define SMALL	32		/* Must be 32 == 0x20 */
+#define SPECIAL	64		/* 0x */
 
-static char *number(int allowed_length, char * str, long num, int base,
-		int size, int precision, int type)
+#define __do_div(n, base) ({ \
+int __res; \
+__res = ((unsigned long) n) % (unsigned) base; \
+n = ((unsigned long) n) / (unsigned) base; \
+__res; })
+
+static char *number(char *str, long num, int base, int size, int precision,
+		    int type)
 {
-	char c, sign, tmp[72];
-	const char *digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	int i = 0;
+	/* we are called with base 8, 10 or 16, only, thus don't need "G..."  */
+	static const char digits[16] = "0123456789ABCDEF"; /* "GHIJKLMNOPQRSTUVWXYZ"; */
 
+	char tmp[66];
+	char c, sign, locase;
+	int i;
+
+	/* locase = 0 or 0x20. ORing digits or letters with 'locase'
+	 * produces same digits or (maybe lowercased) letters */
+	locase = (type & SMALL);
 	if (type & LEFT)
 		type &= ~ZEROPAD;
-
-	if (base < 2 || base > 36)
-		return 0;
-
+	if (base < 2 || base > 16)
+		return NULL;
 	c = (type & ZEROPAD) ? '0' : ' ';
-
-	if (type & SIGN && num < 0) {
-		sign = '-';
-		num = -num;
-	} else {
-		sign = (type & PLUS) ? '+' : ((type & SPACE) ? ' ' : 0);
+	sign = 0;
+	if (type & SIGN) {
+		if (num < 0) {
+			sign = '-';
+			num = -num;
+			size--;
+		} else if (type & PLUS) {
+			sign = '+';
+			size--;
+		} else if (type & SPACE) {
+			sign = ' ';
+			size--;
+		}
 	}
-
-	if (sign)
-		size--;
 	if (type & SPECIAL) {
 		if (base == 16)
 			size -= 2;
 		else if (base == 8)
 			size--;
 	}
-
+	i = 0;
 	if (num == 0)
 		tmp[i++] = '0';
 	else
-		while (num != 0) {
-			tmp[i++] = digits[num % base];
-			num = num / base;
-		}
-
+		while (num != 0)
+			tmp[i++] = (digits[__do_div(num, base)] | locase);
 	if (i > precision)
 		precision = i;
 	size -= precision;
-
 	if (!(type & (ZEROPAD + LEFT)))
-		while (size-- > 0) {
-			if (allowed_length == 0)
-				return str;
+		while (size-- > 0)
 			*str++ = ' ';
-			allowed_length--;
-		}
-
-	if (sign) {
-		if (allowed_length == 0)
-			return str;
-
+	if (sign)
 		*str++ = sign;
-		allowed_length--;
-	}
-
 	if (type & SPECIAL) {
-		if (base == 8) {
-			if (allowed_length == 0)
-				return str;
-
+		if (base == 8)
 			*str++ = '0';
-			allowed_length--;
-		} else if (base == 16) {
-			if (allowed_length == 0)
-				return str;
-
+		else if (base == 16) {
 			*str++ = '0';
-
-			if(--allowed_length == 0)
-				return str;
-
-			*str++ = 'x';
-			allowed_length--;
+			*str++ = ('X' | locase);
 		}
 	}
 	if (!(type & LEFT))
-		while (size-- > 0) {
-			if (allowed_length == 0)
-				return str;
-
+		while (size-- > 0)
 			*str++ = c;
-			allowed_length--;
-		}
-	
-	while (i < precision--) {
-		if (allowed_length == 0)
-			return str;
-
+	while (i < precision--)
 		*str++ = '0';
-		allowed_length--;
-	}
-
-	while (i-- > 0) {
-		if (allowed_length == 0)
-			return str;
-
+	while (i-- > 0)
 		*str++ = tmp[i];
-		allowed_length--;
-	}
-	
-	while (size-- > 0) {
-		if (allowed_length == 0)
-			return str;
-
+	while (size-- > 0)
 		*str++ = ' ';
-		allowed_length--;
-	}
-
 	return str;
 }
 
-int vsnprintf(char *buf, int size, const char *fmt, va_list args)
+int vsprintf(char *buf, const char *fmt, va_list args)
 {
 	int len;
-	int i;
-	char *str, *newstr;
-	char *s;
-	int *ip;
+	unsigned long num;
+	int i, base;
+	char *str;
+	const char *s;
 
-	int flags = 0;
+	int flags;		/* flags to number() */
 
 	int field_width;	/* width of output field */
 	int precision;		/* min. # of digits for integers; max
 				   number of chars for from string */
+	int qualifier;		/* 'h', 'l', or 'L' for integer fields */
 
-	int used_size = 1; /* for null character */
-	
-	if (size == 0)
-		return 0;
-	*buf=0;
-	if (size == 1)
-		return 1;
-
-	for (str=buf; *fmt; fmt++) {
+	for (str = buf; *fmt; ++fmt) {
 		if (*fmt != '%') {
-			if (used_size >= size)
-				break;
-
 			*str++ = *fmt;
-			used_size++;
 			continue;
 		}
-			
-		/* Process flags */
-rep:
-		fmt++;
+
+		/* process flags */
+		flags = 0;
+	      repeat:
+		++fmt;		/* this also skips first '%' */
 		switch (*fmt) {
-			case '-':
-				flags |= LEFT;
-				goto rep;
-			case '+':
-				flags |= PLUS;
-				goto rep;
-			case ' ':
-				flags |= SPACE;
-				goto rep;
-			case '#':
-				flags |= SPECIAL;
-				goto rep;
-			case '0':
-				flags |= ZEROPAD;
-				goto rep;
+		case '-':
+			flags |= LEFT;
+			goto repeat;
+		case '+':
+			flags |= PLUS;
+			goto repeat;
+		case ' ':
+			flags |= SPACE;
+			goto repeat;
+		case '#':
+			flags |= SPECIAL;
+			goto repeat;
+		case '0':
+			flags |= ZEROPAD;
+			goto repeat;
 		}
-		
+
 		/* get field width */
 		field_width = -1;
-		if (is_digit(*fmt))
+		if (isdigit(*fmt))
 			field_width = skip_atoi(&fmt);
 		else if (*fmt == '*') {
+			++fmt;
 			/* it's the next argument */
 			field_width = va_arg(args, int);
 			if (field_width < 0) {
@@ -228,147 +181,114 @@ rep:
 		/* get the precision */
 		precision = -1;
 		if (*fmt == '.') {
-			fmt++;	
-			if (is_digit(*fmt)) {
+			++fmt;
+			if (isdigit(*fmt))
 				precision = skip_atoi(&fmt);
-			} else if (*fmt == '*') {
+			else if (*fmt == '*') {
+				++fmt;
+				/* it's the next argument */
 				precision = va_arg(args, int);
 			}
-
 			if (precision < 0)
 				precision = 0;
 		}
 
 		/* get the conversion qualifier */
-		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L')
+		qualifier = -1;
+		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L') {
+			qualifier = *fmt;
 			++fmt;
+		}
+
+		/* default base */
+		base = 10;
 
 		switch (*fmt) {
 		case 'c':
 			if (!(flags & LEFT))
-				while (--field_width > 0) {
-					if(used_size >= size)
-						goto ret;
+				while (--field_width > 0)
 					*str++ = ' ';
-					used_size++;
-				}
-			
-			if(used_size >= size)
-				goto ret;
-			*str++ = (unsigned char) va_arg(args, int);
-			used_size++;
-			while (--field_width > 0) {
-				if(used_size >= size)
-					goto ret;
+			*str++ = (unsigned char)va_arg(args, int);
+			while (--field_width > 0)
 				*str++ = ' ';
-				used_size++;
-			}
-			break;
+			continue;
+
 		case 's':
 			s = va_arg(args, char *);
-			len = strlen(s);
-			if (precision < 0)
-				precision = len;
-			else if (len > precision)
-				len = precision;
+			len = strnlen(s, precision);
 
 			if (!(flags & LEFT))
-				while (len < field_width--) {
-					if(used_size >= size)
-						goto ret;
+				while (len < field_width--)
 					*str++ = ' ';
-					used_size++;
-				}
-			for (i = 0; i < len; ++i) {
-				if(used_size >= size)
-					goto ret;
+			for (i = 0; i < len; ++i)
 				*str++ = *s++;
-				used_size++;
-			}
-			while (len < field_width--) {
-				if(used_size >= size)
-					goto ret;
+			while (len < field_width--)
 				*str++ = ' ';
-				used_size++;
-			}
-			break;
-
-		case 'o':
-			newstr = number(size-used_size, str, va_arg(args, unsigned long), 8,
-				field_width, precision, flags);
-			used_size += newstr - str; str = newstr;
-			if(used_size >= size)
-				goto ret;
-			break;
+			continue;
 
 		case 'p':
 			if (field_width == -1) {
-				field_width = 8;
+				field_width = 2 * sizeof(void *);
 				flags |= ZEROPAD;
 			}
-			newstr = number(size-used_size, str,
-				(unsigned long) va_arg(args, void *), 16,
-				field_width, precision, flags);
-			used_size += newstr - str; str = newstr;
-			if(used_size >= size)
-				goto ret;
+			str = number(str,
+				     (unsigned long)va_arg(args, void *), 16,
+				     field_width, precision, flags);
+			continue;
+
+		case 'n':
+			if (qualifier == 'l') {
+				long *ip = va_arg(args, long *);
+				*ip = (str - buf);
+			} else {
+				int *ip = va_arg(args, int *);
+				*ip = (str - buf);
+			}
+			continue;
+
+		case '%':
+			*str++ = '%';
+			continue;
+
+			/* integer number formats - set up the flags and "break" */
+		case 'o':
+			base = 8;
 			break;
+
 		case 'x':
-			newstr = number(size-used_size, str, va_arg(args, unsigned long), 16,
-				field_width, precision, flags);
-
-			used_size += newstr - str;
-			str = newstr;
-
-			if(used_size >= size)
-				goto ret;
-
+			flags |= SMALL;
+		case 'X':
+			base = 16;
 			break;
 
 		case 'd':
 		case 'i':
 			flags |= SIGN;
 		case 'u':
-			newstr = number(size-used_size, str, va_arg(args, unsigned long), 10,
-				field_width, precision, flags);
-			used_size += newstr - str; str = newstr;
-			if(used_size >= size)
-				goto ret;
-			break;
-
-		case 'n':
-			ip = va_arg(args, int *);
-			*ip = (str - buf);
 			break;
 
 		default:
-			if (*fmt != '%') {
-				if(used_size >= size)
-					goto ret;
-				*str++ = '%';
-				used_size++;
-			}
-			if (*fmt) {
-				if(used_size >= size)
-					goto ret;
+			*str++ = '%';
+			if (*fmt)
 				*str++ = *fmt;
-				used_size++;
-			}
 			else
 				--fmt;
-			break;
+			continue;
 		}
+		if (qualifier == 'l')
+			num = va_arg(args, unsigned long);
+		else if (qualifier == 'h') {
+			num = (unsigned short)va_arg(args, int);
+			if (flags & SIGN)
+				num = (short)num;
+		} else if (flags & SIGN)
+			num = va_arg(args, int);
+		else
+			num = va_arg(args, unsigned int);
+		str = number(str, num, base, field_width, precision, flags);
 	}
-
-ret:
-	*str=0;
-	return used_size;
-}
-
-i32 vsprintf(char *s, const char *fmt, va_list args)
-{
-	/* TODO Define a size_max */
-	return vsnprintf(s, 512, fmt, args);
+	*str = '\0';
+	return str - buf;
 }
 
 i32 sprintf(char *buf, const char *fmt, ...)
@@ -387,13 +307,13 @@ i32 sprintf(char *buf, const char *fmt, ...)
 void kprintf(const loglevel_t kp, char *prefix, char *fmt, ...)
 {
 	(void) kp;
-	char printbuf[512], fmtbuf[512], prefixbuf[256];
+	char printbuf[1024], fmtbuf[1024], prefixbuf[1024];
 	va_list args;
 
 	//if (kp > get_kp();
 
 	va_start(args, fmt);
-	vsnprintf(printbuf, 512, fmt, args);
+	vsprintf(printbuf, fmt, args);
 
 	sprintf(prefixbuf, "%7s", prefix);
 	fmtbuf[0] = '\0';
@@ -416,11 +336,11 @@ void kprintf(const loglevel_t kp, char *prefix, char *fmt, ...)
 /* TEMP XXX */
 void kprint(char *fmt, ...)
 {
-	char printbuf[512];
+	char printbuf[1024];
 	va_list args;
 
 	va_start(args, fmt);
-	vsnprintf(printbuf, 512, fmt, args);
+	vsprintf(printbuf, fmt, args);
 	prints(printbuf);
 	va_end(args);
 }

@@ -35,12 +35,12 @@ void reboot(void)
 	asm volatile ("cli");
 
 	do {
-		trash = io_inc(PS2_CMD);
+		trash = io_inb(PS2_CMD);
 		if (check_flag(trash, 0) != 0)
-			io_inc(PS2_IO);
+			io_inb(PS2_IO);
 	} while (check_flag(trash, 1) != 0);
 
-	io_outc(PS2_CMD, PS2_RESET);
+	io_outb(PS2_CMD, PS2_RESET);
 
 	for (;;)
 		asm volatile ("hlt");

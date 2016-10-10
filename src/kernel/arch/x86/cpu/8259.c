@@ -30,25 +30,25 @@ static char *devname = "pic";
 
 void pic_remap(void)
 {
-	io_outc(PIC_M_CMD, ICW1_INIT);
-	io_outc(PIC_S_CMD, ICW1_INIT);
+	io_outb(PIC_M_CMD, ICW1_INIT);
+	io_outb(PIC_S_CMD, ICW1_INIT);
 
-	io_outc(PIC_M_IO, PIC_M_OFF);
-	io_outc(PIC_S_IO, PIC_S_OFF);
+	io_outb(PIC_M_IO, PIC_M_OFF);
+	io_outb(PIC_S_IO, PIC_S_OFF);
 
-	io_outc(PIC_M_IO, ICW1_PIC_S);
-	io_outc(PIC_S_IO, ICW1_PIC_M);
+	io_outb(PIC_M_IO, ICW1_PIC_S);
+	io_outb(PIC_S_IO, ICW1_PIC_M);
 
-	io_outc(PIC_M_IO, ICW1_8086);
-	io_outc(PIC_S_IO, ICW1_8086);
+	io_outb(PIC_M_IO, ICW1_8086);
+	io_outb(PIC_S_IO, ICW1_8086);
 
 	kprintf(KP_INFO, devname, "remapped\n");
 }
 
 void pic_disable(void)
 {
-	io_outc(PIC_M_IO, 0xFF);
-	io_outc(PIC_S_IO, 0xFF);
+	io_outb(PIC_M_IO, 0xFF);
+	io_outb(PIC_S_IO, 0xFF);
 
 	kprintf(KP_INFO, devname, "disabled\n");
 }
@@ -64,7 +64,7 @@ void irq_mask(u8 irq)
 		irq -= IRQ_ENTRIES / 2;
 	}
 
-	io_outc(port, io_inc(port) | (1 << irq));
+	io_outb(port, io_inb(port) | (1 << irq));
 }
 
 void irq_unmask(u8 irq)
@@ -78,5 +78,5 @@ void irq_unmask(u8 irq)
 		irq -= IRQ_ENTRIES / 2;
 	}
 
-	io_outc(port, io_inc(port) & ~(1 << irq));
+	io_outb(port, io_inb(port) & ~(1 << irq));
 }

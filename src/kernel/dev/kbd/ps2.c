@@ -71,7 +71,7 @@ const char kbd_keymap_alt[KEYMAP_SIZE] = {
 static void int_handler(struct int_stack *regs)
 {
 	(void) regs;
-	u16 scancode = io_inc(PS2_IO);
+	u16 scancode = io_inb(PS2_IO);
 
 	if (skip) {
 		skip--;
@@ -80,7 +80,7 @@ static void int_handler(struct int_stack *regs)
 
 	if (scancode == PS2_EXT) {
 		skip++;
-		scancode |= io_inc(PS2_IO) << 8;
+		scancode |= io_inb(PS2_IO) << 8;
 	}
 
 	/* TODO Add escape sequences */

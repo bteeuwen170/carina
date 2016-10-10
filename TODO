@@ -23,22 +23,18 @@ Kernel
 - Move sys directory
 - NO ITOA
 - Typedef certain file types like uid_t and gid_t
-- Change *_out and *_in functions to the right byte size
-  - *b for bytes (8b)
-  - *w for words (16b)
-  - *d for double words (32b)
-  - *q for quad words (64b)
-  - *o for octa words (128b)
 - Write parser for pci.ids file
 - Script to get latest pci.ids
 - Always return void from initialization functions
-- Introduce new type that defines u32 on i686 systems, u64 on amd64 systems and
-  the native cpu address bus width type on other systems.
 - Native support for MS-DOS executables using some kind of low-level vm,
   if implementable...
 - Move paging file to cpu/
 - Don't include arch specific files outside of arch dir
 - Use sse + sse2 on > x86_64 and use mmx (+ sse) or sse + sse2 on i686
+- Inconsistency between use of kernel integer data types and
+  C integer data types
+- base_adr_* to bar_*
+- Seperate all driver header files into it's own directory
 
 Makefile
 - Seperate kernel-o and kernel-l (objects and libs)

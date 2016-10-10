@@ -50,8 +50,8 @@ void vga_init(void)
 					vga_create_entry(' ', vga_fgcolor, vga_bgcolor);
 
 	/* Hide cursor */
-	//io_outc(0x3D4, 0x0A);
-	//io_outc(0x3D5, 0x1D);
+	//io_outb(0x3D4, 0x0A);
+	//io_outb(0x3D5, 0x1D);
 
 	kprintf(KP_INFO, devname, "early VGA has been initialized at %dx%d\n",
 			VGA_WIDTH, VGA_HEIGHT);
@@ -61,10 +61,10 @@ static void vga_cur_set(void)
 {
 	u16 l = vga_y * VGA_WIDTH + vga_x;
 
-	io_outc(0x3D4, 0x0E);
-	io_outc(0x3D5, l >> 8);
-	io_outc(0x3D4, 0x0F);
-	io_outc(0x3D5, l);
+	io_outb(0x3D4, 0x0E);
+	io_outb(0x3D5, l >> 8);
+	io_outb(0x3D4, 0x0F);
+	io_outb(0x3D5, l);
 }
 
 void vga_clear(void)

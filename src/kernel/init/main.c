@@ -40,9 +40,11 @@
 #include <8259.h>
 #include <video/vga.h>
 #include <pci/pci.h>
+#include <block/ide/ata.h>
 #include <kernel/print.h>
 #include <video/vesa.h>
 #include <sound/ac97.h>
+#include "../fs/ramfs/ramfs.h"
 
 extern void usrmode_enter();
 
@@ -53,10 +55,11 @@ void kernel_main(struct mboot_info *mboot)
 	serial_init(COM0);
 
 	/* TODO Other format (UTC) */
-	kprintf(KP_INFO, 0, "Welcome to Carina! (compiled on %s %s)\n",
+	kprintf(KP_INFO, "cpu0", "Welcome to Carina! (compiled on %s %s)\n",
 			__DATE__, __TIME__);
+	/* TODO Actually get starting cpu */
 
-	kprintf(KP_INFO, 0, "Command line: %s\n", mboot->cmdline);
+	kprintf(KP_INFO, "cmdline", "%s\n", mboot->cmdline);
 
 	/* Initialize mandatory hardware */
 	pic_remap();
@@ -144,19 +147,20 @@ void kernel_main(struct mboot_info *mboot)
 
 	//cpu_info(); /* FIXME Secure mboot structure first */
 
-	/* Register PCI handlers */
-	ac97_reghandler();
-
-	pci_scan();
-
 	/* Initialize remaining hardware */
 	//acpi_init();
 	rtc_init();
 	pit_init();
 	kbd_enable();
 
+	/* Register PCI handlers */
+	ide_reghandler();
+	ac97_reghandler();
+
 	asm volatile ("sti");
 	kprintf(KP_DBG, "x86", "Interrupts enabled\n");
+
+	pci_scan();
 
 #if 0
 	usrmode_enter();
@@ -212,7 +216,18 @@ void kernel_main(struct mboot_info *mboot)
 			pcspk_play(835);
 			sleep(10);
 			pcspk_stop();
-		/* CRAP */
+
+		/* File system */
+		} else if (strcmp(cmd, "fs init") == 0) {
+			u32 sdf = 0;
+			int res = ramfs_create(4096, &sdf);
+
+			kprintf(KP_DBG, "fs", "ret: %d  dev: %u\n", res, sdf);
+
+		/* Audio */
+		} else if (strcmp(cmd, "ac97 play") == 0) {
+			ac97_play();
+			kprintf(KP_DBG, "ac97", "WAV playing\n");
 		} else if (strcmp(cmd, "fj") == 0) {
 			pcspk_fj();
 		} else if (strcmp(cmd, "mi") == 0) {
@@ -221,10 +236,8 @@ void kernel_main(struct mboot_info *mboot)
 			pcspk_hc();
 		} else if (strcmp(cmd, "acri") == 0) {
 			pcspk_acri();
-		/* ENDCRAP */
-		} else if (strcmp(cmd, "ac97 play") == 0) {
-			ac97_play();
-			kprintf(KP_DBG,"ac97", "WAV playing\n");
+
+		/* Other */
 		} else if (strcmp(cmd, "reboot") == 0) {
 			reboot();
 		} else if (strcmp(cmd, "clear") == 0) {

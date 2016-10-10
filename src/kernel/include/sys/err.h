@@ -1,8 +1,7 @@
-
 /*
  *
  * Carina
- * src/kernel/fs/fs.h
+ * src/kernel/include/sys/err.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -23,43 +22,19 @@
  *
  */
 
-#ifndef _FS_H
-#define _FS_H
+#ifndef _ERR_H
+#define _ERR_H
 
-enum ftype {
-	FTYPE_FILE,
-	FTYPE_LINK,
-	FTYPE_DIR,
-	FTYPE_BLOCK,
-	FTYPE_CHAR,
-	FTYPE_PIPE
-};
-
-enum fmode {
-	FMODE_UR,	/* Owner read */
-	FMODE_UW,	/* Owner write */
-	FMODE_UE,	/* Owner execute */
-	FMODE_GR,	/* Group read */
-	FMODE_GW,	/* Group write */
-	FMODE_GE,	/* Group execute */
-	FMODE_OR,	/* Other read */
-	FMODE_OW,	/* Other write */
-	FMODE_OE,	/* Other execute */
-	FMODE_SUID,	/* Set UID on execution */
-	FMODE_SGID	/* Set GID on execution */
-	/* The sticky bit is pretty useless, so it's not supported in Carina */
-};
-
-/* TODO */
-struct inode {
-	u32	mode;
-	u32	uid;
-	u32	gid;
-	u32	size;
-	u32	blocks;
-	u32	references;
-	u32	flags;
-	u32	size;
-};
+#define EPERM		1	/* Operation not permitted */
+#define ENOENT		2	/* No such file or directory */
+#define ENOMEM		12	/* Out of memory */
+#define EACCES		13	/* Permission denied */
+#define EBUSY		16	/* Device or resource busy */
+#define EEXIST		17	/* File exists */
+#define ENODEV		19	/* No such device */
+#define ENOTDIR		20	/* Not a directory */
+#define EINVAL		22	/* Invalid argument */
+#define ENOSPC		28	/* No space left on device */
+#define EROFS		30	/* Read-only file system */
 
 #endif

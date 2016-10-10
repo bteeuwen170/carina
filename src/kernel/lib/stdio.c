@@ -35,24 +35,13 @@
  * TODO Seperate panic for isrs
  * TODO Dump registers (at least rip/eip)
  */
-void panic(char *reason, u32 err_code)
+void panic(char *reason, u32 err_code, paddr_t ip)
 {
 	asm volatile ("cli");
 
 	//TODO Hide cursor
 
-	kprintf(KP_CRIT, "panic", "%s", reason);
-
-	if ((err_code >> 1) & 0x00)
-		prints(" in GDT\n");
-	else if ((err_code >> 1) & 0x01)
-		prints(" in IDT\n");
-	else if ((err_code >> 1) & 0x02)
-		prints(" in LDT\n");
-	else if ((err_code >> 1) & 0x03)
-		prints(" in IDT\n");
-	else
-		printc('\n');
+	kprintf(KP_CRIT, "panic", "%s @ %#x\n", reason, ip);
 
 	/* TODO Don't always print error code */
 	kprintf(KP_CRIT, "panic", "Error code: %#x\n", err_code);

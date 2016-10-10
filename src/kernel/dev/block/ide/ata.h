@@ -25,6 +25,127 @@
 #ifndef _IDE_ATA_H
 #define _IDE_ATA_H
 
+#define ATA_CHANNELS		2
+#define ATA_DRIVES		2
 
+#define ATA_REG_IO		0x00	/* I/O */
+#define ATA_REG_ERROR		0x01	/* Error */
+#define ATA_REG_FEATURES	0x01	/* Features */
+#define ATA_REG_SECTORS0	0x02	/* Sectors low */
+#define ATA_REG_LBA0		0x03	/* LBA 0 low */
+#define ATA_REG_LBA1		0x04	/* LBA 0 middle */
+#define ATA_REG_LBA2		0x05	/* LBA 0 high */
+#define ATA_REG_DRVSEL		0x06	/* Drive selector */
+#define ATA_REG_CMD		0x07	/* Command */
+#define ATA_REG_STATUS		0x07	/* Status */
+#define ATA_REG_SECTORS1	0x08	/* Sectors high */
+#define ATA_REG_LBA3		0x09	/* LBA 1 low */
+#define ATA_REG_LBA4		0x0A	/* LBA 1 middle */
+#define ATA_REG_LBA5		0x0B	/* LBA 1 high */
+
+#define ATA_REG_CTRL		0x0C	/* Control */
+#define ATA_REG_STATUS_ALT	0x0C	/* Alternative status */
+
+#define ATA_CH0_CMD		0x3F6
+#define ATA_CH0_IO		0x1F0
+#define ATA_CH1_CMD		0x376
+#define ATA_CH1_IO		0x170
+
+#define ATA_CMD_BUSY		0x80	/* Busy */
+#define ATA_CMD_READY		0x40	/* Ready */
+#define ATA_CMD_WERR		0x20	/* Write error */
+#define ATA_CMD_DSEEK		0x10	/* Seek done */
+#define ATA_CMD_DDR		0x08	/* Data request done */
+#define ATA_CMD_COR		0x04	/* Data corrected */
+#define ATA_CMD_INDEX		0x02	/* Index */
+#define ATA_CMD_ERR		0x01	/* Error */
+
+#define ATA_ERR_SBAD		0x80	/* Bad sector */
+#define ATA_ERR_DUNC		0x40	/* Data uncorrectable */
+#define ATA_ERR_NM0		0x20	/* No media */
+#define ATA_ERR_DSEEK		0x10	/* No ID mark */
+#define ATA_ERR_NM1		0x08	/* No media */
+#define ATA_ERR_CABRT		0x04	/* Command aborted */
+#define ATA_ERR_NTRK0		0x02	/* Track 0 missing */
+#define ATA_ERR_NADRM		0x01	/* No address mark */
+
+#define ATA_CMD_PIO_READ	0x20	/* ATA PIO read */
+#define ATA_CMD_PIO_WRITE	0x30	/* ATA PIO write */
+#define ATA_CMD_DMA_READ	0xC8	/* ATA DMA read */
+#define ATA_CMD_DMA_WRITE	0xCA	/* ATA DMA write */
+#define ATA_CMD_IDENT		0xEC	/* ATA identify */
+
+#define ATAPI_CMD_READ		0xA8	/* ATAPI read */
+#define ATAPI_CMD_EJECT		0x1B	/* ATAPI eject */
+#define ATAPI_CMD_IDENT		0xA1	/* ATAPI identify */
+
+/*#define ATA_IDENT_TYPE		0x00
+#define ATA_IDENT_CYLS		0x02
+#define ATA_IDENT_HEADS		0x06
+#define ATA_IDENT_SECTORS	0x0C
+#define ATA_IDENT_SERIAL	0x14
+#define ATA_IDENT_MODEL		0x36
+#define ATA_IDENT_FEATURES	0x62
+#define ATA_IDENT_FV		0x6A
+#define ATA_IDENT_MAX_LBA	0x78
+#define ATA_IDENT_CMDSETS	0xA4*/
+
+struct ata_dev {
+	u8	channel;
+	u8	drive;
+	u8	type;
+	u32	size;
+};
+
+struct ata_channel {
+	u16	base;
+	u16	ctrl;
+	u16	bus_master;
+	u8	nint;
+};
+
+struct ata_ident {
+	u16		type;
+	u16		cylinders;
+	u16		reserved0;
+	u16		heads;
+	u32		unused0;
+	u16		sectors_per_track;
+	u16		vendor[3];
+	char		serial[20];
+	u16		unused1[3];
+	char		revision[8];
+	char		model[40];
+	u16		unused2;
+	u16		reserved1;
+	struct {
+		u8	reserved0;
+		u8	dma:1;
+		u8	lba:1;
+		u16	unused0:2;
+		u8	reserved1:1;
+		u8	unused1:1;
+		u8	reserved2:2;
+		u16	reserved3;
+	} features;
+	u32		unused3;
+	u16		reserved2;
+	u8		unused4[12];
+	u32		lba28_max;
+	u8		unused5[14];
+	u8		reserved3[22];
+	u16		revision_major;
+	u16		revision_minor;
+	u16		cmdset[3]; /* TODO Struct */
+	u16		cmdset_active[3]; /* TODO Struct */
+	u8		udma_support;
+	u8		udma_active;
+	u8		reserved4[8];
+	u8		unused6[14];
+	u32		lba48_max;
+	/* TODO Finish */
+} __attribute__ ((packed));
+
+void ide_reghandler(void);
 
 #endif

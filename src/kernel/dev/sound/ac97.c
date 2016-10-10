@@ -27,16 +27,18 @@
 #include <stdint.h> //TEMP
 #include <stdlib.h>
 #include <cpu.h>
+#include <timer/pit.h>
 #include <kernel/print.h>
 #include <pci/pci.h>
+
 #include "ac97.h"
-//#include "snd.h"
+#include "snd.h"
 
 static char *devname = "ac97";
 
 struct pci_dev *card;
 
-u16 bar_nam, bar_nabm;
+u16 nambar, nabmbar;
 
 u16 sample_rate;
 
@@ -48,7 +50,7 @@ static void *data;
 struct buffer {
 	void	*buf;
 	u16	len;
-	u16	reserve :14;
+	u16	reserved :14;
 	u8	bup :1;
 	u8	ioc :1;
 } __attribute__ ((packed));
@@ -69,12 +71,12 @@ static void int_handler(struct int_stack *regs)
 
 	kprintf(KP_DBG, devname, "!"); //TEMPORARY
 	u32 curbuf = (buffer_last + 1) % 32;
-	u16 samples = io_ins(bar_nabm + 0x18);
+	u16 samples = io_inw(nabmbar + 0x18);
 
 	if (!curbuf || samples < 1)
-		io_outs(bar_nabm + 0x15, 32);
+		io_outw(nabmbar + 0x15, 32);
 
-	io_outs(bar_nabm + 0x16, (1 << 3));
+	io_outw(nabmbar + 0x16, (1 << 3));
 
 	buffer_fill(++buffer_last_w, buffer_last);
 
@@ -83,18 +85,18 @@ static void int_handler(struct int_stack *regs)
 
 void ac97_volume(u8 volume)
 {
-	io_outs(bar_nam + 0x02, (volume << 8) | volume);
-	//io_outs(bar_nam + 0x04, (volume << 8) | volume);
-	//io_outs(bar_nam + 0x06, volume);
-	//io_outs(bar_nam + 0x0A, volume);
-	io_outs(bar_nam + 0x18, (volume << 8) | volume);
+	io_outw(nambar + 0x02, (volume << 8) | volume);
+	//io_outw(nambar + 0x04, (volume << 8) | volume);
+	io_outw(nambar + 0x06, volume);
+	io_outw(nambar + 0x0A, volume);
+	io_outw(nambar + 0x18, (volume << 8) | volume);
 }
 
 void ac97_play(void)
 {
 	int i;
 
-	//data = snd_wav;
+	data = snd_wav;
 
 	for (i = 0; i < 32; i++)
 		buffer_fill(i, i);
@@ -102,8 +104,9 @@ void ac97_play(void)
 	buffer_last = 0;
 	buffer_last_w = 32 - 1;
 
-	io_outc(bar_nabm + 0x15, 32);
-	io_outc(bar_nabm + 0x1B, (1 << 0) | (1 << 3) | (1 << 4));
+	io_outd(nabmbar + 0x10, (intptr_t) buf);
+	io_outb(nabmbar + 0x15, 32);
+	io_outb(nabmbar + 0x1B, 0x15);
 }
 
 static int pci_handler(struct pci_dev *card)
@@ -112,29 +115,45 @@ static int pci_handler(struct pci_dev *card)
 
 	/* Set PIO control */
 	//TODO
-	pci_outi(card->bus, card->dev, card->func, 4, 5);
+	//pci_outd(card->bus, card->dev, card->func, 4, 5);
 
-	bar_nam = pci_ini(card->bus, card->dev, card->func, 0x10) & 0xFFFFFFFC;
-	bar_nabm = pci_ini(card->bus, card->dev, card->func, 0x14) & 0xFFFFFFFC;
+	nambar = pci_ind(card->bus, card->dev, card->func, 0x10) & 0xFFFFFFFC;
+	nabmbar = pci_ind(card->bus, card->dev, card->func, 0x14) & 0xFFFFFFFC;
 
-	if (!bar_nam || !bar_nabm)
+	if (!nambar || !nabmbar)
 		goto err;
 
 	irq_reghandler(SINT_ENTRIES + card->cfg->int_line, &int_handler);
 
+	/* Reset */
+	io_outw(nambar + 0x00, 0x42);
+	io_outb(nabmbar + 0x0060, 0x02);
+
+	sleep(100);
+
 	ac97_volume(3);
 
-	//ac97_sample_rate(0);
+	sleep(10);
+
+	if ((io_inw(nambar + 0x28) & 1)) {
+		kprintf(KP_INFO, devname, ":(\n");
+		//ac97_sample_rate(0);
+		io_outw(nambar + 0x2A, io_inw(nambar + 0x2A) | 1);
+		sleep(10);
+		io_outw(nambar + 0x2C, 44100);
+		io_outw(nambar + 0x32, 44100);
+	} else {
+		kprintf(KP_INFO, devname, ":D\n");
+	}
 
 	buf = kmalloc(sizeof(struct buffer) * 32);
-	io_outi(bar_nabm + 0x10, (intptr_t) buf);
 
 	kprintf(KP_INFO, devname, "initialized (FIXME lies!)\n");
 
 	return 0;
 
 err:
-	kprintf(0, devname, "err\n");
+	kprintf(KP_ERR, devname, "err\n");
 
 	return 1;
 }

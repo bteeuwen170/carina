@@ -18,7 +18,7 @@ mount
 nsleep
 int open(const char *path, int flags);
 read(int fd, void *buf, size_t count);
-readdir
+readdir //One of the first to implement
 reboot(void);
 rename
 rmdir
@@ -32,3 +32,12 @@ stat
 sync
 umount
 write
+
+/* FS system calls */
+open
+close
+readdir
+read
+write
+umount
+mount

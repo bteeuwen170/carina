@@ -22,19 +22,21 @@
  *
  */
 
+/* FIXME This is broken */
+
 #include <stdint.h> //TEMP
 #include <stdlib.h>
-#include <system.h>
+#include <cpu.h>
 #include <kernel/print.h>
 #include <pci/pci.h>
 #include "ac97.h"
-#include "snd.h"
+//#include "snd.h"
 
 static char *devname = "ac97";
 
 struct pci_dev *card;
 
-u32 bar_nam, bar_nabm;
+u16 bar_nam, bar_nabm;
 
 u16 sample_rate;
 
@@ -45,10 +47,10 @@ static void *data;
 
 struct buffer {
 	void	*buf;
-	u16		len;
-	u16		reserve	:14;
-	u8		bup		:1;
-	u8		ioc		:1;
+	u16	len;
+	u16	reserve :14;
+	u8	bup :1;
+	u8	ioc :1;
 } __attribute__ ((packed));
 
 struct buffer *buf;
@@ -82,9 +84,9 @@ static void int_handler(struct int_stack *regs)
 void ac97_volume(u8 volume)
 {
 	io_outw(bar_nam + 0x02, (volume << 8) | volume);
-	io_outw(bar_nam + 0x04, (volume << 8) | volume);
-	io_outw(bar_nam + 0x06, volume);
-	io_outw(bar_nam + 0x0A, volume);
+	//io_outw(bar_nam + 0x04, (volume << 8) | volume);
+	//io_outw(bar_nam + 0x06, volume);
+	//io_outw(bar_nam + 0x0A, volume);
 	io_outw(bar_nam + 0x18, (volume << 8) | volume);
 }
 
@@ -92,7 +94,7 @@ void ac97_play(void)
 {
 	int i;
 
-	data = snd_wav;
+	//data = snd_wav;
 
 	for (i = 0; i < 32; i++)
 		buffer_fill(i, i);
@@ -104,59 +106,40 @@ void ac97_play(void)
 	io_outb(bar_nabm + 0x1B, (1 << 0) | (1 << 3) | (1 << 4));
 }
 
-void ac97_init(void)
+static int pci_handler(struct pci_dev *card)
 {
-	//struct pci_dev *card = pci_devices;
-	struct pci_dev *card = kmalloc(sizeof(struct pci_dev));
-	card->bus = 0;
-	card->dev = 0x04;
-	card->func = 0;
-	//card->cfg->int_line = 0x0B;
-	u8 i;
+	//kprintf(KP_DBG, devname, "intline: %u\n", card->cfg->int_line);
 
-	/* TODO Constant */
-	//irq_register(card->cfg->int_line + 32, &int_ac97);
-	irq_register(0x0B + 32, &int_handler);
-
+	/* Set PIO control */
+	//TODO
 	pci_outd(card->bus, card->dev, card->func, 4, 5);
 
-	sleep(50);
+	bar_nam = pci_ind(card->bus, card->dev, card->func, 0x10) & 0xFFFFFFFC;
+	bar_nabm = pci_ind(card->bus, card->dev, card->func, 0x14) & 0xFFFFFFFC;
 
-	/* TODO */
-	bar_nam = pci_ind(card->bus, card->dev, card->func, 0x10);
-	bar_nabm = pci_ind(card->bus, card->dev, card->func, 0x10 + 0x4 * 1);
+	if (!bar_nam || !bar_nabm)
+		goto err;
 
-	/* Power the card on */
-	io_outd(bar_nabm + 0x2C, io_ini(bar_nabm + 0x2C) | (1 << 0x01));
-	sleep(50);
+	irq_reghandler(SINT_ENTRIES + card->cfg->int_line, &int_handler);
 
-	/* Reset the card */
-	io_outd(bar_nam, 0x01);
-	sleep(50);
-	io_outd(bar_nabm + 0x2C, io_ini(bar_nabm + 0x2C) | (1 << 0x02));
-
-	for (i = 0;; i++) {
-		if (!((io_ini(bar_nabm + 0x2C) >> 2) & 1))
-			break;
-
-		if (i > 100) {
-			kprintf(KP_ERR, devname, "reset failed\n");
-			return;
-		}
-
-		sleep(50);
-	}
-
-	sleep(50);
-
-	ac97_volume(10);
-
-	sleep(50);
+	ac97_volume(3);
 
 	//ac97_sample_rate(0);
-	//for(;;) asm volatile ("hlt");
 
-	sleep(50);
 	buf = kmalloc(sizeof(struct buffer) * 32);
 	io_outd(bar_nabm + 0x10, (intptr_t) buf);
+
+	kprintf(KP_INFO, devname, "initialized (FIXME lies!)\n");
+
+	return 0;
+
+err:
+	kprintf(0, devname, "err\n");
+
+	return 1;
+}
+
+void ac97_reghandler(void)
+{
+	pci_reghandler(0x8086, 0x2415, 1, &pci_handler);
 }
