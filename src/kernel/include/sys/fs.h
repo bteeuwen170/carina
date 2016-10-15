@@ -103,7 +103,7 @@ struct inode {
 struct dirent {
 	u64	inum;
 	char	name[NAME_MAX];
-};
+} __attribute__ ((packed)); //FIXME TEMP
 
 struct block_dev_ops {
 	/* FIXME Crap */
@@ -122,7 +122,7 @@ struct block_dev_ops {
 	/* Read from an inode: ip, data, off, n */
 	int (*read) (struct inode *, void *, u64, u64);
 	/* Write to inode: ip, data, off, n */
-	int (*write) (struct inode *, const void *, u64, u64);
+	int (*write) (struct inode *, void *, u64, u64);
 };
 
 //enum file_types {
@@ -147,7 +147,5 @@ struct block_dev_ops {
 //};
 
 void dev_reg(struct block_dev *dp);
-
-int dir_write(struct inode *dp, u64 inum, char *name);
 
 #endif

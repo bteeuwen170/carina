@@ -1,6 +1,6 @@
-##
-## Variable Definitions
-##
+#
+# Makefile
+#
 
 ARCH			:= x86_64
 ARCH32			= $(ARCH)
@@ -36,25 +36,18 @@ BOCHSFLAGS		:= -f cfg/bochs.rc -q
 QEMUFLAGS		:= -m 16M --serial vc -soundhw pcspk,ac97 #-vga std #-curses #-cpu qemu32 //To test no long mode message
 QEMUDBGFLAGS		:= -s -d cpu_reset,int#,cpu,exec,in_asm
 KVMFLAGS		:= -enable-kvm
+WGETFLAGS		:= -q --show-progress
 
-include src/Makefile
+include src/kernel/Makefile
+#include src/utils/Makefile
+include toolchain/Makefile
 
 PHONY += all
 # TODO Remove qemu in final versions
 all: carina iso qemu
 
-
-##
-## Base System
-##
-
 PHONY += carina
 carina: kernel
-
-
-##
-## Clean
-##
 
 PHONY += clean
 clean:
@@ -77,11 +70,6 @@ clean:
 		 rm root/boot/kernel > /dev/null; \
 	 fi;
 
-
-##
-## Help
-##
-
 PHONY += help
 help:
 	@echo -e "\033[1mMakefile for Carina\033[0m"
@@ -102,43 +90,6 @@ endif
 	@echo " - qemu      Boot the Live CD iso in QEMU"
 	@echo " - qemud     Boot the Live CD iso in QEMU with debugging flags"
 
-
-##
-## Building TODO Move to kernel ?
-##
-
-%32.o: %32.c
-	@echo -e "\033[1;37m> Compiling \033[0;32m$<\033[1m...\033[0m"
-	@$(CC32) $(CFLAGS32) -c $< $(kernel-i) -o $@
-ifeq ($(ARCH),x86_64)
-	@objcopy -O elf64-x86-64 $@ $@.64
-	@mv $@.64 $@
-endif
-
-%.o: %.c
-	@echo -e "\033[1;37m> Compiling \033[0;32m$<\033[1m...\033[0m"
-	@$(CC) $(CFLAGS) -c $< $(kernel-i) -o $@
-
-%.o: %.S
-	@echo -e "\033[1;37m> Assembling \033[0;32m$<\033[1m...\033[0m"
-	@$(CC) $(ASFLAGS) -c $< -o $@
-
-
-##
-## Kernel
-##
-
-PHONY += kernel
-kernel: bin/kernel
-bin/kernel: $(kernel-o) $(kernel-o32)
-	@echo -e "\033[1m> Linking \033[0;32m$@\033[1m...\033[0m"
-	@$(LD) $(LDFLAGS) -T src/kernel/link.ld -o bin/kernel $(kernel-o) $(kernel-o32)
-
-
-##
-## Make ISO Image
-##
-
 # TODO Rethink and do this differently
 mktree:
 	@echo -e "\033[1m> Creating Carina root filesystem tree...\033[0m"
@@ -152,14 +103,9 @@ mktree:
 	@mkdir root/home
 	@mkdir root/sys
 
-#fs: root/boot/kernel
-#	@echo -e "\033[1m> Creating FAT32 img...\033[0m"
-#	@dd if=/dev/zero of=bin/carina.img bs=1M count=40
-#	@$(MKFS) $(MFLAGS) bin/carina.img
-
-#FIXME Don't call this if iso is already present
 PHONY += iso
-iso: bin/kernel
+iso: bin/carina.iso
+bin/carina.iso: bin/kernel
 	@echo -e "\033[1m> Copying kernel to system root...\033[0m"
 	@cp bin/kernel root/boot/.
 	@echo -e "\033[1m> Creating GRUB image...\033[0m"
@@ -167,11 +113,6 @@ iso: bin/kernel
 	@cat /usr/lib/grub/i386-pc/cdboot.img bin/grub.img > root/grub.img
 	@echo -e "\033[1m> Creating Carina iso...\033[0m"
 	@genisoimage -A "Carina" -input-charset "iso8859-1" -R -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/carina.iso root
-
-
-##
-## QEMU
-##
 
 ifeq ($(ARCHT),x86)
 PHONY += bochs

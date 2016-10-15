@@ -40,6 +40,11 @@
 /* Inode */
 //#define INODE(inum, sb)	((inum) / RAMFS_IPB + sb.fb)
 
+struct ramfs_dirent {
+	u64	inum;
+	char	name[NAME_MAX];
+};
+
 struct ramfs_inode {
 	u8	type;
 //	u16	perms;
@@ -55,7 +60,8 @@ struct ramfs_inode {
 
 	u64	size;
 
-	void	*data;
+	struct ramfs_dirent	*dep;
+	void			*data;
 };
 
 static struct inode *ramfs_get(struct block_dev *dev, u64 inum)
@@ -157,16 +163,18 @@ static int ramfs_update(struct inode *ip)
 /*
  * Write to an inode
  */
-static int ramfs_write(struct inode *ip, const void *data, u64 off, u64 n)
+static int ramfs_write(struct inode *ip, void *data, u64 off, u64 n)
 {
 	struct ramfs_inode *is;
 
 	if (n < 1)
 		return 0;
 
-	is = (struct ramfs_inode *) ip->dev->data[ip->inum];
+	is = (struct ramfs_inode *) ip->dev->data[ip->inum + 1];
 
-	if (is->data == NULL)
+	//dp = kmalloc(sizeof(struct block_dev));
+
+	if (!is)
 		return -1; //TODO Create new inode
 
 	/* FIXME */
@@ -177,6 +185,34 @@ static int ramfs_write(struct inode *ip, const void *data, u64 off, u64 n)
 		ip->size = off;
 		ramfs_update(ip);
 	}
+
+	return 0;
+}
+
+/*
+ * Link an inode to a directory by inode number
+ */
+static int ramfs_dir_write(struct inode *dp, u64 inum, char *name)
+{
+	struct ramfs_dirent dep;
+	int res;
+	u64 i = 0;
+
+	do {
+		struct ramfs_inode *is = (struct ramfs_inode *) dp->dev->data[inum];
+
+		if (!is)
+			return -1;
+
+		if (!is->dep)
+			return -12;
+
+		if (strcmp(dep.name, name) == 0)
+			return -EEXIST;
+	} while (dep.inum != 0);
+
+	dep.inum = inum;
+	strncpy(dep.name, name, NAME_MAX);
 
 	return 0;
 }
@@ -235,12 +271,12 @@ int ramfs_create(u64 size, u32 *dev)
 	ip->refs = 0;
 	ip->links = 1;
 
-	res = dir_write(ip, ip->inum, ".");
+	res = ramfs_dir_write(ip, ip->inum, ".");
 
 	if (res < 0)
 		goto out;
 
-	res = dir_write(ip, ip->inum, "..");
+	res = ramfs_dir_write(ip, ip->inum, "..");
 
 	if (res < 0)
 		goto out;

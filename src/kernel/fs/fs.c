@@ -73,42 +73,42 @@ void dev_reg(struct block_dev *dp)
 //
 //}
 
-/*
- * Link an inode to a directory by inode number
- * FIXME In file system handler
- */
-int dir_write(struct inode *dp, u64 inum, char *name)
-{
-	struct dirent dep;
-	int res;
-	u64 i;
-
-	dep.inum = 0;
-
-	for (i = 0; dep.inum != 0; i += sizeof(dep)) {
-		//if (i >= dp->size)
-		//	return -ENOSPC;
-
-		res = dp->dev->op->read(dp, &dep, i, sizeof(dep));
-
-		if (res < 0)
-			return res;
-
-		/* TODO Use strncmp ? */
-		if (strcmp(dep.name, name) == 0)
-			return -EEXIST;
-	}
-
-	dep.inum = inum;
-	strncpy(dep.name, name, NAME_MAX);
-
-	res = dp->dev->op->write(dp, &dep, i, sizeof(dep));
-
-	if (res < 0)
-		return res;
-
-	return 0;
-}
+///*
+// * Link an inode to a directory by inode number
+// * FIXME In file system handler
+// */
+//int dir_write(struct inode *dp, u64 inum, char *name)
+//{
+//	struct dirent dep;
+//	int res;
+//	u64 i;
+//
+//	dep.inum = 0;
+//
+//	for (i = 0; dep.inum != 0; i += sizeof(dep)) {
+//		//if (i >= dp->size)
+//		//	return -ENOSPC;
+//
+//		res = dp->dev->op->read(dp, &dep, i, sizeof(dep));
+//
+//		if (res < 0)
+//			return res;
+//
+//		/* TODO Use strncmp ? */
+//		if (strcmp(dep.name, name) == 0)
+//			return -EEXIST;
+//	}
+//
+//	dep.inum = inum;
+//	strncpy(dep.name, name, NAME_MAX);
+//
+//	res = dp->dev->op->write(dp, &dep, i, sizeof(dep));
+//
+//	if (res < 0)
+//		return res;
+//
+//	return 0;
+//}
 
 /*
  * Inodes

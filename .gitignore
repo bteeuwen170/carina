@@ -2,6 +2,7 @@
 *.img
 *.iso
 *.swp
+*.tar.gz
 
 bin/*
 !bin/.dummy

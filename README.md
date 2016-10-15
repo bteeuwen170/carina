@@ -22,11 +22,35 @@ License: GPLv2
 	└── sys         Kernel VFS
 
 
-## How to build
+## Building the toolchain
 
-	make
+These utilities are required to build the Carina toolchain:
+
+* GNU C Compiler (or Clang)
+* GNU autoconf
+* GNU automake
+* GNU make
+* libtool
+
+An active Internet connection is also needed to download the necessary files.
+
+Issue this command to build the Carina toolchain:
+
+	make toolchain
+
+
+## Building Carina
+
+These applications are required to build the Carina kernel:
+* GNU make
+* Carina toolchain
+* genisoimage (to build an ISO image)
+
+Issue this command to build the carina kernel:
+
+	make carina
 
 
 ## About
 
-Please refer to [my website\(https://teeuwen.github.io).
+Please refer to [my website](https://teeuwen.github.io).
