@@ -1,0 +1,135 @@
+diff -urN toolchain/binutils-2.27/bfd/config.bfd toolchain/binutils-2.27/bfd/config.bfd
+--- toolchain/binutils-2.27/bfd/config.bfd	2016-10-16 16:34:20.025884662 +0200
++++ toolchain/binutils-2.27/bfd/config.bfd	2016-10-16 00:22:43.362649369 +0200
+@@ -582,6 +582,11 @@
+     targ_defvec=i386_elf32_vec
+     targ_selvecs=iamcu_elf32_vec
+     ;;
++  i[3-7]86-*-carina*)
++    targ_defvec=i386_elf32_vec
++    targ_selvecs=
++    targ64_selvecs="x86_64_elf64_vec"
++    ;;
+   i[3-7]86-*-chorus*)
+     targ_defvec=i386_elf32_vec
+     targ_selvecs=iamcu_elf32_vec
+@@ -678,6 +683,11 @@
+     targ_archs="$targ_archs bfd_arm_arch"
+     ;;
+ #ifdef BFD64
++  x86_64-*-carina*)
++    targ_defvec=x86_64_elf64_vec
++    targ_selvecs="i386_elf32_vec"
++    want64=true
++    ;;
+   x86_64-*-cloudabi*)
+     targ_defvec=x86_64_elf64_cloudabi_vec
+     want64=true
+diff -urN toolchain/binutils-2.27/config.sub toolchain/binutils-2.27/config.sub
+--- toolchain/binutils-2.27/config.sub	2016-10-16 16:34:07.642550812 +0200
++++ toolchain/binutils-2.27/config.sub	2016-10-16 00:24:58.962649984 +0200
+@@ -1388,6 +1388,7 @@
+ 	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
+ 	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* \
+ 	      | -chorusos* | -chorusrdb* | -cegcc* \
++	      | -carina* \
+ 	      | -cygwin* | -msys* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
+ 	      | -mingw32* | -mingw64* | -linux-gnu* | -linux-android* \
+ 	      | -linux-newlib* | -linux-musl* | -linux-uclibc* \
+diff -urN toolchain/binutils-2.27/gas/configure.tgt toolchain/binutils-2.27/gas/configure.tgt
+--- toolchain/binutils-2.27/gas/configure.tgt	2016-10-16 16:34:41.562552228 +0200
++++ toolchain/binutils-2.27/gas/configure.tgt	2016-10-16 00:29:38.465984584 +0200
+@@ -216,6 +216,10 @@
+   i386-sequent-bsd*)			fmt=aout em=dynix ;;
+   i386-*-beospe*)			fmt=coff em=pe ;;
+   i386-*-beos*)				fmt=elf ;;
++  i386-*-carina*)			fmt=elf
++    case ${cpu} in
++      x86_64*)				fmt=elf em=gnu ;;
++    esac ;;
+   i386-*-coff)				fmt=coff ;;
+   i386-*-elfiamcu)			fmt=elf arch=iamcu ;;
+   i386-*-elf*)				fmt=elf ;;
+diff -urN toolchain/binutils-2.27/ld/configure.tgt toolchain/binutils-2.27/ld/configure.tgt
+--- toolchain/binutils-2.27/ld/configure.tgt	2016-10-16 16:34:56.985886203 +0200
++++ toolchain/binutils-2.27/ld/configure.tgt	2016-10-16 16:27:42.905868091 +0200
+@@ -245,6 +245,13 @@
+ i[3-7]86-*-bsd)		targ_emul=i386bsd ;;
+ i[3-7]86-*-bsd386)	targ_emul=i386bsd ;;
+ i[3-7]86-*-bsdi*)	targ_emul=i386bsd ;;
++i[3-7]86-*-carina*)	targ_emul=elf_i386_carina
++			targ_extra_emuls=elf_i386
++			targ64_extra_emuls="elf_x86_64_carina elf_x86_64"
++			;;
++x86_64-*-carina*)	targ_emul=elf_x86_64_carina
++			targ_extra_emuls="elf_i386_carina elf_i386"
++			;;
+ i[3-7]86-*-aout)	targ_emul=i386aout ;;
+ i[3-7]86-*-linux*aout*)	targ_emul=i386linux
+ 			targ_extra_emuls="elf_i386 elf_iamcu"
+@@ -830,6 +837,10 @@
+ NATIVE_LIB_DIRS='/usr/local/lib /lib /usr/lib'
+ case "${target}" in
+ 
++*-*-carina*)
++  NATIVE_LIB_DIRS='/app/lib'
++  ;;
++
+ *-*-dragonfly*)
+   NATIVE_LIB_DIRS='/lib /usr/lib /usr/pkg/lib /usr/local/lib'
+   ;;
+diff -urN toolchain/binutils-2.27/ld/emulparams/elf_i386_carina.sh toolchain/binutils-2.27/ld/emulparams/elf_i386_carina.sh
+--- toolchain/binutils-2.27/ld/emulparams/elf_i386_carina.sh	1970-01-01 01:00:00.000000000 +0100
++++ toolchain/binutils-2.27/ld/emulparams/elf_i386_carina.sh	2016-10-16 00:38:45.662653732 +0200
+@@ -0,0 +1,3 @@
++. ${srcdir}/emulparams/elf_i386.sh
++GENERATE_SHLIB_SCRIPT=yes
++GENERATE_PIE_SCRIPT=yes
+diff -urN toolchain/binutils-2.27/ld/emulparams/elf_x86_64_carina.sh toolchain/binutils-2.27/ld/emulparams/elf_x86_64_carina.sh
+--- toolchain/binutils-2.27/ld/emulparams/elf_x86_64_carina.sh	1970-01-01 01:00:00.000000000 +0100
++++ toolchain/binutils-2.27/ld/emulparams/elf_x86_64_carina.sh	2016-10-16 00:38:52.935987099 +0200
+@@ -0,0 +1 @@
++. ${srcdir}/emulparams/elf_x86_64.sh
+diff -urN toolchain/binutils-2.27/ld/Makefile.am toolchain/binutils-2.27/ld/Makefile.am
+--- toolchain/binutils-2.27/ld/Makefile.am	2016-10-16 16:35:08.745886696 +0200
++++ toolchain/binutils-2.27/ld/Makefile.am	2016-10-16 15:58:56.602462728 +0200
+@@ -288,6 +288,7 @@
+ 	eelf32xtensa.c \
+ 	eelf_i386.c \
+ 	eelf_i386_be.c \
++	eelf_i386_carina.c \
+ 	eelf_i386_chaos.c \
+ 	eelf_i386_fbsd.c \
+ 	eelf_i386_ldso.c \
+@@ -503,6 +504,7 @@
+ 	eelf_k1om.c \
+ 	eelf_k1om_fbsd.c \
+ 	eelf_x86_64.c \
++	eelf_x86_64_carina.c \
+ 	eelf_x86_64_cloudabi.c \
+ 	eelf_x86_64_fbsd.c \
+ 	eelf_x86_64_nacl.c \
+@@ -1315,6 +1317,11 @@
+ eelf_i386_be.c: $(srcdir)/emulparams/elf_i386_be.sh \
+   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+ 
++eelf_i386_carina.c: $(srcdir)/emulparams/elf_i386_carina.sh \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++	${GENSCRIPTS} elf_i386_carina "$(tdir_elf_i386_carina)"
++	@# XXX NEEDED?
++
+ eelf_i386_chaos.c: $(srcdir)/emulparams/elf_i386_chaos.sh \
+   $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf_chaos.sc ${GEN_DEPENDS}
+ 
+@@ -2005,6 +2012,11 @@
+ eelf_x86_64.c: $(srcdir)/emulparams/elf_x86_64.sh \
+   $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+ 
++eelf_x86_64_carina.c: $(srcdir)/emulparams/elf_x86_64_carina.sh \
++  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++	${GENSCRIPTS} elf_x86_64_carina "$(tdir_elf_x86_64_carina)"
++	@# XXX NEEDED?
++
+ eelf_x86_64_cloudabi.c: $(srcdir)/emulparams/elf_x86_64_cloudabi.sh \
+   $(srcdir)/emulparams/elf_x86_64.sh \
+   $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

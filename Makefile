@@ -17,10 +17,10 @@ ARCHT			= x86
 ARCHQEMU		= i386
 endif
 
-CC			:= $(ARCH)-elf-gcc
-CC32			:= $(ARCH32)-elf-gcc
-AS			:= $(ARCH)-elf-as
-LD			:= $(ARCH)-elf-ld
+CC			:= $(ARCH)-elf-carina-gcc
+CC32			:= $(ARCH32)-elf-carina-gcc
+AS			:= $(ARCH)-elf-carina-as
+LD			:= $(ARCH)-elf-carina-ld
 BOCHS			:= bochs
 QEMU			:= qemu-system-$(ARCHQEMU)
 
@@ -102,6 +102,7 @@ mktree:
 	@mkdir root/dev
 	@mkdir root/home
 	@mkdir root/sys
+	@mkdir root/tmp
 
 PHONY += iso
 iso: bin/carina.iso

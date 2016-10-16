@@ -2,12 +2,14 @@
 *.img
 *.iso
 *.swp
-*.tar.gz
 
 bin/*
 !bin/.dummy
 dbg/*
 !dbg/.dummy
 root/boot/kernel
+toolchain/*
+!toolchain/Makefile
+!toolchain/*.patch
 
 bx_enh_dbg.ini

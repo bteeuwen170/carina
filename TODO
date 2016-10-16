@@ -44,6 +44,12 @@ OCD
 - Don't use "unused*" but instead just mention that the field is unused in
 		a comment
 
+Toolchain
+- Libc
+- Self contained autoconf and automake
+- Put up precompiled version
+- i686 libgcc broken
+
 
  Legend
 ========

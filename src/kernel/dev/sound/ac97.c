@@ -24,7 +24,7 @@
 
 /* FIXME This is broken */
 
-#include <stdint.h> //TEMP
+//#include <stdint.h> //TEMP
 #include <stdlib.h>
 #include <cpu.h>
 #include <timer/pit.h>
@@ -104,7 +104,8 @@ void ac97_play(void)
 	buffer_last = 0;
 	buffer_last_w = 32 - 1;
 
-	io_outd(nabmbar + 0x10, (intptr_t) buf);
+	//io_outd(nabmbar + 0x10, (intptr_t) buf);
+	io_outd(nabmbar + 0x10, (u64) buf);
 	io_outb(nabmbar + 0x15, 32);
 	io_outb(nabmbar + 0x1B, 0x15);
 }
