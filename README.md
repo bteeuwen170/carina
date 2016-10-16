@@ -24,7 +24,7 @@ filesystem hierarchy layout:
 	├── dev                 Device files (devfs)
 	├── usr                 Users home directories
 	│   └── [user]          User home directory
-	│       ├── .app        User-specific applications
+	│       ├── .app        User-specific applications folder
 	│       │   ├── bin     User-specific application binaries
 	│       │   ├── cfg     User-specific application configuration files
 	│       │   ├── inc     User-specific C include files
