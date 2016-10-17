@@ -38,13 +38,13 @@ QEMUDBGFLAGS		:= -s -d cpu_reset,int#,cpu,exec,in_asm
 KVMFLAGS		:= -enable-kvm
 WGETFLAGS		:= -q --show-progress
 
-include src/kernel/Makefile
-#include src/utils/Makefile
-include toolchain/Makefile
-
 PHONY += all
 # TODO Remove qemu in final versions
 all: carina iso qemu
+
+include src/kernel/Makefile
+#include src/utils/Makefile
+include toolchain/Makefile
 
 PHONY += carina
 carina: kernel

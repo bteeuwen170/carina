@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/include/kernel/fifo.h
+ * src/kernel/include/kernel/types.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *

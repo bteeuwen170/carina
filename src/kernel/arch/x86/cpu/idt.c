@@ -28,6 +28,7 @@
 #include <kernel/print.h>
 #include <8259.h>
 #include <int.h>
+#include <kernel/syscall.h>
 
 static char *devname = "idt";
 
@@ -48,7 +49,7 @@ static char *exceptions[SINT_ENTRIES] = {
 	"Breakpoint Exception (0x03)",
 	"Overflow Exception (0x04)",
 	"BOUND Range Exceeded Exception (0x05)",
-	"Invalid Opcode Exception (0x06)",
+	"Illegal instruction (0x06)",
 	"Device Not Available Exception (0x07)",
 	"Double Fault Exception (0x08)",
 	"Reserved (0x09)",
@@ -119,8 +120,15 @@ void _isr(struct int_stack *regs)
 	case SINT_ENTRIES - 1 + IRQ_PRT:
 	case SINT_ENTRIES - 1 + IRQ_ATA1:
 		break;
+	case 0x08: /* Double fault */
+	case 0x12: /* Internal machine error */
+		panic(exceptions[regs->int_no],
+				regs->err_code, regs->rip);
+		break;
+	case SINT_SYSCALL:
+		break;
 	default:
-		if (regs->int_no < SINT_ENTRIES) { //TODO Don't always halt
+		if (regs->int_no < SINT_ENTRIES) { //XXX TEMPORARY
 			panic(exceptions[regs->int_no],
 					regs->err_code, regs->rip);
 		} else if (regs->int_no < SINT_ENTRIES + IRQ_ENTRIES) {
