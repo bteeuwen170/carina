@@ -73,10 +73,14 @@
 #define ATA_ERR_NTRK0		0x02	/* Track 0 missing */
 #define ATA_ERR_NADRM		0x01	/* No address mark */
 
-#define ATA_CMD_PIO_READ	0x20	/* ATA PIO read */
-#define ATA_CMD_PIO_WRITE	0x30	/* ATA PIO write */
-#define ATA_CMD_DMA_READ	0xC8	/* ATA DMA read */
-#define ATA_CMD_DMA_WRITE	0xCA	/* ATA DMA write */
+#define ATA_CMD_PIO_READ28	0x20	/* ATA PIO read LBA 28 */
+//#define ATA_CMD_PIO_READ48	0x24	/* ATA PIO read LBA 48 */
+#define ATA_CMD_PIO_WRITE28	0x30	/* ATA PIO write LBA 28 */
+//#define ATA_CMD_PIO_WRITE48	0x34	/* ATA PIO write LBA 48 */
+//#define ATA_CMD_DMA_READ28	0xC8	/* ATA DMA read LBA 28 */
+//#define ATA_CMD_DMA_READ48	0x25	/* ATA DMA read LBA 48 */
+//#define ATA_CMD_DMA_WRITE28	0xCA	/* ATA DMA write LBA 28 */
+//#define ATA_CMD_DMA_WRITE48	0x35	/* ATA DMA write LBA 48 */
 #define ATA_CMD_PACKET		0xA0	/* ATA packet */
 #define ATA_CMD_IDENT		0xEC	/* ATA identify */
 

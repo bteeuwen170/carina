@@ -69,6 +69,10 @@ clean:
 		 echo -e "\033[1m> Removing the kernel binary from root/...\033[0m"; \
 		 rm root/boot/kernel > /dev/null; \
 	 fi;
+	@if [[ `find root/ -type d -empty -print` ]]; then \
+		 echo -e "\033[1m> Removing empty directories from root/...\033[0m"; \
+		 find root/ -type d -empty -delete > /dev/null; \
+	 fi;
 
 PHONY += help
 help:
@@ -93,16 +97,34 @@ endif
 # TODO Rethink and do this differently
 mktree:
 	@echo -e "\033[1m> Creating Carina root filesystem tree...\033[0m"
-	@mkdir root/app
-	@mkdir root/app/bin
-	@mkdir root/app/cfg
-	@mkdir root/app/inc
-	@mkdir root/app/lib
-	@mkdir root/cfg
-	@mkdir root/dev
-	@mkdir root/home
-	@mkdir root/sys
-	@mkdir root/tmp
+	@mkdir -p root/
+	@mkdir -p root/app/
+	@mkdir -p root/app/bin/
+	@mkdir -p root/app/cfg/
+	@mkdir -p root/app/inc/
+	@mkdir -p root/app/lib/
+	@mkdir -p root/app/shr/
+	@mkdir -p root/app/tmp/
+	@#mkdir -p root/boot/
+	@#mkdir -p root/boot/grub/
+	@mkdir -p root/cfg/
+	@mkdir -p root/sys/
+	@mkdir -p root/sys/dev/
+	@mkdir -p root/tmp/
+	@mkdir -p root/usr/
+	@mkdir -p root/usr/root/
+	@mkdir -p root/usr/root/.app/
+	@mkdir -p root/usr/root/.app/bin/
+	@mkdir -p root/usr/root/.app/cfg/
+	@mkdir -p root/usr/root/.app/inc/
+	@mkdir -p root/usr/root/.app/lib/
+	@mkdir -p root/usr/root/.app/shr/
+	@mkdir -p root/usr/root/.app/tmp/
+	@mkdir -p root/usr/root/Documents/
+	@mkdir -p root/usr/root/Downloads/
+	@mkdir -p root/usr/root/Music/
+	@mkdir -p root/usr/root/Pictures/
+	@mkdir -p root/usr/root/Videos/
 
 PHONY += iso
 iso: bin/carina.iso
@@ -122,24 +144,26 @@ bochs: iso
 	@$(BOCHS) $(BOCHSFLAGS)
 endif
 
+# The 2>/dev/null is to prevent GTK warnings
+
 PHONY += qemu
 qemu: iso
 	@echo -e "\033[1m> Starting QEMU...\033[0m"
-	@$(QEMU) $(QEMUFLAGS) -cdrom bin/carina.iso
+	@$(QEMU) $(QEMUFLAGS) -cdrom bin/carina.iso 2>/dev/null
 
 PHONY += qemud
 qemud: iso
 	@echo -e "\033[1m> Starting QEMU...\033[0m"
-	@$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -cdrom bin/carina.iso
+	@$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -cdrom bin/carina.iso 2>/dev/null
 
 PHONY += kvm
 kvm: iso
 	@echo -e "\033[1m> Starting QEMU...\033[0m"
-	@$(QEMU) $(QEMUFLAGS) $(KVMFLAGS) -cdrom bin/carina.iso
+	@$(QEMU) $(QEMUFLAGS) $(KVMFLAGS) -cdrom bin/carina.iso 2>/dev/null
 
 PHONY += kvmd
 kvmd: iso
 	@echo -e "\033[1m> Starting QEMU...\033[0m"
-	@$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) $(KVMFLAGS) -cdrom bin/carina.iso
+	@$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) $(KVMFLAGS) -cdrom bin/carina.iso 2>/dev/null
 
 .PHONY: $(PHONY)

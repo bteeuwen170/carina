@@ -148,9 +148,11 @@ size_t strlen(const char *str)
 
 size_t strnlen(const char *str, size_t n)
 {
-	const char *s = memchr(str, 0, n);
+	size_t l;
 
-	return s ? s - str : n;
+	for (l = 0; *str && l < n; l++, str++);
+
+	return l;
 }
 
 char *strrev(char *str)

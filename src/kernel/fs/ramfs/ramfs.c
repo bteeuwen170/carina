@@ -195,8 +195,6 @@ static int ramfs_write(struct inode *ip, void *data, u64 off, u64 n)
 static int ramfs_dir_write(struct inode *dp, u64 inum, char *name)
 {
 	struct ramfs_dirent dep;
-	int res;
-	u64 i = 0;
 
 	do {
 		struct ramfs_inode *is = (struct ramfs_inode *) dp->dev->data[inum];

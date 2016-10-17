@@ -86,11 +86,11 @@ static int ata_write()
 
 }*/
 
+#if 0
 /* FIXME Broken */
 static int atapi_read(struct ata_dev *dev, u64 addr, u16 ss, u32 off, u8 *buf)
 {
 	u32 status, i;
-	u16 data;
 	u8 packet[12];
 
 	if (dev->type != ATA_DEV_TYPE_ATAPI)
@@ -148,6 +148,7 @@ static int atapi_read(struct ata_dev *dev, u64 addr, u16 ss, u32 off, u8 *buf)
 
 	return 0;
 }
+#endif
 
 /* TODO Using ioctl */
 static int ide_eject(struct ata_dev *dev)
@@ -211,23 +212,19 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 	dev->drv = drv;
 
 	/* Primary channel */
-	if (ch) {
-		irq_unmask(IRQ_ATA1);
+	if (ch == 0) {
+		irq_unmask(IRQ_ATA0);
 		channels[ch].base = card->cfg->base_adr_0;
 		channels[ch].ctrl = card->cfg->base_adr_1;
-		/*channels[ch].base = (card->cfg->base_adr_2 & 0xFFFFFFFC) +
-				ATA_CH1_IO * (!card->cfg->base_adr_2);
-		channels[ch].ctrl = (card->cfg->base_adr_3 & 0xFFFFFFFC) +
-				ATA_CH1_CMD * (!card->cfg->base_adr_3);*/
+
+		card->cfg->int_line = 14;
 	/* Secondary channel */
-	} else {
-		irq_unmask(IRQ_ATA0);
+	} else if (ch == 1) {
+		irq_unmask(IRQ_ATA1);
 		channels[ch].base = card->cfg->base_adr_2;
 		channels[ch].ctrl = card->cfg->base_adr_3;
-		/*channels[ch].base = (card->cfg->base_adr_0 & 0xFFFFFFFC) +
-				ATA_CH0_IO * (!card->cfg->base_adr_0);
-		channels[ch].ctrl = (card->cfg->base_adr_1 & 0xFFFFFFFC) +
-				ATA_CH0_CMD * (!card->cfg->base_adr_1);*/
+
+		card->cfg->int_line = 15;
 	}
 
 	channels[ch].bus_master = (card->cfg->base_adr_4 & 0xFFFFFFFC) +
@@ -291,7 +288,7 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 	else
 		goto ret;
 
-	kprintf(KP_INFO, devname, "%s, %s drive @ TODO on IRQ %u\n",
+	kprintf(KP_INFO, devname, "%s, %s drive @ IRQ %u\n",
 			strtrm(dev->ident.model), (dev->type ? "ATAPI": "ATA"),
 			card->cfg->int_line);
 	kprintf(KP_INFO, devname, "%u sectors (%u MB)\n",

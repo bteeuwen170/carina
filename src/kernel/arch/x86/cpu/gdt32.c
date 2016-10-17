@@ -45,7 +45,7 @@ static void gdt_set(const u8 gate, const u32 base, const u32 limit,
 /* FIXME Not i686 compatible ! */
 void gdt_init(void)
 {
-	u32 tss_base, tss_limit;
+	//u32 tss_base, tss_limit;
 
 	gdt_set(1, 0, 0, 0b0011000, true);		  /* 0x08 - Code SV */
 	gdt_set(2, 0, 0, 0b0010000, false);		  /* 0x10 - Data SV */

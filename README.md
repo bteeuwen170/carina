@@ -7,7 +7,7 @@ License: GPLv2
 
 
 ## File system tree
-Carina does not follow the FHS standard, instead it uses this
+Carina does not adhere to the FHS standard, instead it uses this
 filesystem hierarchy layout:
 
 	/                       Root
@@ -21,27 +21,27 @@ filesystem hierarchy layout:
 	├── boot                Boot loader files
 	│   └── grub            GRUB configuration
 	├── cfg                 System configuration files
-	├── dev                 Device files (devfs)
-	├── usr                 Users home directories
-	│   └── [user]          User home directory
-	│       ├── .app        User-specific applications folder
-	│       │   ├── bin     User-specific application binaries
-	│       │   ├── cfg     User-specific application configuration files
-	│       │   ├── inc     User-specific C include files
-	│       │   ├── lib     User-specific shared libraries
-	│       │   ├── shr     User-specific application data
-	│       │   └── tmp     User-specific application cache
-	│       ├── Documents   User documents
-	│       ├── Downloads   User downloads
-	│       ├── Music       User music
-	│       ├── Pictures    User pictures
-	│       └── Videos      User videos
+	├── mnt                 Mounting points
 	├── sys                 Kernel files (sysfs)
+	│   ├── dev             Device files (devfs)
 	│   ├── lck             Lock files
 	│   ├── krn             Kernel files
-	│   ├── prc             Process information
-	│   └── TODO
-	└── tmp                 Temporary files (tmpfs)
+	│   └── prc             Process information
+	├── tmp                 Temporary files (tmpfs)
+	└── usr                 Users home directories
+	    └── [user]          User home directory
+	        ├── .app        User-specific applications folder
+	        │   ├── bin     User-specific application binaries
+	        │   ├── cfg     User-specific application configuration files
+	        │   ├── inc     User-specific C include files
+	        │   ├── lib     User-specific shared libraries
+	        │   ├── shr     User-specific application data
+	        │   └── tmp     User-specific application cache
+	        ├── Documents   User documents
+	        ├── Downloads   User downloads
+	        ├── Music       User music
+	        ├── Pictures    User pictures
+	        └── Videos      User videos
 
 
 ## Building the toolchain
