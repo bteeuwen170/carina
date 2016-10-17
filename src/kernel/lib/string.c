@@ -167,6 +167,21 @@ char *strrev(char *str)
 	return str;
 }
 
+char *strtrm(char *str)
+{
+	char *d;
+
+	while (*str == ' ')
+		str++;
+
+	d = str + strlen(str);
+
+	while (*--d == ' ')
+		*d = '\0';
+
+	return str;
+}
+
 //TODO See header file
 
 int itostr(const char *ptr)

@@ -45,6 +45,8 @@ size_t strnlen(const char *str, size_t n);
 
 char *strrev(char *str);
 
+char *strtrm(char *str);
+
 /* int atoi(const char *str); */
 /* char *itoa(char *dest, const int src, const int base); */
 

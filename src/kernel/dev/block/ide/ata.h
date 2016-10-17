@@ -28,6 +28,10 @@
 #define ATA_CHANNELS		2
 #define ATA_DRIVES		2
 
+#define ATA_SECTOR_SIZE		512
+#define ATAPI_SECTOR_SIZE	2048
+
+
 #define ATA_REG_IO		0x00	/* I/O */
 #define ATA_REG_ERROR		0x01	/* Error */
 #define ATA_REG_FEATURES	0x01	/* Features */
@@ -73,6 +77,7 @@
 #define ATA_CMD_PIO_WRITE	0x30	/* ATA PIO write */
 #define ATA_CMD_DMA_READ	0xC8	/* ATA DMA read */
 #define ATA_CMD_DMA_WRITE	0xCA	/* ATA DMA write */
+#define ATA_CMD_PACKET		0xA0	/* ATA packet */
 #define ATA_CMD_IDENT		0xEC	/* ATA identify */
 
 #define ATAPI_CMD_READ		0xA8	/* ATAPI read */
@@ -90,11 +95,70 @@
 #define ATA_IDENT_MAX_LBA	0x78
 #define ATA_IDENT_CMDSETS	0xA4*/
 
+struct ata_ident {
+	u16		type;
+	u16		cylinders;
+	u8		reserved0[2];
+	u16		heads;
+	u8		unused0[4];
+	u16		sectors_per_track;
+	u16		vendor[3];
+	char		serial[20];
+	u8		unused1[6];
+	char		revision[8];
+	char		model[40];
+	u8		unused2[2];
+	u8		reserved1[2];
+	struct {
+		u8	reserved0;
+		u8	dma:1;
+		u8	lba28:1;
+		u8	unused0:2;
+		u8	reserved1:1;
+		u8	unused1:1;
+		u8	reserved2:2;
+		u8	reserved3[2];
+	} features;
+	u8		unused3[4];
+	u8		reserved2[2];
+	u8		unused4[12];
+	u32		lba28_max;
+	u8		unused5[14];
+	u8		reserved3[22];
+	u16		revision_major;
+	u16		revision_minor;
+	struct {
+		u8	unused0[3];
+		u8	unused1:2;
+		u8	lba48:1;
+		u8	unused2[2];
+		u8	unused3:5;
+	} cmdset;
+	struct {
+		u8	unused0[3];
+		u8	unused1:2;
+		u8	lba48:1;
+		u8	unused2[2];
+		u8	unused3:5;
+	} cmdset_active;
+	u8		udma_support;
+	u8		udma_active;
+	u8		reserved4[8];
+	u8		unused6[14];
+	u64		lba48_max;
+	/* TODO Finish */
+} __attribute__ ((packed));
+
+#define ATA_DEV_TYPE_ATA	0x00	/* ATA device */
+#define ATA_DEV_TYPE_ATAPI	0x01	/* ATAPI device */
+
 struct ata_dev {
-	u8	channel;
-	u8	drive;
-	u8	type;
-	u32	size;
+	u8			ch;
+	u8			drv;
+	u8			type;
+	u64			size;
+
+	struct ata_ident	ident;
 };
 
 struct ata_channel {
@@ -103,48 +167,6 @@ struct ata_channel {
 	u16	bus_master;
 	u8	nint;
 };
-
-struct ata_ident {
-	u16		type;
-	u16		cylinders;
-	u16		reserved0;
-	u16		heads;
-	u32		unused0;
-	u16		sectors_per_track;
-	u16		vendor[3];
-	char		serial[20];
-	u16		unused1[3];
-	char		revision[8];
-	char		model[40];
-	u16		unused2;
-	u16		reserved1;
-	struct {
-		u8	reserved0;
-		u8	dma:1;
-		u8	lba:1;
-		u16	unused0:2;
-		u8	reserved1:1;
-		u8	unused1:1;
-		u8	reserved2:2;
-		u16	reserved3;
-	} features;
-	u32		unused3;
-	u16		reserved2;
-	u8		unused4[12];
-	u32		lba28_max;
-	u8		unused5[14];
-	u8		reserved3[22];
-	u16		revision_major;
-	u16		revision_minor;
-	u16		cmdset[3]; /* TODO Struct */
-	u16		cmdset_active[3]; /* TODO Struct */
-	u8		udma_support;
-	u8		udma_active;
-	u8		reserved4[8];
-	u8		unused6[14];
-	u32		lba48_max;
-	/* TODO Finish */
-} __attribute__ ((packed));
 
 void ide_reghandler(void);
 
