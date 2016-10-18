@@ -2,7 +2,7 @@
 # toolchain/Makefile
 #
 
-# FIXME Not safely written
+# FIXME Not foolproofly written
 
 PHONY += toolchain
 toolchain: toolchain-binutils toolchain-gcc

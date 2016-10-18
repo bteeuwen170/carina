@@ -22,8 +22,9 @@
  *
  */
 
-#include <cpu.h>
-//#include <kernel/print.h>
+//#include <print.h>
+
+#include <asm/cpu.h>
 
 //static char *devname = "tss";
 

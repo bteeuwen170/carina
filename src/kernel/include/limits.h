@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/include/kernel/ipc.h
+ * src/kernel/include/limits.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,14 +22,22 @@
  *
  */
 
-#ifndef _KERNEL_IPC_H
-#define _KERNEL_IPC_H
+/* TODO Relocate in seperate files and delete this */
 
-/* Global pipes */
-struct inode *kbd_pipe;
+#ifndef _LIMITS_H
+#define _LIMITS_H
 
-struct inode_pipe {
-	u8	*data;
-};
+/* FIXME Not here */
+//#define BLOCK_SIZE	1024	/* Block size */
+//#define SECTOR_SIZE	512	/* Sector size */
+//#define CPUS_MAX	8	/* Max. number of CPUs */
+
+#define CHILD_MAX	512	/* Max. number of processes */
+//#define LINK_MAX	32	/* Max. number of links for a file */
+#define NAME_MAX	255	/* Max. length of a file name */
+//#define NGROUPS_MAX	8	/* Max. number of GIDs per process */
+#define OPEN_MAX	32	/* Max. open files */
+#define PATH_MAX	4096	/* Max. length of a path name */
+//#define INODES_MAX	64	/* Max. inodes in memory */
 
 #endif

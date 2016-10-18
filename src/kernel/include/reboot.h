@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/include/kernel/limits.h
+ * src/kernel/include/reboot.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,24 +22,15 @@
  *
  */
 
-/* TODO Relocate in seperate files and delete this */
+#ifndef _REBOOT_H
+#define _REBOOT_H
 
-#ifndef _KERNEL_LIMITS_H
-#define _KERNEL_LIMITS_H
+#define REBOOT_HALT	0x01	/* Halt the system */
+#define REBOOT_POWEROFF	0x02	/* Power the system off (if supported) */
+#define REBOOT_RESTART	0x03	/* Restart the system */
+#define REBOOT_PANIC	0x04	/* Force a kernel panic */
+#define REBOOT_KALL	0x05	/* Kill all processes */
 
-/* FIXME Not here */
-//#define BLOCK_SIZE	1024	/* Block size */
-//#define SECTOR_SIZE	512	/* Sector size */
-
-#define CPUS_MAX	8	/* Max. number of CPUs */
-
-#define INODES_MAX	64	/* Max. inodes in memory */
-#define LINKS_MAX	128	/* Max. number of links for a file */
-#define NAME_MAX	256	/* Max. length of a file name */
-#define PATH_MAX	4096	/* Max. length of a path name */
-
-#define PROC_MAX	512	/* Max. number of processes */
-#define PFILES_MAX	16	/* Max. open files per process */
-#define SFILE_MAX	1024	/* Max. open files */
+void reboot(void);
 
 #endif

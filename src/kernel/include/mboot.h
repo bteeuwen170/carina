@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/include/kernel/mboot.h
+ * src/kernel/include/mboot.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,9 +22,8 @@
  *
  */
 
-#ifndef _KERNEL_MBOOT_H
-#define _KERNEL_MBOOT_H
-
+#ifndef _MBOOT_H
+#define _MBOOT_H
 
 struct mboot_mmap {
 	u32	size;

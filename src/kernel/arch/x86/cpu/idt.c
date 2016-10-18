@@ -22,13 +22,15 @@
  *
  */
 
+#include <print.h>
+#include <syscall.h>
+
+#include <asm/8259.h>
+#include <asm/cpu.h>
+#include <asm/int.h>
+
 #include <stdio.h>
 #include <string.h>
-#include <cpu.h>
-#include <kernel/print.h>
-#include <8259.h>
-#include <int.h>
-#include <kernel/syscall.h>
 
 static char *devname = "idt";
 

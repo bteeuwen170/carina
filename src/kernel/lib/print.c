@@ -14,14 +14,16 @@
  * TODO Implement color
  */
 
-#include <video/fb.h>
-#include <kbd/kbd.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <video/vga.h>
-#include <kernel/print.h>
+#include <print.h>
+
 #include <char/serial/serial.h>
+#include <kbd/kbd.h>
+#include <video/fb.h>
+#include <video/vga.h>
+
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
 
 /* we use this so that we can do without the ctype library */
 #define isdigit(c)	((c) >= '0' && (c) <= '9')

@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/include/sys/err.h
+ * src/kernel/include/errno.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef _ERR_H
-#define _ERR_H
+#ifndef _ERRNO_H
+#define _ERRNO_H
 
 #define EPERM		1	/* Operation not permitted */
 #define ENOENT		2	/* No such file or directory */

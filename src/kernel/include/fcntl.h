@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/arch/x86/include/8259.h
+ * src/kernel/include/fcntl.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,27 +22,20 @@
  *
  */
 
-#ifndef _8259_H
-#define _8259_H
+#ifndef _FCNTL_H
+#define _FCNTL_H
 
-#define PIC_M_CMD	0x20
-#define PIC_M_IO	0x21
-#define PIC_M_OFF	0x20
+/*
+ * File creation flags
+ */
+#define O_CREAT		0x200	/* Create file if doesn't exist */
 
-#define PIC_S_CMD	0xA0
-#define PIC_S_IO	0xA1
-#define PIC_S_OFF	0x28
-
-#define PIC_EOI		0x20
-
-#define ICW1_PIC_M	0x02
-#define ICW1_PIC_S	0x04
-
-#define ICW1_INIT	0x11
-#define ICW1_8086	0x01
-
-void pic_remap(void);
-
-void pic_disable(void);
+/*
+ * File access modes (mode_t)
+ */
+#define O_ACCMODE	0x03
+#define O_RDONLY	0x00	/* Read only */
+#define O_WRONLY	0x01	/* Write only */
+#define O_RDWD		0x02	/* Read and write */
 
 #endif

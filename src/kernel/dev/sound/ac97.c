@@ -21,15 +21,17 @@
  * USA.
  *
  */
-
 /* FIXME This is broken */
+
+#include <print.h>
+
+#include <asm/cpu.h>
+
+#include <pci/pci.h>
+#include <timer/pit.h>
 
 //#include <stdint.h> //TEMP
 #include <stdlib.h>
-#include <cpu.h>
-#include <timer/pit.h>
-#include <kernel/print.h>
-#include <pci/pci.h>
 
 #include "ac97.h"
 #include "snd.h"

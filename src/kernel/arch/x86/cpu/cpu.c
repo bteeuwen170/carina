@@ -22,7 +22,8 @@
  *
  */
 
-#include <cpu.h>
+#include <asm/cpu.h>
+
 #include <stdio.h>
 #include <string.h>
 

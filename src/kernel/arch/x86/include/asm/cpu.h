@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/arch/x86/include/cpu.h
+ * src/kernel/arch/x86/include/asm/cpu.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -25,7 +25,7 @@
 #ifndef _CPU_H
 #define _CPU_H
 
-#include <cpub.h>
+#include <asm/cpub.h>
 
 #define GDT_ENTRIES	6
 

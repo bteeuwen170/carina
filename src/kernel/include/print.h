@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/include/kernel/syscall.h
+ * src/kernel/include/print.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,9 +22,29 @@
  *
  */
 
-#ifndef _KERNEL_SYSCALL_H
-#define _KERNEL_SYSCALL_H
+#ifndef _PRINT_H
+#define _PRINT_H
 
-#define SINT_SYSCALL	0x80
+/* Loglevels */
+typedef enum {
+	KP_DBG	= 0,
+	KP_INFO	= 1,
+	KP_WARN	= 2,
+	KP_ERR	= 3,
+	KP_CRIT	= 4
+} loglevel_t;
+
+/* Loglevels */
+#define LL_DEFAULT	2 //TODO Change to 1
+#define LL_QUIET	0 /* KP_ERR + */
+#define LL_NORMAL	1 /* KP_WARN + */
+#define LL_VERBOSE	2 /* KP_INFO + */
+#define LL_DBG		3 /* KP_BDG + */
+
+void kprintf(const loglevel_t kp, char *prefix, char *fmt, ...);
+
+void kprint(char *fmt, ...);
+
+i8 get_kp();
 
 #endif

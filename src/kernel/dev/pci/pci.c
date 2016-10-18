@@ -22,10 +22,12 @@
  *
  */
 
+#include <asm/cpu.h>
+
+#include <print.h>
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <cpu.h>
-#include <kernel/print.h>
 
 #include "pci.h"
 

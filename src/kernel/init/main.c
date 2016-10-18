@@ -23,27 +23,31 @@
  */
 
 /* TODO Clean up this mess */
-#include <rtc/cmos.h>
-#include <kernel/mboot.h>
-#include <kernel/issue.h>
-#include <cpu.h>
+#include <issue.h>
+#include <mboot.h>
+#include <reboot.h>
+#include <sys/time.h>
+
+#include <asm/8259.h>
+#include <asm/cpu.h>
+
+#include <block/ide/ata.h>
 #include <char/serial/serial.h>
-#include <kernel/reboot.h>
-#include <timer/pit.h>
-#include <sound/pcspk.h>
-#include <video/fb.h>
 #include <kbd/kbd.h>
-#include <kernel/time.h>
+#include <pci/pci.h>
+#include <print.h>
+#include <rtc/cmos.h>
+#include <sound/ac97.h>
+#include <sound/pcspk.h>
+#include <timer/pit.h>
+#include <video/fb.h>
+#include <video/vesa.h>
+#include <video/vga.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <8259.h>
-#include <video/vga.h>
-#include <pci/pci.h>
-#include <block/ide/ata.h>
-#include <kernel/print.h>
-#include <video/vesa.h>
-#include <sound/ac97.h>
+
 #include "../fs/ramfs/ramfs.h"
 
 extern void usrmode_enter();
@@ -162,6 +166,12 @@ void kernel_main(struct mboot_info *mboot)
 
 	pci_scan();
 
+	struct inode *ipp;
+	u32 sdfs = 0;
+	int res = ramfs_get(4096, &sdfs, &ipp);
+
+	kprintf(KP_DBG, "fs", "ret: %d  dev: %u\n", res, sdfs);
+
 #if 0
 	usrmode_enter();
 
@@ -212,19 +222,23 @@ void kernel_main(struct mboot_info *mboot)
 
 		printc(c);
 
-		if (strcmp(cmd, "beep") == 0) {
+		/* File system */
+		if (strcmp(cmd, "fs init") == 0) {
+			//u32 sdf = 0;
+			//int res = ramfs_get(4096, &sdf, &ipp);
+
+			//kprintf(KP_DBG, "fs", "ret: %d  dev: %u\n", res, sdf);
+		} else if (strcmp(cmd, "ls") == 0) {
+			int n = 0;
+			while (ramfs_read_dir(ipp, n) != NULL)
+				kprintf(0,0, "%s\n",
+						ramfs_read_dir(ipp, n++)->name);
+
+		/* Audio */
+		} else if (strcmp(cmd, "beep") == 0) {
 			pcspk_play(835);
 			sleep(10);
 			pcspk_stop();
-
-		/* File system */
-		} else if (strcmp(cmd, "fs init") == 0) {
-			u32 sdf = 0;
-			int res = ramfs_create(4096, &sdf);
-
-			kprintf(KP_DBG, "fs", "ret: %d  dev: %u\n", res, sdf);
-
-		/* Audio */
 		} else if (strcmp(cmd, "ac97 play") == 0) {
 			ac97_play();
 			kprintf(KP_DBG, "ac97", "WAV playing\n");

@@ -22,7 +22,7 @@
  *
  */
 
-#include <cpu.h>
+#include <asm/cpu.h>
 
 #include "kbd.h"
 #include "ps2.h"

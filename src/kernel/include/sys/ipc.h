@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/arch/x86/include-32/cputypes.h
+ * src/kernel/include/sys/ipc.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,9 +22,14 @@
  *
  */
 
-#ifndef _CPUTYPES_H
-#define _CPUTYPES_H
+#ifndef _IPC_H
+#define _IPC_H
 
-typedef unsigned int size_t;
+/* Global pipes */
+struct inode *kbd_pipe;
+
+struct inode_pipe {
+	u8	*data;
+};
 
 #endif

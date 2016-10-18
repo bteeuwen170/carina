@@ -26,7 +26,7 @@ QEMU			:= qemu-system-$(ARCHQEMU)
 
 # TODO Relocate in arch directory
 # TEMP
-TYPES			= src/kernel/include/kernel/types.h
+TYPES			= src/kernel/include/sys/types.h
 # TEMP
 ASFLAGS			:= $(ARCHFLAG)
 CFLAGS			:= $(ARCHFLAG) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
@@ -50,6 +50,7 @@ PHONY += carina
 carina: kernel
 
 PHONY += clean
+# TODO Clean toolchain
 clean:
 	@echo -e "\033[1m> Removing binaries...\033[0m"
 	@find src -type f -name '*.o' -exec rm {} \;
@@ -75,6 +76,7 @@ clean:
 	 fi;
 
 PHONY += help
+# TODO Update
 help:
 	@echo -e "\033[1mMakefile for Carina\033[0m"
 	@echo
@@ -94,8 +96,9 @@ endif
 	@echo " - qemu      Boot the Live CD iso in QEMU"
 	@echo " - qemud     Boot the Live CD iso in QEMU with debugging flags"
 
-# TODO Rethink and do this differently
-mktree:
+# TODO Implement this differently
+fstree: root/tmp/
+root/tmp/:
 	@echo -e "\033[1m> Creating Carina root filesystem tree...\033[0m"
 	@mkdir -p root/
 	@mkdir -p root/app/
@@ -127,7 +130,7 @@ mktree:
 	@mkdir -p root/usr/root/Videos/
 
 PHONY += iso
-iso: bin/carina.iso
+iso: fstree bin/carina.iso
 bin/carina.iso: bin/kernel
 	@echo -e "\033[1m> Copying kernel to system root...\033[0m"
 	@cp bin/kernel root/boot/.

@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/include/kernel/elf.h
+ * src/kernel/include/elf.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef _KERNEL_ELF_H
-#define _KERNEL_ELF_H
+#ifndef _ELF_H
+#define _ELF_H
 
 struct elf_header32 {
 	u8		magic[16];

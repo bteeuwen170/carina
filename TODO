@@ -37,6 +37,8 @@ n Native support for MS-DOS executables using some kind of low-level vm,
 - base_adr_* to bar_*
 - Seperate all driver header files into it's own directory
 - FIXME PCI bug, handler isn't called after reboot (dirty memory)
+- Don't allow including files from dev/, provide interface in include/dev/
+  instead
 
 Makefile
 - Seperate kernel-o and kernel-l (objects and libs)

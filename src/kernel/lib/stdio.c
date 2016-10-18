@@ -22,11 +22,13 @@
  *
  */
 
+#include <print.h>
+
 #include <kbd/kbd.h>
+#include <video/vga.h>
+
 #include <stdio.h>
 #include <string.h>
-#include <video/vga.h>
-#include <kernel/print.h>
 
 /*
  * TODO This has to be safer

@@ -24,8 +24,9 @@
 
 /* TODO Rewrite this crap */
 
-#include <cpu.h>
-#include <kernel/print.h>
+#include <asm/cpu.h>
+
+#include <print.h>
 
 #include "vga.h"
 

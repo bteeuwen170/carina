@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/arch/x86/include/int.h
+ * src/kernel/arch/x86/include/asm/int.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *

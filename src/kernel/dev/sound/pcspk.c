@@ -22,7 +22,8 @@
  *
  */
 
-#include <cpu.h>
+#include <asm/cpu.h>
+
 #include <timer/pit.h>
 
 void pcspk_play(const u16 freq)

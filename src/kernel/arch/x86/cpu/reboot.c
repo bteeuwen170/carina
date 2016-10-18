@@ -22,7 +22,8 @@
  *
  */
 
-#include <cpu.h>
+#include <asm/cpu.h>
+
 #include <kbd/ps2.h>
 
 #define bit(n) (1 << (n))

@@ -21,7 +21,7 @@
  * USA.
  *
  */
-#include <stdlib.h>
+
 #include "string.h"
 
 void *memcpy(void *dest, const void *src, size_t n)
@@ -103,7 +103,7 @@ char *strncpy(char *dest, const char *src, size_t n)
 		dest[i] = src[i];
 
 	while (i < n)
-		dest[++i] = '\0';
+		dest[i++] = '\0';
 
 	return dest;
 #else

@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/include/kernel/issue.h
+ * src/kernel/arch/x86/include-64/asm/cputypes.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,9 +22,10 @@
  *
  */
 
-#ifndef _KERNEL_ISSUE_H
-#define _KERNEL_ISSUE_H
+#ifndef _CPUTYPES_H
+#define _CPUTYPES_H
 
-#define CARINA_VER 0.1
+typedef unsigned long long	size_t;
+typedef long long		ssize_t;
 
 #endif

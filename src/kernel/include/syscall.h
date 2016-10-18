@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/arch/x86/include-64/cputypes.h
+ * src/kernel/include/syscall.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,9 +22,9 @@
  *
  */
 
-#ifndef _CPUTYPES_H
-#define _CPUTYPES_H
+#ifndef _SYSCALL_H
+#define _SYSCALL_H
 
-typedef unsigned long long size_t;
+#define SINT_SYSCALL	0x80
 
 #endif

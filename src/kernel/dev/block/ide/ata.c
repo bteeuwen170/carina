@@ -22,12 +22,15 @@
  *
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <cpu.h>
+#include <print.h>
+
+#include <asm/cpu.h>
+
 #include <pci/pci.h>
 #include <timer/pit.h>
-#include <kernel/print.h>
+
+#include <stdlib.h>
+#include <string.h>
 
 #include "ata.h"
 

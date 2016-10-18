@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/include/kernel/time.h
+ * src/kernel/arch/x86/include/asm/8259.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,11 +22,27 @@
  *
  */
 
-#ifndef _KERNEL_TIME_H
-#define _KERNEL_TIME_H
+#ifndef _8259_H
+#define _8259_H
 
-i8 time_init(void);
+#define PIC_M_CMD	0x20
+#define PIC_M_IO	0x21
+#define PIC_M_OFF	0x20
 
-void time_nice(void *str);
+#define PIC_S_CMD	0xA0
+#define PIC_S_IO	0xA1
+#define PIC_S_OFF	0x28
+
+#define PIC_EOI		0x20
+
+#define ICW1_PIC_M	0x02
+#define ICW1_PIC_S	0x04
+
+#define ICW1_INIT	0x11
+#define ICW1_8086	0x01
+
+void pic_remap(void);
+
+void pic_disable(void);
 
 #endif

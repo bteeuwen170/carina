@@ -25,7 +25,7 @@
 #ifndef _PIT_H
 #define _PIT_H
 
-#include <kernel/time.h>
+#include <sys/time.h>
 
 #define PIT_RATE	0b00110110
 #define PIT_SPKR	0b10110110

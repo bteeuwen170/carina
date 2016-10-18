@@ -22,14 +22,16 @@
  *
  */
 
+#include <errno.h>
+#include <fs.h>
+#include <limits.h>
+#include <print.h>
+#include <sys/types.h> /* XXX TEMP for syntax highlighting */
+
 #include <stdlib.h>
 #include <string.h>
-#include <kernel/types.h> /* XXX TEMP for syntax highlighting */
-#include <kernel/print.h>
-#include <kernel/limits.h>
-#include <sys/err.h>
 
-#include <sys/fs.h>
+#include "ramfs.h"
 
 /* Block size */
 //#define RAMFS_BS	0
@@ -39,17 +41,21 @@
 
 /* Inode */
 //#define INODE(inum, sb)	((inum) / RAMFS_IPB + sb.fb)
+//
+#define RAMFS_NAME_MAX	(NAME_MAX)
 
 struct ramfs_dirent {
-	u64	inum;
-	char	name[NAME_MAX];
+	ino_t	inum;
+	u8	type;
+
+	char	name[RAMFS_NAME_MAX + 1];
 };
 
 struct ramfs_inode {
 	u8	type;
-//	u16	perms;
+	mode_t	mode;
 
-	u32	links;
+	link_t	links;
 
 	uid_t	uid;
 	gid_t	gid;
@@ -58,20 +64,211 @@ struct ramfs_inode {
 	time_t	ctime;
 	time_t	mtime;
 
-	u64	size;
+	off_t	size;
 
-	struct ramfs_dirent	*dep;
-	void			*data;
+	void	*data;
 };
 
-static struct inode *ramfs_get(struct block_dev *dev, u64 inum)
+/*
+ * Allocate a new inode
+ */
+static struct inode *ramfs_alloc_inode(struct block_dev *dev)
+{
+	ino_t i;
+
+	/* FIXME Skips lot's of empty inodes for some reason... */
+	for (i = 1; i < dev->inodes; i++) {
+		//kprintf(0,0, "crap: %u\n",
+		//		((struct ramfs_inode *) dev->data[i])->type);
+		if (((struct ramfs_inode *) dev->data[i]) != 0)
+			continue;
+
+		dev->data[i] = kmalloc(sizeof(struct ramfs_inode));
+
+		struct inode *ip;
+
+		ip = kmalloc(sizeof(struct inode));
+
+		if (!ip)
+			return NULL;
+
+		ip->dev = dev;
+		ip->inum = i;
+
+		ip->type = ((struct ramfs_inode *) dev->data[i])->type;
+		ip->mode = 0;
+
+		ip->refs = 1;
+		ip->links = 0;
+
+		ip->uid = ((struct ramfs_inode *) dev->data[i])->uid;
+		ip->gid = ((struct ramfs_inode *) dev->data[i])->gid;
+
+		ip->atime = ((struct ramfs_inode *) dev->data[i])->atime;
+		ip->ctime = ((struct ramfs_inode *) dev->data[i])->ctime;
+		ip->mtime = ((struct ramfs_inode *) dev->data[i])->mtime;
+
+		ip->size = ((struct ramfs_inode *) dev->data[i])->size;
+
+		return ip;
+	}
+
+	return NULL;
+}
+
+/*
+ * Write an inode
+ */
+static void ramfs_write_inode(struct inode *ip)
+{
+	struct ramfs_inode *is;
+
+	is = (struct ramfs_inode *) ip->dev->data[ip->inum];
+
+	/* TODO Make sure exists beforehand */
+	if (!is)
+		return; //TODO Should notify of error somehow!
+
+	is->type = ip->type;
+
+	is->uid = ip->uid;
+	is->gid = ip->gid;
+
+	is->atime = ip->atime;
+	is->ctime = ip->ctime;
+	is->mtime = ip->mtime;
+
+	is->size = ip->size;
+}
+
+/*
+ * Read from an inode
+ */
+static int ramfs_read(struct inode *ip, void *data, off_t off, size_t n)
+{
+	struct ramfs_inode *is;
+
+	if (n < 1)
+		return 0;
+
+	is = (struct ramfs_inode *) ip->dev->data[ip->inum];
+
+	if (!is || !is->data)
+		return -1;
+
+	memcpy(data, is->data + off, n);
+
+	return 0;
+}
+
+/*
+ * Write to an inode
+ */
+static int ramfs_write(struct inode *ip, const void *data, off_t off, size_t n)
+{
+	struct ramfs_inode *is;
+
+	if (n < 1)
+		return 0;
+
+	is = (struct ramfs_inode *) ip->dev->data[ip->inum];
+
+	if (!is)
+		return -1; //TODO
+
+	if (!is->data)
+		is->data = kmalloc(off + n);
+	//else if (off + n > ip->size)
+	//	is->data = krealloc(is->data, off + n);
+	else if (off + n > ip->size) { /* XXX XXX XXX XXX XXX TEMP !!!! FIXME */
+		void *p = kmalloc(off + n);
+		if (!p)
+			return -1;
+			//TOERRNO return -ENOMEM;
+		memcpy(p, is->data, is->size);
+		kfree(is->data);
+		is->data = p;
+	}
+
+	if (!is->data)
+		return -1;
+		//TOERRNO return -ENOMEM;
+
+	memmove(is->data + off, data, n);
+
+	if (off + n > ip->size) {
+		ip->size = off + n;
+		ramfs_write_inode(ip);
+	}
+
+	return 0;
+}
+
+/*
+ * Create a file
+ */
+//TODO How do other Unix OSes do this?
+static int ramfs_create(struct inode *dp, struct dirent *dep, mode_t mode)
+{
+	struct inode *ip;
+	struct ramfs_dirent de;
+
+	ip = dp->dev->op->alloc_inode(dp->dev);
+
+	if (!ip)
+		return -1;
+
+	ip->mode = mode;
+
+	dp->dev->op->write_inode(ip);
+
+	return 0;
+}
+
+/*
+ * Create a hard link
+ */
+static int ramfs_link(struct dirent *dep, struct inode *dp, const char *name)
+{
+	struct ramfs_dirent de;
+
+	//if (odep->type == [directorytype] && odep->name != '.' or "..")
+	//	return -1; // TODO
+	//TODO Increase link count
+
+	de.inum = dep->inum;
+	de.type = dep->type;
+
+	strncpy(de.name, name, RAMFS_NAME_MAX + 1);
+
+	return ramfs_write(dp, &de, dp->size, sizeof(de));
+	//TODO ERRNO
+}
+
+/*
+ * Create a symbolic link
+ */
+/* TODO How does this crap work, how do you refer to other dirents? */
+static int ramfs_symlink(struct inode *dp, struct dirent *dep, const char *name)
+{
+	struct ramfs_dirent de;
+
+	de.inum = 0;
+	de.type = IT_LINK;
+
+	strncpy(de.name, name, RAMFS_NAME_MAX + 1);
+
+	return ramfs_write(dp, &de, dp->size, sizeof(de));
+}
+
+/*static struct inode *ramfs_open(struct block_dev *dev, ino_t inum)
 {
 	struct inode *ip;
 
 	ip = kmalloc(sizeof(struct inode));
 
 	if (!ip)
-		return 0;
+		return NULL;
 
 	ip->dev = dev;
 	ip->inum = inum;
@@ -91,128 +288,45 @@ static struct inode *ramfs_get(struct block_dev *dev, u64 inum)
 	ip->size = ((struct ramfs_inode *) dev->data[inum])->size;
 
 	return ip;
-}
+}*/
 
-/*
- * Create an inode
- */
-static struct inode *ramfs_alloc(struct block_dev *dev)
+static struct dirent *ramfs_alloc_dir(struct ramfs_dirent *de)
 {
-	u64 i;
+	struct dirent *dep;
 
-	/* TODO Don't hardcode first block */
-	for (i = 1; i < dev->inodes; i++) {
-		if (dev->data[i] != NULL)
-			continue;
+	dep = kmalloc(sizeof(struct dirent));
 
-		dev->data[i] = kmalloc(sizeof(struct ramfs_inode));
-
-		return ramfs_get(dev, i);
-	}
-
-	/* FIXME Doesn't work */
-	return 0;
-
-	//return -ENOSPC;
-}
-
-/*
- * Read from an inode
- */
-static int ramfs_read(struct inode *ip, void *data, u64 off, u64 n)
-{
-	struct ramfs_inode *is;
-
-	if (n < 1)
+	if (!dep)
 		return 0;
 
-	is = (struct ramfs_inode *) ip->dev->data[ip->inum];
+	memcpy(dep, de, sizeof(struct dirent));
 
-	if (is->data != NULL)
-		memcpy(data, is->data + off, n);
-
-	return 0;
+	return dep;
 }
 
 /*
- * Update an inode
+ * Read a directory entry by inode and offset
  */
-static int ramfs_update(struct inode *ip)
+//XXX TEMP without static
+struct dirent *ramfs_read_dir(struct inode *dp, off_t off)
 {
-	struct ramfs_inode *is;
+	struct ramfs_dirent de;
+	int res;
 
-	is = (struct ramfs_inode *) ip->dev->data[ip->inum];
+	/* TODO Check in vfs.c */
+	//if (dp->type != IT_DIR)
+	//	return 0;
+	
+	if (off * sizeof(struct ramfs_dirent) > dp->size - 1)
+		return NULL;
 
-	if (is == NULL)
-		return -1; //TODO Return proper value
+	res = ramfs_read(dp, &de, off * sizeof(struct ramfs_dirent),
+			sizeof(struct ramfs_dirent));
 
-	is->type = ip->type;
+	if (res < 0)
+		return NULL;
 
-	is->uid = ip->uid;
-	is->gid = ip->gid;
-
-	is->atime = ip->atime;
-	is->ctime = ip->ctime;
-	is->mtime = ip->mtime;
-
-	is->size = ip->size;
-
-	return 0;
-}
-
-/*
- * Write to an inode
- */
-static int ramfs_write(struct inode *ip, void *data, u64 off, u64 n)
-{
-	struct ramfs_inode *is;
-
-	if (n < 1)
-		return 0;
-
-	is = (struct ramfs_inode *) ip->dev->data[ip->inum + 1];
-
-	//dp = kmalloc(sizeof(struct block_dev));
-
-	if (!is)
-		return -1; //TODO Create new inode
-
-	/* FIXME */
-	//is->data = data;
-	memcpy(is->data + off, data, n);
-
-	if (off > ip->size) {
-		ip->size = off;
-		ramfs_update(ip);
-	}
-
-	return 0;
-}
-
-/*
- * Link an inode to a directory by inode number
- */
-static int ramfs_dir_write(struct inode *dp, u64 inum, char *name)
-{
-	struct ramfs_dirent dep;
-
-	do {
-		struct ramfs_inode *is = (struct ramfs_inode *) dp->dev->data[inum];
-
-		if (!is)
-			return -1;
-
-		if (!is->dep)
-			return -12;
-
-		if (strcmp(dep.name, name) == 0)
-			return -EEXIST;
-	} while (dep.inum != 0);
-
-	dep.inum = inum;
-	strncpy(dep.name, name, NAME_MAX);
-
-	return 0;
+	return ramfs_alloc_dir(&de);
 }
 
 ///*
@@ -231,11 +345,14 @@ static int ramfs_dir_write(struct inode *dp, u64 inum, char *name)
 /*
  * Create a new ramfs, size number of inodes
  * FIXME Number of inodes? That doesn't work like that I think...
+ * TODO Dynamically change # of inodes based on free ram
+ * TODO Temporarily returns ip
  */
-int ramfs_create(u64 size, u32 *dev)
+int ramfs_get(size_t size, u32 *dev, struct inode **ipp)
 {
 	struct block_dev *dp;
 	struct inode *ip;
+	struct dirent *dep;
 	int res;
 
 	dp = kmalloc(sizeof(struct block_dev));
@@ -245,43 +362,51 @@ int ramfs_create(u64 size, u32 *dev)
 		goto out;
 	}
 
-	dp->inum = 1;
+	dp->inum = 1; //FIXME Should be ip->inum, but ramfs_alloc_inode is broken
 	dp->inodes = size;
 
-	dp->op->alloc = ramfs_alloc;
-	dp->op->read = ramfs_read;
-	dp->op->write = ramfs_write;
+	dp->op->alloc_inode = ramfs_alloc_inode;
+	dp->op->write_inode = ramfs_write_inode;
+
+	dp->op->create = ramfs_create;
+	dp->op->link = ramfs_link;
+	dp->op->symlink = ramfs_symlink;
+
+	//dp->op->open = ramfs_open;
+	//dp->op->read = ramfs_read;
+	//dp->op->write = ramfs_write;
 
 	dev_reg(dp);
 
-	ip = ramfs_alloc(dp);
+	ip = ramfs_alloc_inode(dp);
+	dep = kmalloc(sizeof(struct dirent));
 
-	if (!ip) {
+	if (!ip || !dep) {
 		res = -ENOMEM;
 		goto out;
 	}
 
-	ip->dev = dp;
-	ip->inum = dp->inum;
-
 	ip->type = IT_DIR;
-
-	ip->refs = 0;
 	ip->links = 1;
 
-	res = ramfs_dir_write(ip, ip->inum, ".");
+	dep->inum = ip->inum;
+	dep->type = ip->type;
+
+	res = ramfs_link(dep, ip, ".");
 
 	if (res < 0)
 		goto out;
 
-	res = ramfs_dir_write(ip, ip->inum, "..");
+	res = ramfs_link(dep, ip, "..");
 
 	if (res < 0)
 		goto out;
 
-	ramfs_update(ip);
+	//ramfs_update(ip);
 
 	*dev = dp->dev;
+
+	*ipp = ip;
 
 	//struct dirent dep;
 	//ramfs_read(ip, &dep, 0, 0);
@@ -293,6 +418,7 @@ int ramfs_create(u64 size, u32 *dev)
 out:
 	kfree(dp);
 	kfree(ip);
+	kfree(dep);
 
 	return res;
 	//return NULL;

@@ -22,14 +22,15 @@
  *
  */
 
+#include <errno.h>
+#include <fcntl.h>
+#include <fs.h>
+#include <limits.h>
+#include <print.h>
+#include <sys/types.h> /* XXX TEMP for syntax highlighting */
+
 #include <stdlib.h>
 #include <string.h>
-#include <kernel/types.h> /* XXX TEMP for syntax highlighting */
-#include <kernel/print.h>
-#include <kernel/limits.h>
-#include <sys/err.h>
-
-#include <sys/fs.h>
 
 struct block_dev *block_devices;
 u32 devcount = 0;
@@ -77,7 +78,7 @@ void dev_reg(struct block_dev *dp)
 // * Link an inode to a directory by inode number
 // * FIXME In file system handler
 // */
-//int dir_write(struct inode *dp, u64 inum, char *name)
+//int dir_write(struct inode *dp, ino_t inum, char *name)
 //{
 //	struct dirent dep;
 //	int res;
@@ -115,7 +116,7 @@ void dev_reg(struct block_dev *dp)
  * TODO Seperate fie
  */
 
-struct inode inode_cache[INODES_MAX];
+//struct inode inode_cache[INODES_MAX];
 
 /* Where does this go? */
 /*static struct inode *inode_create(char *path)
@@ -125,20 +126,20 @@ struct inode inode_cache[INODES_MAX];
 	
 }*/
 
-//static struct inode *inode_get(u32 dev, u64 inum)
+//static struct inode *inode_get(u32 dev, ino_t inum)
 //{
 //	struct inode *ip;
 //
 //
 //}
 
-//static struct inode *inode_getn(char *path)
-//{
+static struct inode *inode_getp(char *path)
+{
 //	struct inode *ip;
 //
 //	if (*path == '/')
 //		ip = dev->; /* TODO Not always 1 for device */
-//}
+}
 
 //void inode_drop(struct inode *ip)
 //{
@@ -214,3 +215,62 @@ struct inode inode_cache[INODES_MAX];
 //
 //	return sys_touch(path, FT_DIR);
 //}
+
+/*
+ * Allocate a new inode
+ */
+static struct inode *inode_alloc(struct block_dev *dev, u8 type)
+{
+	//TODO Buffering
+
+	dev->op->alloc_inode(dev);
+}
+
+static struct inode *file_open(const char *path, int flags)
+{
+	if (!path)
+		return NULL;
+
+	return NULL;
+}
+
+static int file_create(const char *path, mode_t mode)
+{
+	//TODO
+}
+
+int sys_open(const char *path, int flags, mode_t mode)
+{
+	struct inode *ip;
+	int fd, res;
+
+	if (!path)
+		return -1;
+		//TOERRNO return -EINVAL;
+
+	if (*path != '/')
+		return -1; //TODO Handle relative path
+
+	if (flags & O_CREAT) {
+		res = file_create(path, mode);
+
+		if (res < 0)
+			return -1;
+			//TOERRNO return res;
+	}
+
+	ip = file_open(path, flags);
+
+	if (!ip)
+		return -1;
+		//TOERRNO return -ENOENT;
+
+	fd = 0; //TODO
+
+	return fd;
+}
+
+int sys_creat(const char *path, mode_t mode)
+{
+
+}

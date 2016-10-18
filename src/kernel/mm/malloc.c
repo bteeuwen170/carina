@@ -48,6 +48,20 @@ void *kmalloc(u64 size)
 	return p;
 }
 
+/*void *krealloc(void *ptr, u64 size)
+{
+	void *p = kmalloc(size);
+
+	if (!p)
+		return NULL;
+
+	//memcpy(p, ptr,
+
+	kfree(ptr);
+
+	return p;
+}*/
+
 void kfree(void *ptr)
 {
 	(void) ptr;

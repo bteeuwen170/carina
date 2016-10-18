@@ -22,9 +22,10 @@
  *
  */
 
+#include <lapic.h>
+
 #include <stdio.h>
 #include <string.h>
-#include <sys/lapic.h>
 
 static i8 lapic_avail(void) {
 	u32 eax, edx;

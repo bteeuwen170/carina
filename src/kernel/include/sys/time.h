@@ -1,7 +1,7 @@
 /*
  *
  * Carina
- * src/kernel/fs/ramfs/ramfs.h
+ * src/kernel/include/sys/time.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,12 +22,11 @@
  *
  */
 
-#ifndef _FS_RAMFS_H
-#define _FS_RAMFS_H
+#ifndef _TIME_H
+#define _TIME_H
 
-#include <fs.h>
+i8 time_init(void);
 
-int ramfs_get(u64 size, u32 *dev, struct inode **ipp);
-struct dirent *ramfs_read_dir(struct inode *dp, off_t off); //XXX TEMP
+void time_nice(void *str);
 
 #endif

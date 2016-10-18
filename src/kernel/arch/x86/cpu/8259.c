@@ -22,9 +22,10 @@
  *
  */
 
-#include <cpu.h>
-#include <8259.h>
-#include <kernel/print.h>
+#include <asm/cpu.h>
+#include <asm/8259.h>
+
+#include <print.h>
 
 static char *devname = "pic";
 

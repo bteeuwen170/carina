@@ -22,7 +22,7 @@
  *
  */
 
-#include <kernel/mboot.h>
+#include <mboot.h>
 
 //extern u64 kern_end;
 
