@@ -1,6 +1,6 @@
 /*
  *
- * Carina
+ * Clemence
  * src/kernel/arch/x86_64/cpu/gdt32.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>

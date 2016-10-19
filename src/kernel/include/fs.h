@@ -1,6 +1,6 @@
 /*
  *
- * Carina
+ * Clemence
  * src/kernel/include/fs.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
@@ -54,7 +54,7 @@
 //#define IM_OE		512	/* Other execute */
 //#define IM_SUID		1024	/* Set UID on execution */
 //#define IM_SGID		2048	/* Set GID on execution */
-///* The sticky bit is pretty useless, so it's ignored in Carina */
+///* The sticky bit is pretty useless, so it's ignored in Clemence */
 
 struct block_dev {
 	dev_t	dev;	/* Device identifier */

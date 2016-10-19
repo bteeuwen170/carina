@@ -1,13 +1,13 @@
-# Carina
+# Clemence
 
-This is the README file for Carina, a free and open source operating system for
+This is the README file for Clemence, a free and open source operating system for
 the i686 and x86\_64 architecture.
 
 License: GPLv2
 
 
 ## File system tree
-Carina does not adhere to the FHS standard, instead it uses this
+Clemence does not adhere to the FHS standard, instead it uses this
 filesystem hierarchy layout:
 
 	/                       Root
@@ -33,7 +33,7 @@ filesystem hierarchy layout:
 	        ├── .app        User-specific applications folder
 	        │   ├── bin     User-specific application binaries
 	        │   ├── cfg     User-specific application configuration files
-	        │   ├── inc     User-specific C include files
+	        │   ├── inc     User-specific C include files
 	        │   ├── lib     User-specific shared libraries
 	        │   ├── shr     User-specific application data
 	        │   └── tmp     User-specific application cache
@@ -46,7 +46,7 @@ filesystem hierarchy layout:
 
 ## Building the toolchain
 
-These utilities are required to build the Carina toolchain:
+These utilities are required to build the Clemence toolchain:
 
 * GNU C Compiler (or Clang)
 * GNU autoconf 2.64
@@ -56,22 +56,22 @@ These utilities are required to build the Carina toolchain:
 
 An active Internet connection is also needed to download the necessary files.
 
-Issue this command to build the Carina toolchain:
+Issue this command to build the Clemence toolchain:
 
 	make toolchain
 
 
-## Building Carina
+## Building Clemence
 
-These applications are required to build the Carina kernel:
+These applications are required to build the Clemence kernel:
 * GNU make
-* Carina toolchain
+* Clemence toolchain
 * cdrkit (for genisoimage to build an ISO image)
 * GRUB (for grub-mkimage to build an ISO image)
 
-Issue this command to build the carina kernel:
+Issue this command to build the clemence kernel:
 
-	make carina
+	make clemence
 
 
 ## About

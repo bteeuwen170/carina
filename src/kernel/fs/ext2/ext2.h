@@ -1,6 +1,6 @@
 /*
  *
- * Carina
+ * Clemence
  * src/kernel/fs/ext2/ext2.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>

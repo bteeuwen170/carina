@@ -1,6 +1,6 @@
 /*
  *
- * Carina
+ * Clemence
  * src/kernel/arch/x86/include-32/asm/cputypes.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>

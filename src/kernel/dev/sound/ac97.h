@@ -1,6 +1,6 @@
 /*
  *
- * Carina
+ * Clemence
  * src/kernel/dev/sound/ac97.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>

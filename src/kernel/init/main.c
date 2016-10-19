@@ -1,6 +1,6 @@
 /*
  *
- * Carina
+ * Clemence
  * src/kernel/init/main.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
@@ -59,7 +59,7 @@ void kernel_main(struct mboot_info *mboot)
 	serial_init(COM0);
 
 	/* TODO Other format (UTC) */
-	kprintf(KP_INFO, "cpu0", "Welcome to Carina! (compiled on %s %s)\n",
+	kprintf(KP_INFO, "cpu0", "Welcome to Clemence! (compiled on %s %s)\n",
 			__DATE__, __TIME__);
 	/* TODO Actually get starting cpu */
 
@@ -84,7 +84,7 @@ void kernel_main(struct mboot_info *mboot)
 	/* TODO Move */
 	/* TODO This is a mess */
 	/* Get memory map from Multiboot structure */
-	kprintf(KP_INFO, 0, "Carina has been loaded by %s\n", mboot->boot_loader_name);
+	kprintf(KP_INFO, 0, "Clemence has been loaded by %s\n", mboot->boot_loader_name);
 	struct mboot_mmap *mmap = (struct mboot_mmap *) mboot->mmap_addr;
 	while ((u64) mmap < mboot->mmap_addr + mboot->mmap_length) {
 		mmap = (struct mboot_mmap *) ((u64) mmap + mmap->size + sizeof(u32));
