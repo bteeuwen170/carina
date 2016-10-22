@@ -6,11 +6,3 @@ include src/kernel/arch/x86/boot/Makefile
 include src/kernel/arch/x86/cpu/Makefile
 
 kernel-i += -I src/kernel/arch/x86/include
-
-ifeq ($(ARCH),i686)
-kernel-i += -I src/kernel/arch/x86/include-32
-endif
-
-ifeq ($(ARCH),x86_64)
-kernel-i += -I src/kernel/arch/x86/include-64
-endif

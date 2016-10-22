@@ -1,7 +1,7 @@
 /*
  *
  * Clemence
- * src/kernel/fs/ramfs/ramfs.h
+ * src/kernel/arch/x86/include-32/asm/sys/types.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,12 +22,6 @@
  *
  */
 
-#ifndef _FS_RAMFS_H
-#define _FS_RAMFS_H
+typedef long		__asm_ssize_t;
 
-#include <fs.h>
-
-int ramfs_get(size_t size, u32 *dev, struct inode **ipp);
-struct dirent *ramfs_read_dir(struct inode *dp, off_t off); //XXX TEMP
-
-#endif
+typedef unsigned long	__asm_size_t;

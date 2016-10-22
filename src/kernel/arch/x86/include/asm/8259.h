@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef _8259_H
-#define _8259_H
+#ifndef _X86_8259_H
+#define _X86_8259_H
 
 #define PIC_M_CMD	0x20
 #define PIC_M_IO	0x21

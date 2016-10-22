@@ -28,7 +28,6 @@
 
 //static char *devname = "gdt";
 
-//static struct segment_desc gdt[GDT_ENTRIES];
 static struct segment_desc gdt[GDT_ENTRIES - 1];
 
 static void gdt_set(const u8 gate, const u32 base, const u32 limit,

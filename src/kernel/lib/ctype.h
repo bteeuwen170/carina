@@ -1,7 +1,7 @@
 /*
  *
  * Clemence
- * src/kernel/arch/x86/include-32/asm/cputypes.h
+ * src/kernel/lib/ctype.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,10 +22,12 @@
  *
  */
 
-#ifndef _CPUTYPES_H
-#define _CPUTYPES_H
+#ifndef _CTYPE_H
+#define _CTYPE_H
 
-typedef unsigned int	size_t;
-typedef int		ssize_t;
+int isspace(char c);
+
+char tolower(char c);
+char *stolower(char *str);
 
 #endif

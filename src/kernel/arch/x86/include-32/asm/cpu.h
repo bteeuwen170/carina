@@ -22,9 +22,6 @@
  *
  */
 
-#ifndef _CPUB_H
-#define _CPUB_H
-
 /* TODO Right now just a copy of the 64-bit file */
 
 struct segment_desc {
@@ -73,5 +70,3 @@ struct tss_entry {
 } __attribute__ ((packed));
 
 void cpu_info(void);
-
-#endif

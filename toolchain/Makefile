@@ -6,6 +6,9 @@
 
 # I shoud really use autoconf for this...
 
+# autoconf: http://ftp.gnu.org/gnu/autoconf/autoconf-2.64.tar.gz
+# automake: http://ftp.gnu.org/gnu/automake/automake-1.11.6.tar.gz
+
 PHONY += toolchain
 toolchain: toolchain-binutils toolchain-gcc
 

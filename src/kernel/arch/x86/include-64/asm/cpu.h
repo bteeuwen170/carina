@@ -22,9 +22,6 @@
  *
  */
 
-#ifndef _CPUB_H
-#define _CPUB_H
-
 /*
  * Can't use the long mode version because we're lazy and don't load a seperate
  * GDT for long mode. This shouldn't be an issue however, as the address of the
@@ -78,5 +75,3 @@ struct tss_entry {
 } __attribute__ ((packed));
 
 void cpu_info(void);
-
-#endif

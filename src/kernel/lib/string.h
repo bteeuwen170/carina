@@ -51,7 +51,7 @@ char *strtrm(char *str);
 /* char *itoa(char *dest, const int src, const int base); */
 
 //int strtoi(const char *str, char **ptr, int base);
-//long strtol(const char *str, char **ptr, int base);
+long strtol(const char *str, char **ptr, int base);
 //long long strtoll(const char *str, char **ptr, int base);
 
 //unsigned int strtoui(const string *str, string *ptr, u32 base);

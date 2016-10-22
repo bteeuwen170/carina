@@ -1,7 +1,7 @@
 /*
  *
  * Clemence
- * src/kernel/arch/x86/include-64/asm/cputypes.h
+ * src/kernel/arch/x86/include-64/asm/sys/types.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,10 +22,6 @@
  *
  */
 
-#ifndef _CPUTYPES_H
-#define _CPUTYPES_H
+typedef long long		__asm_ssize_t;
 
-typedef unsigned long long	size_t;
-typedef long long		ssize_t;
-
-#endif
+typedef unsigned long long	__asm_size_t;

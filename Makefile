@@ -5,7 +5,6 @@
 ARCH			:= x86_64
 ARCH32			= $(ARCH)
 ARCHQEMU		= $(ARCH)
-ARCHFLAG		= -D ARCH_$(ARCH)
 
 ifeq ($(ARCH),x86_64)
 ARCHT			= x86
@@ -16,6 +15,8 @@ ifeq ($(ARCH),i686)
 ARCHT			= x86
 ARCHQEMU		= i386
 endif
+
+ARCHFLAG		= -D ARCH_$(ARCH)
 
 CC			:= $(ARCH)-elf-clemence-gcc
 CC32			:= $(ARCH32)-elf-clemence-gcc
@@ -30,7 +31,7 @@ TYPES			= src/kernel/include/sys/types.h
 # TEMP
 ASFLAGS			:= $(ARCHFLAG)
 CFLAGS			:= $(ARCHFLAG) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
-CFLAGS32		:= $(ARCH32FLAG) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
+CFLAGS32		:= $(ARCHFLAG) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
 LDFLAGS			:= -nostdlib -z max-page-size=4096 #-s #-Os
 BOCHSFLAGS		:= -f cfg/bochs.rc -q
 QEMUFLAGS		:= -m 16M --serial vc -soundhw pcspk,ac97 #-vga std #-curses #-cpu qemu32 //To test no long mode message

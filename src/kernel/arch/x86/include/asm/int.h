@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef _INT_H
-#define _INT_H
+#ifndef _X86_INT_H
+#define _X86_INT_H
 
 /* Software interrupts */
 extern void _int0(void);

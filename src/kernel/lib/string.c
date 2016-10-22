@@ -184,6 +184,37 @@ char *strtrm(char *str)
 	return str;
 }
 
+long strtol(const char *str, char **ptr, int base)
+{
+	long n;
+
+	if (*str == '+' || *str == '-')
+		str++;
+
+	if (base == 0) {
+		//TODO
+	}
+
+	for (;;) {
+		if ((*str >= '0' && *str <= '7') ||
+				((*str == '8' || *str == '9') && base > 8))
+			n = n * base + *(str++) - '0';
+		else if (((*str >= 'a' && *str <= 'f') ||
+				(*str >= 'A' && *str <= 'F')) && base == 16)
+			n = n * base + *(str++) - 'A' + 10;
+		else
+			break;
+	}
+
+	str++;
+
+	if (!*ptr)
+		*ptr = str;
+	//TODO Memcpy
+
+	return (*str == '-' ? -1 : 1) * n;
+}
+
 //TODO See header file
 
 int itostr(const char *ptr)

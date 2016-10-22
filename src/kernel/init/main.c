@@ -75,26 +75,30 @@ void kernel_main(struct mboot_info *mboot)
 
 	mm_init();
 
+#if 0
 	/* TODO Move */
 	kprintf(KP_INFO, "mem", "%u KB base memory\n", mboot->mem_lower);
 	kprintf(KP_INFO, "mem",
 			"%u MB extended memory\n", mboot->mem_upper / 1024);
 
-#if 0
 	/* TODO Move */
-	/* TODO This is a mess */
-	/* Get memory map from Multiboot structure */
-	kprintf(KP_INFO, 0, "Clemence has been loaded by %s\n", mboot->boot_loader_name);
-	struct mboot_mmap *mmap = (struct mboot_mmap *) mboot->mmap_addr;
-	while ((u64) mmap < mboot->mmap_addr + mboot->mmap_length) {
-		mmap = (struct mboot_mmap *) ((u64) mmap + mmap->size + sizeof(u32));
-		kprintf(KP_INFO, "mem", "size = 0x%x, addr = 0x%x%x, len = 0x%x%x, type = 0x%x\n",
-				(u32) mmap->size, mmap->addr >> 32, mmap->addr & 0xFFFFFFFF, mmap->len >> 32, mmap->len & 0xFFFFFFFF, (u32) mmap->type);
-	}
+	kprintf(KP_DBG, "tmp", "Clemence has been loaded by %s\n", mboot->boot_loader_name);
 
-	for (mmap = (struct mboot_mmap *) mboot->mmap_addr; (u64) mmap < mboot->mmap_addr + mboot->mmap_length; mmap = (struct mboot_mmap *) ((u64) mmap + mmap->size + sizeof(mmap->size))) {
-		kprintf(KP_INFO, "mem", "size = 0x%x, addr = 0x%x%x, len = 0x%x%x, type = 0x%x\n",
-				(u32) mmap->size, mmap->addr >> 32, mmap->addr & 0xFFFFFFFF, mmap->len >> 32, mmap->len & 0xFFFFFFFF, (u32) mmap->type);
+	/* TODO Move */
+	/* TODO Only gets first 4GB */
+
+	struct mboot_mmap *mmap = (struct mboot_mmap *) mboot->mmap_addr;
+
+	kprintf(KP_INFO, "mem", "Physical memory map:\n");
+
+	while ((u64) mmap < mboot->mmap_addr + mboot->mmap_length) {
+		u64 addr = (mmap->addr_lo >> 32) | (mmap->addr_hi & 0xFFFFFFFF);
+		u64 len = (mmap->addr_lo >> 32) | (mmap->len_hi & 0xFFFFFFFF);
+
+		kprintf(KP_INFO, "mem", "  %#018x - %#018x (%#04x)\n",
+				addr, len, (u32) mmap->type);
+
+		mmap = (struct mboot_mmap *) ((u64) mmap + mmap->size + sizeof(mmap->size));
 	}
 #endif
 
@@ -190,7 +194,7 @@ void kernel_main(struct mboot_info *mboot)
 
 	cmd[0] = '\0';
 
-	prints("SV Shell:\n$ ");
+	prints("\e[1;34mSV Shell:\n$ ");
 
 	for (;;) {
 		char c;

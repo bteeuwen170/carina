@@ -22,10 +22,15 @@
  *
  */
 
-#ifndef _CPU_H
-#define _CPU_H
+#ifndef _X86_CPU_H
+#define _X86_CPU_H
 
-#include <asm/cpub.h>
+#ifdef ARCH_i686
+#   include "../../include-32/asm/cpu.h"
+#endif
+#ifdef ARCH_x86_64
+#   include "../../include-64/asm/cpu.h"
+#endif
 
 #define GDT_ENTRIES	6
 
