@@ -71,21 +71,18 @@ void kernel_main(struct mboot_info *mboot)
 			__DATE__, __TIME__);
 	/* TODO Actually get starting cpu */
 
-	kprintf(KP_INFO, "cmdline", "%s\n", mboot->cmdline);
+	/* TODO Move */
+	kprintf(KP_INFO | KP_CON, 0, "Elara has been loaded by %s\n",
+			mboot->boot_loader_name);
+	kprintf(KP_INFO | KP_CON, 0, "cmdline: %s\n", mboot->cmdline);
+
+	mm_init(mboot->mmap_addr, mboot->mmap_len);
 
 #if 0
-	mm_init(mboot->mmap_addr, mboot->mmap_len);
-#else
-	mm_init(NULL, NULL);
-#endif
-#if 1
 	/* TODO Move */
 	kprintf(KP_INFO, "mem", "%u KB base memory\n", mboot->mem_lo);
 	kprintf(KP_INFO, "mem",
 			"%u MB extended memory\n", mboot->mem_hi / 1024);
-
-	/* TODO Move */
-	kprintf(KP_DBG, "tmp", "Elara has been loaded by %s\n", mboot->boot_loader_name);
 #endif
 
 #if 0

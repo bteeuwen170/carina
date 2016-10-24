@@ -306,43 +306,31 @@ i32 sprintf(char *buf, const char *fmt, ...)
 }
 
 /* This function is a mess */
-void kprintf(const loglevel_t kp, char *prefix, char *fmt, ...)
+void kprintf(const u8 kp, char *prefix, char *fmt, ...)
 {
-	(void) kp;
 	char printbuf[1024], fmtbuf[1024], prefixbuf[1024];
 	va_list args;
-
-	//if (kp > get_kp();
 
 	va_start(args, fmt);
 	vsprintf(printbuf, fmt, args);
 
 	sprintf(prefixbuf, "%7s", prefix);
-	fmtbuf[0] = '\0';
-	if (prefix) {
-		strcat(fmtbuf, prefixbuf);
+
+	if (kp & KP_CON) {
+		strcpy(fmtbuf, "         ");
+	} else if (prefix) {
+		strcpy(fmtbuf, prefixbuf);
 		strcat(fmtbuf, ": ");
 	}
+
 	strcat(fmtbuf, printbuf);
 
-	prints(fmtbuf);
 	va_end(args);
 
 	//TEMP
+	prints(fmtbuf);
 	u32 i;
 	for (i = 0; i < strlen(fmtbuf); i++)
 		serial_out(COM0, fmtbuf[i]);
 	serial_out(COM0, 0x0D);
-}
-
-/* TEMP XXX */
-void kprint(char *fmt, ...)
-{
-	char printbuf[1024];
-	va_list args;
-
-	va_start(args, fmt);
-	vsprintf(printbuf, fmt, args);
-	prints(printbuf);
-	va_end(args);
 }

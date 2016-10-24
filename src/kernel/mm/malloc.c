@@ -85,7 +85,8 @@ void mm_init(u32 addr, u32 len)
 		u64 maddr = mmap->addr_lo | (mmap->addr_hi >> 16);
 		u64 mlen = mmap->len_lo | (mmap->len_hi >> 16);
 
-		kprintf(KP_INFO, devname, "  %#018x - %#018x (%#04x)\n",
+		kprintf(KP_INFO | KP_CON, devname,
+				"%#018lx - %#018lx (%#04x)\n",
 				maddr, maddr + mlen, (u32) mmap->type);
 
 		mem += mlen;

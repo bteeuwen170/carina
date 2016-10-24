@@ -294,7 +294,7 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 	kprintf(KP_INFO, devname, "%s, %s drive @ IRQ %u\n",
 			strtrm(dev->ident.model), (dev->type ? "ATAPI": "ATA"),
 			card->cfg->int_line);
-	kprintf(KP_INFO, devname, "%u sectors (%u MB)\n",
+	kprintf(KP_INFO | KP_CON, devname, "%u sectors (%u MB)\n",
 			dev->size, dev->size * ATA_SECTOR_SIZE / 1024 / 1024);
 
 	/* XXX TEMPORARY XXX */
