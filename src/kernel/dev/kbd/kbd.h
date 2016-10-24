@@ -1,6 +1,6 @@
 /*
  *
- * Clemence
+ * Elara
  * src/kernel/dev/kbd/kbd.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>

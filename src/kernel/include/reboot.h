@@ -1,6 +1,6 @@
 /*
  *
- * Clemence
+ * Elara
  * src/kernel/include/reboot.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>

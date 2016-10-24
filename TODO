@@ -40,6 +40,7 @@ n Native support for MS-DOS executables using some kind of low-level vm,
 - Don't allow including files from dev/, provide interface in include/dev/
   instead
 - Linked list generic solution
+- Scroll buffer with shortcuts to move up and down
 
 Makefile
 - Seperate kernel-o and kernel-l (objects and libs)

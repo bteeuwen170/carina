@@ -1,6 +1,6 @@
 /*
  *
- * Clemence
+ * Elara
  * src/kernel/kernel/time.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>

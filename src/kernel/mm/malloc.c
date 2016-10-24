@@ -1,6 +1,6 @@
 /*
  *
- * Clemence
+ * Elara
  * src/kernel/mm/malloc.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
@@ -21,6 +21,11 @@
  * USA.
  *
  */
+
+#include <mboot.h>
+#include <print.h>
+
+static char *devname = "mem";
 
 /* FIXME This is utter crap */
 #define BLOCK_SIZE	4096
@@ -68,9 +73,34 @@ void kfree(void *ptr)
 	return;
 }
 
-void mm_init(void)
+void mm_init(u32 addr, u32 len)
 {
+	/* TODO Suppress this d*mn warning */
+	struct mboot_mmap *mmap = (void *) addr;
+	u64 mem = 0;
+
+	kprintf(KP_INFO, devname, "Physical memory map:\n");
+
+	while ((u64) mmap < addr + len) {
+		u64 maddr = mmap->addr_lo | (mmap->addr_hi >> 16);
+		u64 mlen = mmap->len_lo | (mmap->len_hi >> 16);
+
+		kprintf(KP_INFO, devname, "  %#018x - %#018x (%#04x)\n",
+				maddr, maddr + mlen, (u32) mmap->type);
+
+		mem += mlen;
+
+		mmap = (struct mboot_mmap *)
+				((u64) mmap + mmap->size + sizeof(mmap->size));
+	}
+
+	/* FIXME Always off by 1 for some reason */
+	kprintf(KP_INFO, devname, "%u MB memory\n", mem / 1024 / 1024 + 1);
+
+	/* FIXME How much padding is really required? */
+	//position = ((paddr_t) &kern_end) + 0x10000;
 	position = 0x200000;
+
 	/*u16 i;
 
 	for (i = 0; i < BLOCKS_MAX; i++) {

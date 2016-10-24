@@ -1,6 +1,6 @@
 /*
  *
- * Clemence
+ * Elara
  * src/kernel/link.ld
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
@@ -22,11 +22,12 @@
  *
  */
 
+LOAD_VMA = 0x100000;
 /* KERN_VMA = 0xFFFFFFFF80000000; */
 
 SECTIONS
 {
-	. = 0x100000;
+	. = LOAD_VMA;
 
 	.mboot ALIGN(4096) : {
 		*(.mboot)

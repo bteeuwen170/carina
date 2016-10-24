@@ -1,6 +1,6 @@
 /*
  *
- * Clemence
+ * Elara
  * src/kernel/fs/ramfs/ramfs.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
@@ -24,14 +24,13 @@
 
 #include <errno.h>
 #include <fs.h>
+#include <fs/ramfs.h>
 #include <limits.h>
 #include <print.h>
 #include <sys/types.h> /* XXX TEMP for syntax highlighting */
 
 #include <stdlib.h>
 #include <string.h>
-
-#include "ramfs.h"
 
 /* Block size */
 //#define RAMFS_BS	0

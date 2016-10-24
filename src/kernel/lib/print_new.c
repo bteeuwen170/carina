@@ -1,6 +1,6 @@
 /*
  *
- * Clemence
+ * Elara
  * src/kernel/lib/print.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
@@ -61,7 +61,6 @@ static char *num_get(char *str, size_t num, int base, int size, int prec,
 	return " ";
 }
 
-/* This includes some C99 bits I like */
 int vsprintf(char *buf, const char *fmt, va_list args)
 {
 	char *str;

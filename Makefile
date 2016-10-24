@@ -22,6 +22,10 @@ CC			:= $(ARCH)-elf-clemence-gcc
 CC32			:= $(ARCH32)-elf-clemence-gcc
 AS			:= $(ARCH)-elf-clemence-as
 LD			:= $(ARCH)-elf-clemence-ld
+#CC			:= $(ARCH)-elf-elara-gcc
+#CC32			:= $(ARCH32)-elf-elara-gcc
+#AS			:= $(ARCH)-elf-elara-as
+#LD			:= $(ARCH)-elf-elara-ld
 BOCHS			:= bochs
 QEMU			:= qemu-system-$(ARCHQEMU)
 
@@ -41,14 +45,14 @@ WGETFLAGS		:= -q --show-progress
 
 PHONY += all
 # TODO Remove qemu in final versions
-all: clemence iso qemu
+all: elara iso qemu
 
 include src/kernel/Makefile
 #include src/utils/Makefile
 include toolchain/Makefile
 
-PHONY += clemence
-clemence: kernel
+PHONY += elara
+elara: kernel
 
 PHONY += clean
 # TODO Clean toolchain
@@ -79,16 +83,16 @@ clean:
 PHONY += help
 # TODO Update
 help:
-	@echo -e "\033[1mMakefile for Clemence\033[0m"
+	@echo -e "\033[1mMakefile for Elara\033[0m"
 	@echo
 	@echo "Targets:"
 	@echo " - all       Compile the Cito kernel and all userspace applications"
 ifeq ($(ARCHT),x86)
 	@echo " - bochs     Boot the Live CD iso in Bochs and launch the debugger"
 endif
-	@echo " - clemence    Compile the Cito kernel and required userspace applications"
+	@echo " - elara    Compile the Cito kernel and required userspace applications"
 	@echo " - kernel      Compile the Cito kernel"
-	@echo " - clean     Remove all binaries and clemence.iso"
+	@echo " - clean     Remove all binaries and elara.iso"
 	@#echo " - fs        Convert the root directory into a FAT32 img image"
 	@echo " - help      Show this help text"
 	@echo " - iso       Convert the root directory into a LiveCD iso image"
@@ -100,7 +104,7 @@ endif
 # TODO Implement this differently
 fstree: root/tmp/
 root/tmp/:
-	@echo -e "\033[1m> Creating Clemence root filesystem tree...\033[0m"
+	@echo -e "\033[1m> Creating Elara root filesystem tree...\033[0m"
 	@mkdir -p root/
 	@mkdir -p root/app/
 	@mkdir -p root/app/bin/
@@ -131,15 +135,15 @@ root/tmp/:
 	@mkdir -p root/usr/root/Videos/
 
 PHONY += iso
-iso: fstree bin/clemence.iso
-bin/clemence.iso: bin/kernel
+iso: fstree bin/elara.iso
+bin/elara.iso: bin/kernel
 	@echo -e "\033[1m> Copying kernel to system root...\033[0m"
 	@cp bin/kernel root/boot/.
 	@echo -e "\033[1m> Creating GRUB image...\033[0m"
 	@grub-mkimage -p root/boot/grub -c root/boot/grub/grub.cfg -o bin/grub.img -O i386-pc biosdisk iso9660 normal multiboot ext2 boot
 	@cat /usr/lib/grub/i386-pc/cdboot.img bin/grub.img > root/grub.img
-	@echo -e "\033[1m> Creating Clemence iso...\033[0m"
-	@genisoimage -A "Clemence" -input-charset "iso8859-1" -R -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/clemence.iso root
+	@echo -e "\033[1m> Creating Elara iso...\033[0m"
+	@genisoimage -A "Elara" -input-charset "iso8859-1" -R -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/elara.iso root
 
 ifeq ($(ARCHT),x86)
 PHONY += bochs
@@ -153,21 +157,21 @@ endif
 PHONY += qemu
 qemu: iso
 	@echo -e "\033[1m> Starting QEMU...\033[0m"
-	@$(QEMU) $(QEMUFLAGS) -cdrom bin/clemence.iso 2>/dev/null
+	@$(QEMU) $(QEMUFLAGS) -cdrom bin/elara.iso 2>/dev/null
 
 PHONY += qemud
 qemud: iso
 	@echo -e "\033[1m> Starting QEMU...\033[0m"
-	@$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -cdrom bin/clemence.iso 2>/dev/null
+	@$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -cdrom bin/elara.iso 2>/dev/null
 
 PHONY += kvm
 kvm: iso
 	@echo -e "\033[1m> Starting QEMU...\033[0m"
-	@$(QEMU) $(QEMUFLAGS) $(KVMFLAGS) -cdrom bin/clemence.iso 2>/dev/null
+	@$(QEMU) $(QEMUFLAGS) $(KVMFLAGS) -cdrom bin/elara.iso 2>/dev/null
 
 PHONY += kvmd
 kvmd: iso
 	@echo -e "\033[1m> Starting QEMU...\033[0m"
-	@$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) $(KVMFLAGS) -cdrom bin/clemence.iso 2>/dev/null
+	@$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) $(KVMFLAGS) -cdrom bin/elara.iso 2>/dev/null
 
 .PHONY: $(PHONY)

@@ -1,6 +1,6 @@
 /*
  *
- * Clemence
+ * Elara
  * src/kernel/init/main.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
@@ -22,7 +22,6 @@
  *
  */
 
-/* TODO Clean up this mess */
 #include <issue.h>
 #include <mboot.h>
 #include <reboot.h>
@@ -33,6 +32,7 @@
 
 #include <block/ide/ata.h>
 #include <char/serial/serial.h>
+#include <fs/ramfs.h>
 #include <kbd/kbd.h>
 #include <pci/pci.h>
 #include <print.h>
@@ -48,22 +48,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../fs/ramfs/ramfs.h"
-
 extern void usrmode_enter();
 
 void kernel_main(struct mboot_info *mboot)
 {
+	//struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info));
+	//memcpy(mboot, _mboot, sizeof(struct mboot_info));
 	/* Initialize early video and debugging hardware */
 	vga_init();
 	serial_init(COM0);
-
-	/* TODO Other format (UTC) */
-	kprintf(KP_INFO, "cpu0", "Welcome to Clemence! (compiled on %s %s)\n",
-			__DATE__, __TIME__);
-	/* TODO Actually get starting cpu */
-
-	kprintf(KP_INFO, "cmdline", "%s\n", mboot->cmdline);
 
 	/* Initialize mandatory hardware */
 	pic_remap();
@@ -73,33 +66,26 @@ void kernel_main(struct mboot_info *mboot)
 	//lapic_init();
 	//ioapic_init();
 
-	mm_init();
+	/* TODO Other format (UTC) */
+	kprintf(KP_INFO, "cpu0", "Welcome to Elara! (compiled on %s %s)\n",
+			__DATE__, __TIME__);
+	/* TODO Actually get starting cpu */
+
+	kprintf(KP_INFO, "cmdline", "%s\n", mboot->cmdline);
 
 #if 0
+	mm_init(mboot->mmap_addr, mboot->mmap_len);
+#else
+	mm_init(NULL, NULL);
+#endif
+#if 1
 	/* TODO Move */
-	kprintf(KP_INFO, "mem", "%u KB base memory\n", mboot->mem_lower);
+	kprintf(KP_INFO, "mem", "%u KB base memory\n", mboot->mem_lo);
 	kprintf(KP_INFO, "mem",
-			"%u MB extended memory\n", mboot->mem_upper / 1024);
+			"%u MB extended memory\n", mboot->mem_hi / 1024);
 
 	/* TODO Move */
-	kprintf(KP_DBG, "tmp", "Clemence has been loaded by %s\n", mboot->boot_loader_name);
-
-	/* TODO Move */
-	/* TODO Only gets first 4GB */
-
-	struct mboot_mmap *mmap = (struct mboot_mmap *) mboot->mmap_addr;
-
-	kprintf(KP_INFO, "mem", "Physical memory map:\n");
-
-	while ((u64) mmap < mboot->mmap_addr + mboot->mmap_length) {
-		u64 addr = (mmap->addr_lo >> 32) | (mmap->addr_hi & 0xFFFFFFFF);
-		u64 len = (mmap->addr_lo >> 32) | (mmap->len_hi & 0xFFFFFFFF);
-
-		kprintf(KP_INFO, "mem", "  %#018x - %#018x (%#04x)\n",
-				addr, len, (u32) mmap->type);
-
-		mmap = (struct mboot_mmap *) ((u64) mmap + mmap->size + sizeof(mmap->size));
-	}
+	kprintf(KP_DBG, "tmp", "Elara has been loaded by %s\n", mboot->boot_loader_name);
 #endif
 
 #if 0
@@ -258,6 +244,8 @@ void kernel_main(struct mboot_info *mboot)
 		/* Other */
 		} else if (strcmp(cmd, "reboot") == 0) {
 			reboot();
+		} else if (strcmp(cmd, "halt") == 0) {
+			panic("halt", 0, 0);
 		} else if (strcmp(cmd, "clear") == 0) {
 			vga_clear();
 		} else if (strcmp(cmd, "uptime") == 0) {

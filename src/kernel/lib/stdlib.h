@@ -1,6 +1,6 @@
 /*
  *
- * Clemence
+ * Elara
  * src/kernel/lib/stdlib.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
@@ -38,7 +38,7 @@ void *kmalloc(size_t size);
 void *krealloc(void *ptr, size_t size);
 void kfree(void *ptr);
 
-void mm_init(void);
+void mm_init(u32 addr, u32 len);
 /* XXX / TEMP */
 
 #endif

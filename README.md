@@ -1,13 +1,13 @@
-# Clemence
+# Elara
 
-This is the README file for Clemence, a free and open source operating system for
+This is the README file for Elara, a free and open source operating system for
 the i686 and x86\_64 architecture.
 
 License: GPLv2
 
 
 ## File system tree
-Clemence does not adhere to the FHS standard, instead it uses this
+Elara does not adhere to the FHS standard, instead it uses this
 filesystem hierarchy layout:
 
 	/                       Root
@@ -46,7 +46,7 @@ filesystem hierarchy layout:
 
 ## Building the toolchain
 
-These utilities are required to build the Clemence toolchain:
+These utilities are required to build the Elara toolchain:
 
 * GNU C Compiler (or Clang)
 * GNU autoconf 2.64
@@ -56,22 +56,22 @@ These utilities are required to build the Clemence toolchain:
 
 An active Internet connection is also needed to download the necessary files.
 
-Issue this command to build the Clemence toolchain:
+Issue this command to build the Elara toolchain:
 
 	make toolchain
 
 
-## Building Clemence
+## Building Elara
 
-These applications are required to build the Clemence kernel:
+These applications are required to build the Elara kernel:
 * GNU make
-* Clemence toolchain
+* Elara toolchain
 * cdrkit (for genisoimage to build an ISO image)
 * GRUB (for grub-mkimage to build an ISO image)
 
-Issue this command to build the clemence kernel:
+Issue this command to build the elara kernel:
 
-	make clemence
+	make elara
 
 
 ## About
