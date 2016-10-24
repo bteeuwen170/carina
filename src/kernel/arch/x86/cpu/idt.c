@@ -113,7 +113,7 @@ void idt_init(void)
 	idt_load(&idt, IDT_ENTRIES * sizeof(struct idt_desc) - 1);
 
 	kprintf(KP_INFO, devname,
-			"%d entries entered (FIXME hardcoded lies)\n", i);
+			"%d entries entered\n", i);
 }
 
 void _isr(struct int_stack *regs)
