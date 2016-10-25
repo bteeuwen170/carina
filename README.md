@@ -76,4 +76,4 @@ Issue this command to build the elara kernel:
 
 ## About
 
-Please refer to [my website](https://teeuwen.github.io).
+Please refer to [my website](https://teeuwen.github.io/projects/elara).

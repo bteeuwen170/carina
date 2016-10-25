@@ -43,26 +43,22 @@
 
 #define TSS_ENTRIES	1
 
-enum irqs {
-	/* Master PIC */
-	IRQ_PIT		= 0x00,
-	IRQ_KBD		= 0x01,
-	IRQ_CAS		= 0x02,
-	IRQ_COM1	= 0x03,
-	IRQ_COM0	= 0x04,
-	IRQ_SND		= 0x05,
-	IRQ_FDD		= 0x06,
-	IRQ_PRT		= 0x07,
-	/* Slave PIC */
-	IRQ_RTC		= 0x08,
-	IRQ_ACPI	= 0x09,
-	IRQ_OPT0	= 0x0A,
-	IRQ_OPT1	= 0x0B,
-	IRQ_PS2		= 0x0C,
-	IRQ_FPU		= 0x0D,
-	IRQ_ATA0	= 0x0E,
-	IRQ_ATA1	= 0x0F,
-};
+#define IRQ_PIT		0x00
+#define IRQ_KBD		0x01
+#define IRQ_CAS		0x02
+#define IRQ_COM1	0x03
+#define IRQ_COM0	0x04
+#define IRQ_SND		0x05
+#define IRQ_FDD		0x06
+#define IRQ_PRT		0x07
+#define IRQ_RTC		0x08
+#define IRQ_ACPI	0x09
+#define IRQ_OPT0	0x0A
+#define IRQ_OPT1	0x0B
+#define IRQ_PS2		0x0C
+#define IRQ_FPU		0x0D
+#define IRQ_ATA0	0x0E
+#define IRQ_ATA1	0x0F
 
 static inline void cpuid(u32 code, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
 {

@@ -28,6 +28,7 @@
 #define CMOS_CMD	0x70
 #define CMOS_IO		0x71
 
+/* TODO Different */
 enum cmos_registers {
 	CMOS_CENTURY	= 0x32,
 	CMOS_YEAR	= 0x09,
