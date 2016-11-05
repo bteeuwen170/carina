@@ -56,27 +56,7 @@
 //#define IM_SGID		2048	/* Set GID on execution */
 ///* The sticky bit is pretty useless, so it's ignored in Elara */
 
-/* BEGIN mount.h */
-
-struct mountp {
-	struct dirent *dp;	/* Directory entry */
-	struct block_dev *sb;	/* Superblock */
-};
-
-/* END mount.h */
-
-/* BEGIN path.h */
-
-struct path {
-	struct mountp *mnt;	/* Root mount point */
-	struct dirent *dp;	/* Path */
-};
-
-/* END path.h */
-
-/* BEGIN fs.h */
-
-struct superblock {
+struct block_dev {
 	dev_t	dev;	/* Device identifier */
 
 //	u64	fb;	/* First block */
@@ -92,17 +72,23 @@ struct superblock {
 	struct block_dev	*next;
 };
 
-struct sb_ops {
-	/* Allocate a memory inode: sb */
-	struct inode *(*alloc_inode) (struct block_dev *);
-	/* Deallocate a memory inode: ip */
-	void *(*dealloc_inode) (struct inode *);
-	/* Write an inode to disk: ip */
-	int (*write_inode) (struct inode *);
-	/* Delete an inode from disk: ip */
-	int (*delete_inode) (struct inode *);
-	//TODO (sync)
+/* BEGIN mount.h */
+
+struct mountp {
+	struct dirent *dp;
+	struct block_dev *sb;
 };
+
+/* END mount.h */
+
+/* BEGIN path.h */
+
+struct path {
+	struct mountp *mnt;
+	struct dirent *dp;
+};
+
+/* END path.h */
 
 struct inode {
 	ino_t	inum;	/* Inode number */
@@ -123,66 +109,98 @@ struct inode {
 //	u32	bsize;	/* Block size */	
 	off_t	size;	/* File size in bytes */
 
-	struct superblock	*sb;	/* Associated superblock */
-
-	struct inode_ops	*op;	/* Inode operations */
-};
-
-struct inode_ops {
-	/* Create a file: dp, dep, mode */
-	int (*create) (struct inode *, struct dirent *, mode_t);
-	/* Create a hard link: dep, dp, name */
-	int (*link) (struct dirent *, struct inode *, struct dirent *);
-	/* Create a symbolic link: dp, dep, name */
-	int (*symlink) (struct inode *, struct dirent *, const char *);
-	/* Delete a link: dp, dep */
-	int (*rmlink) (struct inode *, struct dirent *);
-	/* Create a directory: dp, dep, mode */
-	int (*mkdir) (struct inode *, struct dirent *, mode_t);
-	/* Delete a directory: dp, dep */
-	int (*rmdir) (struct inode *, struct dirent *);
-	/* Move a dirent: odp, odep, dp, dep */
-	int (*move) (struct inode *, struct dirent *, //XXX Eq to rename on l
-			struct inode *, struct dirent *);
-	//TODO (mknod), (perm), (setattr / getattr), (readlink)
+	struct block_dev	*dev;
 };
 
 struct dirent {
-	struct inode	*ip;	/* Associated inode pointer */
-	u8		type;	/* Dirent type */
-	u32		refs;	/* References count */
+	ino_t	inum;
+	u8	type;
 
 	char	name[NAME_MAX + 1];
 } __attribute__ ((packed));
 
-struct dirent_ops {
-	/* Close the directory entry: dp */
-	int (*close) (struct dirent *);
-};
-
 struct file {
-	struct path	path;	/* File path */
-	mode_t		mode;	/* File access mode */
+	int		fd;	/* File descriptor */
+	u8		type;	/* File type */
+	u32		refs;	/* References count XXX */
 	u8		flags;	/* File flags */
 
-	struct file_ops	*op;	/* File operations */
+	struct inode	*inode;
 };
 
+//typedef struct DIR {
+//	struct dirent	*cur;
+//	char		name[NAME_MAX + 1];
+//} DIR;
+
 struct file_ops {
-	/* Read n bytes at off from fp into buf: fp, buf, off, n */
-	int (*read) (struct file *, void *, off_t, size_t);
-	/* Read next directory: fp, TODO */
-	int (*readdir) (struct file *, void *);
-	/* Write n bytes from buf into fp at off: fp, buf, off, n */
-	int (*write) (struct file *, const void *, off_t, size_t);
-	/* Create a new file object: ip, &fp */
-	int (*open) (struct inode *, struct file *);
-	/* Delete a file object: ip, fp */
-	int (*close) (struct inode *, struct file *); //XXX Eq to release on l
+	///* Read n bytes at off from fp into buf: fp, buf, off, n */
+	//int (*read) (struct file *, void *, off_t, size_t);
+	///* Read next directory: fp,  */
+	//int (*readdir) (struct file *, void *);
+	///* Write n bytes from buf into fp at off: fp, buf, off, n */
+	//int (*write) (struct file *, const void *, off_t, size_t);
+	///* Create a new file object: ip, &fp */
+	//int (*open) (struct inode *, struct file *);
+	///* Delete a file object: ip, fp */
+	//int (*close) (struct inode *, struct file *);
 	//TODO (ioctl), (sync / fsync)
 };
 
-/* END fs.h */
+struct block_dev_ops {
+
+//struct sb_ops {
+	/* Allocate a new inode object: sb, &ip */
+	struct inode *(*alloc_inode) (struct block_dev *);
+	/* Write an inode: ip */
+	void (*write_inode) (struct inode *);
+	/* Delete an inode: ip */
+	//TODO (delete_inode)
+	/* Delete an inode object: ip */ //XXX Do we need this?
+	//TODO (drop_inode)
+	/* Unmount a block device: dev */
+	//TODO (put_super)
+//};
+
+//struct inode_ops {
+	/* Create a file: dp, dep, mode */
+	int (*create) (struct inode *, struct dirent *, mode_t);
+	/* Create a hard link: dep, dp, name */
+	int (*link) (struct dirent *, struct inode *, const char *);
+	/* Create a symbolic link: dp, dep, name */
+	int (*symlink) (struct inode *, struct dirent *, const char *);
+	///* Delete a link: dp, dep */
+	//int (*unlink) (struct inode *, struct dirent *);
+	///* Create a directory: dp, dep, mode */
+	//int (*mkdir) (struct inode *, struct dirent *, mode_t);
+	///* Delete a directory: dp, dep */
+	//int (*rmdir) (struct inode *, struct dirent *);
+	///* Move a dirent: odp, odep, dp, dep */
+	//int (*move) (struct inode *, struct dirent *,
+	//		struct inode *, struct dirent *);
+	//TODO (mknod)
+//};
+
+	struct file_ops *dfop;
+
+
+	/* FIXME Crap */
+	//int (*create) (struct inode *, const char *, int, int, struct inode **);
+
+	//int (*iread) (struct inode *);
+	//int (*iwrite) (struct inode *);
+
+	//int (*read) (struct inode *, char *, int);
+	//int (*mkdir) (struct inode *, char *, void *, );
+	//int (*readdir) (struct inode *, void *);
+
+	/* Copy an inode to memory: dev, inum */
+	//int (*open) (struct block_dev *, ino_t);
+	/* Read from an inode: ip, data, off, n */
+	//int (*read) (struct inode *, void *, u64, u64);
+	/* Write to an inode: ip, data, off, n */
+	//int (*write) (struct inode *, const void *, u64, u64);
+};
 
 void dev_reg(struct block_dev *dp);
 

@@ -153,27 +153,22 @@ void kernel_main(struct mboot_info *mboot)
 
 	pci_scan();
 
-	struct inode *ipp;
-	u32 sdfs = 0;
-	int res = ramfs_get(4096, &sdfs, &ipp);
-
-	kprintf(KP_DBG, "fs", "ret: %d  dev: %u\n", res, sdfs);
-
-#if 0
+#if 1
 	usrmode_enter();
 
-	kprintf(KP_DBG, "x86", "In usermode\n");
+	//kprintf(KP_DBG, "x86", "In usermode\n");
 
 	for (;;)
 		asm volatile ("hlt");
 
 	/* TODO Start init */
 
-	panic("Init was killed", 0);
+	panic("Init was killed", 0, 0);
 #else
 	/* Temporary and crappy code */
 	char cmd[64];
 	u8 i, p = 0;
+	int ipp;
 
 	cmd[0] = '\0';
 
@@ -211,15 +206,17 @@ void kernel_main(struct mboot_info *mboot)
 
 		/* File system */
 		if (strcmp(cmd, "fs init") == 0) {
-			//u32 sdf = 0;
-			//int res = ramfs_get(4096, &sdf, &ipp);
+#if 0
+			u32 sdf = 0;
+			int res = ramfs_get(4096, &sdf, &ipp);
 
-			//kprintf(KP_DBG, "fs", "ret: %d  dev: %u\n", res, sdf);
+			kprintf(KP_DBG, "fs", "ret: %d  dev: %u\n", res, sdf);
 		} else if (strcmp(cmd, "ls") == 0) {
 			int n = 0;
 			while (ramfs_read_dir(ipp, n) != NULL)
 				kprintf(0,0, "%s\n",
 						ramfs_read_dir(ipp, n++)->name);
+#endif
 
 		/* Audio */
 		} else if (strcmp(cmd, "beep") == 0) {

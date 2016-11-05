@@ -44,6 +44,7 @@ n Native support for MS-DOS executables using some kind of low-level vm,
 
 Makefile
 - Seperate kernel-o and kernel-l (objects and libs)
+-   CC       .
 
 OCD
 - Remove the extra blank line after the header

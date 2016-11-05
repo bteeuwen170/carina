@@ -311,6 +311,11 @@ void kprintf(const u8 kp, char *prefix, char *fmt, ...)
 	char printbuf[1024], fmtbuf[1024], prefixbuf[1024];
 	va_list args;
 
+	//FIXME Nah man, what a mess
+	int j;
+	for (j = 0; j < 1024; j++)
+		printbuf[j] = fmtbuf[j] = prefixbuf[j] = 0;
+
 	va_start(args, fmt);
 	vsprintf(printbuf, fmt, args);
 

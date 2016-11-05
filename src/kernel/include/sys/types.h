@@ -66,7 +66,6 @@ typedef i64		off_t;		/* Offset */
 typedef i64		time_t;		/* Time in seconds since epoch */
 typedef u16		mode_t;		/* Permissions */
 typedef u16		link_t;		/* Link count */
-typedef u64		fsize_t;	/* File size */
 typedef u64		ino_t;		/* Inode number */
 
 

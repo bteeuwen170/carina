@@ -152,7 +152,7 @@ static struct inode *inode_getp(char *path)
 
 /*
  * Files
- * TODO Seperate fie
+ * TODO Seperate file
  */
 
 //void file_read(struct file *f, size_t size)
@@ -226,7 +226,7 @@ static struct inode *inode_alloc(struct block_dev *dev, u8 type)
 	dev->op->alloc_inode(dev);
 }
 
-static struct inode *file_open(const char *path, int flags)
+static struct file *file_open(const char *path, int flags)
 {
 	if (!path)
 		return NULL;
@@ -239,8 +239,11 @@ static int file_create(const char *path, mode_t mode)
 	//TODO
 }
 
+//static struct file *file_dup(
+
 int sys_open(const char *path, int flags, mode_t mode)
 {
+#if 0
 	struct inode *ip;
 	int fd, res;
 
@@ -268,9 +271,75 @@ int sys_open(const char *path, int flags, mode_t mode)
 	fd = 0; //TODO
 
 	return fd;
+#endif
 }
 
-int sys_creat(const char *path, mode_t mode)
+int sys_close(int fd)
 {
+	//TODO
+}
 
+int sys_mknod(const char *path, mode_t mode, dev_t dev)
+{
+	//TODO
+}
+
+int sys_read(int fd, char *buf, size_t n)
+{
+	//TODO
+}
+
+int sys_write(int fd, const char *buf, size_t n)
+{
+	//TODO
+}
+
+int sys_create(const char *path, mode_t mode)
+{
+	//TODO
+}
+
+int sys_link(const char *oldpath, const char *path)
+{
+	//TODO
+}
+
+int sys_symlink(const char *oldpath, const char *path)
+{
+	//TODO
+}
+
+int sys_rmlink(const char *path)
+{
+	//TODO
+}
+
+int sys_move(const char *oldpath, const char *path)
+{
+	//TODO
+}
+
+int sys_chdir(const char *path)
+{
+	//TODO
+}
+
+int sys_mount(char *dev, char *path, char *type) //TODO Mount flags
+{
+	//TODO
+}
+
+int sys_unmount(char *path)
+{
+	//TODO
+}
+
+int sys_mkdir(const char *path, mode_t mode)
+{
+	//TODO
+}
+
+int sys_rmdir(const char *path)
+{
+	//TODO
 }

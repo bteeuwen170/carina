@@ -37,7 +37,7 @@
 #define NAME_MAX	255	/* Max. length of a file name */
 //#define NGROUPS_MAX	8	/* Max. number of GIDs per process */
 #define OPEN_MAX	32	/* Max. open files */
-#define PATH_MAX	4096	/* Max. length of a path name */
+#define PATH_MAX	4096	/* Max. length of a path name (with '\0') */
 //#define INODES_MAX	64	/* Max. inodes in memory */
 
 #endif
