@@ -153,7 +153,8 @@ void kernel_main(struct mboot_info *mboot)
 
 	pci_scan();
 
-#if 1
+	/* Temporary and crappy code */
+#if 0
 	usrmode_enter();
 
 	//kprintf(KP_DBG, "x86", "In usermode\n");
@@ -165,7 +166,6 @@ void kernel_main(struct mboot_info *mboot)
 
 	panic("Init was killed", 0, 0);
 #else
-	/* Temporary and crappy code */
 	char cmd[64];
 	u8 i, p = 0;
 	int ipp;

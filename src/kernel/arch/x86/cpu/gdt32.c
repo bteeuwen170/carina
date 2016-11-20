@@ -45,21 +45,26 @@ static void gdt_set(const u8 gate, const u32 base, const u32 limit,
 /* FIXME Not i686 compatible ! */
 void gdt_init(void)
 {
-	//u32 tss_base, tss_limit;
+	u32 tss_base, tss_limit;
 
-	gdt_set(1, 0, 0, 0b0011000, true);		  /* 0x08 - Code SV */
-	gdt_set(2, 0, 0, 0b0010000, false);		  /* 0x10 - Data SV */
-	gdt_set(3, 0, 0, 0b1111000, true);		  /* 0x18 - Code USR */
-	gdt_set(4, 0, 0, 0b1110010, false);		  /* 0x20 - Data USR */
+	/* 0x08 - Code SV */
+	gdt_set(1, 0, 0, 0b0011000, true);
+	/* 0x10 - Data SV */
+	gdt_set(2, 0, 0, 0b0010000, false);
+	/* 0x18 - Code USR */
+	gdt_set(3, 0, 0, 0b1111000, true);
+	/* 0x20 - Data USR */
+	gdt_set(4, 0, 0, 0b1110010, false);
 
-	//tss_init(&tss_base, &tss_limit);
+	tss_init(&tss_base, &tss_limit);
 
-	//gdt_set(5, tss_base, tss_limit, 0b0001001, true);	/* 0x28 - TSS */
+	/* 0x28 - TSS */
+	gdt_set(5, tss_base, tss_limit, 0b0001001, true);
 
-	//gdt_load(&gdt, GDT_ENTRIES * sizeof(struct segment_desc) - 1);
+	gdt_load(&gdt, GDT_ENTRIES * sizeof(struct segment_desc) - 1);
 	gdt_load(&gdt, 5 * sizeof(struct segment_desc) - 1);
 
-	//tss_load();
+	//tss_load(); //FIXME
 
 	//kprintf32(KP_INFO, devname,
 	//"%d entries entered (FIXME hardcoded lies)\n", IDT_ENTRIES);

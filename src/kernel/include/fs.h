@@ -27,10 +27,10 @@
 
 #include <limits.h>
 
-/* Inode and dirent types */
-#define IT_FILE		1	/* Regular */
-#define IT_LINK		2	/* Symbolic link */
-#define IT_DIR		4	/* Directory */
+///* Inode and dirent types */
+//#define IT_FILE		1	/* Regular */
+//#define IT_LINK		2	/* Symbolic link */
+//#define IT_DIR		4	/* Directory */
 //#define IT_BLOCK	8	/* Block device */
 //#define IT_CHAR		16	/* Character device */
 //#define IT_PIPE		32	/* Pipe */
@@ -88,8 +88,6 @@ struct superblock {
 	void	**data;	/* Data pointer for virual devices (optional) */
 
 	struct block_dev_ops	*op;
-
-	struct block_dev	*next;
 };
 
 struct sb_ops {
@@ -120,7 +118,6 @@ struct inode {
 	time_t	ctime;	/* Change time */
 	time_t	mtime;	/* Modification time */
 
-//	u32	bsize;	/* Block size */	
 	off_t	size;	/* File size in bytes */
 
 	struct superblock	*sb;	/* Associated superblock */

@@ -18,14 +18,10 @@ endif
 
 ARCHFLAG		= -D ARCH_$(ARCH)
 
-CC			:= $(ARCH)-elf-clemence-gcc
-CC32			:= $(ARCH32)-elf-clemence-gcc
-AS			:= $(ARCH)-elf-clemence-as
-LD			:= $(ARCH)-elf-clemence-ld
-#CC			:= $(ARCH)-elf-elara-gcc
-#CC32			:= $(ARCH32)-elf-elara-gcc
-#AS			:= $(ARCH)-elf-elara-as
-#LD			:= $(ARCH)-elf-elara-ld
+CC			:= $(ARCH)-elf-elara-gcc
+CC32			:= $(ARCH32)-elf-elara-gcc
+AS			:= $(ARCH)-elf-elara-as
+LD			:= $(ARCH)-elf-elara-ld
 BOCHS			:= bochs
 QEMU			:= qemu-system-$(ARCHQEMU)
 
@@ -152,7 +148,7 @@ bochs: iso
 	@$(BOCHS) $(BOCHSFLAGS)
 endif
 
-# The 2>/dev/null is to prevent GTK warnings
+# The 2>/dev/null is to suppress GTK warnings
 
 PHONY += qemu
 qemu: iso
