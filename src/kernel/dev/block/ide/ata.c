@@ -217,20 +217,20 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 	/* Primary channel */
 	if (ch == 0) {
 		irq_unmask(IRQ_ATA0);
-		channels[ch].base = card->cfg->base_adr_0;
-		channels[ch].ctrl = card->cfg->base_adr_1;
+		channels[ch].base = card->cfg->bar_0;
+		channels[ch].ctrl = card->cfg->bar_1;
 
 		card->cfg->int_line = 14;
 	/* Secondary channel */
 	} else if (ch == 1) {
 		irq_unmask(IRQ_ATA1);
-		channels[ch].base = card->cfg->base_adr_2;
-		channels[ch].ctrl = card->cfg->base_adr_3;
+		channels[ch].base = card->cfg->bar_2;
+		channels[ch].ctrl = card->cfg->bar_3;
 
 		card->cfg->int_line = 15;
 	}
 
-	channels[ch].bus_master = (card->cfg->base_adr_4 & 0xFFFFFFFC) +
+	channels[ch].bus_master = (card->cfg->bar_4 & 0xFFFFFFFC) +
 			((ch) ? 0 : 8);
 
 	/* Disable interrupts */
@@ -318,10 +318,10 @@ static int pci_handler(struct pci_dev *card)
 {
 	u16 ch, drv;
 
-	if (card->cfg->base_adr_0 > 1)
+	if (card->cfg->bar_0 > 1)
 		goto err;
 
-	if (card->cfg->base_adr_1 > 1)
+	if (card->cfg->bar_1 > 1)
 		goto err;
 
 	//io_outb(ATA_CH1_CMD, 0x04);
@@ -330,10 +330,10 @@ static int pci_handler(struct pci_dev *card)
 	//io_outb(ATA_CH1_CMD, 0x04);
 	//io_outb(ATA_CH1_CMD, 0x00);
 
-	card->cfg->base_adr_0 = ATA_CH0_IO;
-	card->cfg->base_adr_1 = ATA_CH0_CMD;
-	card->cfg->base_adr_2 = ATA_CH1_IO;
-	card->cfg->base_adr_3 = ATA_CH1_CMD;
+	card->cfg->bar_0 = ATA_CH0_IO;
+	card->cfg->bar_1 = ATA_CH0_CMD;
+	card->cfg->bar_2 = ATA_CH1_IO;
+	card->cfg->bar_3 = ATA_CH1_CMD;
 	
 	for (ch = 0; ch < ATA_CHANNELS; ch++) {
 		for (drv = 0; drv < ATA_DRIVES; drv++) {

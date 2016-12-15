@@ -23,7 +23,9 @@
  */
 
 #include <issue.h>
+#include <lock.h>
 #include <mboot.h>
+#include <print.h>
 #include <reboot.h>
 #include <sys/time.h>
 
@@ -35,7 +37,6 @@
 #include <fs/ramfs.h>
 #include <kbd/kbd.h>
 #include <pci/pci.h>
-#include <print.h>
 #include <rtc/cmos.h>
 #include <sound/ac97.h>
 #include <sound/pcspk.h>
@@ -52,6 +53,10 @@ extern void usrmode_enter();
 
 void kernel_main(struct mboot_info *mboot)
 {
+	spinlock_t lock = SPINLOCK;
+
+	spin_lock(lock);
+
 	//struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info));
 	//memcpy(mboot, _mboot, sizeof(struct mboot_info));
 	/* Initialize early video and debugging hardware */

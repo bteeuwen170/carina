@@ -11,5 +11,6 @@ root/boot/kernel
 toolchain/*
 !toolchain/Makefile
 !toolchain/*.patch
+util/*
 
 bx_enh_dbg.ini

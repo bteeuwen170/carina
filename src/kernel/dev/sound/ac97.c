@@ -38,6 +38,14 @@
 
 static char *devname = "ac97";
 
+struct ac97_dev {
+	u16 sample_rate;
+
+	u32	buffer_last;
+	u32	buffer_last_w;
+	void	*data;
+};
+
 struct pci_dev *card;
 
 u16 nambar, nabmbar;
@@ -92,6 +100,7 @@ void ac97_volume(u8 volume)
 	io_outw(nambar + 0x06, volume);
 	io_outw(nambar + 0x0A, volume);
 	io_outw(nambar + 0x18, (volume << 8) | volume);
+	sleep(10);
 }
 
 void ac97_play(void)
@@ -120,8 +129,8 @@ static int pci_handler(struct pci_dev *card)
 	//TODO
 	//pci_outd(card->bus, card->dev, card->func, 4, 5);
 
-	nambar = pci_ind(card->bus, card->dev, card->func, 0x10) & 0xFFFFFFFC;
-	nabmbar = pci_ind(card->bus, card->dev, card->func, 0x14) & 0xFFFFFFFC;
+	nambar = card->cfg->bar_0 - 1;
+	nabmbar = card->cfg->bar_1 - 1;
 
 	if (!nambar || !nabmbar)
 		goto err;
@@ -130,15 +139,14 @@ static int pci_handler(struct pci_dev *card)
 
 	/* Reset */
 	io_outw(nambar + 0x00, 0x42);
-	io_outb(nabmbar + 0x0060, 0x02);
-
+	io_outb(nabmbar + 0x0B, 0x02);
+	io_outb(nabmbar + 0x1B, 0x02);
+	io_outb(nabmbar + 0x2B, 0x02);
 	sleep(100);
 
-	ac97_volume(3);
+	ac97_volume(0);
 
-	sleep(10);
-
-	if ((io_inw(nambar + 0x28) & 1)) {
+	if (io_inw(nambar + 0x28) & 1) {
 		kprintf(KP_INFO, devname, ":(\n");
 		//ac97_sample_rate(0);
 		io_outw(nambar + 0x2A, io_inw(nambar + 0x2A) | 1);
@@ -148,6 +156,7 @@ static int pci_handler(struct pci_dev *card)
 	} else {
 		kprintf(KP_INFO, devname, ":D\n");
 	}
+	kprintf(KP_DBG, devname, "sr: %u Hz\n", io_inw(nambar - 1 + 0x2C));
 
 	buf = kmalloc(sizeof(struct buffer) * 32);
 

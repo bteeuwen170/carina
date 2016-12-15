@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/lib/math.h
+ * src/kernel/arch/x86/include/asm/lock.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,24 +22,31 @@
  *
  */
 
-#ifndef _MATH_H
-#define _MATH_H
+#ifndef _X86_LOCK_H
+#define _X86_LOCK_H
 
-typedef struct {
-	int quot;	/* Quotient */
-	int rem;	/* Remainder */
+static inline void spin_lock(spinlock_t lock)
+{
+#if 0
+	asm volatile(
+			"lock \n" \
+			"decl %0 \n" \
+			"js 2 \n" \
+			"2: \n" \
+			"cmpl $0, %0 \n" \
+			"rep \n" \
+			"nop \n" \
+			"jle 2 \n" \
+			"jmp 1"
+			: "=m" (lock) : : "memory");
+#endif
 }
 
-//double sin(double sin);
-//double cos(double cos);
-//double tan(double tan);
-
-//double log(double val);
-
-int abs(int val);
-int div(int num, int denom);
-
-//double ceil(double val);
-//double floor(double val);
+static inline void spin_unlock(spinlock_t lock)
+{
+#if 0
+	asm volatile("movl $1, %0" : "=m" (lock) : : "memory");
+#endif
+}
 
 #endif

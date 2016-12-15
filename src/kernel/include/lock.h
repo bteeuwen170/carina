@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/lib/math.h
+ * src/kernel/include/lock.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,24 +22,13 @@
  *
  */
 
-#ifndef _MATH_H
-#define _MATH_H
+#ifndef _LOCK_H
+#define _LOCK_H
 
-typedef struct {
-	int quot;	/* Quotient */
-	int rem;	/* Remainder */
-}
+typedef volatile u32	spinlock_t;
 
-//double sin(double sin);
-//double cos(double cos);
-//double tan(double tan);
+#include <asm/lock.h>
 
-//double log(double val);
-
-int abs(int val);
-int div(int num, int denom);
-
-//double ceil(double val);
-//double floor(double val);
+#define SPINLOCK	(spinlock_t) 1
 
 #endif

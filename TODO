@@ -48,6 +48,7 @@ Makefile
 
 OCD
 - Remove the extra blank line after the header
+- No space between "asm volatile" and "("
 - Don't use "unused*" but instead just mention that the field is unused in
 		a comment
 

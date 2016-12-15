@@ -43,12 +43,12 @@ struct pci_config_space {
 	u8	latency_timer;
 	u8	header_type;
 	u8	bist;
-	u32	base_adr_0;
-	u32	base_adr_1;
-	u32	base_adr_2;
-	u32	base_adr_3;
-	u32	base_adr_4;
-	u32	base_adr_5;
+	u32	bar_0;
+	u32	bar_1;
+	u32	bar_2;
+	u32	bar_3;
+	u32	bar_4;
+	u32	bar_5;
 	u32	unused;
 	u16	subsys_vendor;
 	u16	subsys;

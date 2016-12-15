@@ -56,7 +56,6 @@ typedef __asm_size_t	size_t;
 //typedef long double	f128;
 
 /* IDs */
-typedef u32		dev_t;		/* Device ID */
 typedef u32		pid_t;		/* Process ID */
 typedef u32		uid_t;		/* User ID */
 typedef u32		gid_t;		/* Group ID */
@@ -68,7 +67,6 @@ typedef u16		mode_t;		/* Permissions */
 typedef u16		link_t;		/* Link count */
 typedef u64		ino_t;		/* Inode number */
 
-
 /* Addresses */
 typedef u32		paddr32_t;	/* Physical address (32-bit) */
 typedef u32		vaddr32_t;	/* Virtual address (32-bit) */
@@ -76,5 +74,11 @@ typedef u64		paddr64_t;	/* Physical address (64-bit) */
 typedef u64		vaddr64_t;	/* Virtual address (64-bit) */
 typedef size_t		paddr_t;	/* Physical address */
 typedef size_t		vaddr_t;	/* Virtual address */
+
+/* Other */
+typedef struct {
+	u8	major;
+	u16	minor;
+} dev_t;				/* Device ID */
 
 #endif
