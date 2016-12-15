@@ -38,7 +38,8 @@
 #include <kbd/kbd.h>
 #include <pci/pci.h>
 #include <rtc/cmos.h>
-#include <sound/ac97.h>
+/* #include <sound/ac97.h> */
+#include <sound/sb16.h>
 #include <sound/pcspk.h>
 #include <timer/pit.h>
 #include <video/fb.h>
@@ -57,19 +58,19 @@ void kernel_main(struct mboot_info *mboot)
 
 	spin_lock(lock);
 
-	//struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info));
-	//memcpy(mboot, _mboot, sizeof(struct mboot_info));
+	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
+	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
 	/* Initialize early video and debugging hardware */
 	vga_init();
 	serial_init(COM0);
 
 	/* Initialize mandatory hardware */
 	pic_remap();
-	//pic_disable();
+	/* pic_disable(); */
 	idt_init();
-	//tss_init();
-	//lapic_init();
-	//ioapic_init();
+	/* tss_init(); */
+	/* lapic_init(); */
+	/* ioapic_init(); */
 
 	/* TODO Other format (UTC) */
 	kprintf(KP_INFO, "cpu0", "Welcome to Elara! (compiled on %s %s)\n",
@@ -129,7 +130,7 @@ void kernel_main(struct mboot_info *mboot)
 		for (j = 0; j < 1024; j++) {
 			u32 v = j * (mboot->framebuffer_bpp / 8) + 2 *
 				mboot->framebuffer_pitch;
-			//u32 i = j * 4 + 32 * 3200;
+			/* u32 i = j * 4 + 32 * 3200; */
 			fb[v + 0] = 0 & 255;
 			fb[v + 1] = 255 & 255;
 			fb[v + 2] = 255 & 255;
@@ -141,17 +142,18 @@ void kernel_main(struct mboot_info *mboot)
 	}
 #endif
 
-	//cpu_info(); /* FIXME Secure mboot structure first */
+	/* FIXME Secure mboot structure first */
+	cpu_info();
 
 	/* Initialize remaining hardware */
-	//acpi_init();
+	/* acpi_init(); */
 	rtc_init();
 	pit_init();
 	kbd_enable();
 
 	/* Register PCI handlers */
 	ide_reghandler();
-	ac97_reghandler();
+	/* ac97_reghandler(); */
 
 	asm volatile ("sti");
 	kprintf(KP_DBG, "x86", "Interrupts enabled\n");
@@ -162,7 +164,7 @@ void kernel_main(struct mboot_info *mboot)
 #if 0
 	usrmode_enter();
 
-	//kprintf(KP_DBG, "x86", "In usermode\n");
+	/* kprintf(KP_DBG, "x86", "In usermode\n"); */
 
 	for (;;)
 		asm volatile ("hlt");
@@ -173,7 +175,7 @@ void kernel_main(struct mboot_info *mboot)
 #else
 	char cmd[64];
 	u8 i, p = 0;
-	int ipp;
+	/* int ipp; */
 
 	cmd[0] = '\0';
 
@@ -228,9 +230,10 @@ void kernel_main(struct mboot_info *mboot)
 			pcspk_play(835);
 			sleep(10);
 			pcspk_stop();
-		} else if (strcmp(cmd, "ac97 play") == 0) {
-			ac97_play();
-			kprintf(KP_DBG, "ac97", "WAV playing\n");
+		/* } else if (strcmp(cmd, "ac97 play") == 0) {
+			ac97_play(); */
+		} else if (strcmp(cmd, "sb16 play") == 0) {
+			sb16_play();
 		} else if (strcmp(cmd, "fj") == 0) {
 			pcspk_fj();
 		} else if (strcmp(cmd, "mi") == 0) {

@@ -22,9 +22,10 @@
  *
  */
 
+#include <print.h>
+
 #include <asm/cpu.h>
 
-#include <stdio.h>
 #include <string.h>
 
 /* CRAP */
@@ -55,5 +56,5 @@ void cpu_info(void)
 	while (*name == ' ')
 		++name; //TODO Right and left justify function
 
-	prints(name);
+	kprintf(KP_INFO, "cpu0", "%s\n", name);
 }

@@ -77,56 +77,6 @@ struct path {
 
 /* BEGIN fs.h */
 
-struct sb_ops {
-	/* Allocate a memory inode: sb */
-	struct inode *(*alloc_inode) (struct block_dev *);
-	/* Deallocate a memory inode: ip */
-	void *(*dealloc_inode) (struct inode *);
-	/* Write an inode to disk: ip */
-	int (*write_inode) (struct inode *);
-	/* Delete an inode from disk: ip */
-	int (*delete_inode) (struct inode *);
-	//TODO (sync)
-};
-
-struct inode_ops {
-	/* Create a file: dp, dep, mode */
-	int (*create) (struct inode *, struct dirent *, mode_t);
-	/* Create a hard link: dep, dp, name */
-	int (*link) (struct dirent *, struct inode *, struct dirent *);
-	/* Create a symbolic link: dp, dep, name */
-	int (*symlink) (struct inode *, struct dirent *, const char *);
-	/* Delete a link: dp, dep */
-	int (*rmlink) (struct inode *, struct dirent *);
-	/* Create a directory: dp, dep, mode */
-	int (*mkdir) (struct inode *, struct dirent *, mode_t);
-	/* Delete a directory: dp, dep */
-	int (*rmdir) (struct inode *, struct dirent *);
-	/* Move a dirent: odp, odep, dp, dep */
-	int (*move) (struct inode *, struct dirent *, //XXX Eq to rename on l
-			struct inode *, struct dirent *);
-	//TODO (mknod), (perm), (setattr / getattr), (readlink)
-};
-
-struct dirent_ops {
-	/* Close the directory entry: dp */
-	int (*close) (struct dirent *);
-};
-
-struct file_ops {
-	/* Read n bytes at off from fp into buf: fp, buf, off, n */
-	int (*read) (struct file *, void *, off_t, size_t);
-	/* Read next directory: fp, TODO */
-	int (*readdir) (struct file *, void *);
-	/* Write n bytes from buf into fp at off: fp, buf, off, n */
-	int (*write) (struct file *, const void *, off_t, size_t);
-	/* Create a new file object: ip, &fp */
-	int (*open) (struct inode *, struct file *);
-	/* Delete a file object: ip, fp */
-	int (*close) (struct inode *, struct file *); //XXX Eq to release on l
-	//TODO (ioctl), (sync / fsync)
-};
-
 struct superblock {
 //	dev_t	dev;	/* Device identifier */
 
@@ -181,6 +131,56 @@ struct file {
 	u8		flags;	/* File flags */
 
 	struct file_ops	*op;	/* File operations */
+};
+
+struct sb_ops {
+	/* Allocate a memory inode: sb */
+	struct inode *(*alloc_inode) (struct block_dev *);
+	/* Deallocate a memory inode: ip */
+	void *(*dealloc_inode) (struct inode *);
+	/* Write an inode to disk: ip */
+	int (*write_inode) (struct inode *);
+	/* Delete an inode from disk: ip */
+	int (*delete_inode) (struct inode *);
+	//TODO (sync)
+};
+
+struct inode_ops {
+	/* Create a file: dp, dep, mode */
+	int (*create) (struct inode *, struct dirent *, mode_t);
+	/* Create a hard link: dep, dp, name */
+	int (*link) (struct dirent *, struct inode *, struct dirent *);
+	/* Create a symbolic link: dp, dep, name */
+	int (*symlink) (struct inode *, struct dirent *, const char *);
+	/* Delete a link: dp, dep */
+	int (*rmlink) (struct inode *, struct dirent *);
+	/* Create a directory: dp, dep, mode */
+	int (*mkdir) (struct inode *, struct dirent *, mode_t);
+	/* Delete a directory: dp, dep */
+	int (*rmdir) (struct inode *, struct dirent *);
+	/* Move a dirent: odp, odep, dp, dep */
+	int (*move) (struct inode *, struct dirent *, //XXX Eq to rename on l
+			struct inode *, struct dirent *);
+	//TODO (mknod), (perm), (setattr / getattr), (readlink)
+};
+
+struct dirent_ops {
+	/* Close the directory entry: dp */
+	int (*close) (struct dirent *);
+};
+
+struct file_ops {
+	/* Read n bytes at off from fp into buf: fp, buf, off, n */
+	int (*read) (struct file *, void *, off_t, size_t);
+	/* Read next directory: fp, TODO */
+	int (*readdir) (struct file *, void *);
+	/* Write n bytes from buf into fp at off: fp, buf, off, n */
+	int (*write) (struct file *, const void *, off_t, size_t);
+	/* Create a new file object: ip, &fp */
+	int (*open) (struct inode *, struct file *);
+	/* Delete a file object: ip, fp */
+	int (*close) (struct inode *, struct file *); //XXX Eq to release on l
+	//TODO (ioctl), (sync / fsync)
 };
 
 /* END fs.h */

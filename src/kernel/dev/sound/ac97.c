@@ -30,8 +30,9 @@
 #include <pci/pci.h>
 #include <timer/pit.h>
 
-//#include <stdint.h> //TEMP
+//#include <stdint.h> /* TEMP */
 #include <stdlib.h>
+#include <string.h> /* TEMP */
 
 #include "ac97.h"
 #include "snd.h"
@@ -93,7 +94,7 @@ static void int_handler(struct int_stack *regs)
 	buffer_last = curbuf;
 }
 
-void ac97_volume(u8 volume)
+static void ac97_volume(u8 volume)
 {
 	io_outw(nambar + 0x02, (volume << 8) | volume);
 	//io_outw(nambar + 0x04, (volume << 8) | volume);
@@ -107,7 +108,8 @@ void ac97_play(void)
 {
 	int i;
 
-	data = snd_wav;
+	data = kmalloc(sizeof(snd_wav));
+	memcpy(data, &snd_wav, sizeof(snd_wav));
 
 	for (i = 0; i < 32; i++)
 		buffer_fill(i, i);
@@ -115,19 +117,20 @@ void ac97_play(void)
 	buffer_last = 0;
 	buffer_last_w = 32 - 1;
 
-	//io_outd(nabmbar + 0x10, (intptr_t) buf);
-	io_outd(nabmbar + 0x10, (u64) buf);
+	io_outd(nabmbar + 0x10, (intptr_t) buf);
 	io_outb(nabmbar + 0x15, 32);
-	io_outb(nabmbar + 0x1B, 0x15);
+	io_outb(nabmbar + 0x1B, 0x19);
+
+	kprintf(KP_INFO, devname, "wav playing\n");
 }
 
 static int pci_handler(struct pci_dev *card)
 {
-	//kprintf(KP_DBG, devname, "intline: %u\n", card->cfg->int_line);
+	kprintf(KP_DBG, devname, "intline: %u\n", card->cfg->int_line);
 
 	/* Set PIO control */
 	//TODO
-	//pci_outd(card->bus, card->dev, card->func, 4, 5);
+	/* pci_outd(card->bus, card->dev, card->func, 4, 5); */
 
 	nambar = card->cfg->bar_0 - 1;
 	nabmbar = card->cfg->bar_1 - 1;
@@ -144,19 +147,16 @@ static int pci_handler(struct pci_dev *card)
 	io_outb(nabmbar + 0x2B, 0x02);
 	sleep(100);
 
-	ac97_volume(0);
-
 	if (io_inw(nambar + 0x28) & 1) {
-		kprintf(KP_INFO, devname, ":(\n");
-		//ac97_sample_rate(0);
+		/* ac97_sample_rate(0); */
 		io_outw(nambar + 0x2A, io_inw(nambar + 0x2A) | 1);
 		sleep(10);
 		io_outw(nambar + 0x2C, 44100);
 		io_outw(nambar + 0x32, 44100);
-	} else {
-		kprintf(KP_INFO, devname, ":D\n");
 	}
-	kprintf(KP_DBG, devname, "sr: %u Hz\n", io_inw(nambar - 1 + 0x2C));
+	kprintf(KP_DBG, devname, "sr: %u Hz\n", io_inw(nambar + 0x2C));
+
+	ac97_volume(0);
 
 	buf = kmalloc(sizeof(struct buffer) * 32);
 

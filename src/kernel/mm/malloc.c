@@ -27,6 +27,14 @@
 
 static char *devname = "mem";
 
+const char *mmap_types[5] = {
+	"rsvd",
+	"free",
+	"rsvd",
+	"ACPI",
+	"rsvd"
+};
+
 /* FIXME This is utter crap */
 #define BLOCK_SIZE	4096
 #define BLOCKS_MAX	(BLOCK_SIZE * sizeof(u8))

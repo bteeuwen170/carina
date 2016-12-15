@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/dev/sound/ac97.h
+ * src/kernel/dev/sound/sb16.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,11 +22,11 @@
  *
  */
 
-#ifndef _AC97_H
-#define _AC97_H
+#ifndef _SB16_H
+#define _SB16_H
 
-void ac97_play(void);
+void sb16_play(void);
 
-void ac97_reghandler(void);
+void sb16_init(void);
 
 #endif

@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/dev/sound/ac97.h
+ * src/kernel/dev/sound/sb16.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,11 +22,32 @@
  *
  */
 
-#ifndef _AC97_H
-#define _AC97_H
+#include <print.h>
 
-void ac97_play(void);
+#include <asm/cpu.h>
 
-void ac97_reghandler(void);
+#include <timer/pit.h>
 
-#endif
+//#include <stdint.h> /* TEMP */
+#include <stdlib.h>
+#include <string.h> /* TEMP */
+
+#include "snd.h"
+
+static char *devname = "sb16";
+
+void sb16_play(void)
+{
+
+	kprintf(KP_INFO, devname, "wav playing\n");
+}
+
+int sb16_init(void)
+{
+	return 0;
+
+/* err:
+	kprintf(KP_ERR, devname, "err\n");
+
+	return 1; */
+}
