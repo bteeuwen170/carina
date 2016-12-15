@@ -25,6 +25,14 @@
 #ifndef _MBOOT_H
 #define _MBOOT_H
 
+static const char *mmap_types[] = {
+	"rsvd",
+	"free",
+	"rsvd",
+	"ACPI",
+	"rsvd"
+};
+
 struct mboot_mmap {
 	u32	size;
 	u32	addr_lo;

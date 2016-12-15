@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/arch/x86/include-32/asm/sys/types.h
+ * src/kernel/include/sched.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,7 +22,14 @@
  *
  */
 
-typedef long		__asm_ssize_t;
-typedef unsigned long	__asm_size_t;
+#ifndef _SCHED_H
+#define _SCHED_H
 
-typedef long		__asm_intptr_t;
+/*struct task {
+	pid_t	pid;
+
+	uid_t	uid;
+	gid_t	gid;
+};*/
+
+#endif

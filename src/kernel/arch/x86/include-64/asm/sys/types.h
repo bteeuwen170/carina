@@ -23,5 +23,6 @@
  */
 
 typedef long long		__asm_ssize_t;
-
 typedef unsigned long long	__asm_size_t;
+
+typedef long long		__asm_intptr_t;

@@ -33,7 +33,7 @@ static char *devname = "mem";
 
 extern u64 kern_end;
 
-static vaddr_t position;
+static intptr_t position;
 
 struct mem_block {
 	u8			allocated;
@@ -75,8 +75,7 @@ void kfree(void *ptr)
 
 void mm_init(u32 addr, u32 len)
 {
-	/* TODO Suppress this d*mn warning */
-	struct mboot_mmap *mmap = (void *) addr;
+	struct mboot_mmap *mmap = (void *) (intptr_t) addr;
 	u64 mem = 0;
 
 	kprintf(KP_INFO, devname, "Physical memory map:\n");
@@ -86,8 +85,8 @@ void mm_init(u32 addr, u32 len)
 		u64 mlen = mmap->len_lo | (mmap->len_hi >> 16);
 
 		kprintf(KP_INFO | KP_CON, devname,
-				"%#018lx - %#018lx (%#04x)\n",
-				maddr, maddr + mlen, (u32) mmap->type);
+				"%#018lx - %#018lx (%s)\n",
+				maddr, maddr + mlen, mmap_types[mmap->type]);
 
 		mem += mlen;
 
@@ -99,7 +98,7 @@ void mm_init(u32 addr, u32 len)
 	kprintf(KP_INFO, devname, "%u MB memory\n", mem / 1024 / 1024 + 1);
 
 	/* FIXME How much padding is really required? */
-	//position = ((paddr_t) &kern_end) + 0x10000;
+	//position = ((intptr_t) &kern_end) + 0x10000;
 	position = 0x200000;
 
 	/*u16 i;

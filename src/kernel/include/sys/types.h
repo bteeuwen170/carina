@@ -68,12 +68,9 @@ typedef u16		link_t;		/* Link count */
 typedef u64		ino_t;		/* Inode number */
 
 /* Addresses */
-typedef u32		paddr32_t;	/* Physical address (32-bit) */
-typedef u32		vaddr32_t;	/* Virtual address (32-bit) */
-typedef u64		paddr64_t;	/* Physical address (64-bit) */
-typedef u64		vaddr64_t;	/* Virtual address (64-bit) */
-typedef size_t		paddr_t;	/* Physical address */
-typedef size_t		vaddr_t;	/* Virtual address */
+typedef u32		intptr32_t;	/* Address (32-bit) */
+typedef u64		intptr64_t;	/* Address (64-bit) */
+typedef __asm_intptr_t	intptr_t;	/* Address */
 
 /* Other */
 typedef struct {

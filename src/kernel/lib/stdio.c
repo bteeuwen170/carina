@@ -37,7 +37,7 @@
  * TODO Seperate panic for isrs
  * TODO Dump registers (at least rip/eip)
  */
-void panic(char *reason, u32 err_code, paddr_t ip)
+void panic(char *reason, u32 err_code, intptr_t ip)
 {
 	asm volatile ("cli");
 

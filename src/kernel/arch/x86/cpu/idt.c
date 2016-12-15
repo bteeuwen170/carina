@@ -104,7 +104,7 @@ void idt_init(void)
 	int i;
 
 	for (i = 0; i < IDT_ENTRIES; i++) {
-		idt_set(i, 0x0E, (vaddr_t) ints[i]);
+		idt_set(i, 0x0E, (intptr_t) ints[i]);
 
 		if (i > SINT_ENTRIES - 1)
 			irq_mask(SINT_ENTRIES - 1 + i);
