@@ -32,20 +32,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct block_dev *block_devices;
 u32 devcount = 0;
 
 //struct mountp *mount_points;
-
-void dev_reg(struct block_dev *dp)
-{
-	dp->dev = ++devcount;
-	dp->next = block_devices;
-
-	block_devices = dp;
-}
-
-//struct dev_block *block_devices[1]; /* XXX TEMP */
 
 /*
  * Directories
@@ -219,7 +208,7 @@ static struct inode *inode_getp(char *path)
 /*
  * Allocate a new inode
  */
-static struct inode *inode_alloc(struct block_dev *dev, u8 type)
+static struct inode *inode_alloc(struct superblock *sp, u8 type)
 {
 	//TODO Buffering
 
@@ -330,7 +319,7 @@ int sys_mkdir(const char *path, mode_t mode)
 {
 	struct inode *ip;
 
-	if (ip = 
+	/* if (ip =  */
 }
 
 int sys_rmdir(const char *path)

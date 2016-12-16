@@ -71,18 +71,18 @@ struct ramfs_inode {
 /*
  * Allocate a new inode
  */
-static struct inode *ramfs_alloc_inode(struct block_dev *dev)
+static struct inode *ramfs_alloc_inode(struct superblock *sp)
 {
 	ino_t i;
 
 	/* FIXME Skips lot's of empty inodes for some reason... */
-	for (i = 1; i < dev->inodes; i++) {
+	for (i = 1; i < sp->inodes; i++) {
 		//kprintf(0,0, "crap: %u\n",
-		//		((struct ramfs_inode *) dev->data[i])->type);
-		if (((struct ramfs_inode *) dev->data[i]) != 0)
+		//		((struct ramfs_inode *) sp->data[i])->type);
+		if (((struct ramfs_inode *) sp->data[i]) != 0)
 			continue;
 
-		dev->data[i] = kmalloc(sizeof(struct ramfs_inode));
+		sp->data[i] = kmalloc(sizeof(struct ramfs_inode));
 
 		struct inode *ip;
 
@@ -91,23 +91,23 @@ static struct inode *ramfs_alloc_inode(struct block_dev *dev)
 		if (!ip)
 			return NULL;
 
-		ip->dev = dev;
+		ip->sp = sp;
 		ip->inum = i;
 
-		ip->type = ((struct ramfs_inode *) dev->data[i])->type;
+		ip->type = ((struct ramfs_inode *) sp->data[i])->type;
 		ip->mode = 0;
 
 		ip->refs = 1;
 		ip->links = 0;
 
-		ip->uid = ((struct ramfs_inode *) dev->data[i])->uid;
-		ip->gid = ((struct ramfs_inode *) dev->data[i])->gid;
+		ip->uid = ((struct ramfs_inode *) sp->data[i])->uid;
+		ip->gid = ((struct ramfs_inode *) sp->data[i])->gid;
 
-		ip->atime = ((struct ramfs_inode *) dev->data[i])->atime;
-		ip->ctime = ((struct ramfs_inode *) dev->data[i])->ctime;
-		ip->mtime = ((struct ramfs_inode *) dev->data[i])->mtime;
+		ip->atime = ((struct ramfs_inode *) sp->data[i])->atime;
+		ip->ctime = ((struct ramfs_inode *) sp->data[i])->ctime;
+		ip->mtime = ((struct ramfs_inode *) sp->data[i])->mtime;
 
-		ip->size = ((struct ramfs_inode *) dev->data[i])->size;
+		ip->size = ((struct ramfs_inode *) sp->data[i])->size;
 
 		return ip;
 	}

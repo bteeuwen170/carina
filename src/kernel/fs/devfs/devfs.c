@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/include/sched.h
+ * src/kernel/fs/devfs/devfs.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,16 +22,20 @@
  *
  */
 
-#ifndef _SCHED_H
-#define _SCHED_H
+#include <fs.h>
 
-struct process {
-	pid_t	pid;
-
-	uid_t	uid;
-	gid_t	gid;
-
-	char **argv, **envp;
+static const struct sb_ops devfs_sb_ops = {
+	.alloc_inode = NULL,
+	.dealloc_inode = NULL,
+	.write_inode = NULL,
+	.delete_inode = NULL
 };
 
-#endif
+static const struct inode_ops devfs_inode_ops = {
+	.symlink = NULL,
+	.rmlink = NULL,
+	.mkdir = NULL,
+	.rmdir = NULL,
+	.mknod = NULL,
+	.move = NULL
+};

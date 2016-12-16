@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/include/sched.h
+ * src/kernel/fs/ramfs/devfs.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,16 +22,10 @@
  *
  */
 
-#ifndef _SCHED_H
-#define _SCHED_H
+#ifndef _FS_DEVFS_H
+#define _FS_DEVFS_H
 
-struct process {
-	pid_t	pid;
-
-	uid_t	uid;
-	gid_t	gid;
-
-	char **argv, **envp;
-};
+/* Major device identifier */
+#define DMAJ_MEM	1
 
 #endif

@@ -142,8 +142,7 @@ void kernel_main(struct mboot_info *mboot)
 	}
 #endif
 
-	/* FIXME Secure mboot structure first */
-	cpu_info();
+	/* cpu_info(); */
 
 	/* Initialize remaining hardware */
 	/* acpi_init(); */
@@ -156,7 +155,7 @@ void kernel_main(struct mboot_info *mboot)
 	/* ac97_reghandler(); */
 
 	asm volatile ("sti");
-	kprintf(KP_DBG, "x86", "Interrupts enabled\n");
+	kprintf(KP_DBG, "cpu0", "Interrupts enabled\n");
 
 	pci_scan();
 

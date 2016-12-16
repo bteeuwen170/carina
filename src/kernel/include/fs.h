@@ -28,13 +28,14 @@
 #include <limits.h>
 #include <list.h>
 
-///* Inode and dirent types */
+///* Inode types */
+//#define IT_INV		0	/* Invalid */
 //#define IT_FILE		1	/* Regular */
 //#define IT_LINK		2	/* Symbolic link */
-//#define IT_DIR		4	/* Directory */
-//#define IT_BLOCK	8	/* Block device */
-//#define IT_CHAR		16	/* Character device */
-//#define IT_PIPE		32	/* Pipe */
+//#define IT_DIR		3	/* Directory */
+//#define IT_BLOCK	4	/* Block device */
+//#define IT_CHAR		5	/* Character device */
+//#define IT_PIPE		6	/* Pipe */
 
 ///* Inode flags */
 //#define IF_RO		1	/* Read only */
@@ -55,13 +56,12 @@
 //#define IM_OE		512	/* Other execute */
 //#define IM_SUID		1024	/* Set UID on execution */
 //#define IM_SGID		2048	/* Set GID on execution */
-///* The sticky bit is pretty useless, so it's ignored in Elara */
 
 /* BEGIN mount.h */
 
 struct mountp {
-	struct dirent *dp;	/* Directory entry */
-	struct block_dev *sb;	/* Superblock */
+	struct dirent		*dp;	/* Directory entry */
+	struct superblock	*sp;	/* Superblock */
 };
 
 /* END mount.h */
@@ -69,8 +69,8 @@ struct mountp {
 /* BEGIN path.h */
 
 struct path {
-	struct mountp *mnt;	/* Root mount point */
-	struct dirent *dp;	/* Path */
+	struct mountp	*mnt;	/* Root mount point */
+	struct dirent	*dp;	/* Path */
 };
 
 /* END path.h */
@@ -78,48 +78,53 @@ struct path {
 /* BEGIN fs.h */
 
 struct superblock {
-//	dev_t	dev;	/* Device identifier */
+	struct list_head l;
 
-//	u64	fb;	/* First block */
-//	u16	bsize;	/* Block size */
+	dev_t	dev;		/* Device identifier */
 
-	ino_t	inum;	/* First inode */
-	ino_t	inodes;	/* Number of inodes */
+//	u64	fb;		/* First block */
+//	u16	bsize;		/* Block size */
+//	u64	size_max;	/* Max. file size */
 
-	void	**data;	/* Data pointer for virual devices (optional) */
-	void	*info;
+	ino_t	inum;		/* First inode */
+	ino_t	inodes;		/* Number of inodes */
 
-	struct block_dev_ops	*op;
+	struct list_head i;	/* Inodes */
 
-	struct list_head	l;
+	struct sb_ops *op;
 };
 
 struct inode {
-	ino_t	inum;	/* Inode number */
-	u8	type;	/* Inode type */
-//	u8	flags;	/* Inode flags */
-	mode_t	mode;	/* Inode mode */
+	struct list_head l;
 
-	u32	refs;	/* References count */
-	link_t	links;	/* Link count */
+	dev_t	dev;		/* Device ID */
+	ino_t	inum;		/* Inode number */
+	u8	type;		/* Inode type */
+//	u8	flags;		/* Inode flags */
+	mode_t	mode;		/* Inode mode */
 
-	uid_t	uid;	/* User ID */
-	gid_t	gid;	/* Group ID */
+	u32	refs;		/* References count */
+	link_t	links;		/* Link count */
 
-	time_t	atime;	/* Access time */
-	time_t	ctime;	/* Change time */
-	time_t	mtime;	/* Modification time */
+	uid_t	uid;		/* User ID */
+	gid_t	gid;		/* Group ID */
 
-	off_t	size;	/* File size in bytes */
+	time_t	atime;		/* Access time */
+	time_t	ctime;		/* Change time */
+	time_t	mtime;		/* Modification time */
 
-	struct superblock	*sb;	/* Associated superblock */
+	union {
+		struct list_head	d;	/* Directory entries */
+		dev_t			dev;	/* Special file device ID */
+		off_t			size;	/* File size in bytes */
+	} e;
 
-	struct inode_ops	*op;	/* Inode operations */
+	struct inode_ops *op;	/* Inode operations */
 };
 
 struct dirent {
 	struct inode	*ip;	/* Associated inode pointer */
-	u8		type;	/* Dirent type */
+	struct inode	*dp;	/* Associated directory pointer */
 	u32		refs;	/* References count */
 
 	char	name[NAME_MAX + 1];
@@ -134,8 +139,8 @@ struct file {
 };
 
 struct sb_ops {
-	/* Allocate a memory inode: sb */
-	struct inode *(*alloc_inode) (struct block_dev *);
+	/* Allocate a memory inode: sp */
+	struct inode *(*alloc_inode) (struct superblock *);
 	/* Deallocate a memory inode: ip */
 	void *(*dealloc_inode) (struct inode *);
 	/* Write an inode to disk: ip */
@@ -184,7 +189,5 @@ struct file_ops {
 };
 
 /* END fs.h */
-
-void dev_reg(struct block_dev *dp);
 
 #endif
