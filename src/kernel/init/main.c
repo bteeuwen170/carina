@@ -38,8 +38,8 @@
 #include <kbd/kbd.h>
 #include <pci/pci.h>
 #include <rtc/cmos.h>
-/* #include <sound/ac97.h> */
-#include <sound/sb16.h>
+#include <sound/ac97.h>
+/* #include <sound/sb16.h> */
 #include <sound/pcspk.h>
 #include <timer/pit.h>
 #include <video/fb.h>
@@ -152,12 +152,14 @@ void kernel_main(struct mboot_info *mboot)
 
 	/* Register PCI handlers */
 	ide_reghandler();
-	/* ac97_reghandler(); */
+	ac97_reghandler();
 
 	asm volatile ("sti");
 	kprintf(KP_DBG, "cpu0", "Interrupts enabled\n");
 
 	pci_scan();
+
+	/* sb16_init(); */
 
 	/* Temporary and crappy code */
 #if 0
@@ -229,10 +231,10 @@ void kernel_main(struct mboot_info *mboot)
 			pcspk_play(835);
 			sleep(10);
 			pcspk_stop();
-		/* } else if (strcmp(cmd, "ac97 play") == 0) {
-			ac97_play(); */
-		} else if (strcmp(cmd, "sb16 play") == 0) {
-			sb16_play();
+		} else if (strcmp(cmd, "ac97 play") == 0) {
+			ac97_play();
+		/* } else if (strcmp(cmd, "sb16 play") == 0) {
+			sb16_play(); */
 		} else if (strcmp(cmd, "fj") == 0) {
 			pcspk_fj();
 		} else if (strcmp(cmd, "mi") == 0) {

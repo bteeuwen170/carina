@@ -44,7 +44,6 @@ struct ac97_dev {
 
 	u32	buffer_last;
 	u32	buffer_last_w;
-	void	*data;
 };
 
 struct pci_dev *card;
@@ -56,10 +55,8 @@ u16 sample_rate;
 u32 buffer_last;
 u32 buffer_last_w;
 
-static void *data;
-
 struct buffer {
-	void	*buf;
+	u32	buf;
 	u16	len;
 	u16	reserved :14;
 	u8	bup :1;
@@ -68,12 +65,12 @@ struct buffer {
 
 struct buffer *buf;
 
-static void buffer_fill(u32 off, u32 n)
+static void buffer_fill(void * data, u32 off, u32 n)
 {
-	buf[n].buf = (void *) (&data + (32 * 2 * off));
+	buf[n].buf = (u32) (u64) (&data + (32 * 2 * off));
 	buf[n].len = 32;
-	buf[n].ioc = 1;
 	buf[n].bup = 0;
+	buf[n].ioc = 1;
 }
 
 static void int_handler(struct int_stack *regs)
@@ -89,7 +86,7 @@ static void int_handler(struct int_stack *regs)
 
 	io_outw(nabmbar + 0x16, (1 << 3));
 
-	buffer_fill(++buffer_last_w, buffer_last);
+	buffer_fill(snd_wav, ++buffer_last_w, buffer_last);
 
 	buffer_last = curbuf;
 }
@@ -108,18 +105,15 @@ void ac97_play(void)
 {
 	int i;
 
-	data = kmalloc(sizeof(snd_wav));
-	memcpy(data, &snd_wav, sizeof(snd_wav));
-
 	for (i = 0; i < 32; i++)
-		buffer_fill(i, i);
+		buffer_fill(snd_wav, i, i);
 
 	buffer_last = 0;
 	buffer_last_w = 32 - 1;
 
-	io_outd(nabmbar + 0x10, (intptr_t) buf);
-	io_outb(nabmbar + 0x15, 32);
-	io_outb(nabmbar + 0x1B, 0x19);
+	io_outb(nabmbar + 0x15, buffer_last);
+	/* io_outb(nabmbar + 0x1B, 0x19); */
+	io_outb(nabmbar + 0x1B, io_inb(nabmbar + 0x1B) | 0x01);
 
 	kprintf(KP_INFO, devname, "wav playing\n");
 }
@@ -128,17 +122,14 @@ static int pci_handler(struct pci_dev *card)
 {
 	kprintf(KP_DBG, devname, "intline: %u\n", card->cfg->int_line);
 
-	/* Set PIO control */
-	//TODO
-	/* pci_outd(card->bus, card->dev, card->func, 4, 5); */
-
 	nambar = card->cfg->bar_0 - 1;
 	nabmbar = card->cfg->bar_1 - 1;
 
 	if (!nambar || !nabmbar)
 		goto err;
 
-	irq_reghandler(SINT_ENTRIES + card->cfg->int_line, &int_handler);
+	/* Set PIO control */
+	pci_outd(card->bus, card->dev, card->func, 4, 5);
 
 	/* Reset */
 	io_outw(nambar + 0x00, 0x42);
@@ -149,16 +140,20 @@ static int pci_handler(struct pci_dev *card)
 
 	if (io_inw(nambar + 0x28) & 1) {
 		/* ac97_sample_rate(0); */
-		io_outw(nambar + 0x2A, io_inw(nambar + 0x2A) | 1);
+		io_outw(nambar + 0x2A, io_inw(nambar + 0x2A) | 0x01);
 		sleep(10);
-		io_outw(nambar + 0x2C, 44100);
-		io_outw(nambar + 0x32, 44100);
+		io_outw(nambar + 0x2C, 48000);
+		io_outw(nambar + 0x32, 48000);
 	}
+
 	kprintf(KP_DBG, devname, "sr: %u Hz\n", io_inw(nambar + 0x2C));
 
 	ac97_volume(0);
 
 	buf = kmalloc(sizeof(struct buffer) * 32);
+	io_outd(nabmbar + 0x10, (intptr_t) buf);
+
+	irq_reghandler(card->cfg->int_line, &int_handler);
 
 	kprintf(KP_INFO, devname, "initialized (FIXME lies!)\n");
 

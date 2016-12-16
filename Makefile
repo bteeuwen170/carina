@@ -53,7 +53,7 @@ LDFLAGS		:= -nostdlib -z max-page-size=4096 #-s #-Os
 
 BOCHSFLAGS	:= -f cfg/bochs.rc -q
 KVMFLAGS	:= -enable-kvm
-QEMUFLAGS	:= -m 32M --serial vc -soundhw pcspk,sb16 #-vga std #-curses #-cpu qemu32 //To test no long mode message
+QEMUFLAGS	:= -m 32M --serial vc -soundhw pcspk,ac97 #-vga std #-curses #-cpu qemu32 //To test no long mode message
 QEMUDBGFLAGS	:= -s -d cpu_reset,int#,cpu,exec,in_asm
 WGETFLAGS	:= -q --show-progress
 
