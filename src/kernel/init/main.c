@@ -39,7 +39,7 @@
 #include <pci/pci.h>
 #include <rtc/cmos.h>
 #include <sound/ac97.h>
-/* #include <sound/sb16.h> */
+#include <sound/sb16.h>
 #include <sound/pcspk.h>
 #include <timer/pit.h>
 #include <video/fb.h>

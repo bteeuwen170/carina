@@ -240,7 +240,6 @@ static void pci_config(u16 bus, u16 dev, u16 func)
 	 * This is from
 	 * https://github.com/dbittman/seakernel/blob/master/
 	 * 		arch/x86_64/drivers/bus/pci.c
-	 * It's just so sexy!
 	 *
 	 * TODO Replace with own elegant version
 	 */

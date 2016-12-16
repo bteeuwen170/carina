@@ -22,6 +22,8 @@
  *
  */
 
+#if 0
+
 #include <print.h>
 
 #include <asm/cpu.h>
@@ -96,3 +98,5 @@ err:
 
 	return 1;
 }
+
+#endif

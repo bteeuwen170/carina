@@ -118,6 +118,8 @@ void idt_init(void)
 
 void _isr(struct int_stack *regs)
 {
+	if (regs->int_no == 32 + 11)
+		kprintf(0, 0, "?");
 	switch (regs->int_no) {
 	case SINT_ENTRIES - 1 + IRQ_PRT:
 	case SINT_ENTRIES - 1 + IRQ_ATA1:

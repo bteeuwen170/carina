@@ -39,65 +39,59 @@
 
 static char *devname = "ac97";
 
-struct ac97_dev {
-	u16 sample_rate;
-
-	u32	buffer_last;
-	u32	buffer_last_w;
-};
-
-struct pci_dev *card;
-
-u16 nambar, nabmbar;
-
-u16 sample_rate;
-
-u32 buffer_last;
-u32 buffer_last_w;
-
 struct buffer {
-	u32	buf;
+	u32	addr;
 	u16	len;
-	u16	reserved :14;
-	u8	bup :1;
-	u8	ioc :1;
+	u16	reserved:14;
+	u8	bup:1;
+	u8	ioc:1;
 } __attribute__ ((packed));
 
-struct buffer *buf;
+struct ac97_dev {
+	u16	nambar;
+	u16	nabmbar;
+//	u16	sample_rate;
 
-static void buffer_fill(void * data, u32 off, u32 n)
+	struct buffer *buf;
+	u32	index;
+	u32	prev;
+};
+
+/* TEMP */
+struct ac97_dev deva;
+struct ac97_dev *dev = &deva;
+
+static void buffer_fill(void * data, u32 n, u32 off)
 {
-	buf[n].buf = (u32) (u64) (&data + (32 * 2 * off));
-	buf[n].len = 32;
-	buf[n].bup = 0;
-	buf[n].ioc = 1;
+	dev->buf[n].addr = (intptr_t) &data + off;
+	dev->buf[n].len = 32;
+	dev->buf[n].bup = 0;
+	dev->buf[n].ioc = 1;
 }
 
 static void int_handler(struct int_stack *regs)
 {
 	(void) regs;
 
+	u32 curbuf = (dev->prev + 1) % 32;
+
+	if (!curbuf || io_inw(dev->nabmbar + 0x18) < 1)
+		io_outw(dev->nabmbar + 0x15, 32);
+
+	io_outw(dev->nabmbar + 0x16, 0x08);
+
+	buffer_fill(snd_wav, dev->prev, ++dev->index);
+
+	dev->prev = curbuf;
+
 	kprintf(KP_DBG, devname, "!"); //TEMPORARY
-	u32 curbuf = (buffer_last + 1) % 32;
-	u16 samples = io_inw(nabmbar + 0x18);
-
-	if (!curbuf || samples < 1)
-		io_outw(nabmbar + 0x15, 32);
-
-	io_outw(nabmbar + 0x16, (1 << 3));
-
-	buffer_fill(snd_wav, ++buffer_last_w, buffer_last);
-
-	buffer_last = curbuf;
 }
 
 static void ac97_volume(u8 volume)
 {
-	io_outw(nambar + 0x02, (volume << 8) | volume);
-	//io_outw(nambar + 0x04, (volume << 8) | volume);
-	io_outw(nambar + 0x06, volume);
-	io_outw(nambar + 0x0A, volume);
-	io_outw(nambar + 0x18, (volume << 8) | volume);
+	io_outw(dev->nambar + 0x02, (volume << 8) | volume);
+	io_outw(dev->nambar + 0x18, (volume << 8) | volume);
+
 	sleep(10);
 }
 
@@ -105,15 +99,21 @@ void ac97_play(void)
 {
 	int i;
 
+	dev->buf = kmalloc(sizeof(struct buffer) * 32);
+
+	dev->index = 32 - 1;
+	dev->prev = 0;
+
+	/* TODO Check file size */
 	for (i = 0; i < 32; i++)
 		buffer_fill(snd_wav, i, i);
 
-	buffer_last = 0;
-	buffer_last_w = 32 - 1;
+	io_outd(dev->nabmbar + 0x10, (intptr_t) dev->buf);
 
-	io_outb(nabmbar + 0x15, buffer_last);
-	/* io_outb(nabmbar + 0x1B, 0x19); */
-	io_outb(nabmbar + 0x1B, io_inb(nabmbar + 0x1B) | 0x01);
+	io_outb(dev->nabmbar + 0x15, dev->index);
+	/* io_outb(dev->nabmbar + 0x1B, 0x19); */
+	/* io_outb(dev->nabmbar + 0x1B, io_inb(dev->nabmbar + 0x1B) | 0x01); */
+	io_outb(dev->nabmbar + 0x1B, 0x15);
 
 	kprintf(KP_INFO, devname, "wav playing\n");
 }
@@ -122,36 +122,33 @@ static int pci_handler(struct pci_dev *card)
 {
 	kprintf(KP_DBG, devname, "intline: %u\n", card->cfg->int_line);
 
-	nambar = card->cfg->bar_0 - 1;
-	nabmbar = card->cfg->bar_1 - 1;
+	dev->nambar = card->cfg->bar_0 - 1;
+	dev->nabmbar = card->cfg->bar_1 - 1;
 
-	if (!nambar || !nabmbar)
+	if (!dev->nambar || !dev->nabmbar)
 		goto err;
 
 	/* Set PIO control */
 	pci_outd(card->bus, card->dev, card->func, 4, 5);
 
 	/* Reset */
-	io_outw(nambar + 0x00, 0x42);
-	io_outb(nabmbar + 0x0B, 0x02);
-	io_outb(nabmbar + 0x1B, 0x02);
-	io_outb(nabmbar + 0x2B, 0x02);
+	io_outw(dev->nambar + 0x00, 0x42);
+	io_outb(dev->nabmbar + 0x0B, 0x02);
+	io_outb(dev->nabmbar + 0x1B, 0x02);
+	io_outb(dev->nabmbar + 0x2B, 0x02);
 	sleep(100);
 
-	if (io_inw(nambar + 0x28) & 1) {
-		/* ac97_sample_rate(0); */
-		io_outw(nambar + 0x2A, io_inw(nambar + 0x2A) | 0x01);
+	/* Check if sample rate is set out of the box */
+	if (io_inw(dev->nambar + 0x28) & 1) {
+		io_outw(dev->nambar + 0x2A, io_inw(dev->nambar + 0x2A) | 0x01);
 		sleep(10);
-		io_outw(nambar + 0x2C, 48000);
-		io_outw(nambar + 0x32, 48000);
+		io_outw(dev->nambar + 0x2C, 48000);
+		io_outw(dev->nambar + 0x32, 48000);
 	}
 
-	kprintf(KP_DBG, devname, "sr: %u Hz\n", io_inw(nambar + 0x2C));
+	kprintf(KP_DBG, devname, "sr: %u Hz\n", io_inw(dev->nambar + 0x2C));
 
 	ac97_volume(0);
-
-	buf = kmalloc(sizeof(struct buffer) * 32);
-	io_outd(nabmbar + 0x10, (intptr_t) buf);
 
 	irq_reghandler(card->cfg->int_line, &int_handler);
 
@@ -168,4 +165,6 @@ err:
 void ac97_reghandler(void)
 {
 	pci_reghandler(0x8086, 0x2415, 1, &pci_handler);
+	pci_reghandler(0x8086, 0x2425, 1, &pci_handler);
+	pci_reghandler(0x8086, 0x2445, 1, &pci_handler);
 }
