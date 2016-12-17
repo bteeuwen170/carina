@@ -61,9 +61,9 @@ struct ac97_dev {
 struct ac97_dev deva;
 struct ac97_dev *dev = &deva;
 
-static void buffer_fill(void * data, u32 n, u32 off)
+static void buffer_fill(void *data, u32 n, u32 off)
 {
-	dev->buf[n].addr = (intptr_t) &data + off;
+	dev->buf[n].addr = (intptr_t) data + off;
 	dev->buf[n].len = 32;
 	dev->buf[n].bup = 0;
 	dev->buf[n].ioc = 1;
@@ -120,6 +120,7 @@ void ac97_play(void)
 
 static int pci_handler(struct pci_dev *card)
 {
+	card->cfg->int_line = 0xA;
 	kprintf(KP_DBG, devname, "intline: %u\n", card->cfg->int_line);
 
 	dev->nambar = card->cfg->bar_0 - 1;

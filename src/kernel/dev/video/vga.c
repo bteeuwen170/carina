@@ -48,7 +48,7 @@ void vga_init(void)
 	for (y = 0; y < VGA_HEIGHT; y++)
 		for (x = 0; x < VGA_WIDTH; x++)
 			 vga_buffer[y * VGA_WIDTH + x] =
-					vga_create_entry(' ', vga_fgcolor, vga_bgcolor);
+				vga_create_entry(' ', vga_fgcolor, vga_bgcolor);
 
 	/* Hide cursor */
 	//io_outb(0x3D4, 0x0A);
@@ -78,7 +78,7 @@ void vga_clear(void)
 	for (y = 0; y < VGA_HEIGHT; y++) {
 		for (x = 0; x < VGA_WIDTH; x++) {
 			 vga_buffer[y * VGA_WIDTH + x] =
-					vga_create_entry(' ', vga_fgcolor, vga_bgcolor);
+				vga_create_entry(' ', vga_fgcolor, vga_bgcolor);
 		}
 	}
 	
@@ -105,7 +105,7 @@ void vga_putch(char c, u8 color)
 		case '\b':
 			vga_x--;
 			vga_buffer[vga_y * VGA_WIDTH + vga_x] =
-					vga_create_entry(' ', color, vga_bgcolor); //FIXME New line
+				vga_create_entry(' ', color, vga_bgcolor);
 			break;
 		case '\n':
 			vga_x = 0;

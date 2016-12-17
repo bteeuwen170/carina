@@ -81,3 +81,13 @@ void irq_unmask(u8 irq)
 
 	io_outb(port, io_inb(port) & ~(1 << irq));
 }
+
+int irq_active(u8 irq)
+{
+	(void) irq;
+	/* io_outb(PIC_M_CMD, 0x0B);
+	io_outb(PIC_S_CMD, 0x0B);
+	return (io_inb(PIC_S_CMD) << 8 | io_inb(PIC_M_CMD)); */
+
+	return 1;
+}

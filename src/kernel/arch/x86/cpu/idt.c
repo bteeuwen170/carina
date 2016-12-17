@@ -80,7 +80,7 @@ static char *exceptions[SINT_ENTRIES] = {
 };
 
 static struct idt_desc idt[IDT_ENTRIES];
-void *irq_handlers[IRQ_ENTRIES];
+static void *isr_handlers[IDT_ENTRIES];
 
 /*
  * Valid values for type are:
@@ -106,8 +106,10 @@ void idt_init(void)
 	for (i = 0; i < IDT_ENTRIES; i++) {
 		idt_set(i, 0x0E, (intptr_t) ints[i]);
 
-		if (i > SINT_ENTRIES - 1)
-			irq_mask(SINT_ENTRIES - 1 + i);
+		if (i < SINT_ENTRIES)
+			isr_reghandler(i, NULL);
+		else if (i < SINT_ENTRIES + IRQ_ENTRIES - 1)
+			irq_mask(SINT_ENTRIES - i);
 	}
 
 	idt_load(&idt, IDT_ENTRIES * sizeof(struct idt_desc) - 1);
@@ -118,47 +120,42 @@ void idt_init(void)
 
 void _isr(struct int_stack *regs)
 {
-	if (regs->int_no == 32 + 11)
-		kprintf(0, 0, "?");
-	switch (regs->int_no) {
-	case SINT_ENTRIES - 1 + IRQ_PRT:
-	case SINT_ENTRIES - 1 + IRQ_ATA1:
-		break;
-	case 0x08: /* Double fault */
-	case 0x12: /* Internal machine error */
+	void (*handler) (struct int_stack *regs);
+
+	if (regs->int_no < SINT_ENTRIES) { //XXX TEMPORARY
 		panic(exceptions[regs->int_no],
 				regs->err_code, regs->rip);
-		break;
-	case SINT_SYSCALL:
-		break;
-	default:
-		if (regs->int_no < SINT_ENTRIES) { //XXX TEMPORARY
-			panic(exceptions[regs->int_no],
-					regs->err_code, regs->rip);
-		} else if (regs->int_no < SINT_ENTRIES + IRQ_ENTRIES) {
-			void (*handler) (struct int_stack *regs);
 
-			handler = irq_handlers[regs->int_no - SINT_ENTRIES];
+		return;
+	}
 
-			if (handler)
-				handler(regs);
+	handler = isr_handlers[regs->int_no];
 
-			if (regs->int_no >= SINT_ENTRIES + (IRQ_ENTRIES / 2))
-				io_outb(PIC_S_CMD, PIC_EOI);
-			io_outb(PIC_M_CMD, PIC_EOI);
-		}
+	if (handler)
+		handler(regs);
 
-		break;
+	if (regs->int_no >= SINT_ENTRIES &&
+			regs->int_no < SINT_ENTRIES + IRQ_ENTRIES - 1) {
+
+		/* TODO Handle spurious interrupts */
+		/* if (!irq_active(SINT_ENTRIES - regs->int_no))
+			return; */
+
+		if (regs->int_no >= SINT_ENTRIES + (IRQ_ENTRIES / 2))
+			io_outb(PIC_S_CMD, PIC_EOI);
+		io_outb(PIC_M_CMD, PIC_EOI);
 	}
 }
 
-void irq_reghandler(const u8 irq, void (*handler) (struct int_stack *))
+void isr_reghandler(const u8 int_no, void (*handler) (struct int_stack *))
 {
-	irq_handlers[irq] = handler;
-	irq_unmask(irq);
+	isr_handlers[int_no] = handler;
+
+	if (int_no >= SINT_ENTRIES && int_no < SINT_ENTRIES + IRQ_ENTRIES - 1)
+		irq_unmask(SINT_ENTRIES - int_no);
 }
 
-void irq_unreghandler(const u8 irq)
+void isr_unreghandler(const u8 int_no)
 {
-	irq_handlers[irq] = 0;
+	isr_handlers[int_no] = NULL;
 }
