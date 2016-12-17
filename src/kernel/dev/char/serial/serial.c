@@ -26,7 +26,7 @@
 
 #include <print.h>
 
-static char *devname = "serial";
+static const char devname[] = "serial";
 
 /* TODO Do more testing */
 /* Taken from http://www.sci.muni.cz/docs/pc/serport.txt */

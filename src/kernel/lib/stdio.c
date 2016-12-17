@@ -66,7 +66,6 @@ void printcc(char c, u8 color)
 
 void prints(char *str)
 {
-	u32 length = 0;
-	while (str[length])
-		printc(str[length++]);
+	while (*str)
+		printc(*(str++));
 }

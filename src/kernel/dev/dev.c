@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static char *devname = "dev";
+static const char devname[] = "dev";
 
 struct head *devices = 0;
 struct handler *handlers = 0;

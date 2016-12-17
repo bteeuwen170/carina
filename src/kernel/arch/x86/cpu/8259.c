@@ -27,7 +27,7 @@
 
 #include <print.h>
 
-static char *devname = "pic";
+static const char devname[] = "pic";
 
 void pic_remap(void)
 {

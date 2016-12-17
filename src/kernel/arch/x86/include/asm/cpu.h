@@ -83,7 +83,7 @@ static inline u16 io_inw(u16 port)
 	return val;
 }
 
-static inline u32 io_ini(u16 port)
+static inline u32 io_ind(u16 port)
 {
 	u32 val;
 

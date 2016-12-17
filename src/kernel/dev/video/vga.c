@@ -30,7 +30,7 @@
 
 #include "vga.h"
 
-static char *devname = "vga";
+static const char devname[] = "vga";
 
 static u16 *vga_buffer = (u16 *) 0xB8000;
 

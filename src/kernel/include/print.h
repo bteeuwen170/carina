@@ -40,7 +40,7 @@
 #define LL_VERBOSE	2 /* KP_INFO + */
 #define LL_DBG		3 /* KP_BDG + */
 
-void kprintf(const u8 kp, char *prefix, char *fmt, ...);
+void kprintf(const u8 kp, const char *prefix, char *fmt, ...);
 
 i8 get_kp();
 

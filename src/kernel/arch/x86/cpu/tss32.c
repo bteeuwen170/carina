@@ -26,7 +26,7 @@
 
 #include <asm/cpu.h>
 
-//static char *devname = "tss";
+//static const char devname[] = "tss";
 
 static struct tss_entry tss[TSS_ENTRIES];
 

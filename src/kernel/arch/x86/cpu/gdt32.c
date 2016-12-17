@@ -26,7 +26,7 @@
 
 #include <asm/cpu.h>
 
-//static char *devname = "gdt";
+//static const char devname[] = "gdt";
 
 static struct segment_desc gdt[GDT_ENTRIES - 1];
 

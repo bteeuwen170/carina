@@ -37,7 +37,7 @@
 #include "ac97.h"
 #include "snd.h"
 
-static char *devname = "ac97";
+static const char devname[] = "ac97";
 
 struct buffer {
 	u32	addr;
@@ -63,7 +63,8 @@ struct ac97_dev *dev = &deva;
 
 static void buffer_fill(void *data, u32 n, u32 off)
 {
-	dev->buf[n].addr = (intptr_t) data + off;
+	/* TEMP 400 to skip header */
+	dev->buf[n].addr = (intptr_t) data + 400 + off;
 	dev->buf[n].len = 32;
 	dev->buf[n].bup = 0;
 	dev->buf[n].ioc = 1;
@@ -72,6 +73,8 @@ static void buffer_fill(void *data, u32 n, u32 off)
 static void int_handler(struct int_stack *regs)
 {
 	(void) regs;
+
+	kprintf(KP_DBG, devname, "!"); //TEMPORARY
 
 	u32 curbuf = (dev->prev + 1) % 32;
 
@@ -83,8 +86,6 @@ static void int_handler(struct int_stack *regs)
 	buffer_fill(snd_wav, dev->prev, ++dev->index);
 
 	dev->prev = curbuf;
-
-	kprintf(KP_DBG, devname, "!"); //TEMPORARY
 }
 
 static void ac97_volume(u8 volume)
@@ -110,34 +111,35 @@ void ac97_play(void)
 
 	io_outd(dev->nabmbar + 0x10, (intptr_t) dev->buf);
 
-	io_outb(dev->nabmbar + 0x15, dev->index);
-	/* io_outb(dev->nabmbar + 0x1B, 0x19); */
-	/* io_outb(dev->nabmbar + 0x1B, io_inb(dev->nabmbar + 0x1B) | 0x01); */
-	io_outb(dev->nabmbar + 0x1B, 0x15);
+	/* X_LVI */ io_outb(dev->nabmbar + 0x15, 32);
+	/* XXX Use LVBIE or CELV for interrupt? */
+	/* X_CR */ io_outb(dev->nabmbar + 0x1B, 0x19);
+	/* Now set: bit 4 (IOCE), bit 3 (FEIE) and bit 0 (RPBM) */
 
-	kprintf(KP_INFO, devname, "wav playing\n");
+	kprintf(KP_DBG, devname, "sr: %u\n", io_inw(dev->nabmbar + 0x16));
+
+	kprintf(KP_DBG, devname, "wav playing\n");
 }
 
 static int pci_handler(struct pci_dev *card)
 {
-	card->cfg->int_line = 0xA;
-	kprintf(KP_DBG, devname, "intline: %u\n", card->cfg->int_line);
-
-	dev->nambar = card->cfg->bar_0 - 1;
-	dev->nabmbar = card->cfg->bar_1 - 1;
-
-	if (!dev->nambar || !dev->nabmbar)
-		goto err;
+	dev->nambar = card->cfg->bar_0 & ~1;
+	dev->nabmbar = card->cfg->bar_1 & ~1;
 
 	/* Set PIO control */
 	pci_outd(card->bus, card->dev, card->func, 4, 5);
 
+	if (dev->nambar <= 0 || dev->nabmbar <= 0)
+		goto err;
+
+	sleep(20);
+
 	/* Reset */
-	io_outw(dev->nambar + 0x00, 0x42);
-	io_outb(dev->nabmbar + 0x0B, 0x02);
-	io_outb(dev->nabmbar + 0x1B, 0x02);
-	io_outb(dev->nabmbar + 0x2B, 0x02);
-	sleep(100);
+	io_outw(dev->nambar + 0x00, 0x01);
+	sleep(20);
+
+	/* Register reset */
+	/* X_CR */ io_outb(dev->nabmbar + 0x1B, 0x02);
 
 	/* Check if sample rate is set out of the box */
 	if (io_inw(dev->nambar + 0x28) & 1) {
@@ -147,13 +149,13 @@ static int pci_handler(struct pci_dev *card)
 		io_outw(dev->nambar + 0x32, 48000);
 	}
 
-	kprintf(KP_DBG, devname, "sr: %u Hz\n", io_inw(dev->nambar + 0x2C));
-
 	ac97_volume(0);
 
 	irq_reghandler(card->cfg->int_line, &int_handler);
 
-	kprintf(KP_INFO, devname, "initialized (FIXME lies!)\n");
+	/* TODO Detect vendor */
+	kprintf(KP_INFO, devname, "initialized, %u Hz @ IRQ %u\n",
+			io_inw(dev->nambar + 0x2C), card->cfg->int_line);
 
 	return 0;
 

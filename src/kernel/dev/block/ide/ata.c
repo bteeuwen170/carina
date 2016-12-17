@@ -34,7 +34,7 @@
 
 #include "ata.h"
 
-static char *devname = "ide";
+static const char devname[] = "ide";
 
 struct ata_channel channels[ATA_CHANNELS];
 struct ata_dev devices[ATA_CHANNELS * ATA_DRIVES];

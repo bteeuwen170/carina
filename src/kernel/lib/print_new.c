@@ -22,6 +22,11 @@
  *
  */
 
+/*
+ * TODO
+ * Binary output
+ */
+
 /*TMP*/
 #include <char/serial/serial.h>
 #include <kbd/kbd.h>

@@ -180,7 +180,7 @@ void kernel_main(struct mboot_info *mboot)
 
 	cmd[0] = '\0';
 
-	prints("\e[1;34mSV Shell:\n$ ");
+	kprintf(0, 0, "\e[1;34mSV Shell:\n$ ");
 
 	for (;;) {
 		char c;
@@ -259,7 +259,7 @@ void kernel_main(struct mboot_info *mboot)
 
 		p = 0;
 
-		prints("$ ");
+		kprintf(0, 0, "$ ");
 
 		for (i = 1; i < strlen(cmd); i++)
 			cmd[i] = 0;

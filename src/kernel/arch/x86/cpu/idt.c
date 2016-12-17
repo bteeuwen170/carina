@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static char *devname = "idt";
+static const char devname[] = "idt";
 
 /*
  * This is a global list of all interrupt vectors:
@@ -107,7 +107,7 @@ void idt_init(void)
 		idt_set(i, 0x0E, (intptr_t) ints[i]);
 
 		if (i < SINT_ENTRIES)
-			isr_reghandler(i, NULL);
+			isr_reghandler(i, 1);
 		else if (i < SINT_ENTRIES + IRQ_ENTRIES - 1)
 			irq_mask(SINT_ENTRIES - i);
 	}
@@ -122,7 +122,8 @@ void _isr(struct int_stack *regs)
 {
 	void (*handler) (struct int_stack *regs);
 
-	if (regs->int_no < SINT_ENTRIES) { //XXX TEMPORARY
+	/* TEMP */
+	if (regs->int_no < SINT_ENTRIES) {
 		panic(exceptions[regs->int_no],
 				regs->err_code, regs->rip);
 
@@ -149,6 +150,11 @@ void _isr(struct int_stack *regs)
 
 void isr_reghandler(const u8 int_no, void (*handler) (struct int_stack *))
 {
+	if (int_no < SINT_ENTRIES && isr_handlers[int_no] != NULL)
+		kprintf(KP_WARN, devname,
+				"remapping exception handler for int. %d\n",
+				int_no);
+
 	isr_handlers[int_no] = handler;
 
 	if (int_no >= SINT_ENTRIES && int_no < SINT_ENTRIES + IRQ_ENTRIES - 1)
@@ -157,5 +163,10 @@ void isr_reghandler(const u8 int_no, void (*handler) (struct int_stack *))
 
 void isr_unreghandler(const u8 int_no)
 {
+	if (int_no < SINT_ENTRIES)
+		kprintf(KP_WARN, devname,
+				"removing exception handler for int. %d\n",
+				int_no);
+
 	isr_handlers[int_no] = NULL;
 }

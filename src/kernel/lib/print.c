@@ -306,7 +306,7 @@ i32 sprintf(char *buf, const char *fmt, ...)
 }
 
 /* This function is a mess */
-void kprintf(const u8 kp, char *prefix, char *fmt, ...)
+void kprintf(const u8 kp, const char *prefix, char *fmt, ...)
 {
 	char printbuf[1024], fmtbuf[1024], prefixbuf[1024];
 	va_list args;
@@ -332,8 +332,29 @@ void kprintf(const u8 kp, char *prefix, char *fmt, ...)
 
 	va_end(args);
 
+	char *str = fmtbuf;
+	u8 color;
+
+	switch (kp) {
+	case KP_WARN:
+		color = VGA_COLOR_YELLOW;
+		break;
+	case KP_DBG:
+		color = VGA_COLOR_LIGHT_GREEN;
+		break;
+	case KP_ERR:
+		color = VGA_COLOR_LIGHT_RED;
+		break;
+	case KP_INFO:
+	default:
+		color = VGA_COLOR_LIGHT_GREY;
+		break;
+	}
+
+	while (*str)
+		printcc(*(str++), color);
+
 	//TEMP
-	prints(fmtbuf);
 	u32 i;
 	for (i = 0; i < strlen(fmtbuf); i++)
 		serial_out(COM0, fmtbuf[i]);

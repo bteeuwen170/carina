@@ -31,7 +31,7 @@
 
 #include "pci.h"
 
-static char *devname = "pci";
+static const char devname[] = "pci";
 
 struct pci_dev *pci_devices = 0;
 struct pci_handler *pci_handlers = 0;
@@ -124,14 +124,16 @@ struct {
 #define	PCI_DEVTABLE_SIZE \
 		(sizeof(pci_device_table) / sizeof(pci_device_table[0]))
 
+/* TODO Use struct */
 u32 pci_ind(u16 bus, u16 dev, u16 func, u32 reg)
 {
 	io_outd(0xCF8, 0x80000000L | ((u32) bus << 16) | ((u32) dev << 11) |
 			((u32) func << 8) | (reg & ~3));
 
-	return io_ini(0xCFC + (reg & 3));
+	return io_ind(0xCFC + (reg & 3));
 }
 
+/* TODO Use struct */
 void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val)
 {
 	io_outd(0xCF8, 0x80000000L | ((u32) bus << 16) | ((u32) dev << 11) |

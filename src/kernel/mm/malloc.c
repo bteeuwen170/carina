@@ -25,7 +25,7 @@
 #include <mboot.h>
 #include <print.h>
 
-static char *devname = "mem";
+static const char devname[] = "mem";
 
 const char *mmap_types[5] = {
 	"rsvd",

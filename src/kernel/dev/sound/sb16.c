@@ -35,7 +35,7 @@
 
 #include "snd.h"
 
-static char *devname = "sb16";
+static const char devname[] = "sb16";
 
 static void int_handler(struct int_stack *regs)
 {

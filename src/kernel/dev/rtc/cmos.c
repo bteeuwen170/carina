@@ -28,7 +28,7 @@
 
 #include "cmos.h"
 
-static char *devname = "rtc";
+static const char devname[] = "rtc";
 
 /* TODO Make get_time function + check if not updating using CMOS_A */
 static u8 cmos_in(const u8 reg)
