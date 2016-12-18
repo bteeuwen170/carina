@@ -33,14 +33,14 @@
 
 static const char devname[] = "pci";
 
-struct pci_dev *pci_devices = 0;
-struct pci_handler *pci_handlers = 0;
+static LIST_HEAD(pci_devices);
+static LIST_HEAD(pci_drivers);
 
 struct {
-	u8	base_class;
-	u8	sub_class;
-	u8	prog_if;
-	char	*device;
+	u8		base_class;
+	u8		sub_class;
+	u8		prog_if;
+	const char	*name;
 } pci_device_table[] = {
 	/* Unclassified Controllers */
 	{ 0x00, 0x00, 0x00, "Non-VGA compatible device" },
@@ -121,197 +121,149 @@ struct {
 	{ 0x0C, 0x80, 0x00, "Serial bus controller" }
 };
 
-#define	PCI_DEVTABLE_SIZE \
-		(sizeof(pci_device_table) / sizeof(pci_device_table[0]))
-
-/* TODO Use struct */
-u32 pci_ind(u16 bus, u16 dev, u16 func, u32 reg)
+u32 pci_ind(struct pci_dev *card, u32 reg)
 {
-	io_outd(0xCF8, 0x80000000L | ((u32) bus << 16) | ((u32) dev << 11) |
-			((u32) func << 8) | (reg & ~3));
+	io_outd(0xCF8, 0x80000000L | ((u32) card->bus << 16) |
+			((u32) card->dev << 11) | ((u32) card->func << 8) |
+			(reg & ~3));
 
 	return io_ind(0xCFC + (reg & 3));
 }
 
-/* TODO Use struct */
-void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val)
+void pci_outd(struct pci_dev *card, u32 reg, u32 val)
 {
-	io_outd(0xCF8, 0x80000000L | ((u32) bus << 16) | ((u32) dev << 11) |
-			((u32) func << 8) | (reg & ~3));
+	io_outd(0xCF8, 0x80000000L | ((u32) card->bus << 16) |
+			((u32) card->dev << 11) | ((u32) card->func << 8) |
+			(reg & ~3));
 
 	io_outd(0xCFC, val);
 }
 
-static void pci_add(struct pci_dev *dp)
+void pci_dev_reg(struct pci_dev *card)
 {
-	dp->next = pci_devices;
+	u8 i;
 
-	pci_devices = dp;
-}
+	for (i = 0; i < (sizeof(pci_device_table) /
+			sizeof(pci_device_table[0])); i++) {
+		if ((pci_device_table[i].base_class == card->cfg->base_class &&
+				pci_device_table[i].sub_class ==
+				card->cfg->sub_class)) {
+			kprintf(KP_INFO, devname, "detected %#x %#x %s\n",
+					card->cfg->vendor, card->cfg->device,
+					pci_device_table[i].name);
 
-struct pci_dev *pci_get(u16 bus, u16 dev, u16 func)
-{
-	struct pci_dev *cur = pci_devices;
-
-	while (cur != NULL) {
-		if (cur->bus == bus && cur->dev == dev && cur->func == func)
-			return cur;
-
-		cur = cur->next;
-	}
-
-	return NULL;
-}
-
-struct pci_handler *pci_gethandler(const u16 vendor, const u16 device)
-{
-	struct pci_handler *cur = pci_handlers;
-
-	while (cur != NULL) {
-		if (cur->vendor == vendor && cur->device == device) {
-			return cur;
+			break;
 		}
-
-		cur = cur->next;
 	}
 
-	return NULL;
+	list_init(&card->l);
+	list_add(&pci_devices, &card->l);
 }
 
-int pci_reghandler(const u16 vendor, const u16 device, int max_calls,
-		int (*handler) (struct pci_dev *))
+void pci_driver_reg(struct pci_driver *driver)
 {
-	if (pci_gethandler(vendor, device) != NULL)
-		return 1;
+	/* TODO Check if not already present */
 
-	struct pci_handler *cur = kmalloc(sizeof(struct pci_handler));
-
-	if (!cur)
-		return 1;
-
-	cur->max_calls = max_calls;
-	cur->vendor = vendor;
-	cur->device = device;
-	cur->handler = handler;
-
-	cur->next = pci_handlers;
-
-	pci_handlers = cur;
-
-	return 0;
+	list_init(&driver->l);
+	list_add(&pci_drivers, &driver->l);
 }
 
-/* TODO Needs some polishing */
-int pci_unreghandler(const u16 vendor, const u16 device)
+static struct pci_dev *pci_config(u16 bus, u16 dev, u16 func)
 {
-	struct pci_handler *prev;
-	struct pci_handler *cur = pci_handlers;
+	struct pci_dev *card;
+	struct pci_driver *driver;
+	const struct pci_dev_id *id;
+	u8 i;
 
-	while (cur != NULL) {
-		if (cur->vendor == vendor && cur->device == device) {
-			prev->next = cur->next;
-			kfree(cur);
+	card = kmalloc(sizeof(struct pci_dev));
 
-			return 0;
-		}
-
-		prev = cur;
-		cur = cur->next;
-	}
-
-	return 1;
-}
-
-static void pci_config(u16 bus, u16 dev, u16 func)
-{
-	struct pci_dev *dp;
-	struct pci_config_space *cfg;
-	struct pci_handler *handler;
-	u8 i, j;
-
-	if ((pci_ind(bus, dev, func, 0) & 0xFFFF) == 0xFFFF)
-		return;
-
-	cfg = kmalloc(sizeof(struct pci_config_space));
-
-	if (!cfg)
+	if (!card)
 		goto err;
 
-	/*
-	 * Copyright 2011 Daniel Bittman
-	 * This is from
-	 * https://github.com/dbittman/seakernel/blob/master/
-	 * 		arch/x86_64/drivers/bus/pci.c
-	 *
-	 * TODO Replace with own elegant version
-	 */
-	for (i = 0; i < 64; i += 16) {
-		*(u32 *) ((unsigned long) cfg + i) = pci_ind(bus, dev, func, i);
-		*(u32 *) ((unsigned long) cfg + i + 4) =
-			pci_ind(bus, dev, func, i + 4);
-		*(u32 *) ((unsigned long) cfg + i + 8) =
-			pci_ind(bus, dev, func, i + 8);
-		*(u32 *) ((unsigned long) cfg + i + 12) =
-			pci_ind(bus, dev, func, i + 12);
+	card->bus = bus;
+	card->dev = dev;
+	card->func = func;
+
+	if ((pci_ind(card, 0) & 0xFFFF) == 0xFFFF) {
+		kfree(card);
+		return NULL;
 	}
 
-	for (i = 0; i < PCI_DEVTABLE_SIZE; i++) {
-		if (pci_device_table[i].base_class != cfg->base_class)
-			continue;
+	card->cfg = kmalloc(sizeof(struct pci_config_space));
 
-		for (j = i; j < PCI_DEVTABLE_SIZE; j++)
-			if (pci_device_table[j].sub_class == cfg->sub_class)
+	if (!card->cfg)
+		goto err;
+
+	for (i = 0; i < 4; i++) {
+		*(uintptr_t *) ((uintptr_t) card->cfg + i * 16) =
+			pci_ind(card, i * 16);
+		*(uintptr_t *) ((uintptr_t) card->cfg + i * 16 + 4) =
+			pci_ind(card, i * 16 + 4);
+		*(uintptr_t *) ((uintptr_t) card->cfg + i * 16 + 8) =
+			pci_ind(card, i * 16 + 8);
+		*(uintptr_t *) ((uintptr_t) card->cfg + i * 16 + 12) =
+			pci_ind(card, i * 16 + 12);
+	}
+
+	list_for_each(driver, &pci_drivers, l) {
+		id = driver->ids;
+
+		/*
+		 * TODO
+		 * More checks
+		 * Seperate function
+		 */
+		while (id->vendor || id->sub_vendor ||
+				id->base_class) {
+			if (id->vendor == card->cfg->vendor &&
+					id->device == card->cfg->device) {
+				card->driver = driver;
 				break;
+			}
 
-		/* TODO More verbose */
-		kprintf(KP_INFO, devname, "detected %#x %#x %s\n", cfg->vendor,
-				cfg->device, pci_device_table[j].device);
-
-		break;
+			id++;
+		}
 	}
 
-	dp = kmalloc(sizeof(struct pci_dev));
-
-	if (!dp)
-		goto err;
-
-	dp->bus = bus;
-	dp->dev = dev;
-	dp->func = func;
-	dp->cfg = cfg;
-
-	pci_add(dp);
-
-	handler = pci_gethandler(cfg->vendor, cfg->device);
-
-	if (handler->handler && handler->calls < handler->max_calls) {
-		handler->handler(dp);
-		handler->calls++;
-	}
-
-	return;
+	return card;
 
 	/* TODO Provide error information */
 err:
-	kprintf(KP_ERR, devname, "Out of memory");
+	kprintf(KP_ERR, devname, "out of memory");
+
+	return NULL;
 }
 
-/* TODO Error messages */
-int pci_scan(void)
+void pci_init(void)
 {
+	struct pci_dev *card;
 	u16 bus, dev, func;
 
-	if (pci_devices)
-		return 1;
-
-	/* Not like anyone has 256 PCI buses */
-	for (bus = 0; bus < PCI_BUSES; bus++) {
+	/* Until kfree works */
+	/* for (bus = 0; bus < PCI_BUSES; bus++) { */
+	for (bus = 0; bus < 5; bus++) {
 		for (dev = 0; dev < PCI_DEVICES; dev++) {
 			for (func = 0; func < PCI_FUNCTIONS; func++) {
-				pci_config(bus, dev, func);
+				card = pci_config(dev, bus, func);
+
+				if (!card)
+					continue;
+
+				pci_dev_reg(card);
 			}
 		}
 	}
 
-	return 0;
+	list_for_each(card, &pci_devices, l) {
+		if (card->driver && card->driver->probe) {
+			card->driver->probe(card);
+		}
+	}
 }
+
+#if 0
+void pci_exit(void)
+{
+	/* TODO Free all structures */
+}
+#endif

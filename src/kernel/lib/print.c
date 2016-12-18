@@ -336,14 +336,14 @@ void kprintf(const u8 kp, const char *prefix, char *fmt, ...)
 	u8 color;
 
 	switch (kp) {
+	case KP_ERR:
+		color = VGA_COLOR_LIGHT_RED;
+		break;
 	case KP_WARN:
 		color = VGA_COLOR_YELLOW;
 		break;
 	case KP_DBG:
 		color = VGA_COLOR_LIGHT_GREEN;
-		break;
-	case KP_ERR:
-		color = VGA_COLOR_LIGHT_RED;
 		break;
 	case KP_INFO:
 	default:

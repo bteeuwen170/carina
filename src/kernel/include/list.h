@@ -31,7 +31,7 @@ struct list_head {
 
 #define LIST_INIT(head)	{ &(head), &(head) }
 
-#define LIST_HEAD(head)	struct list_head head = LIST_INIT(head)
+#define LIST_HEAD(head)	struct list_head (head) = LIST_INIT(head)
 
 static inline void list_init(struct list_head *head)
 {
@@ -39,7 +39,7 @@ static inline void list_init(struct list_head *head)
 	head->next = head;
 }
 
-static inline void list_addb(struct list_head *next, struct list_head *entry)
+static inline void list_add(struct list_head *next, struct list_head *entry)
 {
 	next->prev->next = entry;
 	next->prev = entry;
@@ -62,12 +62,12 @@ static inline void list_adda(struct list_head *prev, struct list_head *entry)
 	prev->next = entry;
 }
 
-static inline void list_mvb(struct list_head *next, struct list_head *entry)
+static inline void list_mv(struct list_head *next, struct list_head *entry)
 {
 	entry->prev->next = entry->next;
 	entry->next->prev = entry->prev;
 
-	list_addb(next, entry);
+	list_add(next, entry);
 }
 
 static inline void list_mva(struct list_head *prev, struct list_head *entry)
@@ -85,5 +85,14 @@ static inline void list_rm(struct list_head *entry)
 
 	entry->prev = entry->next = NULL;
 }
+
+#define list_entry(entry, par, name) \
+	((par *) ((char *) (entry) - (uintptr_t) (&((par *)0)->name)))
+
+#define list_for_each(par, head, name) \
+	for ((par) = list_entry((head)->next, typeof(*(par)), name); \
+			&(par)->name != (head); (par) = \
+			list_entry((par)->name.next, typeof(*(par)), name))
+
 
 #endif

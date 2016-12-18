@@ -172,6 +172,6 @@ struct ata_channel {
 	u8	nint;
 };
 
-void ide_reghandler(void);
+void ide_init(void);
 
 #endif

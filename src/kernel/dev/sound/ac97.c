@@ -39,6 +39,12 @@
 
 static const char devname[] = "ac97";
 
+static const struct pci_dev_id dev_ids[] = {
+	{ PCI_DEVICE(0x8086, 0x2415, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0) },
+	{ PCI_DEVICE(0x8086, 0x2425, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0) },
+	{ PCI_DEVICE(0x8086, 0x2445, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0) }
+};
+
 struct buffer {
 	u32	addr;
 	u16	len;
@@ -88,7 +94,7 @@ static void int_handler(struct int_stack *regs)
 	dev->prev = curbuf;
 }
 
-static void ac97_volume(u8 volume)
+static void volume_set(u8 volume)
 {
 	io_outw(dev->nambar + 0x02, (volume << 8) | volume);
 	io_outw(dev->nambar + 0x18, (volume << 8) | volume);
@@ -121,13 +127,13 @@ void ac97_play(void)
 	kprintf(KP_DBG, devname, "wav playing\n");
 }
 
-static int pci_handler(struct pci_dev *card)
+static int ac97_probe(struct pci_dev *card)
 {
 	dev->nambar = card->cfg->bar_0 & ~1;
 	dev->nabmbar = card->cfg->bar_1 & ~1;
 
 	/* Set PIO control */
-	pci_outd(card->bus, card->dev, card->func, 4, 5);
+	pci_outd(card, 4, 5);
 
 	if (dev->nambar <= 0 || dev->nabmbar <= 0)
 		goto err;
@@ -149,7 +155,7 @@ static int pci_handler(struct pci_dev *card)
 		io_outw(dev->nambar + 0x32, 48000);
 	}
 
-	ac97_volume(0);
+	volume_set(0);
 
 	irq_reghandler(card->cfg->int_line, &int_handler);
 
@@ -165,9 +171,21 @@ err:
 	return 1;
 }
 
-void ac97_reghandler(void)
+static void ac97_fini(struct pci_dev *card)
 {
-	pci_reghandler(0x8086, 0x2415, 1, &pci_handler);
-	pci_reghandler(0x8086, 0x2425, 1, &pci_handler);
-	pci_reghandler(0x8086, 0x2445, 1, &pci_handler);
+	/* TODO */
+}
+
+static struct pci_driver driver = {
+	.name	= devname,
+
+	.ids	= dev_ids,
+
+	.probe	= &ac97_probe,
+	.fini	= &ac97_fini
+};
+
+void ac97_init(void)
+{
+	pci_driver_reg(&driver);
 }

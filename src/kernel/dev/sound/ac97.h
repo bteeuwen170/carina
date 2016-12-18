@@ -27,6 +27,6 @@
 
 void ac97_play(void);
 
-void ac97_reghandler(void);
+void ac97_init(void);
 
 #endif

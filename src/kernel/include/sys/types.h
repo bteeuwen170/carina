@@ -71,6 +71,7 @@ typedef u64		ino_t;		/* Inode number */
 typedef u32		intptr32_t;	/* Address (32-bit) */
 typedef u64		intptr64_t;	/* Address (64-bit) */
 typedef __asm_intptr_t	intptr_t;	/* Address */
+typedef __asm_uintptr_t	uintptr_t;	/* Unsigned address */
 
 /* Other */
 typedef struct {

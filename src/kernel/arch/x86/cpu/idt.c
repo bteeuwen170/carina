@@ -107,7 +107,7 @@ void idt_init(void)
 		idt_set(i, 0x0E, (intptr_t) ints[i]);
 
 		if (i < SINT_ENTRIES)
-			isr_reghandler(i, 1);
+			isr_reghandler(i, NULL);
 		else if (i < SINT_ENTRIES + IRQ_ENTRIES - 1)
 			irq_mask(SINT_ENTRIES - i);
 	}

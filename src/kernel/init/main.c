@@ -54,6 +54,7 @@ extern void usrmode_enter();
 
 void kernel_main(struct mboot_info *mboot)
 {
+#if 1 /* XXX MOVE XXX Arch init */
 	spinlock_t lock = SPINLOCK;
 
 	spin_lock(lock);
@@ -71,24 +72,6 @@ void kernel_main(struct mboot_info *mboot)
 	/* tss_init(); */
 	/* lapic_init(); */
 	/* ioapic_init(); */
-
-	/* TODO Other format (UTC) */
-	kprintf(KP_INFO, "cpu0", "Welcome to Elara! (compiled on %s %s)\n",
-			__DATE__, __TIME__);
-	/* TODO Actually get starting cpu */
-
-	/* TODO Move */
-	kprintf(KP_INFO | KP_CON, 0, "Elara has been loaded by %s\n",
-			mboot->boot_loader_name);
-	kprintf(KP_INFO | KP_CON, 0, "cmdline: %s\n", mboot->cmdline);
-
-	mm_init(mboot->mmap_addr, mboot->mmap_len);
-
-#if 0
-	/* TODO Move */
-	kprintf(KP_INFO, "mem", "%u KB base memory\n", mboot->mem_lo);
-	kprintf(KP_INFO, "mem",
-			"%u MB extended memory\n", mboot->mem_hi / 1024);
 #endif
 
 #if 0
@@ -142,24 +125,43 @@ void kernel_main(struct mboot_info *mboot)
 	}
 #endif
 
+	/* TODO Other format (UTC) */
+	kprintf(KP_INFO, "cpu0", "Welcome to Elara! (compiled on %s %s)\n",
+			__DATE__, __TIME__);
+	/* TODO Actually get starting cpu */
+
+	/* TODO Move */
+	kprintf(KP_INFO | KP_CON, 0, "Elara has been loaded by %s\n",
+			mboot->boot_loader_name);
+	kprintf(KP_INFO | KP_CON, 0, "cmdline: %s\n", mboot->cmdline);
+
+	mm_init(mboot->mmap_addr, mboot->mmap_len);
+
+#if 0
+	/* TODO Move */
+	kprintf(KP_INFO, "mem", "%u KB base memory\n", mboot->mem_lo);
+	kprintf(KP_INFO, "mem",
+			"%u MB extended memory\n", mboot->mem_hi / 1024);
+#endif
+
 	/* cpu_info(); */
 
-	/* Initialize remaining hardware */
 	/* acpi_init(); */
 	rtc_init();
-	pit_init();
-	kbd_enable();
+	pit_init(); /* TODO Timer init (generic) */
 
-	/* Register PCI handlers */
-	ide_reghandler();
-	ac97_reghandler();
+	kbd_enable();
+	/* sb16_init(); */
 
 	asm volatile ("sti");
-	kprintf(KP_DBG, "cpu0", "Interrupts enabled\n");
+	kprintf(KP_DBG, "cpu0", "interrupts enabled\n");
 
-	pci_scan();
+/* #if CONFIG_PCI */
+	ide_init();
+	ac97_init();
 
-	/* sb16_init(); */
+	pci_init();
+/* #endif */
 
 	/* Temporary and crappy code */
 #if 0

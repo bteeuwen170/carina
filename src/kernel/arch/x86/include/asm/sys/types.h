@@ -25,13 +25,6 @@
 #ifndef _X86_TYPES_H
 #define _X86_TYPES_H
 
-#ifdef ARCH_i686
-#   include "../../../include-32/asm/sys/types.h"
-#endif
-#ifdef ARCH_x86_64
-#   include "../../../include-64/asm/sys/types.h"
-#endif
-
 typedef signed char		__asm_i8;
 typedef signed short		__asm_i16;
 typedef signed int		__asm_i32;
@@ -41,5 +34,11 @@ typedef unsigned char		__asm_u8;
 typedef unsigned short		__asm_u16;
 typedef unsigned int		__asm_u32;
 typedef unsigned long long	__asm_u64;
+
+typedef long		__asm_ssize_t;
+typedef unsigned long	__asm_size_t;
+
+typedef long		__asm_intptr_t;
+typedef unsigned long	__asm_uintptr_t;
 
 #endif

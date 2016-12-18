@@ -36,6 +36,12 @@
 
 static const char devname[] = "ide";
 
+static const struct pci_dev_id dev_ids[] = {
+	{ PCI_DEVICE(0x8086, 0x7010, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0) },
+	{ PCI_DEVICE(0x8086, 0x269E, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0) },
+	{ PCI_DEVICE(0x8086, 0x7111, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0) }
+};
+
 struct ata_channel channels[ATA_CHANNELS];
 struct ata_dev devices[ATA_CHANNELS * ATA_DRIVES];
 
@@ -211,6 +217,9 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 
 	dev = kmalloc(sizeof(struct ata_dev));
 
+	if (!dev)
+		goto err;
+
 	dev->ch = ch;
 	dev->drv = drv;
 
@@ -314,7 +323,7 @@ ret:
 
 }
 
-static int pci_handler(struct pci_dev *card)
+static int ide_probe(struct pci_dev *card)
 {
 	u16 ch, drv;
 
@@ -349,10 +358,21 @@ err:
 	return 1;
 }
 
-void ide_reghandler(void)
+static void ide_fini(struct pci_dev *card)
 {
-	pci_reghandler(0x8086, 0x7010, 1, &pci_handler);
-	pci_reghandler(0x8086, 0x269E, 1, &pci_handler);
-	pci_reghandler(0x8086, 0x7111, 1, &pci_handler);
-	/* TODO Register by class ID */
+	/* TODO */
+}
+
+static struct pci_driver driver = {
+	.name	= devname,
+
+	.ids	= dev_ids,
+
+	.probe	= &ide_probe,
+	.fini	= &ide_fini
+};
+
+void ide_init(void)
+{
+	pci_driver_reg(&driver);
 }

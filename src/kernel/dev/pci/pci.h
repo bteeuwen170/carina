@@ -25,6 +25,8 @@
 #ifndef _PCI_H
 #define _PCI_H
 
+#include <list.h>
+
 #define PCI_BUSES	256
 #define PCI_DEVICES	32
 #define PCI_FUNCTIONS	8
@@ -50,8 +52,8 @@ struct pci_config_space {
 	u32	bar_4;
 	u32	bar_5;
 	u32	unused;
-	u16	subsys_vendor;
-	u16	subsys;
+	u16	sub_vendor;
+	u16	sub_device;
 	u32	unused1[3];
 	u8	int_line;
 	u8	int_pin;
@@ -59,38 +61,53 @@ struct pci_config_space {
 	u8	max_lat;
 } __attribute__ ((packed));
 
-/* PCI device structure */
 struct pci_dev {
+	struct list_head l;
+
 	u16			bus, dev, func;
+
+	struct pci_driver	*driver;
 	struct pci_config_space	*cfg;
-	
-	/* Device specific structure */
-	void			*device;
-
-	struct pci_dev		*next;
 };
 
-/* PCI handler structure */
-struct pci_handler {
-	int			calls, max_calls;
+#define PCI_ANY_ID	~(0)
 
-	u16			vendor, device;
-	int			(*handler) (struct pci_dev *);
-	
-	struct pci_handler	*next;
+#define PCI_DEVICE(v, d, sv, sd, bc, sc, pi) \
+	.vendor = (v), \
+	.device = (d), \
+	.sub_vendor = (sv), \
+	.sub_device = (sd), \
+	.base_class = (bc), \
+	.sub_class = (sc), \
+	.prog_if = (pi)
+
+struct pci_dev_id {
+	u16	vendor, device;
+	u16	sub_vendor, sub_device;
+
+	u8	base_class, sub_class, prog_if;
 };
 
-u32 pci_ind(u16 bus, u16 dev, u16 func, u32 reg);
+struct pci_driver {
+	struct list_head l;
 
-void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val);
+	const char		*name;
+	const struct pci_dev_id	*ids;
 
-struct pci_dev *pci_get(u16 bus, u16 dev, u16 func);
+	int	(*probe) (struct pci_dev *);
+	void	(*fini) (struct pci_dev *);
+};
 
-int pci_reghandler(const u16 vendor, const u16 device, int max_calls,
-		int (*handler) (struct pci_dev *));
+u32 pci_ind(struct pci_dev *dev, u32 reg);
+void pci_outd(struct pci_dev *dev, u32 reg, u32 val);
 
-int pci_unreghandler(const u16 vendor, const u16 device);
+/* struct pci_dev *pci_get(u16 bus, u16 dev, u16 func); */
 
-int pci_scan(void);
+void pci_driver_reg(struct pci_driver *driver);
+/* vodi pci_driver_unreg(struct pci_driver *); */
+
+void pci_init(void);
+
+/* void pci_exit(void); */
 
 #endif
