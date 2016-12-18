@@ -139,12 +139,12 @@ void kbd_enable(void)
 {
 	modifiers = 0;
 
-	irq_reghandler(IRQ_KBD, &int_handler);
+	irq_handler_reg(IRQ_KBD, &int_handler);
 }
 
 void kbd_disable(void)
 {
-	irq_unreghandler(IRQ_KBD);
+	irq_handler_unreg(IRQ_KBD);
 }
 
 /* TODO Not here, please this os is a mess ... */

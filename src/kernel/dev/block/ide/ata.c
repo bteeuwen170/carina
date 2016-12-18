@@ -22,7 +22,7 @@
  *
  */
 
-#include <print.h>
+#include <kernel.h>
 
 #include <asm/cpu.h>
 
@@ -36,7 +36,7 @@
 
 static const char devname[] = "ide";
 
-static const struct pci_dev_id dev_ids[] = {
+static const struct pci_dev_id ide_ids[] = {
 	{ PCI_DEVICE(0x8086, 0x7010, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0) },
 	{ PCI_DEVICE(0x8086, 0x269E, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0) },
 	{ PCI_DEVICE(0x8086, 0x7111, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0) }
@@ -300,10 +300,10 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 	else
 		goto ret;
 
-	kprintf(KP_INFO, devname, "%s, %s drive @ IRQ %u\n",
+	dprintf(devname, "%s, %s drive @ IRQ %u\n",
 			strtrm(dev->ident.model), (dev->type ? "ATAPI": "ATA"),
 			card->cfg->int_line);
-	kprintf(KP_INFO | KP_CON, devname, "%u sectors (%u MB)\n",
+	dprintf(devname, KP_CON "%u sectors (%u MB)\n",
 			dev->size, dev->size * ATA_SECTOR_SIZE / 1024 / 1024);
 
 	/* XXX TEMPORARY XXX */
@@ -314,7 +314,7 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 
 	/* TODO Provide error information */
 err:
-	kprintf(KP_ERR, devname, "drive error (%u, %u)\n", drv, ch);
+	dprintf(devname, KP_ERR "drive error (%u, %u)\n", drv, ch);
 
 ret:
 	kfree(dev);
@@ -354,7 +354,7 @@ static int ide_probe(struct pci_dev *card)
 
 	/* TODO Provide error information */
 err:
-	kprintf(KP_ERR, devname, "err\n");
+	dprintf(devname, KP_ERR "err\n");
 	return 1;
 }
 
@@ -363,10 +363,10 @@ static void ide_fini(struct pci_dev *card)
 	/* TODO */
 }
 
-static struct pci_driver driver = {
+static struct pci_driver ide_driver = {
 	.name	= devname,
 
-	.ids	= dev_ids,
+	.ids	= ide_ids,
 
 	.probe	= &ide_probe,
 	.fini	= &ide_fini
@@ -374,5 +374,10 @@ static struct pci_driver driver = {
 
 void ide_init(void)
 {
-	pci_driver_reg(&driver);
+	pci_driver_reg(&ide_driver);
+}
+
+void ide_exit(void)
+{
+	pci_driver_unreg(&ide_driver);
 }

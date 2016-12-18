@@ -23,7 +23,7 @@
  */
 /* FIXME This is broken */
 
-#include <print.h>
+#include <kernel.h>
 
 #include <asm/cpu.h>
 
@@ -39,7 +39,7 @@
 
 static const char devname[] = "ac97";
 
-static const struct pci_dev_id dev_ids[] = {
+static const struct pci_dev_id ac97_ids[] = {
 	{ PCI_DEVICE(0x8086, 0x2415, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0) },
 	{ PCI_DEVICE(0x8086, 0x2425, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0) },
 	{ PCI_DEVICE(0x8086, 0x2445, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0) }
@@ -80,7 +80,7 @@ static void int_handler(struct int_stack *regs)
 {
 	(void) regs;
 
-	kprintf(KP_DBG, devname, "!"); //TEMPORARY
+	dprintf(devname, KP_DBG "!"); //TEMPORARY
 
 	u32 curbuf = (dev->prev + 1) % 32;
 
@@ -122,9 +122,9 @@ void ac97_play(void)
 	/* X_CR */ io_outb(dev->nabmbar + 0x1B, 0x19);
 	/* Now set: bit 4 (IOCE), bit 3 (FEIE) and bit 0 (RPBM) */
 
-	kprintf(KP_DBG, devname, "sr: %u\n", io_inw(dev->nabmbar + 0x16));
+	dprintf(devname, KP_DBG "sr: %u\n", io_inw(dev->nabmbar + 0x16));
 
-	kprintf(KP_DBG, devname, "wav playing\n");
+	dprintf(devname, KP_DBG "wav playing\n");
 }
 
 static int ac97_probe(struct pci_dev *card)
@@ -157,16 +157,16 @@ static int ac97_probe(struct pci_dev *card)
 
 	volume_set(0);
 
-	irq_reghandler(card->cfg->int_line, &int_handler);
+	irq_handler_reg(card->cfg->int_line, &int_handler);
 
 	/* TODO Detect vendor */
-	kprintf(KP_INFO, devname, "initialized, %u Hz @ IRQ %u\n",
+	dprintf(devname, "initialized, %u Hz @ IRQ %u\n",
 			io_inw(dev->nambar + 0x2C), card->cfg->int_line);
 
 	return 0;
 
 err:
-	kprintf(KP_ERR, devname, "err\n");
+	dprintf(devname, KP_ERR "unable to intialize ac97 card\n");
 
 	return 1;
 }
@@ -176,10 +176,10 @@ static void ac97_fini(struct pci_dev *card)
 	/* TODO */
 }
 
-static struct pci_driver driver = {
+static struct pci_driver ac97_driver = {
 	.name	= devname,
 
-	.ids	= dev_ids,
+	.ids	= ac97_ids,
 
 	.probe	= &ac97_probe,
 	.fini	= &ac97_fini
@@ -187,5 +187,10 @@ static struct pci_driver driver = {
 
 void ac97_init(void)
 {
-	pci_driver_reg(&driver);
+	pci_driver_reg(&ac97_driver);
+}
+
+void ac97_exit(void)
+{
+	pci_driver_unreg(&ac97_driver);
 }

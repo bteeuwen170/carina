@@ -173,5 +173,6 @@ struct ata_channel {
 };
 
 void ide_init(void);
+void ide_exit(void);
 
 #endif

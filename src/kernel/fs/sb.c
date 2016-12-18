@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/lib/stdio.c
+ * src/kernel/fs/sb.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,50 +22,30 @@
  *
  */
 
-#include <kernel.h>
+#include <fs.h>
+#include <list.h>
 
-#include <kbd/kbd.h>
-#include <video/vga.h>
+#include <stdlib.h>
 
-#include <stdio.h>
-#include <string.h>
+static LIST_HEAD(superblock);
 
-/*
- * TODO This has to be safer
- * Don't use kprintf, switch to VGA if double fault, etc...
- * TODO Also relocate in other file
- * TODO Seperate panic for isrs
- * TODO Dump registers (at least rip/eip)
- */
-void panic(char *reason, u32 err_code, intptr_t ip)
+struct superblock *sb_alloc(struct fs_driver *driver)
 {
-	asm volatile ("cli");
+	struct superblock *sp;
 
-	//TODO Hide cursor
+	/* TODO Check if doesn't exist already */
 
-	kprintf(KP_CRIT "%s @ %#x\n", reason, ip);
+	sp = kmalloc(sizeof(struct superblock));
 
-	/* TODO Don't always print error code */
-	kprintf(KP_CRIT "Error code: %#x\n", err_code);
+	if (!sp)
+		return NULL;
 
-	prints("The system has been halted.");
+	list_init(&sp->l);
 
-	for (;;)
-		asm volatile ("hlt");
-}
+	sp->dev = (dev_t) { 0, 0 };
 
-void printc(char c)
-{
-	printcc(c, vga_fgcolor);
-}
+	list_init(&sp->il);
+	sp->inodes = 0;
 
-void printcc(char c, u8 color)
-{
-	vga_putch(c, color);
-}
-
-void prints(char *str)
-{
-	while (*str)
-		printc(*(str++));
+	return sp;
 }

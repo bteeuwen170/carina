@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/include/print.h
+ * src/kernel/fs/dir.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,26 +22,55 @@
  *
  */
 
-#ifndef _PRINT_H
-#define _PRINT_H
+#include <fs.h>
+#include <limits.h>
 
-/* Loglevels */
-#define KP_DBG		1
-#define KP_INFO		2
-#define KP_WARN		4
-#define KP_ERR		8
-#define KP_CRIT		16
-#define KP_CON		32
+#include <stdlib.h>
+#include <string.h>
 
-/* Loglevels */
-#define LL_DEFAULT	2 //TODO Change to 1
-#define LL_QUIET	0 /* KP_ERR + */
-#define LL_NORMAL	1 /* KP_WARN + */
-#define LL_VERBOSE	2 /* KP_INFO + */
-#define LL_DBG		3 /* KP_BDG + */
+struct dirent *dirent_alloc(struct dirent *dp, const char *name)
+{
+	struct dirent *dep;
 
-void kprintf(const u8 kp, const char *prefix, char *fmt, ...);
+	dep = kmalloc(sizeof(struct dirent));
 
-i8 get_kp();
+	if (!dep)
+		return NULL;
 
-#endif
+	if (strlen(name) > NAME_MAX) {
+		kfree(dep);
+		return NULL;
+	}
+
+	list_init(&dep->l);
+
+	/* TODO Lock for this */
+	if (dp)
+		list_add(&dp->del, &dep->l);
+
+	dep->ip = NULL;
+	dep->dp = dp;
+	list_init(&dep->del);
+
+	dep->refs = 1;
+
+	memcpy(dep->name, name, NAME_MAX);
+
+	return dep;
+}
+
+struct dirent *dirent_alloc_root(struct inode *rp)
+{
+	struct dirent *dep;
+
+	if (!rp)
+		return NULL;
+
+	dep = dirent_alloc(NULL, "/");
+
+	if (!dep)
+		return NULL;
+
+	dep->ip = rp;
+	dep->dp = dep;
+}

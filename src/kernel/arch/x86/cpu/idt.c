@@ -22,7 +22,7 @@
  *
  */
 
-#include <print.h>
+#include <kernel.h>
 #include <syscall.h>
 
 #include <asm/8259.h>
@@ -107,15 +107,15 @@ void idt_init(void)
 		idt_set(i, 0x0E, (intptr_t) ints[i]);
 
 		if (i < SINT_ENTRIES)
-			isr_reghandler(i, NULL);
+			isr_handler_reg(i, NULL);
 		else if (i < SINT_ENTRIES + IRQ_ENTRIES - 1)
 			irq_mask(SINT_ENTRIES - i);
 	}
 
 	idt_load(&idt, IDT_ENTRIES * sizeof(struct idt_desc) - 1);
 
-	kprintf(KP_INFO, devname,
-			"%d entries entered\n", i);
+	dprintf(devname,
+			KP_NOTICE "%d entries entered\n", i);
 }
 
 void _isr(struct int_stack *regs)
@@ -148,10 +148,10 @@ void _isr(struct int_stack *regs)
 	}
 }
 
-void isr_reghandler(const u8 int_no, void (*handler) (struct int_stack *))
+void isr_handler_reg(const u8 int_no, void (*handler) (struct int_stack *))
 {
 	if (int_no < SINT_ENTRIES && isr_handlers[int_no] != NULL)
-		kprintf(KP_WARN, devname,
+		dprintf(devname, KP_WARN
 				"remapping exception handler for int. %d\n",
 				int_no);
 
@@ -161,10 +161,10 @@ void isr_reghandler(const u8 int_no, void (*handler) (struct int_stack *))
 		irq_unmask(SINT_ENTRIES - int_no);
 }
 
-void isr_unreghandler(const u8 int_no)
+void isr_handler_unreg(const u8 int_no)
 {
 	if (int_no < SINT_ENTRIES)
-		kprintf(KP_WARN, devname,
+		dprintf(devname, KP_WARN
 				"removing exception handler for int. %d\n",
 				int_no);
 

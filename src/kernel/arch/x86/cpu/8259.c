@@ -25,7 +25,7 @@
 #include <asm/cpu.h>
 #include <asm/8259.h>
 
-#include <print.h>
+#include <kernel.h>
 
 static const char devname[] = "pic";
 
@@ -43,7 +43,7 @@ void pic_remap(void)
 	io_outb(PIC_M_IO, ICW1_8086);
 	io_outb(PIC_S_IO, ICW1_8086);
 
-	kprintf(KP_INFO, devname, "remapped\n");
+	dprintf(devname, KP_NOTICE "remapped\n");
 }
 
 void pic_disable(void)
@@ -51,7 +51,7 @@ void pic_disable(void)
 	io_outb(PIC_M_IO, 0xFF);
 	io_outb(PIC_S_IO, 0xFF);
 
-	kprintf(KP_INFO, devname, "disabled\n");
+	dprintf(devname, KP_NOTICE "disabled\n");
 }
 
 void irq_mask(u8 irq)

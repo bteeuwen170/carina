@@ -25,7 +25,7 @@
 #include <issue.h>
 #include <lock.h>
 #include <mboot.h>
-#include <print.h>
+#include <kernel.h>
 #include <reboot.h>
 #include <sys/time.h>
 
@@ -76,10 +76,10 @@ void kernel_main(struct mboot_info *mboot)
 
 #if 0
 	/* Initialize video hardware properly */
-	kprintf(KP_DBG, "fb", "addr is %#x\n", mboot->framebuffer_addr);
-	kprintf(KP_DBG, "fb", "bpp is %#x\n", mboot->framebuffer_bpp);
-	kprintf(KP_DBG, "fb", "pitch is %#x\n", mboot->framebuffer_pitch);
-	kprintf(KP_DBG, "fb", "type is %#x\n", mboot->framebuffer_type);
+	kprintf("fb", KP_DBG "addr is %#x\n", mboot->framebuffer_addr);
+	kprintf("fb", KP_DBG "bpp is %#x\n", mboot->framebuffer_bpp);
+	kprintf("fb", KP_DBG "pitch is %#x\n", mboot->framebuffer_pitch);
+	kprintf("fb", KP_DBG "type is %#x\n", mboot->framebuffer_type);
 
 	/* TODO Switch */
 	if (mboot->framebuffer_type == 1) {
@@ -126,23 +126,18 @@ void kernel_main(struct mboot_info *mboot)
 #endif
 
 	/* TODO Other format (UTC) */
-	kprintf(KP_INFO, "cpu0", "Welcome to Elara! (compiled on %s %s)\n",
+	dprintf("cpu0", "Welcome to Elara! (compiled on %s %s)\n",
 			__DATE__, __TIME__);
 	/* TODO Actually get starting cpu */
 
 	/* TODO Move */
-	kprintf(KP_INFO | KP_CON, 0, "Elara has been loaded by %s\n",
+	kprintf(KP_CON "Elara has been loaded by %s\n",
 			mboot->boot_loader_name);
-	kprintf(KP_INFO | KP_CON, 0, "cmdline: %s\n", mboot->cmdline);
+	kprintf(KP_CON "cmdline: %s\n", mboot->cmdline);
 
 	mm_init(mboot->mmap_addr, mboot->mmap_len);
 
-#if 0
-	/* TODO Move */
-	kprintf(KP_INFO, "mem", "%u KB base memory\n", mboot->mem_lo);
-	kprintf(KP_INFO, "mem",
-			"%u MB extended memory\n", mboot->mem_hi / 1024);
-#endif
+	ramfs_init();
 
 	/* cpu_info(); */
 
@@ -154,7 +149,7 @@ void kernel_main(struct mboot_info *mboot)
 	/* sb16_init(); */
 
 	asm volatile ("sti");
-	kprintf(KP_DBG, "cpu0", "interrupts enabled\n");
+	dprintf("cpu0", KP_DBG "interrupts enabled\n");
 
 /* #if CONFIG_PCI */
 	ide_init();
@@ -166,8 +161,6 @@ void kernel_main(struct mboot_info *mboot)
 	/* Temporary and crappy code */
 #if 0
 	usrmode_enter();
-
-	/* kprintf(KP_DBG, "x86", "In usermode\n"); */
 
 	for (;;)
 		asm volatile ("hlt");
@@ -182,7 +175,7 @@ void kernel_main(struct mboot_info *mboot)
 
 	cmd[0] = '\0';
 
-	kprintf(0, 0, "\e[1;34mSV Shell:\n$ ");
+	kprintf("\e[1;34mSV Shell:\n$ ");
 
 	for (;;) {
 		char c;
@@ -215,18 +208,9 @@ void kernel_main(struct mboot_info *mboot)
 		printc(c);
 
 		/* File system */
-		if (strcmp(cmd, "fs init") == 0) {
-#if 0
-			u32 sdf = 0;
-			int res = ramfs_get(4096, &sdf, &ipp);
-
-			kprintf(KP_DBG, "fs", "ret: %d  dev: %u\n", res, sdf);
+		if (strcmp(cmd, "finit") == 0) {
+			sv_mount(0, "ramfs");
 		} else if (strcmp(cmd, "ls") == 0) {
-			int n = 0;
-			while (ramfs_read_dir(ipp, n) != NULL)
-				kprintf(0,0, "%s\n",
-						ramfs_read_dir(ipp, n++)->name);
-#endif
 
 		/* Audio */
 		} else if (strcmp(cmd, "beep") == 0) {
@@ -254,14 +238,14 @@ void kernel_main(struct mboot_info *mboot)
 		} else if (strcmp(cmd, "clear") == 0) {
 			vga_clear();
 		} else if (strcmp(cmd, "uptime") == 0) {
-			kprintf(0, 0, "uptime: %d seconds\n", uptime());
+			kprintf("uptime: %d seconds\n", uptime());
 		} else if (cmd[0] != '\0') {
-			kprintf(0, 0, "shell: command not found: %s\n", cmd);
+			kprintf("shell: command not found: %s\n", cmd);
 		}
 
 		p = 0;
 
-		kprintf(0, 0, "$ ");
+		kprintf("$ ");
 
 		for (i = 1; i < strlen(cmd); i++)
 			cmd[i] = 0;
@@ -273,7 +257,7 @@ void kernel_main(struct mboot_info *mboot)
 void usermode_main(void)
 {
 	asm volatile ("cli");
-	kprintf(KP_DBG, "x86", "User mode\n");
+	dprintf("cpu0", KP_DBG "User mode\n");
 	for (;;)
 		asm volatile ("hlt");
 }

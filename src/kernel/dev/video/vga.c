@@ -26,7 +26,7 @@
 
 #include <asm/cpu.h>
 
-#include <print.h>
+#include <kernel.h>
 
 #include "vga.h"
 
@@ -54,7 +54,7 @@ void vga_init(void)
 	//io_outb(0x3D4, 0x0A);
 	//io_outb(0x3D5, 0x1D);
 
-	kprintf(KP_INFO, devname, "early VGA has been initialized at %dx%d\n",
+	dprintf(devname, "early VGA has been initialized at %dx%d\n",
 			VGA_WIDTH, VGA_HEIGHT);
 }
 

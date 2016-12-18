@@ -23,7 +23,7 @@
  */
 
 #include <mboot.h>
-#include <print.h>
+#include <kernel.h>
 
 static const char devname[] = "mem";
 
@@ -86,14 +86,14 @@ void mm_init(u32 addr, u32 len)
 	struct mboot_mmap *mmap = (void *) (intptr_t) addr;
 	u64 mem = 0;
 
-	kprintf(KP_INFO, devname, "Physical memory map:\n");
+	dprintf(devname, "Physical memory map:\n");
 
 	while ((u64) mmap < addr + len) {
 		u64 maddr = mmap->addr_lo | (mmap->addr_hi >> 16);
 		u64 mlen = mmap->len_lo | (mmap->len_hi >> 16);
 
-		kprintf(KP_INFO | KP_CON, devname,
-				"%#018lx - %#018lx (%s)\n",
+		dprintf(devname,
+				KP_CON "%#018lx - %#018lx (%s)\n",
 				maddr, maddr + mlen, mmap_types[mmap->type]);
 
 		mem += mlen;
@@ -103,7 +103,7 @@ void mm_init(u32 addr, u32 len)
 	}
 
 	/* FIXME Always off by 1 for some reason */
-	kprintf(KP_INFO, devname, "%u MB memory\n", mem / 1024 / 1024 + 1);
+	dprintf(devname, "%u MB memory\n", mem / 1024 / 1024 + 1);
 
 	/* FIXME How much padding is really required? */
 	//position = ((intptr_t) &kern_end) + 0x10000;

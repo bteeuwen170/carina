@@ -24,7 +24,7 @@
 
 #include <asm/cpu.h>
 
-#include <print.h>
+#include <kernel.h>
 
 static const char devname[] = "serial";
 
@@ -81,20 +81,16 @@ void serial_init(const u16 port)
 	case 0:
 		return;
 	case 1:
-		kprintf(KP_INFO, devname,
-				"%s\n", "detected 8250 serial interface");
+		dprintf(devname, "%s\n", "detected 8250 serial interface");
 		break;
 	case 2:
-		kprintf(KP_INFO, devname,
-				"%s\n", "detected 8250 with scratch regs");
+		dprintf(devname, "%s\n", "detected 8250 with scratch regs");
 		break;
 	case 3:
-		kprintf(KP_INFO, devname,
-				"%s\n", "detected 16450 serial interface");
+		dprintf(devname, "%s\n", "detected 16450 serial interface");
 		break;
 	case 4:
-		kprintf(KP_INFO, devname,
-				"%s\n", "detected 16550A serial interface");
+		dprintf(devname, "%s\n", "detected 16550A serial interface");
 		break;
 	}
 

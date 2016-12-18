@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/lib/stdio.c
+ * src/kernel/fs/inode.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,50 +22,52 @@
  *
  */
 
-#include <kernel.h>
+#include <fs.h>
 
-#include <kbd/kbd.h>
-#include <video/vga.h>
+#include <stdlib.h>
 
-#include <stdio.h>
-#include <string.h>
+ino_t inodes = 0;
 
-/*
- * TODO This has to be safer
- * Don't use kprintf, switch to VGA if double fault, etc...
- * TODO Also relocate in other file
- * TODO Seperate panic for isrs
- * TODO Dump registers (at least rip/eip)
- */
-void panic(char *reason, u32 err_code, intptr_t ip)
+struct inode *inode_alloc(struct superblock *sp)
 {
-	asm volatile ("cli");
+	struct inode *ip;
 
-	//TODO Hide cursor
+	if (sp->op->alloc_inode)
+		ip = sp->op->alloc_inode(sp);
+	else
+		ip = kmalloc(sizeof(struct inode));
 
-	kprintf(KP_CRIT "%s @ %#x\n", reason, ip);
+	if (!ip)
+		return NULL;
 
-	/* TODO Don't always print error code */
-	kprintf(KP_CRIT "Error code: %#x\n", err_code);
+	list_init(&ip->l);
 
-	prints("The system has been halted.");
+	ip->dev = sp->dev;
+	if (!ip->inum)
+		ip->inum = ++inodes;
+	ip->mode = 0;
 
-	for (;;)
-		asm volatile ("hlt");
+	ip->refs = 1;
+	ip->links = 1;
+
+	/* TODO Set to current user */
+	ip->uid = 0;
+	ip->gid = 0;
+
+	/* TODO Get current time */
+	ip->atime = 0;
+	ip->ctime = 0;
+	ip->mtime = 0;
+
+	ip->size = 0;
+
+	ip->sp = sp;
 }
 
-void printc(char c)
+void inode_dealloc(struct inode *ip)
 {
-	printcc(c, vga_fgcolor);
-}
-
-void printcc(char c, u8 color)
-{
-	vga_putch(c, color);
-}
-
-void prints(char *str)
-{
-	while (*str)
-		printc(*(str++));
+	if (ip->sp->op->dealloc_inode)
+		ip->sp->op->dealloc_inode(ip);
+	else
+		kfree(ip);
 }

@@ -24,7 +24,7 @@
 
 #if 0
 
-#include <print.h>
+#include <kernel.h>
 
 #include <asm/cpu.h>
 
@@ -39,13 +39,13 @@ static const char devname[] = "sb16";
 
 static void int_handler(struct int_stack *regs)
 {
-	kprintf(KP_INFO, devname, "!\n");
+	dprintf(devname, "!\n");
 }
 
 void sb16_play(void)
 {
 
-	kprintf(KP_INFO, devname, "wav playing\n");
+	dprintf(devname, "wav playing\n");
 }
 
 int sb16_init(void)
@@ -81,7 +81,7 @@ int sb16_init(void)
 		break;
 	}
 
-	kprintf(KP_DBG, devname, "DSP %d.%d\n",
+	dprintf(devname, KP_DBG "DSP %d.%d\n",
 			io_inb(0x220 + 0x0A), io_inb(0x220 + 0x0A));
 
 	/* Set IRQ */
@@ -89,12 +89,12 @@ int sb16_init(void)
 	io_outb(0x220 + 0x04, 0x80);
 	io_outb(0x220 + 0x05, (1 << 2));
 
-	irq_reghandler(7, &int_handler);
+	irq_handler_reg(7, &int_handler);
 
 	return 0;
 
 err:
-	kprintf(KP_ERR, devname, "err\n");
+	dprintf(devname, KP_ERR "err\n");
 
 	return 1;
 }

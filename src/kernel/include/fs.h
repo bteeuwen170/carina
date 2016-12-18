@@ -28,40 +28,50 @@
 #include <limits.h>
 #include <list.h>
 
-///* Inode types */
-//#define IT_INV		0	/* Invalid */
-//#define IT_FILE		1	/* Regular */
-//#define IT_LINK		2	/* Symbolic link */
-//#define IT_DIR		3	/* Directory */
-//#define IT_BLOCK	4	/* Block device */
-//#define IT_CHAR		5	/* Character device */
-//#define IT_PIPE		6	/* Pipe */
-
 ///* Inode flags */
 //#define IF_RO		1	/* Read only */
 //#define IF_AO		2	/* Append only */
 //#define IF_IMMUTABLE	4	/* Immutable */
 //#define IF_NOATIME	8	/* Do not update access time */
-//#define IF_SYNC		16	/* Synchronous updates */
-//
-///* Inode permissions */
-//#define IM_UR		1	/* Owner read */
-//#define IM_UW		2	/* Owner write */
-//#define IM_UE		8	/* Owner execute */
-//#define IM_GR		16	/* Group read */
-//#define IM_GW		32	/* Group write */
-//#define IM_GE		64	/* Group execute */
-//#define IM_OR		128	/* Other read */
-//#define IM_OW		256	/* Other write */
-//#define IM_OE		512	/* Other execute */
-//#define IM_SUID		1024	/* Set UID on execution */
-//#define IM_SGID		2048	/* Set GID on execution */
+//#define IF_SYNC	16	/* Synchronous updates */
+
+/* Inode permissions */
+#define IM_FTM		0170000
+#define IM_LNK		0120000	/* Symbolic link */
+#define IM_REG		0100000	/* Regular file */
+#define IM_BLK		0060000	/* Block device */
+#define IM_DIR		0040000	/* Directory */
+#define IM_CHR		0020000	/* Character device */
+#define IM_FIFO		0010000	/* Pipe */
+//#define IM_SOCK	0140000	/* Socket */
+
+#define IM_SUID		0004000	/* Set UID on execution */
+#define IM_SGID		0002000	/* Set GID on execution */
+
+#define IM_UM		0000700
+#define IM_UR		0000400	/* Owner read */
+#define IM_UW		0000200	/* Owner write */
+#define IM_UE		0000100	/* Owner execute */
+
+#define IM_GM		0000070
+#define IM_GR		0000040	/* Group read */
+#define IM_GW		0000020	/* Group write */
+#define IM_GE		0000010	/* Group execute */
+
+#define IM_OM		0000007
+#define IM_OR		0000004	/* Other read */
+#define IM_OW		0000002	/* Other write */
+#define IM_OE		0000001	/* Other execute */
 
 /* BEGIN mount.h */
 
 struct mountp {
-	struct dirent		*dp;	/* Directory entry */
-	struct superblock	*sp;	/* Superblock */
+	struct mountp	*pp;	/* Parent fs */
+	struct dirent	*dp;	/* Directory entry */
+
+	struct superblock *sp;	/* Superblock */
+
+	char *name;		/* Device path or name */
 };
 
 /* END mount.h */
@@ -77,6 +87,15 @@ struct path {
 
 /* BEGIN fs.h */
 
+struct fs_driver {
+	struct list_head l;
+
+	const char		*name;
+
+	/* Read the superblock: sp, data */
+	struct superblock *(*read_sb) (struct superblock *);
+};
+
 struct superblock {
 	struct list_head l;
 
@@ -86,10 +105,11 @@ struct superblock {
 //	u16	bsize;		/* Block size */
 //	u64	size_max;	/* Max. file size */
 
-	ino_t	inum;		/* First inode */
+	struct list_head il;	/* Inodes */
+//	ino_t	inum;		/* First inode */
 	ino_t	inodes;		/* Number of inodes */
 
-	struct list_head i;	/* Inodes */
+	struct dirent *root;	/* Root dirent */
 
 	struct sb_ops *op;
 };
@@ -99,7 +119,6 @@ struct inode {
 
 	dev_t	dev;		/* Device ID */
 	ino_t	inum;		/* Inode number */
-	u8	type;		/* Inode type */
 //	u8	flags;		/* Inode flags */
 	mode_t	mode;		/* Inode mode */
 
@@ -113,19 +132,20 @@ struct inode {
 	time_t	ctime;		/* Change time */
 	time_t	mtime;		/* Modification time */
 
-	union {
-		struct list_head	d;	/* Directory entries */
-		dev_t			dev;	/* Special file device ID */
-		off_t			size;	/* File size in bytes */
-	} e;
+	off_t	size;		/* File size in bytes */
 
-	struct inode_ops *op;	/* Inode operations */
+	struct superblock *sp;	/* Associated superblock */
+	struct inode_ops  *op;	/* Inode operations */
 };
 
 struct dirent {
-	struct inode	*ip;	/* Associated inode pointer */
-	struct inode	*dp;	/* Associated directory pointer */
-	u32		refs;	/* References count */
+	struct list_head l;
+
+	struct inode		*ip;	/* Associated inode pointer */
+	struct dirent		*dp;	/* Associated directory pointer */
+	struct list_head	del;	/* List of children */
+
+	u32		refs;		/* References count */
 
 	char	name[NAME_MAX + 1];
 };
@@ -142,7 +162,7 @@ struct sb_ops {
 	/* Allocate a memory inode: sp */
 	struct inode *(*alloc_inode) (struct superblock *);
 	/* Deallocate a memory inode: ip */
-	void *(*dealloc_inode) (struct inode *);
+	void (*dealloc_inode) (struct inode *);
 	/* Write an inode to disk: ip */
 	int (*write_inode) (struct inode *);
 	/* Delete an inode from disk: ip */
@@ -153,8 +173,8 @@ struct sb_ops {
 struct inode_ops {
 	/* Create a file: dp, dep, mode */
 	int (*create) (struct inode *, struct dirent *, mode_t);
-	/* Create a hard link: dep, dp, name */
-	int (*link) (struct dirent *, struct inode *, struct dirent *);
+	/* Create a hard link: dp, dep, name */
+	int (*link) (struct inode *, struct dirent *, struct dirent *);
 	/* Create a symbolic link: dp, dep, name */
 	int (*symlink) (struct inode *, struct dirent *, const char *);
 	/* Delete a link: dp, dep */
@@ -163,6 +183,8 @@ struct inode_ops {
 	int (*mkdir) (struct inode *, struct dirent *, mode_t);
 	/* Delete a directory: dp, dep */
 	int (*rmdir) (struct inode *, struct dirent *);
+	/* Create a special file: dp, dep, mode, dev */
+	int (*mknod) (struct inode *, struct dirent *, mode_t, dev_t);
 	/* Move a dirent: odp, odep, dp, dep */
 	int (*move) (struct inode *, struct dirent *, //XXX Eq to rename on l
 			struct inode *, struct dirent *);
@@ -187,6 +209,20 @@ struct file_ops {
 	int (*close) (struct inode *, struct file *); //XXX Eq to release on l
 	//TODO (ioctl), (sync / fsync)
 };
+
+void fs_reg(struct fs_driver *driver);
+void fs_unreg(struct fs_driver *driver);
+
+struct mountp *sv_mount(struct fs_driver *driver, const char *name);
+
+struct superblock *sb_alloc(struct fs_driver *driver);
+
+struct inode *inode_alloc(struct superblock *sp);
+
+struct dirent *dirent_alloc(struct dirent *dp, const char *name);
+struct dirent *dirent_alloc_root(struct inode *rp);
+
+void inode_dealloc(struct inode *ip);
 
 /* END fs.h */
 

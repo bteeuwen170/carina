@@ -24,7 +24,7 @@
 
 #include <asm/cpu.h>
 
-#include <print.h>
+#include <kernel.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -139,7 +139,7 @@ void pci_outd(struct pci_dev *card, u32 reg, u32 val)
 	io_outd(0xCFC, val);
 }
 
-void pci_dev_reg(struct pci_dev *card)
+static void pci_dev_reg(struct pci_dev *card)
 {
 	u8 i;
 
@@ -148,7 +148,7 @@ void pci_dev_reg(struct pci_dev *card)
 		if ((pci_device_table[i].base_class == card->cfg->base_class &&
 				pci_device_table[i].sub_class ==
 				card->cfg->sub_class)) {
-			kprintf(KP_INFO, devname, "detected %#x %#x %s\n",
+			dprintf(devname, "detected %#x %#x %s\n",
 					card->cfg->vendor, card->cfg->device,
 					pci_device_table[i].name);
 
@@ -160,12 +160,22 @@ void pci_dev_reg(struct pci_dev *card)
 	list_add(&pci_devices, &card->l);
 }
 
+static void pci_dev_unreg(struct pci_dev *card)
+{
+	/* TODO */
+}
+
 void pci_driver_reg(struct pci_driver *driver)
 {
 	/* TODO Check if not already present */
 
 	list_init(&driver->l);
 	list_add(&pci_drivers, &driver->l);
+}
+
+void pci_driver_unreg(struct pci_driver *driver)
+{
+	/* TODO */
 }
 
 static struct pci_dev *pci_config(u16 bus, u16 dev, u16 func)
@@ -229,7 +239,7 @@ static struct pci_dev *pci_config(u16 bus, u16 dev, u16 func)
 
 	/* TODO Provide error information */
 err:
-	kprintf(KP_ERR, devname, "out of memory");
+	dprintf(devname, KP_ERR "out of memory");
 
 	return NULL;
 }
@@ -261,9 +271,7 @@ void pci_init(void)
 	}
 }
 
-#if 0
 void pci_exit(void)
 {
 	/* TODO Free all structures */
 }
-#endif

@@ -26,12 +26,13 @@
 #include <fs.h>
 #include <fs/ramfs.h>
 #include <limits.h>
-#include <print.h>
+#include <kernel.h>
 #include <sys/types.h> /* XXX TEMP for syntax highlighting */
 
 #include <stdlib.h>
 #include <string.h>
 
+#if 0
 /* Block size */
 //#define RAMFS_BS	0
 
@@ -77,7 +78,7 @@ static struct inode *ramfs_alloc_inode(struct superblock *sp)
 
 	/* FIXME Skips lot's of empty inodes for some reason... */
 	for (i = 1; i < sp->inodes; i++) {
-		//kprintf(0,0, "crap: %u\n",
+		//kprintf("crap: %u\n",
 		//		((struct ramfs_inode *) sp->data[i])->type);
 		if (((struct ramfs_inode *) sp->data[i]) != 0)
 			continue;
@@ -375,8 +376,6 @@ int ramfs_get(size_t size, u32 *dev, struct inode **ipp)
 	//dp->op->read = ramfs_read;
 	//dp->op->write = ramfs_write;
 
-	dev_reg(dp);
-
 	ip = ramfs_alloc_inode(dp);
 	dep = kmalloc(sizeof(struct dirent));
 
@@ -421,4 +420,128 @@ out:
 
 	return res;
 	//return NULL;
+}
+#endif
+
+static const char devname[] = "ramfs";
+
+static int ramfs_create(struct inode *dp, struct dirent *dep, mode_t mode)
+{
+
+}
+
+static int ramfs_link(struct inode *dp, struct dirent *dep, struct dirent *name)
+{
+
+}
+
+static int ramfs_symlink(struct inode *dp, struct dirent *dep, const char *name)
+{
+
+}
+
+static int ramfs_rmlink(struct inode *dp, struct dirent *dep)
+{
+
+}
+
+static int ramfs_mkdir(struct inode *dp, struct dirent *dep, mode_t mode)
+{
+
+}
+
+static int ramfs_rmdir(struct inode *dp, struct dirent *dep)
+{
+
+}
+
+static int ramfs_mknod(struct inode *dp, struct dirent *dep,
+		mode_t mode, dev_t dev)
+{
+
+}
+
+static int ramfs_move(struct inode *odp, struct dirent *odep,
+		struct inode *dp, struct dirent *dep)
+{
+
+}
+
+static struct sb_ops ramfs_sb_ops = {
+	NULL
+};
+
+static struct inode_ops ramfs_inode_ops = {
+	.create		= &ramfs_create,
+	.link		= &ramfs_link,
+	.symlink	= &ramfs_symlink,
+	.rmlink		= &ramfs_rmlink,
+	.mkdir		= &ramfs_mkdir,
+	.rmdir		= &ramfs_rmdir,
+	.mknod		= &ramfs_mknod,
+	.move		= &ramfs_move
+};
+
+static struct file_ops ramfs_file_ops = {
+	.read		= NULL
+};
+
+static struct inode *ramfs_inode_alloc(struct superblock *sp,
+		mode_t mode, dev_t dev)
+{
+	struct inode *ip;
+
+	ip = inode_alloc(sp);
+
+	if (!ip)
+		return NULL;
+
+	ip->mode = mode;
+
+	switch (mode & IM_FTM) {
+	case IM_DIR:
+		ip->op = &ramfs_inode_ops;
+		break;
+	default:
+		/* TODO */
+		break;
+	}
+
+	return ip;
+}
+
+/*static */struct superblock *ramfs_read_sb(struct superblock *sp)
+{
+	struct inode *ip;
+	struct dirent *dep;
+
+	sp->op = &ramfs_sb_ops;
+
+	ip = ramfs_inode_alloc(sp, IM_DIR | 0755, (dev_t) { 0, 0 });
+
+	if (!ip)
+		return NULL;
+
+	dep = dirent_alloc_root(ip);
+
+	sp->root = dep;
+
+	return sp;
+}
+
+static struct fs_driver ramfs_driver = {
+	.name		= devname,
+
+	.read_sb	= &ramfs_read_sb
+};
+
+void ramfs_init(void)
+{
+	fs_reg(&ramfs_driver);
+}
+
+void ramfs_exit(void)
+{
+	fs_unreg(&ramfs_driver);
+	/* TODO */
 }

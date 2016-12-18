@@ -24,7 +24,7 @@
 
 #include <asm/cpu.h>
 
-#include <print.h>
+#include <kernel.h>
 
 #include "cmos.h"
 
@@ -40,7 +40,7 @@ static u8 cmos_in(const u8 reg)
 
 void rtc_init(void)
 {
-	kprintf(KP_INFO, devname,
+	dprintf(devname,
 			"current time is %02x%02x/%02x/%02x %02x:%02x:%02x UTC\n",
 			cmos_in(CMOS_CENTURY), cmos_in(CMOS_YEAR),
 			cmos_in(CMOS_MONTH), cmos_in(CMOS_DAY),

@@ -22,7 +22,7 @@
  *
  */
 
-//#include <print.h>
+//#include <kernel.h>
 
 #include <asm/cpu.h>
 

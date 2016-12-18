@@ -14,7 +14,7 @@
  * TODO Implement color
  */
 
-#include <print.h>
+#include <kernel.h>
 
 #include <char/serial/serial.h>
 #include <kbd/kbd.h>
@@ -306,7 +306,7 @@ i32 sprintf(char *buf, const char *fmt, ...)
 }
 
 /* This function is a mess */
-void kprintf(const u8 kp, const char *prefix, char *fmt, ...)
+void kprint(const char *prefix, char *fmt, ...)
 {
 	char printbuf[1024], fmtbuf[1024], prefixbuf[1024];
 	va_list args;
@@ -321,9 +321,9 @@ void kprintf(const u8 kp, const char *prefix, char *fmt, ...)
 
 	sprintf(prefixbuf, "%7s", prefix);
 
-	if (kp & KP_CON) {
+	/* if (kp & KP_CON) {
 		strcpy(fmtbuf, "         ");
-	} else if (prefix) {
+	} else */if (prefix) {
 		strcpy(fmtbuf, prefixbuf);
 		strcat(fmtbuf, ": ");
 	}
@@ -333,9 +333,9 @@ void kprintf(const u8 kp, const char *prefix, char *fmt, ...)
 	va_end(args);
 
 	char *str = fmtbuf;
-	u8 color;
+	u8 color = VGA_COLOR_LIGHT_GREY;
 
-	switch (kp) {
+	/* switch (kp) {
 	case KP_ERR:
 		color = VGA_COLOR_LIGHT_RED;
 		break;
@@ -349,7 +349,7 @@ void kprintf(const u8 kp, const char *prefix, char *fmt, ...)
 	default:
 		color = VGA_COLOR_LIGHT_GREY;
 		break;
-	}
+	} */
 
 	while (*str)
 		printcc(*(str++), color);

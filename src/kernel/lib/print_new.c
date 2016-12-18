@@ -34,7 +34,7 @@
 #include <video/vga.h>
 /*TMP*/
 
-#include <print.h>
+#include <kernel.h>
 
 #include <stdarg.h>
 #include <string.h>

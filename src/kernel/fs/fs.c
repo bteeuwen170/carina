@@ -26,14 +26,13 @@
 #include <fcntl.h>
 #include <fs.h>
 #include <limits.h>
-#include <print.h>
+#include <kernel.h>
 #include <sys/types.h> /* XXX TEMP for syntax highlighting */
 
 #include <stdlib.h>
 #include <string.h>
 
-u32 devcount = 0;
-
+#if 0
 //struct mountp *mount_points;
 
 /*
@@ -205,16 +204,6 @@ static struct inode *inode_getp(char *path)
 //	return sys_touch(path, FT_DIR);
 //}
 
-/*
- * Allocate a new inode
- */
-static struct inode *inode_alloc(struct superblock *sp, u8 type)
-{
-	//TODO Buffering
-
-	dev->op->alloc_inode(dev);
-}
-
 static struct file *file_open(const char *path, int flags)
 {
 	if (!path)
@@ -222,8 +211,6 @@ static struct file *file_open(const char *path, int flags)
 
 	return NULL;
 }
-
-/* -------------------------------------------------------------------------- */
 
 static struct inode *mp_get(const char *path)
 {
@@ -250,6 +237,35 @@ int sys_mount(char *dev, char *path, char *type) //TODO Mount flags
 int sys_unmount(char *path)
 {
 	//TODO
+}
+
+#endif
+
+static const char devname[] = "fs";
+
+static LIST_HEAD(fs_drivers);
+
+void fs_reg(struct fs_driver *driver)
+{
+	/* TODO Check if not already present */
+
+	list_init(&driver->l);
+	list_add(&fs_drivers, &driver->l);
+}
+
+void fs_unreg(struct fs_driver *driver)
+{
+	/* TODO */
+}
+
+struct mountp *sv_mount(struct fs_driver *driver, const char *name)
+{
+	struct superblock *sp;
+
+	sp = sb_alloc(driver);
+
+	/* TEMP */
+	ramfs_read_sb(sp);
 }
 
 int sys_open(const char *path, int flags, mode_t mode)
@@ -300,6 +316,12 @@ int sys_write(int fd, const char *buf, size_t n)
 	//TODO
 }
 
+int sys_readdir(int fd, void *dentry)
+{
+	//TODO
+	return 0;
+}
+
 int sys_create(const char *path, mode_t mode)
 {
 	//TODO
@@ -317,9 +339,7 @@ int sys_chdir(const char *path)
 
 int sys_mkdir(const char *path, mode_t mode)
 {
-	struct inode *ip;
-
-	/* if (ip =  */
+	//TODO
 }
 
 int sys_rmdir(const char *path)

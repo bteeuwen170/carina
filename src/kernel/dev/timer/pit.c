@@ -24,7 +24,7 @@
 
 #include <asm/cpu.h>
 
-#include <print.h>
+#include <kernel.h>
 
 #include "pit.h"
 
@@ -56,7 +56,7 @@ void pit_init(void)
 	io_outb(PIT_CH0_IO, val & 0xFF);
 	io_outb(PIT_CH0_IO, (val >> 8) & 0xFF);
 
-	irq_reghandler(IRQ_PIT, &int_handler);
+	irq_handler_reg(IRQ_PIT, &int_handler);
 }
 
 void sleep(const u64 delay)
