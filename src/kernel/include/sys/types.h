@@ -27,53 +27,39 @@
 
 #include <asm/sys/types.h>
 
-/* Boolean */
-typedef enum {
-	false =	0,
-	true =	1
-} bool;
-
-/* NULL */
 #define NULL	((void *) 0)
 
-/* Signed data types */
 typedef __asm_i8	i8;
 typedef __asm_i16	i16;
 typedef __asm_i32	i32;
 typedef __asm_i64	i64;
 typedef __asm_ssize_t	ssize_t;
 
-/* Unsigned data types */
 typedef __asm_u8	u8;
 typedef __asm_u16	u16;
 typedef __asm_u32	u32;
 typedef __asm_u64	u64;
 typedef __asm_size_t	size_t;
 
-/* Floating-point types */
 //typedef float		f32;
 //typedef double	f64;
 //typedef long double	f128;
 
-/* IDs */
 typedef u32		pid_t;		/* Process ID */
 typedef u32		uid_t;		/* User ID */
 typedef u32		gid_t;		/* Group ID */
 
-/* File system */
 typedef i64		off_t;		/* Offset */
 typedef i64		time_t;		/* Time in seconds since epoch */
 typedef u16		mode_t;		/* Permissions */
 typedef u16		link_t;		/* Link count */
 typedef u64		ino_t;		/* Inode number */
 
-/* Addresses */
 typedef u32		intptr32_t;	/* Address (32-bit) */
 typedef u64		intptr64_t;	/* Address (64-bit) */
 typedef __asm_intptr_t	intptr_t;	/* Address */
 typedef __asm_uintptr_t	uintptr_t;	/* Unsigned address */
 
-/* Other */
 typedef struct {
 	u8	major;
 	u16	minor;

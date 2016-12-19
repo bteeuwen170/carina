@@ -72,14 +72,16 @@ struct pci_dev {
 
 #define PCI_ANY_ID	~(0)
 
-#define PCI_DEVICE(v, d, sv, sd, bc, sc, pi) \
-	.vendor = (v), \
-	.device = (d), \
-	.sub_vendor = (sv), \
-	.sub_device = (sd), \
-	.base_class = (bc), \
-	.sub_class = (sc), \
-	.prog_if = (pi)
+#define PCI_DEV_ID(v, d, sv, sd, bc, sc, pi) \
+	{ \
+		.vendor = (v), \
+		.device = (d), \
+		.sub_vendor = (sv), \
+		.sub_device = (sd), \
+		.base_class = (bc), \
+		.sub_class = (sc), \
+		.prog_if = (pi) \
+	}
 
 struct pci_dev_id {
 	u16	vendor, device;

@@ -62,6 +62,8 @@ struct inode *inode_alloc(struct superblock *sp)
 	ip->size = 0;
 
 	ip->sp = sp;
+
+	return ip;
 }
 
 void inode_dealloc(struct inode *ip)

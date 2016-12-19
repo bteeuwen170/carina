@@ -427,44 +427,60 @@ static const char devname[] = "ramfs";
 
 static int ramfs_create(struct inode *dp, struct dirent *dep, mode_t mode)
 {
+	(void) dp, (void) dep, (void) mode;
 
+	return 0;
 }
 
 static int ramfs_link(struct inode *dp, struct dirent *dep, struct dirent *name)
 {
+	(void) dp, (void) dep, (void) name;
 
+	return 0;
 }
 
 static int ramfs_symlink(struct inode *dp, struct dirent *dep, const char *name)
 {
+	(void) dp, (void) dep, (void) name;
 
+	return 0;
 }
 
 static int ramfs_rmlink(struct inode *dp, struct dirent *dep)
 {
+	(void) dp, (void) dep;
 
+	return 0;
 }
 
 static int ramfs_mkdir(struct inode *dp, struct dirent *dep, mode_t mode)
 {
+	(void) dp, (void) dep, (void) mode;
 
+	return 0;
 }
 
 static int ramfs_rmdir(struct inode *dp, struct dirent *dep)
 {
+	(void) dp, (void) dep;
 
+	return 0;
 }
 
 static int ramfs_mknod(struct inode *dp, struct dirent *dep,
 		mode_t mode, dev_t dev)
 {
+	(void) dp, (void) dep, (void) mode, (void) dev;
 
+	return 0;
 }
 
 static int ramfs_move(struct inode *odp, struct dirent *odep,
 		struct inode *dp, struct dirent *dep)
 {
+	(void) odp, (void) odep, (void) dp, (void) dep;
 
+	return 0;
 }
 
 static struct sb_ops ramfs_sb_ops = {
@@ -483,12 +499,21 @@ static struct inode_ops ramfs_inode_ops = {
 };
 
 static struct file_ops ramfs_file_ops = {
-	.read		= NULL
+	.read		= NULL,
+	.write		= NULL
+};
+
+static struct file_ops ramfs_dir_ops = {
+	.open		= NULL,
+	.close		= NULL,
+	.read		= NULL,
+	.readdir	= NULL
 };
 
 static struct inode *ramfs_inode_alloc(struct superblock *sp,
 		mode_t mode, dev_t dev)
 {
+	(void) dev;
 	struct inode *ip;
 
 	ip = inode_alloc(sp);
@@ -501,6 +526,11 @@ static struct inode *ramfs_inode_alloc(struct superblock *sp,
 	switch (mode & IM_FTM) {
 	case IM_DIR:
 		ip->op = &ramfs_inode_ops;
+		ip->fop = &ramfs_dir_ops;
+		break;
+	case IM_REG:
+		ip->op = &ramfs_inode_ops;
+		ip->fop = &ramfs_file_ops;
 		break;
 	default:
 		/* TODO */

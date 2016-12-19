@@ -28,6 +28,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct usr_dirent {
+	ino_t	inum;
+	char	name[NAME_MAX + 1];
+};
+
 struct dirent *dirent_alloc(struct dirent *dp, const char *name)
 {
 	struct dirent *dep;
@@ -59,11 +64,11 @@ struct dirent *dirent_alloc(struct dirent *dp, const char *name)
 	return dep;
 }
 
-struct dirent *dirent_alloc_root(struct inode *rp)
+struct dirent *dirent_alloc_root(struct inode *ip)
 {
 	struct dirent *dep;
 
-	if (!rp)
+	if (!ip)
 		return NULL;
 
 	dep = dirent_alloc(NULL, "/");
@@ -71,6 +76,20 @@ struct dirent *dirent_alloc_root(struct inode *rp)
 	if (!dep)
 		return NULL;
 
-	dep->ip = rp;
+	dep->ip = ip;
 	dep->dp = dep;
+
+	return dep;
+}
+
+void *dirent_get(struct file *fp)
+{
+	struct usr_dirent *udp;
+
+	udp = kmalloc(sizeof(struct usr_dirent));
+
+	udp->inum = fp->dp->ip->inum;
+	memcpy(udp->name, fp->dp->name, sizeof(fp->dp->name));
+
+	return udp;
 }

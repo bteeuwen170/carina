@@ -209,7 +209,7 @@ long strtol(const char *str, char **ptr, int base)
 	str++;
 
 	if (!*ptr)
-		*ptr = str;
+		*ptr = (char *) str;
 	//TODO Memcpy
 
 	return (*str == '-' ? -1 : 1) * n;

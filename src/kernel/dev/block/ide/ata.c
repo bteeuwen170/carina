@@ -37,9 +37,9 @@
 static const char devname[] = "ide";
 
 static const struct pci_dev_id ide_ids[] = {
-	{ PCI_DEVICE(0x8086, 0x7010, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0) },
-	{ PCI_DEVICE(0x8086, 0x269E, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0) },
-	{ PCI_DEVICE(0x8086, 0x7111, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0) }
+	PCI_DEV_ID(0x8086, 0x7010, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0),
+	PCI_DEV_ID(0x8086, 0x269E, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0),
+	PCI_DEV_ID(0x8086, 0x7111, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0)
 };
 
 struct ata_channel channels[ATA_CHANNELS];
@@ -360,6 +360,7 @@ err:
 
 static void ide_fini(struct pci_dev *card)
 {
+	(void) card;
 	/* TODO */
 }
 

@@ -27,6 +27,7 @@
 
 #define EPERM		1	/* Operation not permitted */
 #define ENOENT		2	/* No such file or directory */
+#define EBADF		9	/* Invalid file descriptor */
 #define ENOMEM		12	/* Out of memory */
 #define EACCES		13	/* Permission denied */
 #define EBUSY		16	/* Device or resource busy */

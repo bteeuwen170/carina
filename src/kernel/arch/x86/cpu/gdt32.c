@@ -31,7 +31,7 @@
 static struct segment_desc gdt[GDT_ENTRIES - 1];
 
 static void gdt_set(const u8 gate, const u32 base, const u32 limit,
-		const u8 type, const bool lm)
+		const u8 type, const u8 lm)
 {
 	gdt[gate].limit_lo	= limit & 0xFFFF;
 	gdt[gate].base_lo[0]	= base & 0xFF;
@@ -48,18 +48,18 @@ void gdt_init(void)
 	u32 tss_base, tss_limit;
 
 	/* 0x08 - Code SV */
-	gdt_set(1, 0, 0, 0b0011000, true);
+	gdt_set(1, 0, 0, 0b0011000, 1);
 	/* 0x10 - Data SV */
-	gdt_set(2, 0, 0, 0b0010000, false);
+	gdt_set(2, 0, 0, 0b0010000, 0);
 	/* 0x18 - Code USR */
-	gdt_set(3, 0, 0, 0b1111000, true);
+	gdt_set(3, 0, 0, 0b1111000, 1);
 	/* 0x20 - Data USR */
-	gdt_set(4, 0, 0, 0b1110010, false);
+	gdt_set(4, 0, 0, 0b1110010, 0);
 
 	tss_init(&tss_base, &tss_limit);
 
 	/* 0x28 - TSS */
-	gdt_set(5, tss_base, tss_limit, 0b0001001, true);
+	gdt_set(5, tss_base, tss_limit, 0b0001001, 1);
 
 	gdt_load(&gdt, GDT_ENTRIES * sizeof(struct segment_desc) - 1);
 	gdt_load(&gdt, 5 * sizeof(struct segment_desc) - 1);

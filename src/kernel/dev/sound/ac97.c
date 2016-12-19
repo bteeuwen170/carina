@@ -40,9 +40,9 @@
 static const char devname[] = "ac97";
 
 static const struct pci_dev_id ac97_ids[] = {
-	{ PCI_DEVICE(0x8086, 0x2415, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0) },
-	{ PCI_DEVICE(0x8086, 0x2425, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0) },
-	{ PCI_DEVICE(0x8086, 0x2445, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0) }
+	PCI_DEV_ID(0x8086, 0x2415, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0),
+	PCI_DEV_ID(0x8086, 0x2425, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0),
+	PCI_DEV_ID(0x8086, 0x2445, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0)
 };
 
 struct buffer {
@@ -173,6 +173,7 @@ err:
 
 static void ac97_fini(struct pci_dev *card)
 {
+	(void) card;
 	/* TODO */
 }
 

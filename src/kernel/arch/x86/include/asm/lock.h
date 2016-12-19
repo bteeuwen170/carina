@@ -39,6 +39,8 @@ static inline void spin_lock(spinlock_t lock)
 			"jle 2 \n" \
 			"jmp 1"
 			: "=m" (lock) : : "memory");
+#else
+	(void) lock;
 #endif
 }
 
@@ -46,6 +48,8 @@ static inline void spin_unlock(spinlock_t lock)
 {
 #if 0
 	asm volatile("movl $1, %0" : "=m" (lock) : : "memory");
+#else
+	(void) lock;
 #endif
 }
 

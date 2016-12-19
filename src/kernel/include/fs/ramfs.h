@@ -30,4 +30,6 @@
 int ramfs_get(size_t size, u32 *dev, struct inode **ipp);
 struct dirent *ramfs_read_dir(struct inode *dp, off_t off); //XXX TEMP
 
+void ramfs_init(void);
+
 #endif

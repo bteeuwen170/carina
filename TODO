@@ -10,6 +10,7 @@ Bootloader
 - Write own bootloader
 
 Kernel
+- Check if all errno are used
 - Fix unable to fit without stripping kernel
 . Finish PCI driver
 . Finish AC97 driver
@@ -17,25 +18,16 @@ Kernel
 . Finish ATA/ATAPI driver
 - Scrollbuffer 64KB size
 - Check mboot flags before using them
-- deregister -> unregister (WTF)
-- Recursive kprintf
-- Make #includes look nicer
-- Use bool in some places instead of i32 or char or u8 or i8
 - Move sys directory
-- NO ITOA
-- Typedef certain file types like uid_t and gid_t
 - Write parser for pci.ids file
 - Script to get latest pci.ids
 - Always return void from initialization functions
-n Native support for MS-DOS executables using some kind of low-level vm,
-  if implementable...
 - Move paging source file to cpu/
 - Don't include arch specific files outside of arch dir
 - Use sse + sse2 on > x86_64 and use mmx (+ sse) or sse + sse2 on i686
 - Inconsistency between use of kernel integer data types and
   C integer data types
-- base_adr_* to bar_*
-- Seperate all driver header files into it's own directory
+- Split all driver header files into it's own directory
 - FIXME PCI bug, handler isn't called after reboot (dirty memory)
 - Don't allow including files from dev/, provide interface in include/dev/
   instead

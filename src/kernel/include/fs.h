@@ -76,15 +76,6 @@ struct mountp {
 
 /* END mount.h */
 
-/* BEGIN path.h */
-
-struct path {
-	struct mountp	*mnt;	/* Root mount point */
-	struct dirent	*dp;	/* Path */
-};
-
-/* END path.h */
-
 /* BEGIN fs.h */
 
 struct fs_driver {
@@ -122,7 +113,7 @@ struct inode {
 //	u8	flags;		/* Inode flags */
 	mode_t	mode;		/* Inode mode */
 
-	u32	refs;		/* References count */
+	int	refs;		/* References count */
 	link_t	links;		/* Link count */
 
 	uid_t	uid;		/* User ID */
@@ -135,7 +126,9 @@ struct inode {
 	off_t	size;		/* File size in bytes */
 
 	struct superblock *sp;	/* Associated superblock */
-	struct inode_ops  *op;	/* Inode operations */
+
+	struct inode_ops  *op;
+	struct file_ops  *fop;
 };
 
 struct dirent {
@@ -145,17 +138,23 @@ struct dirent {
 	struct dirent		*dp;	/* Associated directory pointer */
 	struct list_head	del;	/* List of children */
 
-	u32		refs;		/* References count */
+	int	refs;			/* References count */
 
 	char	name[NAME_MAX + 1];
 };
 
 struct file {
-	struct path	path;	/* File path */
-	mode_t		mode;	/* File access mode */
-	u8		flags;	/* File flags */
+	struct list_head l;
 
-	struct file_ops	*op;	/* File operations */
+	struct mountp		*mp;	/* Associated mountpoint */
+	struct dirent		*dp;	/* Associated directory pointer */
+
+	int	refs;
+	mode_t	mode;	/* File access mode */
+
+	off_t	off;
+
+	struct file_ops	*op;
 };
 
 struct sb_ops {
@@ -197,32 +196,32 @@ struct dirent_ops {
 };
 
 struct file_ops {
-	/* Read n bytes at off from fp into buf: fp, buf, off, n */
-	int (*read) (struct file *, void *, off_t, size_t);
-	/* Read next directory: fp, TODO */
-	int (*readdir) (struct file *, void *);
-	/* Write n bytes from buf into fp at off: fp, buf, off, n */
-	int (*write) (struct file *, const void *, off_t, size_t);
 	/* Create a new file object: ip, &fp */
 	int (*open) (struct inode *, struct file *);
 	/* Delete a file object: ip, fp */
-	int (*close) (struct inode *, struct file *); //XXX Eq to release on l
+	int (*close) (struct inode *, struct file *);
+	/* Read n bytes at off from fp into buf: fp, buf, off, n */
+	int (*read) (struct file *, void *, off_t, size_t);
+	/* Write n bytes from buf into fp at off: fp, buf, off, n */
+	int (*write) (struct file *, const void *, off_t, size_t);
+	/* Read next directory: fp, TODO */
+	int (*readdir) (struct file *, void *);
 	//TODO (ioctl), (sync / fsync)
 };
-
-void fs_reg(struct fs_driver *driver);
-void fs_unreg(struct fs_driver *driver);
 
 struct mountp *sv_mount(struct fs_driver *driver, const char *name);
 
 struct superblock *sb_alloc(struct fs_driver *driver);
 
 struct inode *inode_alloc(struct superblock *sp);
+void inode_dealloc(struct inode *ip);
 
 struct dirent *dirent_alloc(struct dirent *dp, const char *name);
 struct dirent *dirent_alloc_root(struct inode *rp);
+void *dirent_get(struct file *fp);
 
-void inode_dealloc(struct inode *ip);
+void fs_reg(struct fs_driver *driver);
+void fs_unreg(struct fs_driver *driver);
 
 /* END fs.h */
 

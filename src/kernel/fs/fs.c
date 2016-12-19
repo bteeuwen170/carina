@@ -255,114 +255,101 @@ void fs_reg(struct fs_driver *driver)
 
 void fs_unreg(struct fs_driver *driver)
 {
-	/* TODO */
+	/* TODO Check for presence */
+
+	list_rm(&driver->l);
 }
 
 struct mountp *sv_mount(struct fs_driver *driver, const char *name)
 {
+	(void) name;
 	struct superblock *sp;
 
 	sp = sb_alloc(driver);
 
-	/* TEMP */
-	ramfs_read_sb(sp);
+	/* TODO */
+
+	return NULL;
 }
 
-int sys_open(const char *path, int flags, mode_t mode)
-{
-#if 0
-	struct inode *ip;
-	int fd, res;
-
-	if (!path)
-		return -1;
-		//TOERRNO return -EINVAL;
-
-	if (*path != '/')
-		return -1; //TODO Handle relative path
-
-	if (flags & O_CREAT) {
-		res = file_create(path, mode);
-
-		if (res < 0)
-			return -1;
-			//TOERRNO return res;
-	}
-
-	ip = file_open(path, flags);
-
-	if (!ip)
-		return -1;
-		//TOERRNO return -ENOENT;
-
-	fd = 0; //TODO
-
-	return fd;
-#endif
-}
-
-int sys_close(int fd)
+/* int sys_chdir(const char *path)
 {
 	//TODO
-}
+} */
 
-int sys_read(int fd, char *buf, size_t n)
+/* int sys_open(const char *path, int flags, mode_t mode)
 {
 	//TODO
-}
+} */
 
-int sys_write(int fd, const char *buf, size_t n)
+/* int sys_close(int fd)
 {
 	//TODO
-}
+} */
 
-int sys_readdir(int fd, void *dentry)
+/* int sys_read(int fd, char *buf, size_t n)
 {
 	//TODO
+} */
+
+/* int sys_write(int fd, const char *buf, size_t n)
+{
+	//TODO
+} */
+
+int sys_readdir(int fd, void *usr_dirent)
+{
+	(void) fd, (void) usr_dirent;
+	struct file *fp;
+
+	fp = NULL;
+
+	if (!fp)
+		return -EBADF;
+
+	/* TODO Update atime */
+	/* TODO Loop */
+	dirent_get(fp);
+
 	return 0;
 }
 
-int sys_create(const char *path, mode_t mode)
+/* int sys_create(const char *path, mode_t mode)
 {
 	//TODO
-}
+} */
 
-int sys_move(const char *oldpath, const char *path)
+/* int sys_link(const char *oldpath, const char *path)
 {
 	//TODO
-}
+} */
 
-int sys_chdir(const char *path)
+/* int sys_symlink(const char *oldpath, const char *path)
 {
 	//TODO
-}
+} */
 
-int sys_mkdir(const char *path, mode_t mode)
+/* int sys_rmlink(const char *path)
 {
 	//TODO
-}
+} */
 
-int sys_rmdir(const char *path)
+/* int sys_mkdir(const char *path, mode_t mode)
 {
 	//TODO
-}
+} */
 
-int sys_link(const char *oldpath, const char *path)
+/* int sys_rmdir(const char *path)
 {
 	//TODO
-}
+} */
 
-int sys_symlink(const char *oldpath, const char *path)
+/* int sys_mknod(const char *path, mode_t mode, dev_t dev)
 {
 	//TODO
-}
+} */
 
-int sys_rmlink(const char *path)
+/* int sys_move(const char *oldpath, const char *path)
 {
 	//TODO
-}
-
-int sys_mknod(const char *path, mode_t mode, dev_t dev)
-{
-	//TODO
-}
+} */

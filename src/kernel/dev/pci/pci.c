@@ -160,10 +160,9 @@ static void pci_dev_reg(struct pci_dev *card)
 	list_add(&pci_devices, &card->l);
 }
 
-static void pci_dev_unreg(struct pci_dev *card)
+/* static void pci_dev_unreg(struct pci_dev *card)
 {
-	/* TODO */
-}
+} */
 
 void pci_driver_reg(struct pci_driver *driver)
 {
@@ -175,7 +174,9 @@ void pci_driver_reg(struct pci_driver *driver)
 
 void pci_driver_unreg(struct pci_driver *driver)
 {
-	/* TODO */
+	/* TODO Check if present */
+
+	list_rm(&driver->l);
 }
 
 static struct pci_dev *pci_config(u16 bus, u16 dev, u16 func)

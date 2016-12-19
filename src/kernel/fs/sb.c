@@ -31,6 +31,7 @@ static LIST_HEAD(superblock);
 
 struct superblock *sb_alloc(struct fs_driver *driver)
 {
+	(void) driver;
 	struct superblock *sp;
 
 	/* TODO Check if doesn't exist already */
