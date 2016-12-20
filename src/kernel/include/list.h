@@ -29,9 +29,9 @@ struct list_head {
 	struct list_head *prev, *next;
 };
 
-#define LIST_INIT(head)	{ &(head), &(head) }
+#define LIST_INIT(head)		{ &(head), &(head) }
 
-#define LIST_HEAD(head)	struct list_head (head) = LIST_INIT(head)
+#define LIST_HEAD(head)		struct list_head (head) = LIST_INIT(head)
 
 static inline void list_init(struct list_head *head)
 {

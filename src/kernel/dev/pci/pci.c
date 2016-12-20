@@ -177,6 +177,7 @@ void pci_driver_unreg(struct pci_driver *driver)
 	/* TODO Check if present */
 
 	list_rm(&driver->l);
+	kfree(driver);
 }
 
 static struct pci_dev *pci_config(u16 bus, u16 dev, u16 func)
@@ -265,11 +266,9 @@ void pci_init(void)
 		}
 	}
 
-	list_for_each(card, &pci_devices, l) {
-		if (card->driver && card->driver->probe) {
+	list_for_each(card, &pci_devices, l)
+		if (card->driver && card->driver->probe)
 			card->driver->probe(card);
-		}
-	}
 }
 
 void pci_exit(void)

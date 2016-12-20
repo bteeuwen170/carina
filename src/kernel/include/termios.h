@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/include/limits.h
+ * src/kernel/include/termios.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,23 +22,59 @@
  *
  */
 
-/* TODO Relocate in seperate files and delete this */
+#ifndef _TERMIOS_H
+#define _TERMIOS_H
 
-#ifndef _LIMITS_H
-#define _LIMITS_H
+/* #define IGNBRK	
+#define BRKINT	
+#define IGNPAR	
+#define PARMRK	
+#define INPCK	
+#define ISTRIP	
+#define INLCR	
+#define IGNCR	
+#define ICRNL	
+#define IUCLC	
+#define IXON		
+#define IXANY	
+#define IXOFF	
+#define IMAXBEL	 */
 
-/* FIXME Not here */
-//#define BLOCK_SIZE	1024	/* Block size */
-//#define SECTOR_SIZE	512	/* Sector size */
-//#define CPUS_MAX	8	/* Max. number of CPUs */
+/* Not going to use all CCs */
+#define NUM_CC	17
 
-#define CHILD_MAX	512	/* Max. number of processes */
-#define DEV_MAX		256	/* Max. number of devices */
-//#define LINK_MAX	32	/* Max. number of links for a file */
-#define NAME_MAX	255	/* Max. length of a file name */
-//#define NGROUPS_MAX	8	/* Max. number of GIDs per process */
-#define OPEN_MAX	32	/* Max. open files */
-#define PATH_MAX	4096	/* Max. length of a path name (with '\0') */
-//#define INODES_MAX	64	/* Max. inodes in memory */
+#define VINTR		0
+#define VQUIT		1
+#define VERASE		2
+#define VKILL		3
+#define VEOF		4
+#define VTIME		5
+#define VMIN		6
+#define VSWTC		7
+#define VSTART		8
+#define VSTOP		9
+#define VSUSP		10
+#define VEOL		11
+#define VREPRINT	12
+#define VDISCARD	13
+#define WERASE		14
+#define VLNEXT		15
+#define VEOL2		16
+
+struct termios {
+	u32	c_iflag;
+	u32	c_oflag;
+	u32	c_cflag;
+	u32	c_lflag;
+	u8	c_line;
+	u8	c_cc[NUM_CC];
+};
+
+struct winsize {
+	u16	ws_row;
+	u16	ws_col;
+	u16	ws_xpixel;
+	u16	wx_ypixel;
+};
 
 #endif

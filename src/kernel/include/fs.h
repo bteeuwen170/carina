@@ -81,10 +81,18 @@ struct mountp {
 struct fs_driver {
 	struct list_head l;
 
-	const char		*name;
+	const char *name;
 
 	/* Read the superblock: sp, data */
 	struct superblock *(*read_sb) (struct superblock *);
+};
+
+struct fs_dev {
+	struct list_head l;
+
+	const char *name;
+
+	struct file_ops *op;
 };
 
 struct superblock {
@@ -209,8 +217,6 @@ struct file_ops {
 	//TODO (ioctl), (sync / fsync)
 };
 
-struct mountp *sv_mount(struct fs_driver *driver, const char *name);
-
 struct superblock *sb_alloc(struct fs_driver *driver);
 
 struct inode *inode_alloc(struct superblock *sp);
@@ -220,8 +226,14 @@ struct dirent *dirent_alloc(struct dirent *dp, const char *name);
 struct dirent *dirent_alloc_root(struct inode *rp);
 void *dirent_get(struct file *fp);
 
+struct mountp *sv_mount(struct fs_driver *driver, const char *name);
+
+void dev_init(void);
+
 void fs_reg(struct fs_driver *driver);
 void fs_unreg(struct fs_driver *driver);
+
+void fs_init(void);
 
 /* END fs.h */
 

@@ -59,11 +59,29 @@ void kernel_main(struct mboot_info *mboot)
 
 	spin_lock(lock);
 
+	/* FIXME Memory map cannot be printed before vga_init() */
+	mm_init(mboot->mmap_addr, mboot->mmap_len);
+
+	fs_init();
+	ramfs_init();
+
 	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
 	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
 	/* Initialize early video and debugging hardware */
 	vga_init();
 	serial_init(COM0);
+
+	/* TODO Other format (UTC) */
+	dprintf("cpu0", "Welcome to Elara! (compiled on %s %s)\n",
+			__DATE__, __TIME__);
+	/* TODO Actually get starting cpu */
+
+	/* TODO Move */
+	kprintf(KP_CON "Elara has been loaded by %s\n",
+			mboot->boot_loader_name);
+	kprintf(KP_CON "cmdline: %s\n", mboot->cmdline);
+
+	/* cpu_info(); */
 
 	/* Initialize mandatory hardware */
 	pic_remap();
@@ -124,22 +142,6 @@ void kernel_main(struct mboot_info *mboot)
 		/* TODO Return error */
 	}
 #endif
-
-	/* TODO Other format (UTC) */
-	dprintf("cpu0", "Welcome to Elara! (compiled on %s %s)\n",
-			__DATE__, __TIME__);
-	/* TODO Actually get starting cpu */
-
-	/* TODO Move */
-	kprintf(KP_CON "Elara has been loaded by %s\n",
-			mboot->boot_loader_name);
-	kprintf(KP_CON "cmdline: %s\n", mboot->cmdline);
-
-	mm_init(mboot->mmap_addr, mboot->mmap_len);
-
-	ramfs_init();
-
-	/* cpu_info(); */
 
 	/* acpi_init(); */
 	rtc_init();

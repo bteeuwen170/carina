@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/include/limits.h
+ * src/kernel/include/tty.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,23 +22,16 @@
  *
  */
 
-/* TODO Relocate in seperate files and delete this */
+#ifndef _TTY_H
+#define _TTY_H
 
-#ifndef _LIMITS_H
-#define _LIMITS_H
+#include <termios.h>
 
-/* FIXME Not here */
-//#define BLOCK_SIZE	1024	/* Block size */
-//#define SECTOR_SIZE	512	/* Sector size */
-//#define CPUS_MAX	8	/* Max. number of CPUs */
+#define TTY_BUF_SIZE	1024
 
-#define CHILD_MAX	512	/* Max. number of processes */
-#define DEV_MAX		256	/* Max. number of devices */
-//#define LINK_MAX	32	/* Max. number of links for a file */
-#define NAME_MAX	255	/* Max. length of a file name */
-//#define NGROUPS_MAX	8	/* Max. number of GIDs per process */
-#define OPEN_MAX	32	/* Max. open files */
-#define PATH_MAX	4096	/* Max. length of a path name (with '\0') */
-//#define INODES_MAX	64	/* Max. inodes in memory */
+struct tty {
+	struct termios	termios;
+	struct winsize	winsize;
+};
 
 #endif

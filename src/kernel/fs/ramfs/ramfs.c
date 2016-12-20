@@ -572,6 +572,7 @@ void ramfs_init(void)
 
 void ramfs_exit(void)
 {
-	fs_unreg(&ramfs_driver);
 	/* TODO */
+
+	fs_unreg(&ramfs_driver);
 }

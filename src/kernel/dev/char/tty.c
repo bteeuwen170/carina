@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/include/limits.h
+ * src/kernel/dev/char/tty.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,23 +22,53 @@
  *
  */
 
-/* TODO Relocate in seperate files and delete this */
+#include <asm/cpu.h>
 
-#ifndef _LIMITS_H
-#define _LIMITS_H
+#include <kernel.h>
 
-/* FIXME Not here */
-//#define BLOCK_SIZE	1024	/* Block size */
-//#define SECTOR_SIZE	512	/* Sector size */
-//#define CPUS_MAX	8	/* Max. number of CPUs */
+static const char devname[] = "tty";
 
-#define CHILD_MAX	512	/* Max. number of processes */
-#define DEV_MAX		256	/* Max. number of devices */
-//#define LINK_MAX	32	/* Max. number of links for a file */
-#define NAME_MAX	255	/* Max. length of a file name */
-//#define NGROUPS_MAX	8	/* Max. number of GIDs per process */
-#define OPEN_MAX	32	/* Max. open files */
-#define PATH_MAX	4096	/* Max. length of a path name (with '\0') */
-//#define INODES_MAX	64	/* Max. inodes in memory */
+static int tty_open(struct inode *ip, struct file *)
+{
 
-#endif
+}
+
+static int tty_close(struct inode *ip, struct file *fp)
+{
+
+}
+
+static int tty_read(struct file *fp, void *buf, off_t off, size_t n)
+{
+
+}
+
+static int tty_write(struct file *fp, const void *buf, off_t off, size_t n)
+{
+
+}
+
+static struct file_ops tty_file_ops = {
+	.open	= &tty_open,
+	.close	= &tty_close,
+	.read	= &tty_read,
+	.write	= &tty_write
+};
+
+static struct fs_dev = {
+	.name	= devname,
+
+	.op	= &tty_file_ops
+};
+
+void tty_init(void)
+{
+	fs_chrdev_reg(0, &fs_dev);
+}
+
+void tty_exit(void)
+{
+	/* TODO */
+
+	fs_chrdev_unreg(0, name);
+}

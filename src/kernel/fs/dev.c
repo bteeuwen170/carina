@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/include/limits.h
+ * src/kernel/fs/dev.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,23 +22,49 @@
  *
  */
 
-/* TODO Relocate in seperate files and delete this */
+#include <errno.h>
+#include <fs.h>
+#include <limits.h>
 
-#ifndef _LIMITS_H
-#define _LIMITS_H
+#include <stdlib.h>
+#include <string.h>
 
-/* FIXME Not here */
-//#define BLOCK_SIZE	1024	/* Block size */
-//#define SECTOR_SIZE	512	/* Sector size */
-//#define CPUS_MAX	8	/* Max. number of CPUs */
+struct list_head devices[DEV_MAX];
 
-#define CHILD_MAX	512	/* Max. number of processes */
-#define DEV_MAX		256	/* Max. number of devices */
-//#define LINK_MAX	32	/* Max. number of links for a file */
-#define NAME_MAX	255	/* Max. length of a file name */
-//#define NGROUPS_MAX	8	/* Max. number of GIDs per process */
-#define OPEN_MAX	32	/* Max. open files */
-#define PATH_MAX	4096	/* Max. length of a path name (with '\0') */
-//#define INODES_MAX	64	/* Max. inodes in memory */
+int dev_block_reg(u8 major, struct fs_dev *device)
+{
+	return -EINVAL;
+}
 
-#endif
+int dev_char_reg(u8 major, struct fs_dev *device)
+{
+	/* TODO Check if not already present */
+
+	list_init(&device->l);
+	list_add(&devices[major], &device->l);
+
+	return 0;
+}
+
+int dev_char_unreg(u8 major, const char *name)
+{
+	struct fs_dev *device;
+
+	/* TODO Check for presence */
+
+	list_for_each(device, &devices[major], l)
+		if (strcmp(device->name, name) == 0) {
+			list_rm(&device[major].l);
+			kfree(device);
+		}
+
+	return 0;
+}
+
+void dev_init(void)
+{
+	int i;
+
+	for (i = 0; i < DEV_MAX; i++)
+		list_init(&devices[i]);
+}

@@ -245,21 +245,6 @@ static const char devname[] = "fs";
 
 static LIST_HEAD(fs_drivers);
 
-void fs_reg(struct fs_driver *driver)
-{
-	/* TODO Check if not already present */
-
-	list_init(&driver->l);
-	list_add(&fs_drivers, &driver->l);
-}
-
-void fs_unreg(struct fs_driver *driver)
-{
-	/* TODO Check for presence */
-
-	list_rm(&driver->l);
-}
-
 struct mountp *sv_mount(struct fs_driver *driver, const char *name)
 {
 	(void) name;
@@ -353,3 +338,23 @@ int sys_readdir(int fd, void *usr_dirent)
 {
 	//TODO
 } */
+
+void fs_reg(struct fs_driver *driver)
+{
+	/* TODO Check if not already present */
+
+	list_init(&driver->l);
+	list_add(&fs_drivers, &driver->l);
+}
+
+void fs_unreg(struct fs_driver *driver)
+{
+	/* TODO Check for presence */
+
+	list_rm(&driver->l);
+}
+
+void fs_init(void)
+{
+	dev_init();
+}
