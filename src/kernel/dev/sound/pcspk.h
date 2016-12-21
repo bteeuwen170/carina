@@ -26,7 +26,6 @@
 #define _PCSPK_H
 
 void pcspk_play(const u16 freq);
-
 void pcspk_stop(void);
 
 void pcspk_fj(void); /* Frere Jacques */

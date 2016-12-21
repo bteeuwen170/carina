@@ -30,10 +30,9 @@
 #define COM2	0x3E8
 #define COM3	0x2E8
 
-void serial_init(const u16 port);
-
 u16 serial_in(const u16 port);
-
 void serial_out(const u16 port, const u8 value);
+
+void serial_init(const u16 port);
 
 #endif

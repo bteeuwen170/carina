@@ -24,13 +24,12 @@
 
 #include <kernel.h>
 #include <module.h>
+#include <pci.h>
 
 #include <asm/cpu.h>
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "pci.h"
 
 static const char devname[] = "pci";
 

@@ -29,31 +29,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-static struct fs_dev devices[DEV_MAX];
+static struct device devices[DEV_MAX];
 
-int dev_block_reg(u32 major, struct fs_dev *device)
+int dev_reg(u8 major, const char *name, struct file_ops *op)
 {
-	return -EINVAL;
-}
-
-int dev_char_reg(u32 major, const char *name, struct file_ops *op)
-{
-	/* TODO Lock */
-
-	if (major > DEV_MAX)
+	if (strlen(name) > NAME_MAX + 1)
 		return -EINVAL;
 
-	if (devices[major].op != op)
+	if (devices[major].op)
 		return -EEXIST;
 
-	memcpy(devices[major].name, name, NAME_MAX);
+	devices[major].name = name;
 	devices[major].op = op;
 
 	return 0;
 }
 
-void dev_char_unreg(u32 major)
+void dev_unreg(u8 major)
 {
-	memset(devices[major].name, 0, NAME_MAX + 1);
+	devices[major].name = NULL;
 	devices[major].op = NULL;
 }

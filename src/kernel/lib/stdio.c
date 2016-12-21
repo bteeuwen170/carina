@@ -48,7 +48,7 @@ void panic(char *reason, u32 err_code, intptr_t ip)
 	/* TODO Don't always print error code */
 	kprintf(KP_CRIT "Error code: %#x\n", err_code);
 
-	prints("The system has been halted.");
+	kprintf("The system has been halted.");
 
 	for (;;)
 		asm volatile ("hlt");

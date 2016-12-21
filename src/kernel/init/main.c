@@ -29,21 +29,18 @@
 #include <module.h>
 #include <lock.h>
 #include <mboot.h>
+#include <pci.h>
 #include <reboot.h>
 #include <sys/time.h>
 
 #include <asm/8259.h>
 #include <asm/cpu.h>
 
-#include <block/ide/ata.h>
 #include <char/serial/serial.h>
-#include <pci/pci.h>
 #include <sound/ac97.h>
 #include <sound/sb16.h>
 #include <sound/pcspk.h>
 #include <timer/pit.h>
-#include <video/fb.h>
-#include <video/vesa.h>
 #include <video/vga.h>
 
 #include <stdio.h>
@@ -183,7 +180,7 @@ void kernel_main(struct mboot_info *mboot)
 			if (p < 1)
 				continue;
 
-			printc(c);
+			kprintf("%c", c);
 
 			cmd[strlen(cmd) - 1] = '\0';
 			p--;
@@ -196,14 +193,14 @@ void kernel_main(struct mboot_info *mboot)
 			cur[1] = '\0';
 			strcat(cmd, cur);
 
-			printc(c);
+			kprintf("%c", c);
 
 			p++;
 
 			continue;
 		}
 
-		printc(c);
+		kprintf("%c", c);
 
 		/* File system */
 		if (strcmp(cmd, "finit") == 0) {

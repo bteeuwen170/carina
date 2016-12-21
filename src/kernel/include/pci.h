@@ -31,7 +31,6 @@
 #define PCI_DEVICES	32
 #define PCI_FUNCTIONS	8
 
-/* PCI Config space structure */
 struct pci_config_space {
 	u16	vendor;
 	u16	device;

@@ -83,7 +83,8 @@ u16 serial_read(const u16 port)
 
 u16 serial_in(const u16 port)
 {
-	while (serial_read(port) == 0);
+	while (!serial_read(port));
+
 	return io_inb(port);
 }
 
@@ -94,7 +95,8 @@ u16 serial_free(const u16 port)
 
 void serial_out(const u16 port, const u8 value)
 {
-	while (serial_free(port) == 0);
+	while (!serial_free(port));
+
 	io_outb(port, value);
 }
 

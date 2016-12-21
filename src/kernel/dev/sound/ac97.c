@@ -24,10 +24,10 @@
 
 #include <kernel.h>
 #include <module.h>
+#include <pci.h>
 
 #include <asm/cpu.h>
 
-#include <pci/pci.h>
 #include <timer/pit.h>
 
 #include <stdlib.h>

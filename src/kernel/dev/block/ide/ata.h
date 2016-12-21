@@ -31,7 +31,6 @@
 #define ATA_SECTOR_SIZE		512
 #define ATAPI_SECTOR_SIZE	2048
 
-
 #define ATA_REG_IO		0x00	/* I/O */
 #define ATA_REG_ERROR		0x01	/* Error */
 #define ATA_REG_FEATURES	0x01	/* Features */
