@@ -23,6 +23,7 @@
  */
 
 #include <kernel.h>
+#include <module.h>
 
 #include <asm/cpu.h>
 
@@ -355,7 +356,7 @@ static int ide_probe(struct pci_dev *card)
 	/* TODO Provide error information */
 err:
 	dprintf(devname, KP_ERR "err\n");
-	return 1;
+	return -1;
 }
 
 static void ide_fini(struct pci_dev *card)
@@ -373,12 +374,14 @@ static struct pci_driver ide_driver = {
 	.fini	= &ide_fini
 };
 
-void ide_init(void)
+int ide_init(void)
 {
-	pci_driver_reg(&ide_driver);
+	return pci_driver_reg(&ide_driver);
 }
 
 void ide_exit(void)
 {
 	pci_driver_unreg(&ide_driver);
 }
+
+MODULE("ide", &ide_init, &ide_exit);

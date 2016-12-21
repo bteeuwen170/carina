@@ -27,7 +27,4 @@
 
 void ac97_play(void);
 
-void ac97_init(void);
-void ac97_exit(void);
-
 #endif

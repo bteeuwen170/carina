@@ -29,42 +29,31 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct list_head devices[DEV_MAX];
+static struct fs_dev devices[DEV_MAX];
 
-int dev_block_reg(u8 major, struct fs_dev *device)
+int dev_block_reg(u32 major, struct fs_dev *device)
 {
 	return -EINVAL;
 }
 
-int dev_char_reg(u8 major, struct fs_dev *device)
+int dev_char_reg(u32 major, const char *name, struct file_ops *op)
 {
-	/* TODO Check if not already present */
+	/* TODO Lock */
 
-	list_init(&device->l);
-	list_add(&devices[major], &device->l);
+	if (major > DEV_MAX)
+		return -EINVAL;
+
+	if (devices[major].op != op)
+		return -EEXIST;
+
+	memcpy(devices[major].name, name, NAME_MAX);
+	devices[major].op = op;
 
 	return 0;
 }
 
-int dev_char_unreg(u8 major, const char *name)
+void dev_char_unreg(u32 major)
 {
-	struct fs_dev *device;
-
-	/* TODO Check for presence */
-
-	list_for_each(device, &devices[major], l)
-		if (strcmp(device->name, name) == 0) {
-			list_rm(&device[major].l);
-			kfree(device);
-		}
-
-	return 0;
-}
-
-void dev_init(void)
-{
-	int i;
-
-	for (i = 0; i < DEV_MAX; i++)
-		list_init(&devices[i]);
+	memset(devices[major].name, 0, NAME_MAX + 1);
+	devices[major].op = NULL;
 }

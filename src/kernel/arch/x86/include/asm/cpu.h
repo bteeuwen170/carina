@@ -144,7 +144,7 @@ static inline void tss_load(void)
 
 void idt_init(void);
 
-void isr_handler_reg(const u8 int_no, void (*handler) (struct int_stack *regs));
+int isr_handler_reg(const u8 int_no, int (*handler) (struct int_stack *regs));
 void isr_handler_unreg(const u8 int_no);
 
 #define irq_handler_reg(i, h)	isr_handler_reg(SINT_ENTRIES + i, h)

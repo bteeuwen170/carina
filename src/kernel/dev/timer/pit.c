@@ -38,15 +38,31 @@ time_t uptime(void)
 	//return do_div(ticks, 1000);
 }
 
-static void int_handler(struct int_stack *regs)
+static int int_handler(struct int_stack *regs)
 {
 	(void) regs;
 	ticks++;
+
+	return 1;
 }
 
-void pit_init(void)
+void sleep(const u64 delay)
 {
+	u64 target = ticks + delay;
+
+	while (ticks < target)
+		asm volatile ("hlt");
+}
+
+int timer_init(void)
+{
+	int res;
 	u32 val;
+
+	res = irq_handler_reg(IRQ_PIT, &int_handler);
+
+	if (res < 0)
+		return res;
 
 	//val = PIT_FREQ / 100;
 	val = PIT_FREQ / 1000;
@@ -56,13 +72,5 @@ void pit_init(void)
 	io_outb(PIT_CH0_IO, val & 0xFF);
 	io_outb(PIT_CH0_IO, (val >> 8) & 0xFF);
 
-	irq_handler_reg(IRQ_PIT, &int_handler);
-}
-
-void sleep(const u64 delay)
-{
-	u64 target = ticks + delay;
-
-	while (ticks < target)
-		asm volatile ("hlt");
+	return res;
 }

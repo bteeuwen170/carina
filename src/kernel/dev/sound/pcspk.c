@@ -22,6 +22,8 @@
  *
  */
 
+#include <module.h>
+
 #include <asm/cpu.h>
 
 #include <timer/pit.h>
@@ -44,6 +46,8 @@ void pcspk_stop(void)
 	u8 spkr = io_inb(0x61) & 0xFC;
 	io_outb(0x61, spkr);
 }
+
+MODULE("pcspk", NULL, NULL);
 
 /*
  * This is more something that should be implemented in userspace, this is just

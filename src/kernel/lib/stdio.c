@@ -22,9 +22,9 @@
  *
  */
 
+#include <kbd.h>
 #include <kernel.h>
 
-#include <kbd/kbd.h>
 #include <video/vga.h>
 
 #include <stdio.h>

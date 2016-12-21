@@ -162,12 +162,6 @@ static struct inode *inode_getp(char *path)
 //{
 //	//if (f
 //}
-//
-//int fs_init(void)
-//{
-//	/* Temporary for vfs */
-//	inode_alloc(0, 1);
-//}
 
 /*
  * System calls
@@ -339,12 +333,14 @@ int sys_readdir(int fd, void *usr_dirent)
 	//TODO
 } */
 
-void fs_reg(struct fs_driver *driver)
+int fs_reg(struct fs_driver *driver)
 {
 	/* TODO Check if not already present */
 
 	list_init(&driver->l);
 	list_add(&fs_drivers, &driver->l);
+
+	return 0;
 }
 
 void fs_unreg(struct fs_driver *driver)
@@ -352,9 +348,4 @@ void fs_unreg(struct fs_driver *driver)
 	/* TODO Check for presence */
 
 	list_rm(&driver->l);
-}
-
-void fs_init(void)
-{
-	dev_init();
 }

@@ -57,8 +57,6 @@ enum vga_cursors {
 
 u8 vga_fgcolor, vga_bgcolor;
 
-void vga_init(void);
-
 void vga_clear(void);
 
 void vga_scroll_down(void);

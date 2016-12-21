@@ -22,9 +22,11 @@
  *
  */
 
-#include <asm/cpu.h>
-
+#include <fs.h>
 #include <kernel.h>
+#include <module.h>
+
+#include <asm/cpu.h>
 
 static const char devname[] = "tty";
 
@@ -55,20 +57,27 @@ static struct file_ops tty_file_ops = {
 	.write	= &tty_write
 };
 
-static struct fs_dev = {
+static struct fs_dev tty_dev = {
 	.name	= devname,
 
 	.op	= &tty_file_ops
 };
 
-void tty_init(void)
+int tty_init(void)
 {
-	fs_chrdev_reg(0, &fs_dev);
+	int res;
+
+	res = dev_char_reg(0, &tty_dev);
+
+	if (res < 0)
+		panic("%s: unable to register tty (%d)", devname, res);
+
+	return 0;
 }
 
 void tty_exit(void)
 {
 	/* TODO */
-
-	fs_chrdev_unreg(0, name);
 }
+
+MODULE("tty", &tty_init, &tty_exit);

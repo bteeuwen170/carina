@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/dev/rtc/cmos.h
+ * src/kernel/dev/rtc/cmos.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,8 +22,12 @@
  *
  */
 
-#ifndef _CMOS_H
-#define _CMOS_H
+#include <kernel.h>
+#include <module.h>
+
+#include <asm/cpu.h>
+
+static const char devname[] = "cmos";
 
 #define CMOS_CMD	0x70
 #define CMOS_IO		0x71
@@ -46,6 +50,29 @@ enum cmos_registers {
 	CMOS_PERIF	= 0x14
 };
 
-void rtc_init(void);
+/* TODO Make get_time function + check if not updating using CMOS_A */
+static u8 cmos_in(const u8 reg)
+{
+	io_outb(CMOS_CMD, reg);
 
-#endif
+	return io_inb(CMOS_IO);
+}
+
+int cmos_init(void)
+{
+	dprintf(devname,
+			"current time is %02x%02x/%02x/%02x %02x:%02x:%02x UTC\n",
+			cmos_in(CMOS_CENTURY), cmos_in(CMOS_YEAR),
+			cmos_in(CMOS_MONTH), cmos_in(CMOS_DAY),
+			cmos_in(CMOS_HOURS), cmos_in(CMOS_MINUTES),
+			cmos_in(CMOS_SECONDS));
+
+	return 0;
+}
+
+void cmos_exit(void)
+{
+	/* TODO */
+}
+
+MODULE("cmos", &cmos_init, &cmos_exit);

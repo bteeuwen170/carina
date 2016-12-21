@@ -24,9 +24,10 @@
 
 /* TODO Rewrite this crap */
 
-#include <asm/cpu.h>
-
 #include <kernel.h>
+#include <module.h>
+
+#include <asm/cpu.h>
 
 #include "vga.h"
 
@@ -35,28 +36,6 @@ static const char devname[] = "vga";
 static u16 *vga_buffer = (u16 *) 0xB8000;
 
 u16 vga_x, vga_y;
-
-void vga_init(void)
-{
-	u8 x, y;
-
-	vga_x = vga_y = 0;
-
-	vga_fgcolor = VGA_COLOR_LIGHT_GREY;
-	vga_bgcolor = VGA_COLOR_BLACK;
-
-	for (y = 0; y < VGA_HEIGHT; y++)
-		for (x = 0; x < VGA_WIDTH; x++)
-			 vga_buffer[y * VGA_WIDTH + x] =
-				vga_create_entry(' ', vga_fgcolor, vga_bgcolor);
-
-	/* Hide cursor */
-	//io_outb(0x3D4, 0x0A);
-	//io_outb(0x3D5, 0x1D);
-
-	dprintf(devname, "early VGA has been initialized at %dx%d\n",
-			VGA_WIDTH, VGA_HEIGHT);
-}
 
 static void vga_cur_set(void)
 {
@@ -134,3 +113,31 @@ void vga_putch(char c, u8 color)
 		vga_cur_set();
 	}
 }
+
+int vga_init(void)
+{
+	u8 x, y;
+
+	vga_x = vga_y = 0;
+
+	vga_fgcolor = VGA_COLOR_LIGHT_GREY;
+	vga_bgcolor = VGA_COLOR_BLACK;
+
+	for (y = 0; y < VGA_HEIGHT; y++)
+		for (x = 0; x < VGA_WIDTH; x++)
+			 vga_buffer[y * VGA_WIDTH + x] =
+				vga_create_entry(' ', vga_fgcolor, vga_bgcolor);
+
+	/* Hide cursor */
+	//io_outb(0x3D4, 0x0A);
+	//io_outb(0x3D5, 0x1D);
+
+	dprintf(devname, "early VGA has been initialized at %dx%d\n",
+			VGA_WIDTH, VGA_HEIGHT);
+
+	return 0;
+}
+
+void vga_exit(void);
+
+MODULE("vga", &vga_init, &vga_exit);

@@ -15,9 +15,9 @@
  */
 
 #include <kernel.h>
+#include <kbd.h>
 
 #include <char/serial/serial.h>
-#include <kbd/kbd.h>
 #include <video/fb.h>
 #include <video/vga.h>
 

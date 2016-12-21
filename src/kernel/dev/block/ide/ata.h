@@ -172,7 +172,4 @@ struct ata_channel {
 	u8	nint;
 };
 
-void ide_init(void);
-void ide_exit(void);
-
 #endif

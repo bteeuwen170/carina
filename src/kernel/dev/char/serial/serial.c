@@ -22,9 +22,10 @@
  *
  */
 
-#include <asm/cpu.h>
-
 #include <kernel.h>
+#include <module.h>
+
+#include <asm/cpu.h>
 
 static const char devname[] = "serial";
 
@@ -75,6 +76,28 @@ static i8 serial_chip_detect(const u16 addr)
 	return 4;
 }
 
+u16 serial_read(const u16 port)
+{
+	return io_inb(port + 5) & 0x01;
+}
+
+u16 serial_in(const u16 port)
+{
+	while (serial_read(port) == 0);
+	return io_inb(port);
+}
+
+u16 serial_free(const u16 port)
+{
+	return io_inb(port + 5) & 0x20;
+}
+
+void serial_out(const u16 port, const u8 value)
+{
+	while (serial_free(port) == 0);
+	io_outb(port, value);
+}
+
 void serial_init(const u16 port)
 {
 	switch (serial_chip_detect(port)) {
@@ -104,24 +127,9 @@ void serial_init(const u16 port)
 	//TODO Register the serial input handler
 }
 
-u16 serial_read(const u16 port)
+/* void serial_exit(void)
 {
-	return io_inb(port + 5) & 0x01;
+	[>TODO<]
 }
 
-u16 serial_in(const u16 port)
-{
-	while (serial_read(port) == 0);
-	return io_inb(port);
-}
-
-u16 serial_free(const u16 port)
-{
-	return io_inb(port + 5) & 0x20;
-}
-
-void serial_out(const u16 port, const u8 value)
-{
-	while (serial_free(port) == 0);
-	io_outb(port, value);
-}
+MODULE("serial", &serial_init, &serial_exit); */

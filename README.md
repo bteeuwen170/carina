@@ -1,7 +1,7 @@
 # Elara
 
-This is the README file for Elara, a free and open source operating system for
-the i686 and x86\_64 architecture.
+This is the README file for Elara, a free and open source operating system
+kernel for the i686 and x86\_64 architecture.
 
 License: GPLv2
 

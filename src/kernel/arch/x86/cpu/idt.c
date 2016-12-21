@@ -106,21 +106,18 @@ void idt_init(void)
 	for (i = 0; i < IDT_ENTRIES; i++) {
 		idt_set(i, 0x0E, (intptr_t) ints[i]);
 
-		if (i < SINT_ENTRIES)
-			isr_handler_reg(i, NULL);
-		else if (i < SINT_ENTRIES + IRQ_ENTRIES - 1)
+		if (i > SINT_ENTRIES && i < SINT_ENTRIES + IRQ_ENTRIES - 1)
 			irq_mask(SINT_ENTRIES - i);
 	}
 
 	idt_load(&idt, IDT_ENTRIES * sizeof(struct idt_desc) - 1);
 
-	dprintf(devname,
-			KP_NOTICE "%d entries entered\n", i);
+	dprintf(devname, KP_NOTICE "%d entries entered\n", i);
 }
 
 void _isr(struct int_stack *regs)
 {
-	void (*handler) (struct int_stack *regs);
+	int (*handler) (struct int_stack *regs);
 
 	/* TEMP */
 	if (regs->int_no < SINT_ENTRIES) {
@@ -148,17 +145,17 @@ void _isr(struct int_stack *regs)
 	}
 }
 
-void isr_handler_reg(const u8 int_no, void (*handler) (struct int_stack *))
+int isr_handler_reg(const u8 int_no, int (*handler) (struct int_stack *))
 {
-	if (int_no < SINT_ENTRIES && isr_handlers[int_no] != NULL)
-		dprintf(devname, KP_WARN
-				"remapping exception handler for int. %d\n",
-				int_no);
+	if (isr_handlers[int_no])
+		return -1;
 
 	isr_handlers[int_no] = handler;
 
 	if (int_no >= SINT_ENTRIES && int_no < SINT_ENTRIES + IRQ_ENTRIES - 1)
 		irq_unmask(SINT_ENTRIES - int_no);
+
+	return 0;
 }
 
 void isr_handler_unreg(const u8 int_no)

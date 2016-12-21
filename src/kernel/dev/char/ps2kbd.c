@@ -22,19 +22,48 @@
  *
  */
 
-#include <asm/cpu.h>
+#include <kbd.h>
+#include <module.h>
 
-#include "kbd.h"
-#include "ps2.h"
+#include <asm/cpu.h>
 
 #define KEYMAP_SIZE 128
 
-static char kbuf = -1;
-/* TODO Make this a pipe */
+#define PS2_KEYUP	0x80
 
-static u8 modifiers, skip;
+#define PS2_CMD		0x64
+#define PS2_IO		0x60
 
-const char kbd_keymap[KEYMAP_SIZE] = {
+#define PS2_RESET	0xFE
+
+#define PS2_EXT		0xE0
+
+/* Modifiers */
+#define PS2_LSHIFT	0x2A
+#define PS2_LSHIFTU	0xAA
+#define PS2_RSHIFT	0x36
+#define PS2_RSHIFTU	0xB6
+#define PS2_LCTRL	0x1D
+#define PS2_LCTRLU	0x9D
+#define PS2_RCTRL	0x1DE0
+#define PS2_RCTRLU	0x9DE0
+#define PS2_LALT	0x38
+#define PS2_LALTU	0xB8
+#define PS2_RALT	0x38E0
+#define PS2_RALTU	0xB8E0
+#define PS2_LSUPER	0x5BE0
+#define PS2_LSUPERU	0xDBE0
+#define PS2_RSUPER	0x5CE0
+#define PS2_RSUPERU	0xDCE0
+
+/* Other keys */
+/*
+ * TODO
+ * Esc, PrtSc, CapsLock, NumLock, ScrLk, Pause, Ins, Home, PGUP, Del, End, PGDN,
+ * Function keys, Media keys, WinMenu
+ */
+
+static const char kbd_keymap[KEYMAP_SIZE] = {
 	-1,
 	0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
 	'\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',
@@ -51,7 +80,7 @@ const char kbd_keymap[KEYMAP_SIZE] = {
 	'0', '.'
 };
 
-const char kbd_keymap_alt[KEYMAP_SIZE] = {
+static const char kbd_keymap_alt[KEYMAP_SIZE] = {
 	/* Shift */
 	-1,
 	0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',
@@ -68,19 +97,25 @@ const char kbd_keymap_alt[KEYMAP_SIZE] = {
 	0, 0, 0, '+'
 };
 
-static void int_handler(struct int_stack *regs)
+static char kbuf = -1;
+
+static u8 modifiers = 0, skip;
+
+static int int_handler(struct int_stack *regs)
 {
 	(void) regs;
 	u16 scancode = io_inb(PS2_IO);
 
 	if (skip) {
 		skip--;
-		return;
+		return 1;
 	}
 
 	if (scancode == PS2_EXT) {
 		skip++;
 		scancode |= io_inb(PS2_IO) << 8;
+
+		return 1;
 	}
 
 	/* TODO Add escape sequences */
@@ -128,23 +163,7 @@ static void int_handler(struct int_stack *regs)
 			kbuf = kbd_keymap[scancode];
 	}
 
-}
-
-void kbd_init(void)
-{
-	//TODO Numlock and such
-}
-
-void kbd_enable(void)
-{
-	modifiers = 0;
-
-	irq_handler_reg(IRQ_KBD, &int_handler);
-}
-
-void kbd_disable(void)
-{
-	irq_handler_unreg(IRQ_KBD);
+	return 1;
 }
 
 /* TODO Not here, please this os is a mess ... */
@@ -157,3 +176,17 @@ char getch(void)
 
 	return kbuf;
 }
+
+int ps2kbd_init(void)
+{
+	//TODO Numlock and such
+
+	return irq_handler_reg(IRQ_KBD, &int_handler);
+}
+
+void ps2kbd_exit(void)
+{
+	irq_handler_unreg(IRQ_KBD);
+}
+
+MODULE("ps2kbd", &ps2kbd_init, &ps2kbd_exit);

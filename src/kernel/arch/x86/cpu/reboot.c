@@ -24,13 +24,14 @@
 
 #include <asm/cpu.h>
 
-#include <kbd/ps2.h>
+/* #include <kbd/ps2.h> */
 
 #define bit(n) (1 << (n))
 #define check_flag(flags, n) ((flags) & bit(n))
 
 void reboot(void)
 {
+#if 0
 	u8 trash;
 
 	asm volatile ("cli");
@@ -42,6 +43,7 @@ void reboot(void)
 	} while (check_flag(trash, 1) != 0);
 
 	io_outb(PS2_CMD, PS2_RESET);
+#endif
 
 	for (;;)
 		asm volatile ("hlt");

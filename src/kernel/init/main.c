@@ -22,10 +22,13 @@
  *
  */
 
+#include <fs.h>
 #include <issue.h>
+#include <kbd.h>
+#include <kernel.h>
+#include <module.h>
 #include <lock.h>
 #include <mboot.h>
-#include <kernel.h>
 #include <reboot.h>
 #include <sys/time.h>
 
@@ -34,10 +37,7 @@
 
 #include <block/ide/ata.h>
 #include <char/serial/serial.h>
-#include <fs/ramfs.h>
-#include <kbd/kbd.h>
 #include <pci/pci.h>
-#include <rtc/cmos.h>
 #include <sound/ac97.h>
 #include <sound/sb16.h>
 #include <sound/pcspk.h>
@@ -62,7 +62,6 @@ void kernel_main(struct mboot_info *mboot)
 	/* FIXME Memory map cannot be printed before vga_init() */
 	mm_init(mboot->mmap_addr, mboot->mmap_len);
 
-	fs_init();
 	ramfs_init();
 
 	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
@@ -72,9 +71,8 @@ void kernel_main(struct mboot_info *mboot)
 	serial_init(COM0);
 
 	/* TODO Other format (UTC) */
-	dprintf("cpu0", "Welcome to Elara! (compiled on %s %s)\n",
+	kprintf("Welcome to Elara! (compiled on %s %s)\n",
 			__DATE__, __TIME__);
-	/* TODO Actually get starting cpu */
 
 	/* TODO Move */
 	kprintf(KP_CON "Elara has been loaded by %s\n",
@@ -143,22 +141,20 @@ void kernel_main(struct mboot_info *mboot)
 	}
 #endif
 
-	/* acpi_init(); */
-	rtc_init();
-	pit_init(); /* TODO Timer init (generic) */
-
-	kbd_enable();
-	/* sb16_init(); */
-
 	asm volatile ("sti");
 	dprintf("cpu0", KP_DBG "interrupts enabled\n");
+	/* TODO Actually get starting cpu */
 
-/* #if CONFIG_PCI */
-	ide_init();
+	/* TODO Modules */
+	/* acpi_init(); */
+	cmos_init();
+	timer_init();
+	ps2kbd_init();
+	/* FIXME Corrupts video memory */
+	/* ide_init(); */
 	ac97_init();
-
+	/* sb16_init(); */
 	pci_init();
-/* #endif */
 
 	/* Temporary and crappy code */
 #if 0

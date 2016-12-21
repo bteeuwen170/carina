@@ -22,8 +22,12 @@
  *
  */
 
-void acpi_init(void)
+int acpi_init(void)
 {
-	for (;;)
-		asm volatile ("hlt");
+	return 0;
+}
+
+void acpi_exit(void)
+{
+	/* TODO */
 }

@@ -150,6 +150,4 @@ struct ext2_dir_entry {
 	char name[];
 } __attribute__ ((packed));
 
-void ext2_init(void);
-
 #endif

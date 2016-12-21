@@ -21,18 +21,16 @@
  * USA.
  *
  */
-/* FIXME This is broken */
 
 #include <kernel.h>
+#include <module.h>
 
 #include <asm/cpu.h>
 
 #include <pci/pci.h>
 #include <timer/pit.h>
 
-//#include <stdint.h> /* TEMP */
 #include <stdlib.h>
-#include <string.h> /* TEMP */
 
 #include "ac97.h"
 #include "snd.h"
@@ -70,17 +68,15 @@ struct ac97_dev *dev = &deva;
 static void buffer_fill(void *data, u32 n, u32 off)
 {
 	/* TEMP 400 to skip header */
-	dev->buf[n].addr = (intptr_t) data + 400 + off;
+	dev->buf[n].addr = (intptr_t) data + off;
 	dev->buf[n].len = 32;
 	dev->buf[n].bup = 0;
 	dev->buf[n].ioc = 1;
 }
 
-static void int_handler(struct int_stack *regs)
+static int int_handler(struct int_stack *regs)
 {
 	(void) regs;
-
-	dprintf(devname, KP_DBG "!"); //TEMPORARY
 
 	u32 curbuf = (dev->prev + 1) % 32;
 
@@ -92,6 +88,8 @@ static void int_handler(struct int_stack *regs)
 	buffer_fill(snd_wav, dev->prev, ++dev->index);
 
 	dev->prev = curbuf;
+
+	return 1;
 }
 
 static void volume_set(u8 volume)
@@ -155,7 +153,7 @@ static int ac97_probe(struct pci_dev *card)
 		io_outw(dev->nambar + 0x32, 48000);
 	}
 
-	volume_set(0);
+	volume_set(1);
 
 	irq_handler_reg(card->cfg->int_line, &int_handler);
 
@@ -168,7 +166,7 @@ static int ac97_probe(struct pci_dev *card)
 err:
 	dprintf(devname, KP_ERR "unable to intialize ac97 card\n");
 
-	return 1;
+	return -1;
 }
 
 static void ac97_fini(struct pci_dev *card)
@@ -186,12 +184,14 @@ static struct pci_driver ac97_driver = {
 	.fini	= &ac97_fini
 };
 
-void ac97_init(void)
+int ac97_init(void)
 {
-	pci_driver_reg(&ac97_driver);
+	return pci_driver_reg(&ac97_driver);
 }
 
 void ac97_exit(void)
 {
 	pci_driver_unreg(&ac97_driver);
 }
+
+MODULE("ac97", &ac97_init, &ac97_exit);

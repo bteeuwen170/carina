@@ -88,11 +88,8 @@ struct fs_driver {
 };
 
 struct fs_dev {
-	struct list_head l;
-
-	const char *name;
-
-	struct file_ops *op;
+	char		name[NAME_MAX + 1];
+	struct file_ops	*op;
 };
 
 struct superblock {
@@ -226,14 +223,13 @@ struct dirent *dirent_alloc(struct dirent *dp, const char *name);
 struct dirent *dirent_alloc_root(struct inode *rp);
 void *dirent_get(struct file *fp);
 
+int dev_char_reg(u32 major, const char *name, struct file_ops *op);
+void dev_char_unreg(u32 major);
+
 struct mountp *sv_mount(struct fs_driver *driver, const char *name);
 
-void dev_init(void);
-
-void fs_reg(struct fs_driver *driver);
+int fs_reg(struct fs_driver *driver);
 void fs_unreg(struct fs_driver *driver);
-
-void fs_init(void);
 
 /* END fs.h */
 

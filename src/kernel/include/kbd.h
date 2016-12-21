@@ -1,7 +1,7 @@
 /*
  *
  * Elara
- * src/kernel/fs/ramfs/ramfs.h
+ * src/kernel/include/kbd.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,14 +22,12 @@
  *
  */
 
-#ifndef _FS_RAMFS_H
-#define _FS_RAMFS_H
+#ifndef _KBD_H
+#define _KBD_H
 
-#include <fs.h>
-
-int ramfs_get(size_t size, u32 *dev, struct inode **ipp);
-struct dirent *ramfs_read_dir(struct inode *dp, off_t off); //XXX TEMP
-
-void ramfs_init(void);
+#define MOD_SHIFT	0b0001
+#define MOD_CTRL	0b0010
+#define MOD_ALT		0b0100
+#define MOD_SUPER	0b1000
 
 #endif

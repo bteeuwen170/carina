@@ -38,8 +38,8 @@
 
 time_t uptime(void);
 
-void pit_init(void);
-
 void sleep(const u64 delay);
+
+int timer_init(void);
 
 #endif

@@ -24,9 +24,9 @@
 
 #include <errno.h>
 #include <fs.h>
-#include <fs/ramfs.h>
 #include <limits.h>
 #include <kernel.h>
+#include <module.h>
 #include <sys/types.h> /* XXX TEMP for syntax highlighting */
 
 #include <stdlib.h>
@@ -313,7 +313,7 @@ struct dirent *ramfs_read_dir(struct inode *dp, off_t off)
 	struct ramfs_dirent de;
 	int res;
 
-	/* TODO Check in vfs.c */
+	/* TODO Check in fs.c */
 	//if (dp->type != IT_DIR)
 	//	return 0;
 	
@@ -565,9 +565,9 @@ static struct fs_driver ramfs_driver = {
 	.read_sb	= &ramfs_read_sb
 };
 
-void ramfs_init(void)
+int ramfs_init(void)
 {
-	fs_reg(&ramfs_driver);
+	return fs_reg(&ramfs_driver);
 }
 
 void ramfs_exit(void)
@@ -576,3 +576,5 @@ void ramfs_exit(void)
 
 	fs_unreg(&ramfs_driver);
 }
+
+MODULE("ramfs", &ramfs_init, &ramfs_exit);

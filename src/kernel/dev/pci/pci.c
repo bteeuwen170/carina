@@ -22,9 +22,10 @@
  *
  */
 
-#include <asm/cpu.h>
-
 #include <kernel.h>
+#include <module.h>
+
+#include <asm/cpu.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -164,12 +165,14 @@ static void pci_dev_reg(struct pci_dev *card)
 {
 } */
 
-void pci_driver_reg(struct pci_driver *driver)
+int pci_driver_reg(struct pci_driver *driver)
 {
 	/* TODO Check if not already present */
 
 	list_init(&driver->l);
 	list_add(&pci_drivers, &driver->l);
+
+	return 0;
 }
 
 void pci_driver_unreg(struct pci_driver *driver)
@@ -246,7 +249,7 @@ err:
 	return NULL;
 }
 
-void pci_init(void)
+int pci_init(void)
 {
 	struct pci_dev *card;
 	u16 bus, dev, func;
@@ -269,9 +272,13 @@ void pci_init(void)
 	list_for_each(card, &pci_devices, l)
 		if (card->driver && card->driver->probe)
 			card->driver->probe(card);
+
+	return 0;
 }
 
 void pci_exit(void)
 {
 	/* TODO Free all structures */
 }
+
+MODULE("pci", &pci_init, &pci_exit);

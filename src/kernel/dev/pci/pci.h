@@ -103,10 +103,7 @@ struct pci_driver {
 u32 pci_ind(struct pci_dev *dev, u32 reg);
 void pci_outd(struct pci_dev *dev, u32 reg, u32 val);
 
-void pci_driver_reg(struct pci_driver *driver);
+int pci_driver_reg(struct pci_driver *driver);
 void pci_driver_unreg(struct pci_driver *driver);
-
-void pci_init(void);
-void pci_exit(void);
 
 #endif
