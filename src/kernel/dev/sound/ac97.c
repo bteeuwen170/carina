@@ -68,7 +68,7 @@ struct ac97_dev *dev = &deva;
 
 static void buffer_fill(void *data, u32 n, u32 off)
 {
-	dev->buf[n].addr = (intptr_t) data + (32 * 2 * off);
+	dev->buf[n].addr = (intptr_t) data + (off * 2 * 32);
 	dev->buf[n].len = 32;
 	dev->buf[n].bup = 0;
 	dev->buf[n].ioc = 1;
@@ -82,8 +82,6 @@ static int int_handler(struct int_stack *regs)
 
 	if (status & 0b100) {
 		io_outw(dev->nabmbar + 0x16, 0b100);
-
-		return 1;
 	} else if (status & 0b1000) {
 		u32 curbuf = (dev->prev + 1) % 32;
 
@@ -97,10 +95,6 @@ static int int_handler(struct int_stack *regs)
 		dev->prev = curbuf;
 
 		/* dprintf(devname, KP_DBG "sr: %u\n", io_inw(dev->nabmbar + 0x16)); */
-
-		return 1;
-	} else if (status & 0b10000) {
-		return 1;
 	}
 
 	return 1;

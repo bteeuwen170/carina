@@ -25,7 +25,7 @@
 #include <mboot.h>
 #include <kernel.h>
 
-static const char devname[] = "mem";
+static const char devname[] = "mm";
 
 const char *mmap_types[5] = {
 	"rsvd",
@@ -40,6 +40,7 @@ const char *mmap_types[5] = {
 #define BLOCKS_MAX	(BLOCK_SIZE * sizeof(u8))
 
 extern u64 kern_end;
+u64 mem;
 
 static intptr_t position;
 
@@ -84,7 +85,6 @@ void kfree(void *ptr)
 void mm_init(u32 addr, u32 len)
 {
 	struct mboot_mmap *mmap = (void *) (intptr_t) addr;
-	u64 mem = 0;
 
 	dprintf(devname, "Physical memory map:\n");
 

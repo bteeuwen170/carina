@@ -189,6 +189,22 @@ static struct pci_dev *pci_config(u16 bus, u16 dev, u16 func)
 	const struct pci_dev_id *id;
 	u8 i;
 
+#if 1
+	struct pci_dev tmp;
+
+	tmp.bus = bus;
+	tmp.dev = dev;
+	tmp.func = func;
+
+	if ((pci_ind(&tmp, 0) & 0xFFFF) == 0xFFFF)
+		return NULL;
+#else
+	if ((pci_ind(card, 0) & 0xFFFF) == 0xFFFF) {
+		kfree(card);
+		return NULL;
+	}
+#endif
+
 	card = kmalloc(sizeof(struct pci_dev));
 
 	if (!card)
@@ -197,11 +213,6 @@ static struct pci_dev *pci_config(u16 bus, u16 dev, u16 func)
 	card->bus = bus;
 	card->dev = dev;
 	card->func = func;
-
-	if ((pci_ind(card, 0) & 0xFFFF) == 0xFFFF) {
-		kfree(card);
-		return NULL;
-	}
 
 	card->cfg = kmalloc(sizeof(struct pci_config_space));
 
@@ -243,7 +254,7 @@ static struct pci_dev *pci_config(u16 bus, u16 dev, u16 func)
 
 	/* TODO Provide error information */
 err:
-	dprintf(devname, KP_ERR "out of memory");
+	dprintf(devname, KP_ERR "out of memory\n");
 
 	return NULL;
 }
@@ -253,9 +264,7 @@ int pci_init(void)
 	struct pci_dev *card;
 	u16 bus, dev, func;
 
-	/* Until kfree works */
-	/* for (bus = 0; bus < PCI_BUSES; bus++) { */
-	for (bus = 0; bus < 5; bus++) {
+	for (bus = 0; bus < PCI_BUSES; bus++) {
 		for (dev = 0; dev < PCI_DEVICES; dev++) {
 			for (func = 0; func < PCI_FUNCTIONS; func++) {
 				card = pci_config(dev, bus, func);
