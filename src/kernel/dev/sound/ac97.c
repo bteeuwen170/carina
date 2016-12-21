@@ -22,6 +22,7 @@
  *
  */
 
+#include <errno.h>
 #include <kernel.h>
 #include <module.h>
 #include <pci.h>
@@ -67,8 +68,7 @@ struct ac97_dev *dev = &deva;
 
 static void buffer_fill(void *data, u32 n, u32 off)
 {
-	/* TEMP 400 to skip header */
-	dev->buf[n].addr = (intptr_t) data + off;
+	dev->buf[n].addr = (intptr_t) data + (32 * 2 * off);
 	dev->buf[n].len = 32;
 	dev->buf[n].bup = 0;
 	dev->buf[n].ioc = 1;
@@ -78,16 +78,30 @@ static int int_handler(struct int_stack *regs)
 {
 	(void) regs;
 
-	u32 curbuf = (dev->prev + 1) % 32;
+	u16 status = io_inw(dev->nabmbar + 0x16);
 
-	if (!curbuf || io_inw(dev->nabmbar + 0x18) < 1)
-		io_outw(dev->nabmbar + 0x15, 32);
+	if (status & 0b100) {
+		io_outw(dev->nabmbar + 0x16, 0b100);
 
-	io_outw(dev->nabmbar + 0x16, 0x08);
+		return 1;
+	} else if (status & 0b1000) {
+		u32 curbuf = (dev->prev + 1) % 32;
 
-	buffer_fill(snd_wav, dev->prev, ++dev->index);
+		if (!curbuf || io_inw(dev->nabmbar + 0x18) < 1)
+			io_outb(dev->nabmbar + 0x15, 32);
 
-	dev->prev = curbuf;
+		io_outw(dev->nabmbar + 0x16, 0b1000);
+
+		buffer_fill(snd_wav, dev->prev, ++dev->index);
+
+		dev->prev = curbuf;
+
+		/* dprintf(devname, KP_DBG "sr: %u\n", io_inw(dev->nabmbar + 0x16)); */
+
+		return 1;
+	} else if (status & 0b10000) {
+		return 1;
+	}
 
 	return 1;
 }
@@ -115,28 +129,32 @@ void ac97_play(void)
 
 	io_outd(dev->nabmbar + 0x10, (intptr_t) dev->buf);
 
+	dprintf(devname, KP_DBG "wav playing\n");
+
 	/* X_LVI */ io_outb(dev->nabmbar + 0x15, 32);
 	/* XXX Use LVBIE or CELV for interrupt? */
-	/* X_CR */ io_outb(dev->nabmbar + 0x1B, 0x19);
-	/* Now set: bit 4 (IOCE), bit 3 (FEIE) and bit 0 (RPBM) */
-
-	dprintf(devname, KP_DBG "sr: %u\n", io_inw(dev->nabmbar + 0x16));
-
-	dprintf(devname, KP_DBG "wav playing\n");
+	/* X_CR */ io_outb(dev->nabmbar + 0x1B, 0b11001);
 }
 
 static int ac97_probe(struct pci_dev *card)
 {
+	int res;
+
+	res = irq_handler_reg(card->cfg->int_line, &int_handler);
+
+	if (res < 0)
+		goto err;
+
 	dev->nambar = card->cfg->bar_0 & ~1;
 	dev->nabmbar = card->cfg->bar_1 & ~1;
 
+	if (dev->nambar <= 0 || dev->nabmbar <= 0) {
+		res = -EBUSY;
+		goto err;
+	}
+
 	/* Set PIO control */
 	pci_outd(card, 4, 5);
-
-	if (dev->nambar <= 0 || dev->nabmbar <= 0)
-		goto err;
-
-	sleep(20);
 
 	/* Reset */
 	io_outw(dev->nambar + 0x00, 0x01);
@@ -155,18 +173,16 @@ static int ac97_probe(struct pci_dev *card)
 
 	volume_set(1);
 
-	irq_handler_reg(card->cfg->int_line, &int_handler);
-
 	/* TODO Detect vendor */
 	dprintf(devname, "initialized, %u Hz @ IRQ %u\n",
 			io_inw(dev->nambar + 0x2C), card->cfg->int_line);
 
-	return 0;
+	return res;
 
 err:
 	dprintf(devname, KP_ERR "unable to intialize ac97 card\n");
 
-	return -1;
+	return res;
 }
 
 static void ac97_fini(struct pci_dev *card)

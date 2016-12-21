@@ -251,6 +251,7 @@ struct mountp *sv_mount(struct fs_driver *driver, const char *name)
 	return NULL;
 }
 
+/* TODO Move to proc/ */
 /* int sys_chdir(const char *path)
 {
 	//TODO

@@ -212,7 +212,7 @@ void kernel_main(struct mboot_info *mboot)
 			pcspk_play(835);
 			sleep(10);
 			pcspk_stop();
-		} else if (strcmp(cmd, "ac97 play") == 0) {
+		} else if (strcmp(cmd, "p") == 0) {
 			ac97_play();
 		/* } else if (strcmp(cmd, "sb16 play") == 0) {
 			sb16_play(); */
