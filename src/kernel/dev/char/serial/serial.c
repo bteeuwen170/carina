@@ -1,6 +1,6 @@
 /*
  *
- * Elara
+ * Elarix
  * src/kernel/dev/char/serial.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>

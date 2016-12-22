@@ -1,6 +1,6 @@
 /*
  *
- * Elara
+ * Elarix
  * src/kernel/init/main.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
@@ -68,11 +68,11 @@ void kernel_main(struct mboot_info *mboot)
 	serial_init(COM0);
 
 	/* TODO Other format (UTC) */
-	kprintf("Welcome to Elara! (compiled on %s %s)\n",
+	kprintf("Welcome to Elarix! (compiled on %s %s)\n",
 			__DATE__, __TIME__);
 
 	/* TODO Move */
-	kprintf(KP_CON "Elara has been loaded by %s\n",
+	kprintf(KP_CON "Elarix has been loaded by %s\n",
 			mboot->boot_loader_name);
 	kprintf(KP_CON "cmdline: %s\n", mboot->cmdline);
 

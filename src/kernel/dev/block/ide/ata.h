@@ -1,6 +1,6 @@
 /*
  *
- * Elara
+ * Elarix
  * src/kernel/dev/block/ide/ata.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>

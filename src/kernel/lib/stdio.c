@@ -1,6 +1,6 @@
 /*
  *
- * Elara
+ * Elarix
  * src/kernel/lib/stdio.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>

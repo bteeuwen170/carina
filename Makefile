@@ -29,10 +29,10 @@ HOSTCC		:= gcc
 HOSTLD		:= ld
 export HOSTCC HOSTLD
 
-CC		:= $(ARCH)-elf-elara-gcc
-CC32		:= $(ARCH32)-elf-elara-gcc
-AS		:= $(ARCH)-elf-elara-as
-LD		:= $(ARCH)-elf-elara-ld
+CC		:= $(ARCH)-elf-elarix-gcc
+CC32		:= $(ARCH32)-elf-elarix-gcc
+AS		:= $(ARCH)-elf-elarix-as
+LD		:= $(ARCH)-elf-elarix-ld
 
 BOCHS		:= bochs
 QEMU		:= qemu-system-$(ARCHQEMU)
@@ -87,7 +87,7 @@ menuconfig:
 PHONY += fstree
 fstree: root/tmp/
 root/tmp/:
-	echo -e "\033[1m> Creating Elara root filesystem tree...\033[0m"
+	echo -e "\033[1m> Creating Elarix root filesystem tree...\033[0m"
 	mkdir -p root/
 	mkdir -p root/app/
 	mkdir -p root/app/bin/
@@ -118,15 +118,15 @@ root/tmp/:
 	mkdir -p root/usr/root/Videos/
 
 PHONY += iso
-iso: fstree bin/elara.iso
-bin/elara.iso: bin/kernel
+iso: fstree bin/elarix.iso
+bin/elarix.iso: bin/kernel
 	echo -e "\033[1m> Copying kernel to system root...\033[0m"
 	cp bin/kernel root/boot/.
 	echo -e "\033[1m> Creating GRUB image...\033[0m"
 	grub-mkimage -p root/boot/grub -c root/boot/grub/grub.cfg -o bin/grub.img -O i386-pc biosdisk iso9660 normal multiboot ext2 boot
 	cat /usr/lib/grub/i386-pc/cdboot.img bin/grub.img > root/grub.img
-	echo -e "\033[1m> Creating Elara iso...\033[0m"
-	genisoimage -A "Elara" -input-charset "iso8859-1" -R -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/elara.iso root
+	echo -e "\033[1m> Creating Elarix iso...\033[0m"
+	genisoimage -A "Elarix" -input-charset "iso8859-1" -R -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/elarix.iso root
 
 ifeq ($(ARCHT),x86)
 PHONY += bochs
@@ -140,21 +140,21 @@ endif
 PHONY += qemu
 qemu: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) -cdrom bin/elara.iso 2>/dev/null
+	$(QEMU) $(QEMUFLAGS) -cdrom bin/elarix.iso 2>/dev/null
 
 PHONY += qemud
 qemud: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -cdrom bin/elara.iso 2>/dev/null
+	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -cdrom bin/elarix.iso 2>/dev/null
 
 PHONY += kvm
 kvm: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) $(KVMFLAGS) -cdrom bin/elara.iso 2>/dev/null
+	$(QEMU) $(QEMUFLAGS) $(KVMFLAGS) -cdrom bin/elarix.iso 2>/dev/null
 
 PHONY += kvmd
 kvmd: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) $(KVMFLAGS) -cdrom bin/elara.iso 2>/dev/null
+	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) $(KVMFLAGS) -cdrom bin/elarix.iso 2>/dev/null
 
 .PHONY: $(PHONY)

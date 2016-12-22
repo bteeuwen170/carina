@@ -1,6 +1,6 @@
-# Elara
+# Elarix
 
-This is the README file for Elara, a free and open source operating system
+This is the README file for Elarix, a free and open source operating system
 kernel for the i686 and x86\_64 architecture.
 
 License: GPLv2
@@ -8,7 +8,7 @@ License: GPLv2
 
 ## Building the toolchain
 
-These utilities are required to build the Elara toolchain:
+These utilities are required to build the Elarix toolchain:
 
 * GNU C Compiler (or Clang)
 * GNU autoconf 2.64
@@ -18,26 +18,26 @@ These utilities are required to build the Elara toolchain:
 
 An active Internet connection is also needed to download the necessary files.
 
-Issue this command to build the Elara toolchain:
+Issue this command to build the Elarix toolchain:
 
 	make toolchain
 
 
-## Building Elara
+## Building Elarix
 
-These applications are required to build the Elara kernel:
+These applications are required to build the Elarix kernel:
 * GNU make
-* Elara toolchain
+* Elarix toolchain
 * cdrkit (for genisoimage to build an ISO image)
 * GRUB (for grub-mkimage to build an ISO image)
 
-Issue this command to build the elara kernel:
+Issue this command to build the elarix kernel:
 
-	make elara
+	make elarix
 
 
 ## File system tree
-Elara does not adhere to the FHS standard, instead it uses this
+Elarix does not adhere to the FHS standard, instead it uses this
 filesystem hierarchy layout:
 
 	/                       Root
@@ -76,4 +76,4 @@ filesystem hierarchy layout:
 
 ## About
 
-Please refer to [my website](https://teeuwen.github.io/projects/elara).
+Please refer to [my website](https://teeuwen.github.io/projects/elarix).

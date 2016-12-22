@@ -5,7 +5,7 @@ diff -urN toolchain/binutils-2.27/bfd/config.bfd toolchain/binutils-2.27/bfd/con
      targ_defvec=i386_elf32_vec
      targ_selvecs=iamcu_elf32_vec
      ;;
-+  i[3-7]86-*-elara*)
++  i[3-7]86-*-elarix*)
 +    targ_defvec=i386_elf32_vec
 +    targ_selvecs=
 +    targ64_selvecs="x86_64_elf64_vec"
@@ -17,7 +17,7 @@ diff -urN toolchain/binutils-2.27/bfd/config.bfd toolchain/binutils-2.27/bfd/con
      targ_archs="$targ_archs bfd_arm_arch"
      ;;
  #ifdef BFD64
-+  x86_64-*-elara*)
++  x86_64-*-elarix*)
 +    targ_defvec=x86_64_elf64_vec
 +    targ_selvecs="i386_elf32_vec"
 +    want64=true
@@ -32,7 +32,7 @@ diff -urN toolchain/binutils-2.27/config.sub toolchain/binutils-2.27/config.sub
  	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
  	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* \
  	      | -chorusos* | -chorusrdb* | -cegcc* \
-+	      | -elara* \
++	      | -elarix* \
  	      | -cygwin* | -msys* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
  	      | -mingw32* | -mingw64* | -linux-gnu* | -linux-android* \
  	      | -linux-newlib* | -linux-musl* | -linux-uclibc* \
@@ -43,7 +43,7 @@ diff -urN toolchain/binutils-2.27/gas/configure.tgt toolchain/binutils-2.27/gas/
    i386-sequent-bsd*)			fmt=aout em=dynix ;;
    i386-*-beospe*)			fmt=coff em=pe ;;
    i386-*-beos*)				fmt=elf ;;
-+  i386-*-elara*)			fmt=elf
++  i386-*-elarix*)			fmt=elf
 +    case ${cpu} in
 +      x86_64*)				fmt=elf em=gnu ;;
 +    esac ;;
@@ -57,12 +57,12 @@ diff -urN toolchain/binutils-2.27/ld/configure.tgt toolchain/binutils-2.27/ld/co
  i[3-7]86-*-bsd)		targ_emul=i386bsd ;;
  i[3-7]86-*-bsd386)	targ_emul=i386bsd ;;
  i[3-7]86-*-bsdi*)	targ_emul=i386bsd ;;
-+i[3-7]86-*-elara*)	targ_emul=elf_i386_elara
++i[3-7]86-*-elarix*)	targ_emul=elf_i386_elarix
 +			targ_extra_emuls=elf_i386
-+			targ64_extra_emuls="elf_x86_64_elara elf_x86_64"
++			targ64_extra_emuls="elf_x86_64_elarix elf_x86_64"
 +			;;
-+x86_64-*-elara*)	targ_emul=elf_x86_64_elara
-+			targ_extra_emuls="elf_i386_elara elf_i386"
++x86_64-*-elarix*)	targ_emul=elf_x86_64_elarix
++			targ_extra_emuls="elf_i386_elarix elf_i386"
 +			;;
  i[3-7]86-*-aout)	targ_emul=i386aout ;;
  i[3-7]86-*-linux*aout*)	targ_emul=i386linux
@@ -71,23 +71,23 @@ diff -urN toolchain/binutils-2.27/ld/configure.tgt toolchain/binutils-2.27/ld/co
  NATIVE_LIB_DIRS='/usr/local/lib /lib /usr/lib'
  case "${target}" in
  
-+*-*-elara*)
++*-*-elarix*)
 +  NATIVE_LIB_DIRS='/app/lib'
 +  ;;
 +
  *-*-dragonfly*)
    NATIVE_LIB_DIRS='/lib /usr/lib /usr/pkg/lib /usr/local/lib'
    ;;
-diff -urN toolchain/binutils-2.27/ld/emulparams/elf_i386_elara.sh toolchain/binutils-2.27/ld/emulparams/elf_i386_elara.sh
---- toolchain/binutils-2.27/ld/emulparams/elf_i386_elara.sh	1970-01-01 01:00:00.000000000 +0100
-+++ toolchain/binutils-2.27/ld/emulparams/elf_i386_elara.sh	2016-10-16 00:38:45.662653732 +0200
+diff -urN toolchain/binutils-2.27/ld/emulparams/elf_i386_elarix.sh toolchain/binutils-2.27/ld/emulparams/elf_i386_elarix.sh
+--- toolchain/binutils-2.27/ld/emulparams/elf_i386_elarix.sh	1970-01-01 01:00:00.000000000 +0100
++++ toolchain/binutils-2.27/ld/emulparams/elf_i386_elarix.sh	2016-10-16 00:38:45.662653732 +0200
 @@ -0,0 +1,3 @@
 +. ${srcdir}/emulparams/elf_i386.sh
 +GENERATE_SHLIB_SCRIPT=yes
 +GENERATE_PIE_SCRIPT=yes
-diff -urN toolchain/binutils-2.27/ld/emulparams/elf_x86_64_elara.sh toolchain/binutils-2.27/ld/emulparams/elf_x86_64_elara.sh
---- toolchain/binutils-2.27/ld/emulparams/elf_x86_64_elara.sh	1970-01-01 01:00:00.000000000 +0100
-+++ toolchain/binutils-2.27/ld/emulparams/elf_x86_64_elara.sh	2016-10-16 00:38:52.935987099 +0200
+diff -urN toolchain/binutils-2.27/ld/emulparams/elf_x86_64_elarix.sh toolchain/binutils-2.27/ld/emulparams/elf_x86_64_elarix.sh
+--- toolchain/binutils-2.27/ld/emulparams/elf_x86_64_elarix.sh	1970-01-01 01:00:00.000000000 +0100
++++ toolchain/binutils-2.27/ld/emulparams/elf_x86_64_elarix.sh	2016-10-16 00:38:52.935987099 +0200
 @@ -0,0 +1 @@
 +. ${srcdir}/emulparams/elf_x86_64.sh
 diff -urN toolchain/binutils-2.27/ld/Makefile.am toolchain/binutils-2.27/ld/Makefile.am
@@ -97,7 +97,7 @@ diff -urN toolchain/binutils-2.27/ld/Makefile.am toolchain/binutils-2.27/ld/Make
  	eelf32xtensa.c \
  	eelf_i386.c \
  	eelf_i386_be.c \
-+	eelf_i386_elara.c \
++	eelf_i386_elarix.c \
  	eelf_i386_chaos.c \
  	eelf_i386_fbsd.c \
  	eelf_i386_ldso.c \
@@ -105,7 +105,7 @@ diff -urN toolchain/binutils-2.27/ld/Makefile.am toolchain/binutils-2.27/ld/Make
  	eelf_k1om.c \
  	eelf_k1om_fbsd.c \
  	eelf_x86_64.c \
-+	eelf_x86_64_elara.c \
++	eelf_x86_64_elarix.c \
  	eelf_x86_64_cloudabi.c \
  	eelf_x86_64_fbsd.c \
  	eelf_x86_64_nacl.c \
@@ -113,9 +113,9 @@ diff -urN toolchain/binutils-2.27/ld/Makefile.am toolchain/binutils-2.27/ld/Make
  eelf_i386_be.c: $(srcdir)/emulparams/elf_i386_be.sh \
    $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
  
-+eelf_i386_elara.c: $(srcdir)/emulparams/elf_i386_elara.sh \
++eelf_i386_elarix.c: $(srcdir)/emulparams/elf_i386_elarix.sh \
 +  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-+	${GENSCRIPTS} elf_i386_elara "$(tdir_elf_i386_elara)"
++	${GENSCRIPTS} elf_i386_elarix "$(tdir_elf_i386_elarix)"
 +	@# XXX NEEDED?
 +
  eelf_i386_chaos.c: $(srcdir)/emulparams/elf_i386_chaos.sh \
@@ -125,9 +125,9 @@ diff -urN toolchain/binutils-2.27/ld/Makefile.am toolchain/binutils-2.27/ld/Make
  eelf_x86_64.c: $(srcdir)/emulparams/elf_x86_64.sh \
    $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
  
-+eelf_x86_64_elara.c: $(srcdir)/emulparams/elf_x86_64_elara.sh \
++eelf_x86_64_elarix.c: $(srcdir)/emulparams/elf_x86_64_elarix.sh \
 +  $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-+	${GENSCRIPTS} elf_x86_64_elara "$(tdir_elf_x86_64_elara)"
++	${GENSCRIPTS} elf_x86_64_elarix "$(tdir_elf_x86_64_elarix)"
 +	@# XXX NEEDED?
 +
  eelf_x86_64_cloudabi.c: $(srcdir)/emulparams/elf_x86_64_cloudabi.sh \

@@ -21,7 +21,7 @@ speaker: enabled=1, mode=system
 vga: extension=vbe, update_freq=5, realtime=1
 
 ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
-ata0-master: type=cdrom, path="bin/elara.iso", status=inserted, model="Generic 1234", biosdetect=auto
+ata0-master: type=cdrom, path="bin/elarix.iso", status=inserted, model="Generic 1234", biosdetect=auto
 
 pci: enabled=1, chipset=i440fx
 

@@ -1,6 +1,6 @@
 /*
  *
- * Elara
+ * Elarix
  * kernel/arch/x86/boot/paging.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
