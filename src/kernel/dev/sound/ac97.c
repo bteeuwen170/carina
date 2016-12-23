@@ -172,6 +172,8 @@ static int ac97_probe(struct pci_dev *card)
 	return res;
 
 err:
+	irq_handler_unreg(card->cfg->int_line);
+
 	dprintf(devname, KP_ERR "unable to intialize ac97 card\n");
 
 	return res;

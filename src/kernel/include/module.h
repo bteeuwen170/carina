@@ -50,7 +50,8 @@ void ac97_exit(void);
 
 /* pcspk */
 
-/* sb16 */
+int sb16_init(void);
+void sb16_exit(void);
 
 int vga_init(void);
 void vga_exit(void);

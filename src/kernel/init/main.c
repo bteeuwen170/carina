@@ -150,7 +150,7 @@ void kernel_main(struct mboot_info *mboot)
 	/* FIXME Corrupts video memory */
 	/* ide_init(); */
 	ac97_init();
-	/* sb16_init(); */
+	sb16_init();
 	pci_init();
 
 	/* Temporary and crappy code */
@@ -213,9 +213,8 @@ void kernel_main(struct mboot_info *mboot)
 			sleep(10);
 			pcspk_stop();
 		} else if (strcmp(cmd, "p") == 0) {
-			ac97_play();
-		/* } else if (strcmp(cmd, "sb16 play") == 0) {
-			sb16_play(); */
+			/* ac97_play(); */
+			sb16_play();
 		} else if (strcmp(cmd, "fj") == 0) {
 			pcspk_fj();
 		} else if (strcmp(cmd, "mi") == 0) {

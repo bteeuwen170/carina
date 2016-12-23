@@ -27,6 +27,4 @@
 
 void sb16_play(void);
 
-void sb16_init(void);
-
 #endif
