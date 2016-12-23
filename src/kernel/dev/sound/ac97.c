@@ -41,7 +41,8 @@ static const char devname[] = "ac97";
 static const struct pci_dev_id ac97_ids[] = {
 	PCI_DEV_ID(0x8086, 0x2415, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0),
 	PCI_DEV_ID(0x8086, 0x2425, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0),
-	PCI_DEV_ID(0x8086, 0x2445, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0)
+	PCI_DEV_ID(0x8086, 0x2445, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0),
+	PCI_DEV_ID(0x8086, 0x24C5, PCI_ANY_ID, PCI_ANY_ID, 0x04, 0x01, 0)
 };
 
 struct buffer {
@@ -59,7 +60,6 @@ struct ac97_dev {
 
 	struct buffer *buf;
 	u32	index;
-	u32	prev;
 };
 
 /* TEMP */
@@ -68,7 +68,7 @@ struct ac97_dev *dev = &deva;
 
 static void buffer_fill(void *data, u32 n, u32 off)
 {
-	dev->buf[n].addr = (intptr_t) data + (off * 2 * 32);
+	dev->buf[n].addr = (intptr_t) data + (off * 32 * 2);
 	dev->buf[n].len = 32;
 	dev->buf[n].bup = 0;
 	dev->buf[n].ioc = 1;
@@ -79,22 +79,21 @@ static int int_handler(struct int_stack *regs)
 	(void) regs;
 
 	u16 status = io_inw(dev->nabmbar + 0x16);
+	u32 buf;
 
 	if (status & 0b100) {
 		io_outw(dev->nabmbar + 0x16, 0b100);
 	} else if (status & 0b1000) {
-		u32 curbuf = (dev->prev + 1) % 32;
+		buf = (dev->index + 1) % 32;
+		buffer_fill(snd_wav, buf, ++dev->index);
 
-		if (!curbuf || io_inw(dev->nabmbar + 0x18) < 1)
-			io_outb(dev->nabmbar + 0x15, 32);
-
+		io_outb(dev->nabmbar + 0x15, 32);
 		io_outw(dev->nabmbar + 0x16, 0b1000);
 
-		buffer_fill(snd_wav, dev->prev, ++dev->index);
-
-		dev->prev = curbuf;
-
-		/* dprintf(devname, KP_DBG "sr: %u\n", io_inw(dev->nabmbar + 0x16)); */
+		/* dprintf(devname, KP_DBG "sc: %u\n",
+				io_inw(dev->nabmbar + 0x16)); */
+	} else {
+		asm volatile ("cli");
 	}
 
 	return 1;
@@ -115,7 +114,6 @@ void ac97_play(void)
 	dev->buf = kmalloc(sizeof(struct buffer) * 32);
 
 	dev->index = 32 - 1;
-	dev->prev = 0;
 
 	/* TODO Check file size */
 	for (i = 0; i < 32; i++)
