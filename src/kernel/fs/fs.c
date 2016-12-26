@@ -22,6 +22,7 @@
  *
  */
 
+/* TODO Clean includes */
 #include <errno.h>
 #include <fcntl.h>
 #include <fs.h>
@@ -32,212 +33,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if 0
-//struct mountp *mount_points;
-
-/*
- * Directories
- * TODO Seperate file
- */
-
-/*
- * Look for a directory entry by name
- */
-//int dir_search(struct inode *ip, char *name, u64 *off)
-//{
-//	if (ip->type != FT_DIR)
-//		return -ENOTDIR;
-//
-//	for (i = 0; i < ip->size; i += sizeof(struct dir)) {
-//		
-//	}
-//
-//	return -ENOENT;
-//}
-
-/*
- * Seek directory entry by name
- */
-//struct dp *dir_read(struct inode *dp, char *name) {
-//
-//}
-
-///*
-// * Link an inode to a directory by inode number
-// * FIXME In file system handler
-// */
-//int dir_write(struct inode *dp, ino_t inum, char *name)
-//{
-//	struct dirent dep;
-//	int res;
-//	u64 i;
-//
-//	dep.inum = 0;
-//
-//	for (i = 0; dep.inum != 0; i += sizeof(dep)) {
-//		//if (i >= dp->size)
-//		//	return -ENOSPC;
-//
-//		res = dp->dev->op->read(dp, &dep, i, sizeof(dep));
-//
-//		if (res < 0)
-//			return res;
-//
-//		/* TODO Use strncmp ? */
-//		if (strcmp(dep.name, name) == 0)
-//			return -EEXIST;
-//	}
-//
-//	dep.inum = inum;
-//	strncpy(dep.name, name, NAME_MAX);
-//
-//	res = dp->dev->op->write(dp, &dep, i, sizeof(dep));
-//
-//	if (res < 0)
-//		return res;
-//
-//	return 0;
-//}
-
-/*
- * Inodes
- * TODO Seperate fie
- */
-
-//struct inode inode_cache[INODES_MAX];
-
-/* Where does this go? */
-/*static struct inode *inode_create(char *path)
-{
-	struct inode *ip;
-
-	
-}*/
-
-//static struct inode *inode_get(u32 dev, ino_t inum)
-//{
-//	struct inode *ip;
-//
-//
-//}
-
-static struct inode *inode_getp(char *path)
-{
-//	struct inode *ip;
-//
-//	if (*path == '/')
-//		ip = dev->; /* TODO Not always 1 for device */
-}
-
-//void inode_drop(struct inode *ip)
-//{
-//	if (ip->refs == 1 && ip->links < 1) {
-//		/* TODO Free memory inode */
-//	}
-//
-//	ip->refs--;
-//}
-
-/*
- * Files
- * TODO Seperate file
- */
-
-//void file_read(struct file *f, size_t size)
-//{
-//	/* TODO Check if not read-only */
-//
-//	//inode->atime = 0; /* TODO Only if noatime is not set */
-//
-//	//return f->
-//}
-//
-//void file_readdir(struct file *f, size_t size)
-//{
-//	if (!(f->type & FT_DIR))
-//		return -EINVAL;
-//}
-//
-//void file_open(struct file *f, int flags)
-//{
-//	//if (f
-//}
-
-/*
- * System calls
- * TODO Seperate file
- */
-
-/* FIXME HACKS FIXME */
-//int sys_touch(char *path, u8 type, struct inode *temp) /* XXX Remove last arg */
-//{
-//	struct inode *ip;
-//	int res;
-//
-//	/* TODO Get parent inode using inode_getn */
-//
-//	struct super *temp2 = malloc(sizeof(struct super));
-//	temp2->inodes = 4096;
-//
-//	res = temp->op->alloc(temp2, &ip)
-//
-//	if (res < 0)
-//		return res;
-//
-//	if (type == IT_DIR) {
-//		//TODO Create . and ..
-//	}
-//
-//	//TODO Link to parent
-//}
-//
-//int sys_mkdir(char *path)
-//{
-//	//TODO ip->links++;
-//
-//	return sys_touch(path, FT_DIR);
-//}
-
-static struct file *file_open(const char *path, int flags)
-{
-	if (!path)
-		return NULL;
-
-	return NULL;
-}
-
-static struct inode *mp_get(const char *path)
-{
-	
-}
-
-static struct inode *inode_get(const char *path)
-{
-	struct inode *ip;
-
-
-}
-
-static struct inode *file_create(const char *path, mode_t mode)
-{
-	//TODO
-}
-
-int sys_mount(char *dev, char *path, char *type) //TODO Mount flags
-{
-	//TODO
-}
-
-int sys_unmount(char *path)
-{
-	//TODO
-}
-
-#endif
-
 static const char devname[] = "fs";
 
 static LIST_HEAD(fs_drivers);
+
+struct superblock *root_sb;
 
 struct mountp *sv_mount(struct fs_driver *driver, const char *name)
 {
@@ -246,6 +46,7 @@ struct mountp *sv_mount(struct fs_driver *driver, const char *name)
 
 	sp = sb_alloc(driver);
 
+	/* TEMP */ root_sb = list_entry(fs_drivers.next, struct fs_driver, l)->read_sb(sp);
 	/* TODO */
 
 	return NULL;
@@ -257,10 +58,42 @@ struct mountp *sv_mount(struct fs_driver *driver, const char *name)
 	//TODO
 } */
 
-/* int sys_open(const char *path, int flags, mode_t mode)
+/* TODO Move to ipc/ */
+/* int sys_pipe(int fd[2])
 {
 	//TODO
 } */
+
+int sys_open(const char *path, int flags, mode_t mode)
+{
+	(void) flags;
+	struct dirent *dep;
+	struct file *fp;
+	int fd = -1;
+
+	dep = dirent_get(path);
+	if (!dep)
+		goto err;
+
+	fp = file_alloc(dep);
+	if (!fp)
+		goto err;
+
+	fp->mode = mode;
+
+	fd = fd_alloc(fp);
+	if (fd < 0)
+		goto err;
+	//open_namei 0.99 namei.c <- from <- open.c (sys_open)
+
+	return fd;
+
+err:
+	file_dealloc(fp);
+	/* fd_dealloc(fd); */
+
+	return fd;
+}
 
 /* int sys_close(int fd)
 {
@@ -277,27 +110,26 @@ struct mountp *sv_mount(struct fs_driver *driver, const char *name)
 	//TODO
 } */
 
-int sys_readdir(int fd, void *usr_dirent)
+int sys_readdir(int fd, struct usr_dirent *udep)
 {
-	(void) fd, (void) usr_dirent;
 	struct file *fp;
+	struct usr_dirent *ludep;
 
-	fp = NULL;
-
+	fp = file_get(fd);
 	if (!fp)
 		return -EBADF;
 
+	ludep = usr_dirent_get(fp);
+	if (!ludep)
+		return -1; //TODO
+
 	/* TODO Update atime */
 	/* TODO Loop */
-	dirent_get(fp);
+	/* TODO memcpy to userspace */
+	memcpy(udep, ludep, sizeof(struct usr_dirent));
 
-	return 0;
+	return 1;
 }
-
-/* int sys_create(const char *path, mode_t mode)
-{
-	//TODO
-} */
 
 /* int sys_link(const char *oldpath, const char *path)
 {
@@ -314,10 +146,11 @@ int sys_readdir(int fd, void *usr_dirent)
 	//TODO
 } */
 
-/* int sys_mkdir(const char *path, mode_t mode)
+int sys_mkdir(const char *path, mode_t mode)
 {
+	(void) path, (void) mode;
 	//TODO
-} */
+}
 
 /* int sys_rmdir(const char *path)
 {
@@ -330,6 +163,11 @@ int sys_readdir(int fd, void *usr_dirent)
 } */
 
 /* int sys_move(const char *oldpath, const char *path)
+{
+	//TODO
+} */
+
+/* int sys_stat(int fd, struct stat *buf)
 {
 	//TODO
 } */

@@ -111,4 +111,4 @@ void sb16_exit(void)
 {
 }
 
-MODULE("sb16", &sb16_init, &sb16_exit);
+MODULE(sb16, &sb16_init, &sb16_exit);

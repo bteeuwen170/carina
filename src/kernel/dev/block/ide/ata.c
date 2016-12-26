@@ -384,4 +384,5 @@ void ide_exit(void)
 	pci_driver_unreg(&ide_driver);
 }
 
-MODULE("ide", &ide_init, &ide_exit);
+MODULE(ide, &ide_init, &ide_exit);
+MODULE_DEP(pci);

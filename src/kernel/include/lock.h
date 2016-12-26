@@ -25,10 +25,10 @@
 #ifndef _LOCK_H
 #define _LOCK_H
 
-typedef volatile u32	spinlock_t;
+typedef volatile u8	spinlock_t;
 
 #include <asm/lock.h>
 
-#define SPINLOCK	(spinlock_t) 1
+#define SPINLOCK(n)	spinlock_t (n) = 0
 
 #endif

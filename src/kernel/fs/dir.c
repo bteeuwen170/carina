@@ -22,23 +22,19 @@
  *
  */
 
+#include <errno.h>
 #include <fs.h>
 #include <limits.h>
+#include <proc.h>
 
 #include <stdlib.h>
 #include <string.h>
 
-struct usr_dirent {
-	ino_t	inum;
-	char	name[NAME_MAX + 1];
-};
-
-struct dirent *dirent_alloc(struct dirent *dp, const char *name)
+static struct dirent *dirent_alloc(struct dirent *dp, const char *name)
 {
 	struct dirent *dep;
 
 	dep = kmalloc(sizeof(struct dirent));
-
 	if (!dep)
 		return NULL;
 
@@ -49,17 +45,12 @@ struct dirent *dirent_alloc(struct dirent *dp, const char *name)
 
 	list_init(&dep->l);
 
-	/* TODO Lock for this */
-	if (dp)
-		list_add(&dp->del, &dep->l);
-
-	dep->ip = NULL;
-	dep->dp = dp;
-	list_init(&dep->del);
+	strncpy(dep->name, name, NAME_MAX);
 
 	dep->refs = 1;
 
-	memcpy(dep->name, name, NAME_MAX);
+	dep->ip = NULL;
+	dep->dp = dp;
 
 	return dep;
 }
@@ -72,7 +63,6 @@ struct dirent *dirent_alloc_root(struct inode *ip)
 		return NULL;
 
 	dep = dirent_alloc(NULL, "/");
-
 	if (!dep)
 		return NULL;
 
@@ -82,14 +72,35 @@ struct dirent *dirent_alloc_root(struct inode *ip)
 	return dep;
 }
 
-void *dirent_get(struct file *fp)
+struct dirent *dirent_get(const char *path)
+{
+	struct dirent *dep;
+
+	/* Incorrect */
+	/*dep = kmalloc(sizeof(struct dirent));
+	if (!dep)
+		return NULL;*/
+
+	if (*path == '/')
+		dep = root_sb->root;
+	else
+		dep = cproc->cwd;
+
+	/* while (*path) {
+
+	} */
+
+	return dep;
+}
+
+struct usr_dirent *usr_dirent_get(struct file *fp)
 {
 	struct usr_dirent *udp;
 
 	udp = kmalloc(sizeof(struct usr_dirent));
 
-	udp->inum = fp->dp->ip->inum;
-	memcpy(udp->name, fp->dp->name, sizeof(fp->dp->name));
+	udp->inum = fp->dep->ip->inum;
+	strncpy(udp->name, fp->dep->name, NAME_MAX);
 
 	return udp;
 }

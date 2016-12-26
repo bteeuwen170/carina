@@ -27,6 +27,9 @@
 
 #define MODULE(n, i, e)
 
+#define MODULE_DEP(n)
+
+#if 1
 int ide_init(void);
 void ide_exit(void);
 
@@ -67,5 +70,6 @@ void iso9660_exit(void); */
 
 int ramfs_init(void);
 void ramfs_exit(void);
+#endif
 
 #endif

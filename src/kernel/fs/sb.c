@@ -27,7 +27,7 @@
 
 #include <stdlib.h>
 
-static LIST_HEAD(superblock);
+static LIST_HEAD(superblocks);
 
 struct superblock *sb_alloc(struct fs_driver *driver)
 {
@@ -37,7 +37,6 @@ struct superblock *sb_alloc(struct fs_driver *driver)
 	/* TODO Check if doesn't exist already */
 
 	sp = kmalloc(sizeof(struct superblock));
-
 	if (!sp)
 		return NULL;
 
@@ -46,7 +45,11 @@ struct superblock *sb_alloc(struct fs_driver *driver)
 	sp->dev = (dev_t) { 0, 0 };
 
 	list_init(&sp->il);
-	sp->inodes = 0;
+	sp->root = NULL;
+
+	sp->op = NULL;
+
+	list_add(&superblocks, &sp->il);
 
 	return sp;
 }

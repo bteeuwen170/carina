@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/fs/dev.c
+ * src/kernel/kernel/proc.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,31 +22,6 @@
  *
  */
 
-#include <errno.h>
-#include <fs.h>
-#include <limits.h>
+#include <proc.h>
 
-#include <stdlib.h>
-#include <string.h>
-
-static struct device devices[DEV_MAX];
-
-int dev_reg(u8 major, const char *name, struct file_ops *op)
-{
-	if (strlen(name) > NAME_MAX)
-		return -EINVAL;
-
-	if (devices[major].op)
-		return -EEXIST;
-
-	devices[major].name = name;
-	devices[major].op = op;
-
-	return 0;
-}
-
-void dev_unreg(u8 major)
-{
-	devices[major].name = NULL;
-	devices[major].op = NULL;
-}
+struct process _cproc;

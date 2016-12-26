@@ -75,4 +75,4 @@ void cmos_exit(void)
 	/* TODO */
 }
 
-MODULE("cmos", &cmos_init, &cmos_exit);
+MODULE(cmos, &cmos_init, &cmos_exit);

@@ -23,10 +23,20 @@
  */
 
 #include <fs.h>
+#include <proc.h>
 
 #include <stdlib.h>
 
 ino_t inodes = 0;
+
+static void inode_delete(struct inode *ip)
+{
+	if (ip->sp->op->delete_inode) {
+		ip->sp->op->delete_inode(ip);
+	} else {
+		/* TODO */
+	}
+}
 
 struct inode *inode_alloc(struct superblock *sp)
 {
@@ -42,17 +52,17 @@ struct inode *inode_alloc(struct superblock *sp)
 
 	list_init(&ip->l);
 
-	ip->dev = sp->dev;
 	if (!ip->inum)
 		ip->inum = ++inodes;
+	//ip->flags = 0;
 	ip->mode = 0;
 
 	ip->refs = 1;
-	ip->links = 1;
+	ip->links = 0;
 
 	/* TODO Set to current user */
-	ip->uid = 0;
-	ip->gid = 0;
+	ip->uid = cproc->uid;
+	ip->gid = cproc->gid;
 
 	/* TODO Get current time */
 	ip->atime = 0;
@@ -62,14 +72,41 @@ struct inode *inode_alloc(struct superblock *sp)
 	ip->size = 0;
 
 	ip->sp = sp;
+	list_init(&ip->del);
+
+	ip->op = NULL;
+	ip->fop = NULL;
 
 	return ip;
 }
 
-void inode_dealloc(struct inode *ip)
+static void inode_dealloc(struct inode *ip)
 {
+	if (!ip->links)
+		inode_delete(ip);
+
 	if (ip->sp->op->dealloc_inode)
 		ip->sp->op->dealloc_inode(ip);
 	else
 		kfree(ip);
+}
+
+struct inode *inode_get(struct superblock *sp, ino_t inum)
+{
+	struct inode *ip;
+
+	list_for_each(ip, &sp->il, l) {
+		if (ip->inum == inum)
+			return ip;
+	}
+
+	return inode_alloc(sp);
+}
+
+void inode_put(struct inode *ip)
+{
+	ip->refs--;
+
+	if (!ip->refs)
+		inode_dealloc(ip);
 }

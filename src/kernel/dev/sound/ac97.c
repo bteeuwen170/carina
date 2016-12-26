@@ -204,4 +204,5 @@ void ac97_exit(void)
 	pci_driver_unreg(&ac97_driver);
 }
 
-MODULE("ac97", &ac97_init, &ac97_exit);
+MODULE(ac97, &ac97_init, &ac97_exit);
+MODULE_DEP(pci);

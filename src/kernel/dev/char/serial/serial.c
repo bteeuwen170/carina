@@ -134,4 +134,4 @@ void serial_init(const u16 port)
 	[>TODO<]
 }
 
-MODULE("serial", &serial_init, &serial_exit); */
+MODULE(serial, &serial_init, &serial_exit); */

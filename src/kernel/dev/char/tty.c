@@ -73,4 +73,4 @@ void tty_exit(void)
 	/* TODO */
 }
 
-MODULE("tty", &tty_init, &tty_exit);
+MODULE(tty, &tty_init, &tty_exit);

@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/fs/dev.c
+ * src/kernel/fs/file.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -25,28 +25,48 @@
 #include <errno.h>
 #include <fs.h>
 #include <limits.h>
+#include <proc.h>
 
 #include <stdlib.h>
-#include <string.h>
 
-static struct device devices[DEV_MAX];
+int file_cnt = 0;
 
-int dev_reg(u8 major, const char *name, struct file_ops *op)
+struct file *file_alloc(struct dirent *dep)
 {
-	if (strlen(name) > NAME_MAX)
-		return -EINVAL;
+	struct file *fp;
 
-	if (devices[major].op)
-		return -EEXIST;
+	if (file_cnt + 1 > FD_MAX)
+		return NULL;
 
-	devices[major].name = name;
-	devices[major].op = op;
+	fp = kmalloc(sizeof(struct file));
+	if (!fp)
+		return NULL;
 
-	return 0;
+	fp->mode = 0;
+	fp->off = 0;
+
+	fp->refs = 1;
+
+	fp->dep = dep;
+
+	fp->op = dep->ip->fop;
+
+	file_cnt++;
+
+	return fp;
 }
 
-void dev_unreg(u8 major)
+void file_dealloc(struct file *fp)
 {
-	devices[major].name = NULL;
-	devices[major].op = NULL;
+	if (!fp)
+		return;
+
+	kfree(fp);
+
+	file_cnt--;
+}
+
+struct file *file_get(int fd)
+{
+	return cproc->fd[fd];
 }

@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/include/sched.h
+ * src/kernel/include/proc.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,8 +22,16 @@
  *
  */
 
-#ifndef _SCHED_H
-#define _SCHED_H
+#ifndef _PROC_H
+#define _PROC_H
+
+#include <fs.h>
+
+/* struct cpu {
+	int		id;
+
+	struct process	*proc;
+}; */
 
 struct process {
 	pid_t	pid;
@@ -31,7 +39,16 @@ struct process {
 	uid_t	uid;
 	gid_t	gid;
 
-	char **argv, **envp;
+//	char **argv, **envp;
+
+	struct file	*fd[FD_MAX];
+//	struct process	*parent;
+	struct dirent	*cwd;
 };
+
+/* XXX TEMP until scheduler is working */
+extern struct process _cproc;
+static struct process *cproc = &_cproc;
+/* XXX BAD */
 
 #endif

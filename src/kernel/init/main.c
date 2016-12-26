@@ -52,9 +52,9 @@ extern void usrmode_enter();
 void kernel_main(struct mboot_info *mboot)
 {
 #if 1 /* XXX MOVE XXX Arch init */
-	spinlock_t lock = SPINLOCK;
+	SPINLOCK(main);
 
-	spin_lock(lock);
+	spin_lock(main);
 
 	/* FIXME Memory map cannot be printed before vga_init() */
 	mm_init(mboot->mmap_addr, mboot->mmap_len);
@@ -206,14 +206,28 @@ void kernel_main(struct mboot_info *mboot)
 		if (strcmp(cmd, "finit") == 0) {
 			sv_mount(0, "ramfs");
 		} else if (strcmp(cmd, "ls") == 0) {
+			struct usr_dirent udep;
+			int tmpfd = sys_open("/", 0, 0);
+
+			int res = sys_readdir(tmpfd, &udep);
+			kprintf("fd: %d, res: %d\n", tmpfd, res);
+			if (res > 0) {
+			/* while (sys_readdir(tmpfd, &udep)) { */
+				kprintf("entry: %s\n", udep.name);
+			/* } */
+			}
+		} else if (strcmp(cmd, "mkdir test") == 0) {
+			int res2 = sys_mkdir("/test", 0);
+			kprintf("res: %d", res2);
 
 		/* Audio */
 		} else if (strcmp(cmd, "beep") == 0) {
 			pcspk_play(835);
 			sleep(10);
 			pcspk_stop();
-		} else if (strcmp(cmd, "p") == 0) {
-			/* ac97_play(); */
+		} else if (strcmp(cmd, "pac") == 0) {
+			ac97_play();
+		} else if (strcmp(cmd, "psb") == 0) {
 			sb16_play();
 		} else if (strcmp(cmd, "fj") == 0) {
 			pcspk_fj();

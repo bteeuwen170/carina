@@ -30,15 +30,17 @@
 /* FIXME Not here */
 //#define BLOCK_SIZE	1024	/* Block size */
 //#define SECTOR_SIZE	512	/* Sector size */
-//#define CPUS_MAX	8	/* Max. number of CPUs */
+//#define CPUS_MAX	8	/* Max. CPUs */
 
-#define CHILD_MAX	512	/* Max. number of processes */
-#define DEV_MAX		256	/* Max. number of devices */
-//#define LINK_MAX	32	/* Max. number of links for a file */
-#define NAME_MAX	255	/* Max. length of a file name */
-//#define NGROUPS_MAX	8	/* Max. number of GIDs per process */
-#define OPEN_MAX	32	/* Max. open files */
-#define PATH_MAX	4096	/* Max. length of a path name (with '\0') */
+//#define CHILD_MAX	512	/* Max. processes */
+#define DEV_MAX		256	/* Max. devices */
+#define ERRNO_MAX	4095	/* Max. errno */
+#define FD_MAX		32	/* Max. file descriptors per process */
+#define FILE_MAX	32	/* Max. files that may be open at once */
 //#define INODES_MAX	64	/* Max. inodes in memory */
+//#define LINK_MAX	32	/* Max. links for a file */
+#define NAME_MAX	255	/* Max. length of a file name */
+//#define NGROUPS_MAX	8	/* Max. GIDs per process */
+//#define PATH_MAX	4095	/* Max. length of a path name */
 
 #endif

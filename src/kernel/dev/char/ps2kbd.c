@@ -189,4 +189,4 @@ void ps2kbd_exit(void)
 	irq_handler_unreg(IRQ_KBD);
 }
 
-MODULE("ps2kbd", &ps2kbd_init, &ps2kbd_exit);
+MODULE(ps2kbd, &ps2kbd_init, &ps2kbd_exit);

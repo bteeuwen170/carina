@@ -179,7 +179,6 @@ void pci_driver_unreg(struct pci_driver *driver)
 	/* TODO Check if present */
 
 	list_rm(&driver->l);
-	kfree(driver);
 }
 
 static struct pci_dev *pci_config(u16 bus, u16 dev, u16 func)
@@ -289,4 +288,4 @@ void pci_exit(void)
 	/* TODO Free all structures */
 }
 
-MODULE("pci", &pci_init, &pci_exit);
+MODULE(pci, &pci_init, &pci_exit);

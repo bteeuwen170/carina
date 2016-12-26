@@ -37,7 +37,7 @@
 //#define IF_NOATIME	8	/* Do not update access time */
 //#define IF_SYNC	16	/* Synchronous updates */
 
-/* Inode permissions */
+/* Inode mode */
 #define IM_FTM		0170000
 //#define IM_SOCK	0140000	/* Socket */
 #define IM_LNK		0120000	/* Symbolic link */
@@ -83,11 +83,8 @@ struct superblock {
 //	u16	bsize;		/* Block size */
 //	u64	size_max;	/* Max. file size */
 
-	struct list_head il;	/* Inodes */
-//	ino_t	inum;		/* First inode */
-	ino_t	inodes;		/* Number of inodes */
-
 	struct dirent *root;	/* Root dirent */
+	struct list_head il;	/* Inodes */
 
 	struct sb_ops *op;
 };
@@ -95,51 +92,53 @@ struct superblock {
 struct inode {
 	struct list_head l;
 
-	dev_t	dev;		/* Device ID */
-	ino_t	inum;		/* Inode number */
-//	u8	flags;		/* Inode flags */
-	mode_t	mode;		/* Inode mode */
+	ino_t	inum;			/* Inode number */
+//	u8	flags;			/* Inode flags */
+	mode_t	mode;			/* Inode mode */
 
-	int	refs;		/* References count */
-	link_t	links;		/* Link count */
+	int	refs;			/* Reference count */
+	link_t	links;			/* Link count */
 
-	uid_t	uid;		/* User ID */
-	gid_t	gid;		/* Group ID */
+	uid_t	uid;			/* User ID */
+	gid_t	gid;			/* Group ID */
 
-	time_t	atime;		/* Access time */
-	time_t	ctime;		/* Change time */
-	time_t	mtime;		/* Modification time */
+	time_t	atime;			/* Access time */
+	time_t	ctime;			/* Change time */
+	time_t	mtime;			/* Modification time */
 
-	off_t	size;		/* File size in bytes */
+	off_t	size;			/* File size in bytes */
 
-	struct superblock *sp;	/* Associated superblock */
+	struct superblock	*sp;	/* Associated superblock */
+	struct list_head	del;	/* List of children */
 
-	struct inode_ops  *op;
-	struct file_ops  *fop;
+	struct inode_ops	*op;
+	struct file_ops		*fop;
 };
 
 struct dirent {
 	struct list_head l;
 
-	struct inode		*ip;	/* Associated inode pointer */
-	struct dirent		*dp;	/* Associated directory pointer */
-	struct list_head	del;	/* List of children */
+	char	name[NAME_MAX + 1];	/* File name */
 
-	int	refs;			/* References count */
+	int	refs;			/* Reference count */
 
-	char	name[NAME_MAX + 1];
+	struct inode	*ip;		/* Associated inode pointer */
+	struct dirent	*dp;		/* Associated directory pointer */
+};
+
+struct usr_dirent {
+	ino_t	inum;			/* Inode number */
+
+	char	name[NAME_MAX + 1];	/* File name */
 };
 
 struct file {
-	struct list_head l;
+	mode_t	mode;			/* File mode */
+	off_t	off;			/* Current offset */
 
-	struct mountp		*mp;	/* Associated mountpoint */
-	struct dirent		*dp;	/* Associated directory pointer */
+	int	refs;			/* Reference count */
 
-	int	refs;
-	mode_t	mode;	/* File access mode */
-
-	off_t	off;
+	struct dirent	*dep;		/* Associated directory entry pointer */
 
 	struct file_ops	*op;
 };
@@ -192,21 +191,40 @@ struct file_ops {
 	/* Write n bytes from buf into fp at off: fp, buf, off, n */
 	int (*write) (struct file *, const void *, off_t, size_t);
 	/* Read next directory: fp, TODO */
-	int (*readdir) (struct file *, void *);
+	int (*readdir) (struct file *, struct usr_dirent *);
 	//TODO (ioctl), (sync / fsync)
 };
+
+extern struct superblock *root_sb;
 
 struct superblock *sb_alloc(struct fs_driver *driver);
 
 struct inode *inode_alloc(struct superblock *sp);
-void inode_dealloc(struct inode *ip);
+/* void inode_dealloc(struct inode *ip); */
 
-struct dirent *dirent_alloc(struct dirent *dp, const char *name);
-struct dirent *dirent_alloc_root(struct inode *rp);
-void *dirent_get(struct file *fp);
+struct inode *inode_get(struct superblock *sp, ino_t inum);
+void inode_put(struct inode *ip);
+
+/* struct dirent *dirent_alloc(struct dirent *dp, const char *name); */
+struct dirent *dirent_alloc_root(struct inode *ip);
+
+struct dirent *dirent_get(const char *path);
+struct usr_dirent *usr_dirent_get(struct file *fp);
+
+struct file *file_alloc(struct dirent *dep);
+void file_dealloc(struct file *fp);
+struct file *file_get(int fd);
+
+int fd_alloc(struct file *fp);
 
 int fs_reg(struct fs_driver *driver);
 void fs_unreg(struct fs_driver *driver);
+
+/* XXX TMP XXX */
+int sys_open(const char *path, int flags, mode_t mode);
+int sys_readdir(int fd, struct usr_dirent *udep);
+int sys_mkdir(const char *path, mode_t mode);
+/* XXX END TMP XXX */
 
 /* END fs.h */
 
@@ -237,7 +255,6 @@ void dev_unreg(u8 major);
 
 struct mountp {
 	struct mountp	*pp;	/* Parent fs */
-	struct dirent	*dp;	/* Directory entry */
 
 	struct superblock *sp;	/* Superblock */
 

@@ -68,4 +68,4 @@ void tty_exit(void)
 	/* TODO */
 }
 
-MODULE("pty", &pty_init, &pty_exit);
+MODULE(pty, &pty_init, &pty_exit);

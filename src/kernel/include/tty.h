@@ -32,6 +32,8 @@
 struct tty {
 	struct termios	termios;
 	struct winsize	winsize;
+
+	u8	mode;
 };
 
 #endif

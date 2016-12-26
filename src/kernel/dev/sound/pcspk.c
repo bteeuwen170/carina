@@ -47,7 +47,7 @@ void pcspk_stop(void)
 	io_outb(0x61, spkr);
 }
 
-MODULE("pcspk", NULL, NULL);
+MODULE(pcspk, NULL, NULL);
 
 /*
  * This is more something that should be implemented in userspace, this is just

@@ -140,4 +140,4 @@ int vga_init(void)
 
 void vga_exit(void);
 
-MODULE("vga", &vga_init, &vga_exit);
+MODULE(vga, &vga_init, &vga_exit);

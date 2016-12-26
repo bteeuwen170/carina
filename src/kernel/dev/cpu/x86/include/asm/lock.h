@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/fs/dev.c
+ * src/kernel/arch/x86/include/asm/lock.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,31 +22,27 @@
  *
  */
 
-#include <errno.h>
-#include <fs.h>
-#include <limits.h>
+#ifndef _X86_LOCK_H
+#define _X86_LOCK_H
 
-#include <stdlib.h>
-#include <string.h>
-
-static struct device devices[DEV_MAX];
-
-int dev_reg(u8 major, const char *name, struct file_ops *op)
+static inline void spin_lock(spinlock_t *lock)
 {
-	if (strlen(name) > NAME_MAX)
-		return -EINVAL;
+	/* if (lock)
+		panic("attempted to lock a locked spinlock");
 
-	if (devices[major].op)
-		return -EEXIST;
+	asm volatile ("lock; xchgl %0, %1" : "+m" (*lock) : "1" (1) : "cc");
 
-	devices[major].name = name;
-	devices[major].op = op;
-
-	return 0;
+	__sync_synchronize(); */
 }
 
-void dev_unreg(u8 major)
+static inline void spin_unlock(spinlock_t *lock)
 {
-	devices[major].name = NULL;
-	devices[major].op = NULL;
+	/* if (!lock)
+		panic("attempted to unlock a unlocked spinlock");
+
+	__sync_synchronize();
+
+	asm volatile ("movl $0, %0" : "+m" (lock) : ); */
 }
+
+#endif
