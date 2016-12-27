@@ -127,15 +127,15 @@ static struct superblock *ramfs_read_sb(struct superblock *sp)
 	struct inode *ip;
 	struct dirent *dep;
 
+	sp->flags = SF_KEEP;
+
 	sp->op = &ramfs_sb_ops;
 
 	ip = ramfs_inode_alloc(sp, IM_DIR | 0755, (dev_t) { 0, 0 });
-
 	if (!ip)
 		return NULL;
 
 	dep = dirent_alloc_root(ip);
-
 	sp->root = dep;
 
 	return sp;

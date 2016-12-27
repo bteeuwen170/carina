@@ -72,6 +72,17 @@ struct dirent *dirent_alloc_root(struct inode *ip)
 	return dep;
 }
 
+static void dirent_dealloc(struct dirent *dep)
+{
+	/* if (!dep->ip->links)
+		inode_delete(ip);
+
+	if (ip->sp->op->dealloc_inode)
+		ip->sp->op->dealloc_inode(ip);
+	else
+		kfree(ip); */
+}
+
 struct dirent *dirent_get(const char *path)
 {
 	struct dirent *dep;
@@ -90,6 +101,8 @@ struct dirent *dirent_get(const char *path)
 
 	} */
 
+	dep->refs++;
+
 	return dep;
 }
 
@@ -103,4 +116,12 @@ struct usr_dirent *usr_dirent_get(struct file *fp)
 	strncpy(udp->name, fp->dep->name, NAME_MAX);
 
 	return udp;
+}
+
+void dirent_put(struct dirent *dep)
+{
+	dep->refs--;
+
+	if (!dep->refs)
+		dirent_dealloc(dep);
 }

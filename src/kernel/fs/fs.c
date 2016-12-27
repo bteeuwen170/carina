@@ -148,8 +148,14 @@ int sys_readdir(int fd, struct usr_dirent *udep)
 
 int sys_mkdir(const char *path, mode_t mode)
 {
-	(void) path, (void) mode;
+	struct dirent *dep;
+
+	dep = dirent_get(path);
+	if (!dep)
+		goto err;
 	//TODO
+err:
+	return -1;
 }
 
 /* int sys_rmdir(const char *path)

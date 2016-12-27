@@ -27,6 +27,8 @@
 
 #include <stdlib.h>
 
+static const char devname[] = "fs";
+
 ino_t inodes = 0;
 
 static void inode_delete(struct inode *ip)
@@ -54,7 +56,7 @@ struct inode *inode_alloc(struct superblock *sp)
 
 	if (!ip->inum)
 		ip->inum = ++inodes;
-	//ip->flags = 0;
+	/* ip->flags = 0; */
 	ip->mode = 0;
 
 	ip->refs = 1;
@@ -84,6 +86,9 @@ static void inode_dealloc(struct inode *ip)
 {
 	if (!ip->links)
 		inode_delete(ip);
+
+	if (ip->sp->flags & SF_KEEP)
+		return;
 
 	if (ip->sp->op->dealloc_inode)
 		ip->sp->op->dealloc_inode(ip);

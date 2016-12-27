@@ -30,6 +30,9 @@
 #include <limits.h>
 #include <list.h>
 
+/* Superblock flags */
+#define SF_KEEP		1	/* Don't remove from cache */
+
 ///* Inode flags */
 //#define IF_RO		1	/* Read only */
 //#define IF_AO		2	/* Append only */
@@ -68,7 +71,7 @@
 struct fs_driver {
 	struct list_head l;
 
-	const char *name;
+	const char	*name;
 
 	/* Read the superblock: sp, data */
 	struct superblock *(*read_sb) (struct superblock *);
@@ -78,6 +81,7 @@ struct superblock {
 	struct list_head l;
 
 	dev_t	dev;		/* Device identifier */
+	u8	flags;		/* Superblock flags */
 
 //	u64	fb;		/* First block */
 //	u16	bsize;		/* Block size */
