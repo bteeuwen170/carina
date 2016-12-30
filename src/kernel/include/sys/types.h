@@ -41,9 +41,9 @@ typedef __asm_u32	u32;
 typedef __asm_u64	u64;
 typedef __asm_size_t	size_t;
 
-//typedef float		f32;
-//typedef double	f64;
-//typedef long double	f128;
+/* typedef float		f32; */
+/* typedef double	f64; */
+/* typedef long double	f128; */
 
 typedef u32		pid_t;		/* Process ID */
 typedef u32		uid_t;		/* User ID */

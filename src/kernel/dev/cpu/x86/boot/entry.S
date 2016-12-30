@@ -24,12 +24,12 @@
  
 .code32
 
-//.set KERN_VMA,		0xFFFFFFFF80000000
+;.set KERN_VMA,		0xFFFFFFFF80000000
 
 .section .mboot
 
 .set MB_MAGIC,		0x1BADB002
-//.set MB_FLAGS,		(1 << 0) | (1 << 1) | (1 << 2)
+;.set MB_FLAGS,		(1 << 0) | (1 << 1) | (1 << 2)
 .set MB_FLAGS,		(1 << 0) | (1 << 1)
 
 .align 4
@@ -50,9 +50,9 @@ entry:
 	mov %ebx, %edi
 
 	/* TODO What is this again??? */
-	//mov $0xFF, %al
-	//outb %al, $0xA1
-	//outb %al, $0x21
+	;mov $0xFF, %al
+	;outb %al, $0xA1
+	;outb %al, $0x21
 
 	/* Check if CPUID is available */
 	pushfl
@@ -85,15 +85,15 @@ entry:
 	mov %cr4, %eax
 	bts $5, %eax /* CR4.PAE */
 	bts $7, %eax /* CR4.PGE */ /* TEMP */
-	//bts $9, %eax /* What does this do again? */
-	//bts $10, %eax /* CR4.OSXMMEXCPT */
+	;bts $9, %eax /* What does this do again? */
+	;bts $10, %eax /* CR4.OSXMMEXCPT */
 	mov %eax, %cr4
 
-	//call paging_init
-	//mov $0x200000, %eax
-	//mov %eax, %cr3
+	;call paging_init
+	;mov $0x200000, %eax
+	;mov %eax, %cr3
 
-	//call gdt_init
+	;call gdt_init
 
 	jmp bootstrap
 

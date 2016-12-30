@@ -103,8 +103,8 @@ static u8 modifiers = 0, skip;
 
 static int int_handler(struct int_stack *regs)
 {
-	(void) regs;
 	u16 scancode = io_inb(PS2_IO);
+	(void) regs;
 
 	if (skip) {
 		skip--;
@@ -179,7 +179,7 @@ char getch(void)
 
 int ps2kbd_init(void)
 {
-	//TODO Numlock and such
+	/* TODO Numlock and such */
 
 	return irq_handler_reg(IRQ_KBD, &int_handler);
 }

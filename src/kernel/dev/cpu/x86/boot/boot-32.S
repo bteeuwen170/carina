@@ -29,8 +29,8 @@
 .global bootstrap
 bootstrap:
 	mov $pdpte, %eax
-	//call paging_init
-	//mov $0x200000, %eax
+	;call paging_init
+	;mov $0x200000, %eax
 	mov %eax, %cr3
 
 	/* Enable paging */

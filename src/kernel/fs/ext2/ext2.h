@@ -25,8 +25,6 @@
 #ifndef _EXT2_H
 #define _EXT2_H
 
-//TODO Down here ...
-
 #define EXT2_BLOCKS 15
 
 /*#define EXT2_STATE_CLEAN	1
@@ -80,8 +78,8 @@
 #define EXT2_TYPE_OR	0x0004		/* Other read */
 #define EXT2_TYPE_OW	0x0002		/* Other write */
 #define EXT2_TYPE_OE	0x0001		/* Other execute */
-//#define EXT2_TYPE_SUID	0x0001	/* Set UID on execution */
-//#define EXT2_TYPE_SGID	0x0001	/* Set GID on execution */
+/*#define EXT2_TYPE_SUID	0x0001*/	/* Set UID on execution */
+/*#define EXT2_TYPE_SGID	0x0001*/	/* Set GID on execution */
 
 /* Flags */
 #define EXT2_FLAGS_SYNC		0x0008	/* Synchronous updates */

@@ -32,7 +32,7 @@
 void cpu_info(void)
 {
 	u32 eax, ebx, ecx, edx;
-	char brand[48];
+	char brand[48], *name;
 
 	cpuid(0x80000002, &eax, &ebx, &ecx, &edx);
 	memcpy(brand, &eax, 4);
@@ -52,9 +52,9 @@ void cpu_info(void)
 	memcpy(brand + 40, &ecx, 4);
 	memcpy(brand + 44, &edx, 4);
 
-	char *name = brand;
+	name = brand;
 	while (*name == ' ')
-		++name; //TODO Right and left justify function
+		++name; /* TODO Right and left justify function */
 
 	dprintf("cpu0", KP_DBG "%s\n", name);
 }

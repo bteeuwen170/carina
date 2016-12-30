@@ -34,7 +34,7 @@ struct iso9660_sb {
 	u64	blocks;
 	u8	reserved2[32];
 	u32	unused1[2];
-	//TODO
+	/* TODO */
 };
 
 struct iso9660_date {

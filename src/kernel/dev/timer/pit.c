@@ -29,18 +29,17 @@
 #include "pit.h"
 
 /* TODO Should store as 10ms */
-/* TODO Change to u64 again once support for 64-bit division on i686 */
-u32 ticks;
+u64 ticks;
 
 time_t uptime(void)
 {
-	return ticks / 1000;
-	//return do_div(ticks, 1000);
+	return ticks / (u32) 1000;
 }
 
 static int int_handler(struct int_stack *regs)
 {
 	(void) regs;
+
 	ticks++;
 
 	return 1;
@@ -64,7 +63,7 @@ int timer_init(void)
 	if (res < 0)
 		return res;
 
-	//val = PIT_FREQ / 100;
+	/* val = PIT_FREQ / 100; */
 	val = PIT_FREQ / 1000;
 	ticks = 0;
 

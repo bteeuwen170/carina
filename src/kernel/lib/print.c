@@ -311,7 +311,7 @@ void kprint(const char *prefix, char *fmt, ...)
 	char printbuf[1024], fmtbuf[1024], prefixbuf[1024];
 	va_list args;
 
-	//FIXME Nah man, what a mess
+	/* FIXME Nah man, what a mess */
 	int j;
 	for (j = 0; j < 1024; j++)
 		printbuf[j] = fmtbuf[j] = prefixbuf[j] = 0;
@@ -354,7 +354,7 @@ void kprint(const char *prefix, char *fmt, ...)
 	while (*str)
 		printcc(*(str++), color);
 
-	//TEMP
+	/* TEMP */
 	u32 i;
 	for (i = 0; i < strlen(fmtbuf); i++)
 		serial_out(COM0, fmtbuf[i]);

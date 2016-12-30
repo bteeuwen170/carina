@@ -56,7 +56,7 @@ struct buffer {
 struct ac97_dev {
 	u16	nambar;
 	u16	nabmbar;
-//	u16	sample_rate;
+	/* u16	sample_rate; */
 
 	struct buffer *buf;
 	u32	index;
@@ -76,10 +76,11 @@ static void buffer_fill(void *data, u32 n, u32 off)
 
 static int int_handler(struct int_stack *regs)
 {
+	u16 status;
+	u32 buf;
 	(void) regs;
 
-	u16 status = io_inw(dev->nabmbar + 0x16);
-	u32 buf;
+	status = io_inw(dev->nabmbar + 0x16);
 
 	if (status & 0b100) {
 		io_outw(dev->nabmbar + 0x16, 0b100);

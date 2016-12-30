@@ -26,8 +26,8 @@
 #define _VESA_H
 
 struct vbe_info {
-//	char[4]	signature = "VESA";
-//	u16	version = 0x0300;
+	/* char[4]	signature = "VESA"; */
+	/* u16	version = 0x0300; */
 	u32	unused;
 	u32	capabilities;
 	u32	video_modes;

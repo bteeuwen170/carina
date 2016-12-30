@@ -98,40 +98,42 @@ void paging_init(struct mboot_info *mboot)
 		off += PAGE_SIZE;
 	}
 
+#if 0
 	/* Zero out the whole thing just in case */
-	//for (i = 0; i < total; i++)
-	//	pml4[i] = 0;
+	for (i = 0; i < total; i++)
+		pml4[i] = 0;
 
-	///* PT Entries (4 KB each) */
-	//off = FLAGS;
-	//for (i = 0; i < pages; i++) {
-	//	pt[i] = off;
+	/* PT Entries (4 KB each) */
+	off = FLAGS;
+	for (i = 0; i < pages; i++) {
+		pt[i] = off;
 
-	//	/* For BIOS ? */
-	//	//if (i < 1024)
-	//	//	pt[i] |= 0x100;
+		/* For BIOS ? */
+		/* if (i < 1024)
+			pt[i] |= 0x100; */
 
-	//	off += PAGE_SIZE;
-	//}
+		off += PAGE_SIZE;
+	}
 
-	///* PDT Entries (2 MB each) */
-	//off = pt_off + FLAGS;
-	//for (i = 0; i < pte; i++) {
-	//	pdt[i] = off;
-	//	off += PAGE_SIZE;
-	//}
+	/* PDT Entries (2 MB each) */
+	off = pt_off + FLAGS;
+	for (i = 0; i < pte; i++) {
+		pdt[i] = off;
+		off += PAGE_SIZE;
+	}
 
-	///* PDPT Entries (1 GB each) */
-	//off = pdt_off + FLAGS;
-	//for (i = 0; i < pdte; i++) {
-	//	pdpt[i] = off;
-	//	off += PAGE_SIZE;
-	//}
+	/* PDPT Entries (1 GB each) */
+	off = pdt_off + FLAGS;
+	for (i = 0; i < pdte; i++) {
+		pdpt[i] = off;
+		off += PAGE_SIZE;
+	}
 
-	///* PML4 Entries (512 GB each) */
-	//off = pdpt_off + FLAGS;
-	//for (i = 0; i < pdpte; i++) {
-	//	pml4[i] = off;
-	//	off += PAGE_SIZE;
-	//}
+	/* PML4 Entries (512 GB each) */
+	off = pdpt_off + FLAGS;
+	for (i = 0; i < pdpte; i++) {
+		pml4[i] = off;
+		off += PAGE_SIZE;
+	}
+#endif
 }

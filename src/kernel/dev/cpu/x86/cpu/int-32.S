@@ -98,7 +98,7 @@ isr:
 	mov %esp, %edi
 
 	call _isr
-	//mov %rbx, %rsp
+	;mov %rbx, %rsp
 	pop %eax
 
 	popa

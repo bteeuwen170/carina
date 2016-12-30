@@ -126,7 +126,7 @@ void serial_init(const u16 port)
 	io_outb(port + 3, 0x03);
 	io_outb(port + 2, 0xC7);
 	io_outb(port + 4, 0x0B);
-	//TODO Register the serial input handler
+	/* TODO Register the serial input handler */
 }
 
 /* void serial_exit(void)

@@ -25,7 +25,7 @@
 #ifndef _STDIO_H
 #define _STDIO_H
 
-//TODO This is crap
+/* TODO This is crap */
 #define FAIL	-1
 #define NONE	0
 #define OK	1

@@ -41,8 +41,8 @@ struct superblock *root_sb;
 
 struct mountp *sv_mount(struct fs_driver *driver, const char *name)
 {
-	(void) name;
 	struct superblock *sp;
+	(void) name;
 
 	sp = sb_alloc(driver);
 
@@ -55,21 +55,19 @@ struct mountp *sv_mount(struct fs_driver *driver, const char *name)
 /* TODO Move to proc/ */
 /* int sys_chdir(const char *path)
 {
-	//TODO
 } */
 
 /* TODO Move to ipc/ */
 /* int sys_pipe(int fd[2])
 {
-	//TODO
 } */
 
 int sys_open(const char *path, int flags, mode_t mode)
 {
-	(void) flags;
 	struct dirent *dep;
 	struct file *fp;
 	int fd = -1;
+	(void) flags;
 
 	dep = dirent_get(path);
 	if (!dep)
@@ -84,7 +82,7 @@ int sys_open(const char *path, int flags, mode_t mode)
 	fd = fd_alloc(fp);
 	if (fd < 0)
 		goto err;
-	//open_namei 0.99 namei.c <- from <- open.c (sys_open)
+	/* open_namei 0.99 namei.c <- from <- open.c (sys_open) */
 
 	return fd;
 
@@ -97,17 +95,14 @@ err:
 
 /* int sys_close(int fd)
 {
-	//TODO
 } */
 
 /* int sys_read(int fd, char *buf, size_t n)
 {
-	//TODO
 } */
 
 /* int sys_write(int fd, const char *buf, size_t n)
 {
-	//TODO
 } */
 
 int sys_readdir(int fd, struct usr_dirent *udep)
@@ -121,7 +116,7 @@ int sys_readdir(int fd, struct usr_dirent *udep)
 
 	ludep = usr_dirent_get(fp);
 	if (!ludep)
-		return -1; //TODO
+		return -1; /* TODO */
 
 	/* TODO Update atime */
 	/* TODO Loop */
@@ -133,17 +128,14 @@ int sys_readdir(int fd, struct usr_dirent *udep)
 
 /* int sys_link(const char *oldpath, const char *path)
 {
-	//TODO
 } */
 
 /* int sys_symlink(const char *oldpath, const char *path)
 {
-	//TODO
 } */
 
 /* int sys_rmlink(const char *path)
 {
-	//TODO
 } */
 
 int sys_mkdir(const char *path, mode_t mode)
@@ -153,29 +145,25 @@ int sys_mkdir(const char *path, mode_t mode)
 	dep = dirent_get(path);
 	if (!dep)
 		goto err;
-	//TODO
+	/* TODO */
 err:
 	return -1;
 }
 
 /* int sys_rmdir(const char *path)
 {
-	//TODO
 } */
 
 /* int sys_mknod(const char *path, mode_t mode, dev_t dev)
 {
-	//TODO
 } */
 
 /* int sys_move(const char *oldpath, const char *path)
 {
-	//TODO
 } */
 
 /* int sys_stat(int fd, struct stat *buf)
 {
-	//TODO
 } */
 
 int fs_reg(struct fs_driver *driver)

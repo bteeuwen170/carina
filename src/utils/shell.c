@@ -32,8 +32,8 @@ int (*builtin_func[]) (char **) = {
 };*/
 
 static const char *pss = " $ ";
-//static const char *path = "/usr/bin/";
-//static const char *home = "/home";
+/* static const char *path = "/usr/bin/"; */
+/* static const char *home = "/home"; */
 
 static char ps[ARGSIZE];
 
@@ -194,14 +194,14 @@ void signal_handle(int s)
 
 void ps_update(void)
 {
-	//char wd[PATHSIZE];
+	/* char wd[PATHSIZE];
 
-	//if (getcwd(wd, PATHSIZE)) {
-	//	strcpy(ps, wd);
-	//	strcat(ps, pss);
-	//} else {
-		strcpy(ps, pss);
-	//}
+	if (getcwd(wd, PATHSIZE)) {
+		strcpy(ps, wd);
+		strcat(ps, pss);
+	} else { */
+	      strcpy(ps, pss);
+	/* } */
 }
 
 /* TODO Stuff has to freed */
@@ -232,7 +232,7 @@ int main_shell(void)
 			}
 
 			prints("Command not found");
-			//execute(argv_get(cmd));
+			/* execute(argv_get(cmd)); */
 			/* if (execute(argv_get(cmd)) != 0) */
 			/*	fprintf(stderr, "%s: unable to find %s\n", pname, cmd); */ /* XXX TEMP TEMP XXX */
 
@@ -255,11 +255,11 @@ int main_shell(void)
 				for (j = --p; j < i; j++)
 					cmd[j] = cmd[j + 1];
 
-				//printf("\033[2K\r");
+				/* printf("\033[2K\r"); */
 				prints(ps);
 				prints(cmd);
-				//if (p != --i)
-				//	printf("\033[%dD", i - p);
+				/* if (p != --i)
+					printf("\033[%dD", i - p); */
 			}
 			break;
 		default:
@@ -267,9 +267,9 @@ int main_shell(void)
 
 			if (p == i) {
 				printc(c);
-				//strncat(cmd, &c, 1);
+				/* strncat(cmd, &c, 1); */
 
-				/*if (p++ == i && ++i >= bs) {
+				/* if (p++ == i && ++i >= bs) {
 					bs += BUFSIZE;
 					cmd = realloc(cmd, sizeof(char) * bs);
 
@@ -277,7 +277,7 @@ int main_shell(void)
 						fprintf(stderr, "%s: allocation error\n", pname);
 						exit(1);
 					}
-				}*/
+				} */
 			/* TODO Realloc */
 			} else {
 				for (j = ++i; j > p; j--)

@@ -51,7 +51,7 @@
 #define KP_DEFAULT	KP_INFO
 
 /* Loglevels */
-#define LL_DEFAULT	2 //TODO Change to 1
+#define LL_DEFAULT	2 /* TODO Change to 1 */
 #define LL_QUIET	0 /* KP_ERR + */
 #define LL_NORMAL	1 /* KP_WARN + */
 #define LL_VERBOSE	2 /* KP_INFO + */

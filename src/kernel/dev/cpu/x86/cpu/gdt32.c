@@ -22,11 +22,11 @@
  *
  */
 
-//#include <kernel.h>
+/* #include <kernel.h> */
 
 #include <asm/cpu.h>
 
-//static const char devname[] = "gdt";
+/* static const char devname[] = "gdt"; */
 
 static struct segment_desc gdt[GDT_ENTRIES - 1];
 
@@ -64,8 +64,8 @@ void gdt_init(void)
 	gdt_load(&gdt, GDT_ENTRIES * sizeof(struct segment_desc) - 1);
 	gdt_load(&gdt, 5 * sizeof(struct segment_desc) - 1);
 
-	//tss_load(); //FIXME
+	/* tss_load(); */
 
-	//kprintf32(KP_INFO, devname,
-	//"%d entries entered (FIXME hardcoded lies)\n", IDT_ENTRIES);
+	/* kprintf32(KP_INFO, devname,
+	"%d entries entered (FIXME hardcoded lies)\n", IDT_ENTRIES); */
 }

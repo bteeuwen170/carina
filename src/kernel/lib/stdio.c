@@ -41,7 +41,7 @@ void panic(char *reason, u32 err_code, intptr_t ip)
 {
 	asm volatile ("cli");
 
-	//TODO Hide cursor
+	/* TODO Hide cursor */
 
 	kprintf(KP_CRIT "%s @ %#x\n", reason, ip);
 

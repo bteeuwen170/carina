@@ -87,7 +87,7 @@ void kernel_main(struct mboot_info *mboot)
 	/* ioapic_init(); */
 #endif
 
-#if 1
+#if 0
 	/* Initialize video hardware properly */
 	dprintf("fb", KP_DBG "addr is %#x\n", mboot->framebuffer_addr);
 	dprintf("fb", KP_DBG "bpp is %#x\n", mboot->framebuffer_bpp);
@@ -166,7 +166,6 @@ void kernel_main(struct mboot_info *mboot)
 #else
 	char cmd[64];
 	u8 i, p = 0;
-	/* int ipp; */
 
 	cmd[0] = '\0';
 

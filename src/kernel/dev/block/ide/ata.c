@@ -214,6 +214,7 @@ static int ide_eject(struct ata_dev *dev)
 static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 {
 	struct ata_dev *dev;
+	char *str;
 	u32 i, status;
 
 	dev = kmalloc(sizeof(struct ata_dev));
@@ -287,7 +288,7 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 
 	/* This wasn't documented ANYWHERE */
 	/* FIXME Corrupted strings */
-	char *str = ((char *) &dev->ident.model);
+	str = ((char *) &dev->ident.model);
 	for (i = 0; i < sizeof(dev->ident.model) - 1; i += 2) {
 		char cur = str[i];
 		str[i] = str[i + 1];
@@ -334,11 +335,11 @@ static int ide_probe(struct pci_dev *card)
 	if (card->cfg->bar_1 > 1)
 		goto err;
 
-	//io_outb(ATA_CH1_CMD, 0x04);
-	//io_outb(ATA_CH1_CMD, 0x04);
-	//io_outb(ATA_CH1_CMD, 0x04);
-	//io_outb(ATA_CH1_CMD, 0x04);
-	//io_outb(ATA_CH1_CMD, 0x00);
+	/* io_outb(ATA_CH1_CMD, 0x04);
+	io_outb(ATA_CH1_CMD, 0x04);
+	io_outb(ATA_CH1_CMD, 0x04);
+	io_outb(ATA_CH1_CMD, 0x04);
+	io_outb(ATA_CH1_CMD, 0x00); */
 
 	card->cfg->bar_0 = ATA_CH0_IO;
 	card->cfg->bar_1 = ATA_CH0_CMD;

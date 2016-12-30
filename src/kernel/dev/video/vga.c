@@ -34,8 +34,7 @@
 static const char devname[] = "vga";
 
 static u16 *vga_buffer = (u16 *) 0xB8000;
-
-u16 vga_x, vga_y;
+static u16 vga_x, vga_y;
 
 static void vga_cur_set(void)
 {
@@ -91,9 +90,9 @@ void vga_putch(char c, u8 color)
 			vga_y++;
 			break;
 		case '\r':
-			vga_x = 0; //FIXME Clear line as well!!
+			vga_x = 0; /* FIXME Clear line as well!! */
 		case '\t':
-			vga_x += 4; //FIXME New line //FUck
+			vga_x += 4; /* FIXME New line */
 			break;
 		default:
 			vga_buffer[vga_y * VGA_WIDTH + vga_x] =
@@ -129,8 +128,8 @@ int vga_init(void)
 				vga_create_entry(' ', vga_fgcolor, vga_bgcolor);
 
 	/* Hide cursor */
-	//io_outb(0x3D4, 0x0A);
-	//io_outb(0x3D5, 0x1D);
+	/* io_outb(0x3D4, 0x0A);
+	io_outb(0x3D5, 0x1D); */
 
 	dprintf(devname, "early VGA has been initialized at %dx%d\n",
 			VGA_WIDTH, VGA_HEIGHT);

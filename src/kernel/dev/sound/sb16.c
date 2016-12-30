@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h> /* TEMP */
 
-//#include "snd.h"
+/* #include "snd.h" */
 
 static const char devname[] = "sb16";
 
@@ -53,9 +53,8 @@ void sb16_play(void)
 
 static int sb16_probe(struct device *card)
 {
-	(void) card;
-
 	int res;
+	(void) card;
 
 	res = irq_handler_reg(10, &int_handler);
 

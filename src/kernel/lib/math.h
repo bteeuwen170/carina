@@ -30,16 +30,16 @@ typedef struct {
 	int rem;	/* Remainder */
 }
 
-//double sin(double sin);
-//double cos(double cos);
-//double tan(double tan);
+/* double sin(double sin); */
+/* double cos(double cos); */
+/* double tan(double tan); */
 
-//double log(double val);
+/* double log(double val); */
 
 int abs(int val);
 int div(int num, int denom);
 
-//double ceil(double val);
-//double floor(double val);
+/* double ceil(double val); */
+/* double floor(double val); */
 
 #endif

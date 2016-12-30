@@ -117,7 +117,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 				width = -width;
 			}
 		} else {
-			//TODO We will have strtoi for this
+			/* TODO We will have strtoi for this */
 			width = (int) strtol(fmt, (char **) &fmt, 10);
 		}
 
@@ -127,7 +127,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 				prec = va_arg(args, int);
 			else
 				prec = (int) strtol(fmt, (char **) &fmt, 10);
-				//TODO We will have strtoi for this 
+				/* TODO We will have strtoi for this */
 
 			flags &= ~FLAG_ZERO;
 		}
@@ -224,13 +224,13 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 		 */
 		case 'p':
 			base = BASE_HEX;
-			//TODO
+			/* TODO */
 			continue;
 		/*
 		 * int *
 		 */
 		case 'n':
-			//TODO
+			/* TODO */
 			continue;
 
 		default:
@@ -304,9 +304,9 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 	return str - buf;
 }
 
-//TODO vfprintf, vprintf, fprintf, printf, sprintf
-//TODO scanf, fscanf, sscanf
-//TODO fputs
+/* TODO vfprintf, vprintf, fprintf, printf, sprintf */
+/* TODO scanf, fscanf, sscanf */
+/* TODO fputs */
 
 i32 sprintf(char *buf, const char *fmt, ...)
 {
@@ -324,11 +324,11 @@ i32 sprintf(char *buf, const char *fmt, ...)
 /* This function is a mess */
 void kprintf(const loglevel_t kp, char *prefix, char *fmt, ...)
 {
-	(void) kp;
 	char printbuf[1024], fmtbuf[1024], prefixbuf[1024];
 	va_list args;
+	(void) kp;
 
-	//if (kp > get_kp();
+	/* if (kp > get_kp(); */
 
 	va_start(args, fmt);
 	vsprintf(printbuf, fmt, args);
@@ -344,7 +344,7 @@ void kprintf(const loglevel_t kp, char *prefix, char *fmt, ...)
 	prints(fmtbuf);
 	va_end(args);
 
-	//TEMP
+	/* TEMP */
 	u32 i;
 	for (i = 0; i < strlen(fmtbuf); i++)
 		serial_out(COM0, fmtbuf[i]);

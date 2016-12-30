@@ -39,10 +39,10 @@ struct process {
 	uid_t	uid;
 	gid_t	gid;
 
-//	char **argv, **envp;
+	/* char **argv, **envp; */
 
 	struct file	*fd[FD_MAX];
-//	struct process	*parent;
+	/* struct process	*parent; */
 	struct dirent	*cwd;
 };
 

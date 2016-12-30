@@ -95,8 +95,8 @@ static int ramfs_move(struct inode *odp, struct dirent *odep,
 static struct inode *ramfs_inode_alloc(struct superblock *sp,
 		mode_t mode, dev_t dev)
 {
-	(void) dev;
 	struct inode *ip;
+	(void) dev;
 
 	ip = inode_alloc(sp);
 

@@ -52,10 +52,12 @@ struct mem_block {
 
 void *kmalloc(u64 size)
 {
+	void *p;
+
 	if (size == 0)
 		return NULL;
 
-	void *p = (void *) position;
+	p = (void *) position;
 
 	position += size;
 
@@ -69,7 +71,7 @@ void *kmalloc(u64 size)
 	if (!p)
 		return NULL;
 
-	//memcpy(p, ptr,
+	memcpy(p, ptr,
 
 	kfree(ptr);
 
@@ -79,6 +81,7 @@ void *kmalloc(u64 size)
 void kfree(void *ptr)
 {
 	(void) ptr;
+
 	return;
 }
 
@@ -106,7 +109,7 @@ void mm_init(u32 addr, u32 len)
 	dprintf(devname, "%u MB memory\n", mem / 1024 / 1024 + 1);
 
 	/* FIXME How much padding is really required? */
-	//position = ((intptr_t) &kern_end) + 0x10000;
+	/* position = ((intptr_t) &kern_end) + 0x10000; */
 	position = 0x300000;
 
 	/*u16 i;

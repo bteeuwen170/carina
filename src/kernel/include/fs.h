@@ -33,16 +33,18 @@
 /* Superblock flags */
 #define SF_KEEP		1	/* Don't remove from cache */
 
-///* Inode flags */
-//#define IF_RO		1	/* Read only */
-//#define IF_AO		2	/* Append only */
-//#define IF_IMMUTABLE	4	/* Immutable */
-//#define IF_NOATIME	8	/* Do not update access time */
-//#define IF_SYNC	16	/* Synchronous updates */
+#if 0
+/* Inode flags */
+#define IF_RO		1	/* Read only */
+#define IF_AO		2	/* Append only */
+#define IF_IMMUTABLE	4	/* Immutable */
+#define IF_NOATIME	8	/* Do not update access time */
+#define IF_SYNC	16	/* Synchronous updates */
+#endif
 
 /* Inode mode */
 #define IM_FTM		0170000
-//#define IM_SOCK	0140000	/* Socket */
+/* #define IM_SOCK	0140000 */	/* Socket */
 #define IM_LNK		0120000	/* Symbolic link */
 #define IM_REG		0100000	/* Regular file */
 #define IM_BLK		0060000	/* Block device */
@@ -83,9 +85,9 @@ struct superblock {
 	dev_t	dev;		/* Device identifier */
 	u8	flags;		/* Superblock flags */
 
-//	u64	fb;		/* First block */
-//	u16	bsize;		/* Block size */
-//	u64	size_max;	/* Max. file size */
+	/* u64	fb; */		/* First block */
+	/* u16	bsize; */		/* Block size */
+	/* u64	size_max; */	/* Max. file size */
 
 	struct dirent *root;	/* Root dirent */
 	struct list_head il;	/* Inodes */
@@ -97,7 +99,7 @@ struct inode {
 	struct list_head l;
 
 	ino_t	inum;			/* Inode number */
-//	u8	flags;			/* Inode flags */
+	/* u8	flags; */			/* Inode flags */
 	mode_t	mode;			/* Inode mode */
 
 	int	refs;			/* Reference count */
@@ -156,7 +158,7 @@ struct sb_ops {
 	int (*write_inode) (struct inode *);
 	/* Delete an inode from disk: ip */
 	int (*delete_inode) (struct inode *);
-	//TODO (sync)
+	/* TODO (sync) */
 };
 
 struct inode_ops {
@@ -175,9 +177,9 @@ struct inode_ops {
 	/* Create a special file: dp, dep, mode, dev */
 	int (*mknod) (struct inode *, struct dirent *, mode_t, dev_t);
 	/* Move a dirent: odp, odep, dp, dep */
-	int (*move) (struct inode *, struct dirent *, //XXX Eq to rename on l
+	int (*move) (struct inode *, struct dirent *, /* XXX Eq to rename on l */
 			struct inode *, struct dirent *);
-	//TODO (mknod), (perm), (setattr / getattr), (readlink)
+	/* TODO (mknod), (perm), (setattr / getattr), (readlink) */
 };
 
 struct dirent_ops {
@@ -196,7 +198,7 @@ struct file_ops {
 	int (*write) (struct file *, const void *, off_t, size_t);
 	/* Read next directory: fp, TODO */
 	int (*readdir) (struct file *, struct usr_dirent *);
-	//TODO (ioctl), (sync / fsync)
+	/* TODO (ioctl), (sync / fsync) */
 };
 
 extern struct superblock *root_sb;

@@ -69,7 +69,7 @@ void *memset(void *dest, int c, size_t n)
 	return dest;
 }
 
-//TODO memcmp
+/* TODO memcmp */
 
 void *memchr(const void *src, int c, size_t n)
 {
@@ -122,7 +122,7 @@ char *strcat(char *dest, const char *src)
 	return dest;
 }
 
-//TODO strncat
+/* TODO strncat */
 
 int strcmp(const char *src1, const char *src2)
 {
@@ -134,7 +134,7 @@ int strcmp(const char *src1, const char *src2)
 	return *(unsigned char *) src1 - *(unsigned char *) src2;
 }
 
-//TODO strncmp
+/* TODO strncmp */
 
 size_t strlen(const char *str)
 {
@@ -192,7 +192,7 @@ long strtol(const char *str, char **ptr, int base)
 		str++;
 
 	if (base == 0) {
-		//TODO
+		/* TODO */
 	}
 
 	for (;;) {
@@ -210,12 +210,12 @@ long strtol(const char *str, char **ptr, int base)
 
 	if (!*ptr)
 		*ptr = (char *) str;
-	//TODO Memcpy
+	/* TODO Memcpy */
 
 	return (*str == '-' ? -1 : 1) * n;
 }
 
-//TODO See header file
+/* TODO See header file */
 
 int itostr(const char *ptr)
 {
