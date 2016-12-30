@@ -106,7 +106,7 @@ isr:
 	mov %rsp, %rdi
 
 	call _isr
-	;mov %rbx, %rsp
+	#mov %rbx, %rsp
 	pop %rax
 
 	pop %r11
