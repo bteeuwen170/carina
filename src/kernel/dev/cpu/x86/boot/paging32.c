@@ -24,7 +24,7 @@
 
 #include <mboot.h>
 
-#define PML4_OFF	0x200000
+#define BASE_OFF	0x200000
 
 #define PAGE_SIZE	4096
 #define ENTRY_SIZE	8
@@ -50,11 +50,15 @@ static u32 get_parent(u32 entry, u32 size)
 /* TODO Only identity map the kernel binary itself */
 void paging_init(struct mboot_info *mboot)
 {
-	u64 ac;
-	u32 pml4e, pdpte, pdte, pte, pages;
-	u32 pdpt_off, pdt_off, pt_off;
+	u32 pml4e = 0, pdpte = 0, pdte = 0, pte = 0, pages = 0;
+	u32 pdpt_off = 0, pdt_off = 0, pt_off = 0;
+#ifdef CONFIG_X86_PAE
 	u64 *pml4, *pdpt, *pdt, *pt;
-	u64 off;
+	u64 ac, off;
+#else
+	u32 *pml4, *pdpt, *pdt, *pt;
+	u32 ac, off;
+#endif
 	u32 i;
 
 	ac = mboot->mem_lo + mboot->mem_hi;
@@ -63,38 +67,46 @@ void paging_init(struct mboot_info *mboot)
 	pages	= ((ac > (1 << 22)) ? 1 << 20 : ac >> 2) + 0x100;
 	pte	= PTE(pages);
 	pdte	= PDTE(pages);
+#ifdef CONFIG_X86_PAE
 	pdpte	= PDPE(pages);
+#endif
+#ifdef ARCH_x86_64
 	pml4e	= PML4E(pages);
+#endif
 
-	pml4		= (void *) PML4_OFF;
 	pdpt_off	= pml4e * PAGE_SIZE;
-	pdpt		= (void *) PML4_OFF + pdpt_off;
 	pdt_off		= (pml4e + pdpte) * PAGE_SIZE;
-	pdt		= (void *) PML4_OFF + pdt_off;
 	pt_off		= (pml4e + pdpte + pdte) * PAGE_SIZE;
-	pt		= (void *) PML4_OFF + pt_off;
 
-	off = 0;
-	for (i = 0; i < pte; i++) {
-		pt[i] = off | FLAGS;
+#ifdef ARCH_x86_64
+	pml4 = (void *) BASE_OFF;
+	off = BASE_OFF + pdpt_off;
+	for (i = 0; i < pml4e; i++) {
+		pml4[i] = off | FLAGS;
 		off += PAGE_SIZE;
 	}
+#endif
 
-	off = PML4_OFF + pt_off;
+#ifdef CONFIG_X86_PAE
+	pdpt = (void *) BASE_OFF + pdpt_off;
+	off = BASE_OFF + pdt_off;
+	for (i = 0; i < pdpte; i++) {
+		pdpt[i] = off | FLAGS;
+		off += PAGE_SIZE;
+	}
+#endif
+
+	pdt = (void *) BASE_OFF + pdt_off;
+	off = BASE_OFF + pt_off;
 	for (i = 0; i < pdte; i++) {
 		pdt[i] = off | FLAGS;
 		off += PAGE_SIZE;
 	}
 
-	off = PML4_OFF + pdt_off;
-	for (i = 0; i < pdpte; i++) {
-		pdpt[i] = off | FLAGS;
-		off += PAGE_SIZE;
-	}
-
-	off = PML4_OFF + pdpt_off;
-	for (i = 0; i < pml4e; i++) {
-		pml4[i] = off | FLAGS;
+	pt = (void *) BASE_OFF + pt_off;
+	off = 0;
+	for (i = 0; i < pte; i++) {
+		pt[i] = off | FLAGS;
 		off += PAGE_SIZE;
 	}
 

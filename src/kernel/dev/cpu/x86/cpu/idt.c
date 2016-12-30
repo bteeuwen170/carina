@@ -121,8 +121,14 @@ void _isr(struct int_stack *regs)
 
 	/* TEMP */
 	if (regs->int_no < SINT_ENTRIES) {
+#ifdef ARCH_i686
+		panic(exceptions[regs->int_no],
+				regs->err_code, regs->eip);
+#endif
+#ifdef ARCH_x86_64
 		panic(exceptions[regs->int_no],
 				regs->err_code, regs->rip);
+#endif
 
 		return;
 	}

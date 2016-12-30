@@ -39,8 +39,8 @@ const char *mmap_types[5] = {
 #define BLOCK_SIZE	4096
 #define BLOCKS_MAX	(BLOCK_SIZE * sizeof(u8))
 
-extern u64 kern_end;
-u64 mem;
+extern uintptr_t kern_end;
+size_t mem;
 
 static intptr_t position;
 
@@ -50,7 +50,7 @@ struct mem_block {
 	struct mem_block	*next;
 } *blocks;
 
-void *kmalloc(u64 size)
+void *kmalloc(size_t size)
 {
 	void *p;
 
@@ -64,7 +64,7 @@ void *kmalloc(u64 size)
 	return p;
 }
 
-/*void *krealloc(void *ptr, u64 size)
+/*void *krealloc(void *ptr, size_t size)
 {
 	void *p = kmalloc(size);
 
@@ -91,9 +91,9 @@ void mm_init(u32 addr, u32 len)
 
 	dprintf(devname, "Physical memory map:\n");
 
-	while ((u64) mmap < addr + len) {
-		u64 maddr = mmap->addr_lo | (mmap->addr_hi >> 16);
-		u64 mlen = mmap->len_lo | (mmap->len_hi >> 16);
+	while ((uintptr_t) mmap < addr + len) {
+		uintptr_t maddr = mmap->addr_lo | (mmap->addr_hi >> 16);
+		uintptr_t mlen = mmap->len_lo | (mmap->len_hi >> 16);
 
 		dprintf(devname,
 				KP_CON "%#018lx - %#018lx (%s)\n",
@@ -102,7 +102,8 @@ void mm_init(u32 addr, u32 len)
 		mem += mlen;
 
 		mmap = (struct mboot_mmap *)
-				((u64) mmap + mmap->size + sizeof(mmap->size));
+				((uintptr_t)
+				 mmap + mmap->size + sizeof(mmap->size));
 	}
 
 	/* FIXME Always off by 1 for some reason */

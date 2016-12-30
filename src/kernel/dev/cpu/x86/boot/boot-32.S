@@ -28,13 +28,13 @@
 
 .global bootstrap
 bootstrap:
-	mov $pdpte, %eax
-	#call paging_init
-	#mov $0x200000, %eax
+	call paging_init
+	mov $0x200000, %eax
 	mov %eax, %cr3
 
 	/* Enable paging */
 	mov %cr0, %eax
+	bts $31, %eax /* CR0.PG */
 	bts $16, %eax /* CR0.WP */
 	mov %eax, %cr0
 
@@ -83,23 +83,6 @@ gdt_sd:
 gdt:
 	.word . - gdt_sd - 1	/* Limit */
 	.long gdt_sd		/* Base address */
-
-.align 4096
-/* Controls 1 GB */
-pdpte:
-	.long (pde + 3)
-	.fill 511, 8, 0
-/* Controls 2 MB */
-pde:
-	.long (pte + 3)
-	.fill 511, 8, 0
-/* Controls 4 KB */
-pte:
-	i = 0x00
-	.rept 512
-		.long (i + 3)
-		i = i + 4096
-	.endr
 
 
 .section .text

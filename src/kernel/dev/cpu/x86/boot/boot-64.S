@@ -28,8 +28,6 @@
 
 .global bootstrap
 bootstrap:
-	/* TODO Enable SSE and SSE2 */
-
 	call paging_init
 	mov $0x200000, %eax
 	mov %eax, %cr3

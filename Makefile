@@ -41,19 +41,24 @@ QEMU		:= qemu-system-$(ARCHQEMU)
 # Flags
 
 ARCHFLAG	= -D ARCH_$(ARCH)
+CONFIGFLAGS	= -D CONFIG_X86_PAE
+# Possible config flags:
+#  if ARCH_i686 || ARCH_x86_64
+#    CONFIG_X86_PAE	Enable PAE (always true if ARCH_x86_64)
+#  endif
 MAKEFLAGS	:= -s --no-print-directory
 
 # TEMP TODO Relocate in arch directory
 TYPES		= src/kernel/include/sys/types.h
 # TEMP
-ASFLAGS		:= $(ARCHFLAG)
-CFLAGS		:= $(ARCHFLAG) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Wno-unused-parameter -Wno-return-type #-Os
-CFLAGS32	:= $(ARCHFLAG) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
+ASFLAGS		:= $(ARCHFLAG) $(CONFIGFLAGS)
+CFLAGS		:= $(ARCHFLAG) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Wno-unused-parameter -Wno-return-type #-Os
+CFLAGS32	:= $(ARCHFLAG) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
 LDFLAGS		:= -nostdlib -z max-page-size=4096 #-s #-Os
 
 BOCHSFLAGS	:= -f cfg/bochs.rc -q
 KVMFLAGS	:= -enable-kvm
-QEMUFLAGS	:= -m 16M --serial vc -soundhw pcspk,ac97,sb16 #-vga std #-curses #-cpu qemu32 //To test no long mode message
+QEMUFLAGS	:= -m 8M --serial vc -soundhw pcspk,ac97,sb16 #-vga std #-curses #-cpu qemu32 # To test no long mode message
 QEMUDBGFLAGS	:= -s -d cpu_reset,int#,cpu,exec,in_asm
 WGETFLAGS	:= -q --show-progress
 

@@ -33,7 +33,13 @@ u64 ticks;
 
 time_t uptime(void)
 {
-	return ticks / (u32) 1000;
+#if ARCH_i686
+	/* XXX TEMP XXX */
+	return ((u32) ticks) / 1000;
+#endif
+#if ARCH_x86_64
+	return ticks / 1000;
+#endif
 }
 
 static int int_handler(struct int_stack *regs)
