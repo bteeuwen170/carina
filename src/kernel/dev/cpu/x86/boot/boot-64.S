@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/arch/x86/boot/boot-64.S
+ * src/kernel/dev/cpu/x86/boot/boot-64.S
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -30,9 +30,8 @@
 bootstrap:
 	/* TODO Enable SSE and SSE2 */
 
-	//call paging_init
-	mov $pml4e, %eax
-	//mov $0x200000, %eax
+	call paging_init
+	mov $0x200000, %eax
 	mov %eax, %cr3
 
 	/* Enable long mode */
@@ -50,44 +49,6 @@ bootstrap:
 	call gdt_init
 
 	ljmp $0x08, $start
-
-
-.section .data
-
-.align 4096
-/* Controls 512 GB */
-pml4e:
-	.quad (pdpte + 3)
-	.fill 510, 8, 0
-	.quad (pdpte2 + 3)
-/* Controls 1 GB */
-pdpte:
-	.quad (pde + 3)
-	.fill 511, 8, 0
-/* Controls 1 GB */
-pdpte2:
-	.fill 510, 8, 0
-	.quad (pde + 3)
-	.quad 0
-/* Controls 2 MB */
-pde:
-	.quad (pte + 3)
-	.quad (pte2 + 3)
-	.fill 510, 8, 0
-/* Controls 4 KB */
-pte:
-	i = 0x00
-	.rept 512
-		.quad (i + 3)
-		i = i + 4096
-	.endr
-/* TEMP */
-pte2:
-	i = 0x200000
-	.rept 512
-		.quad (i + 3)
-		i = i + 4096
-	.endr
 
 
 .code64

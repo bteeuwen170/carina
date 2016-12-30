@@ -107,7 +107,7 @@ void mm_init(u32 addr, u32 len)
 
 	/* FIXME How much padding is really required? */
 	//position = ((intptr_t) &kern_end) + 0x10000;
-	position = 0x200000;
+	position = 0x300000;
 
 	/*u16 i;
 

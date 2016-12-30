@@ -87,12 +87,12 @@ void kernel_main(struct mboot_info *mboot)
 	/* ioapic_init(); */
 #endif
 
-#if 0
+#if 1
 	/* Initialize video hardware properly */
-	kprintf("fb", KP_DBG "addr is %#x\n", mboot->framebuffer_addr);
-	kprintf("fb", KP_DBG "bpp is %#x\n", mboot->framebuffer_bpp);
-	kprintf("fb", KP_DBG "pitch is %#x\n", mboot->framebuffer_pitch);
-	kprintf("fb", KP_DBG "type is %#x\n", mboot->framebuffer_type);
+	dprintf("fb", KP_DBG "addr is %#x\n", mboot->framebuffer_addr);
+	dprintf("fb", KP_DBG "bpp is %#x\n", mboot->framebuffer_bpp);
+	dprintf("fb", KP_DBG "pitch is %#x\n", mboot->framebuffer_pitch);
+	dprintf("fb", KP_DBG "type is %#x\n", mboot->framebuffer_type);
 
 	/* TODO Switch */
 	if (mboot->framebuffer_type == 1) {
