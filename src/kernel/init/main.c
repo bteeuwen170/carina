@@ -152,9 +152,15 @@ void kernel_main(void)
 	ps2kbd_init();
 	/* FIXME Corrupts video memory */
 	/* ide_init(); */
+#if CONFIG_AC97
 	ac97_init();
+#endif
+#if CONFIG_SB16
 	sb16_init();
+#endif
+#if CONFIG_PCI
 	pci_init();
+#endif
 
 	/* Temporary and crappy code */
 #if 0

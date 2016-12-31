@@ -39,11 +39,7 @@ QEMU		:= qemu-system-$(ARCH)
 # Flags
 
 ARCHFLAG	= -D ARCH_$(ARCH)
-CONFIGFLAGS	= -D CONFIG_X86_PAE
-# Possible config flags:
-#  if ARCH_i386 || ARCH_x86_64
-#    CONFIG_X86_PAE	Enable PAE (always true if ARCH_x86_64)
-#  endif
+CONFIGFLAGS	= $(shell sed -e '/^\s*\\\#/d' -e '/^\s*$$/d' -e 's/^/-D /g' .config)
 MAKEFLAGS	:= -s --no-print-directory
 
 # TEMP TODO Relocate in arch directory
