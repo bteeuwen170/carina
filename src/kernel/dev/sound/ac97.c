@@ -68,7 +68,7 @@ struct ac97_dev *dev = &deva;
 
 static void buffer_fill(void *data, u32 n, u32 off)
 {
-	dev->buf[n].addr = (intptr_t) data + (off * 32 * 2);
+	dev->buf[n].addr = (uintptr_t) data + (off * 32 * 2);
 	dev->buf[n].len = 32;
 	dev->buf[n].bup = 0;
 	dev->buf[n].ioc = 1;
@@ -120,7 +120,7 @@ void ac97_play(void)
 	for (i = 0; i < 32; i++)
 		buffer_fill(snd_wav, i, i);
 
-	io_outd(dev->nabmbar + 0x10, (intptr_t) dev->buf);
+	io_outd(dev->nabmbar + 0x10, (uintptr_t) dev->buf);
 
 	dprintf(devname, KP_DBG "wav playing\n");
 

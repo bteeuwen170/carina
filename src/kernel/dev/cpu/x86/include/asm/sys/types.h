@@ -38,7 +38,6 @@ typedef unsigned long long	__asm_u64;
 typedef long		__asm_ssize_t;
 typedef unsigned long	__asm_size_t;
 
-typedef long		__asm_intptr_t;
 typedef unsigned long	__asm_uintptr_t;
 
 #endif

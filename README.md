@@ -1,7 +1,7 @@
 # Elarix
 
 This is the README file for Elarix, a free and open source operating system
-kernel for the i686 and x86\_64 architecture.
+kernel for the i386 and x86\_64 architecture.
 
 License: GPLv2
 

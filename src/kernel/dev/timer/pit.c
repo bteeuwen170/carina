@@ -33,7 +33,7 @@ u64 ticks;
 
 time_t uptime(void)
 {
-#if ARCH_i686
+#if ARCH_i386
 	/* XXX TEMP XXX */
 	return ((u32) ticks) / 1000;
 #endif

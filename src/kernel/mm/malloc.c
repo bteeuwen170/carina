@@ -42,7 +42,7 @@ const char *mmap_types[5] = {
 extern uintptr_t kern_end;
 size_t mem;
 
-static intptr_t position;
+static uintptr_t position;
 
 struct mem_block {
 	u8			allocated;
@@ -87,7 +87,7 @@ void kfree(void *ptr)
 
 void mm_init(u32 addr, u32 len)
 {
-	struct mboot_mmap *mmap = (void *) (intptr_t) addr;
+	struct mboot_mmap *mmap = (void *) (uintptr_t) addr;
 
 	dprintf(devname, "Physical memory map:\n");
 
@@ -110,7 +110,7 @@ void mm_init(u32 addr, u32 len)
 	dprintf(devname, "%u MB memory\n", mem / 1024 / 1024 + 1);
 
 	/* FIXME How much padding is really required? */
-	/* position = ((intptr_t) &kern_end) + 0x10000; */
+	/* position = ((uintptr_t) &kern_end) + 0x10000; */
 	position = 0x300000;
 
 	/*u16 i;

@@ -88,15 +88,20 @@ static void *isr_handlers[IDT_ENTRIES];
  * - Task Gate		(0b1001)
  */
 /* TODO Add parameter for privilege level */
-static void idt_set(const u8 gate, const u8 type, const u64 offset)
+static void idt_set(const u8 gate, const u8 type, const uintptr_t offset)
 {
 	idt[gate].offset_lo	= offset & 0xFFFF;
 	idt[gate].segment	= 0x08;
 	idt[gate].zero		= 0;
 	idt[gate].flags		= type | 0b10000000;
+#ifdef ARCH_i386
+	idt[gate].offset_hi	= (offset >> 16) & 0xFFFF;
+#endif
+#ifdef ARCH_x86_64
 	idt[gate].offset_hi[0]	= (offset >> 16) & 0xFFFF;
 	idt[gate].offset_hi[1]	= (offset >> 32) & 0xFFFF;
 	idt[gate].offset_hi[2]	= (offset >> 48) & 0xFFFF;
+#endif
 }
 
 void idt_init(void)
@@ -104,7 +109,7 @@ void idt_init(void)
 	int i;
 
 	for (i = 0; i < IDT_ENTRIES; i++) {
-		idt_set(i, 0x0E, (intptr_t) ints[i]);
+		idt_set(i, 0x0E, (uintptr_t) ints[i]);
 
 		if (i > SINT_ENTRIES && i < SINT_ENTRIES + IRQ_ENTRIES - 1)
 			irq_mask(SINT_ENTRIES - i);
@@ -121,7 +126,7 @@ void _isr(struct int_stack *regs)
 
 	/* TEMP */
 	if (regs->int_no < SINT_ENTRIES) {
-#ifdef ARCH_i686
+#ifdef ARCH_i386
 		panic(exceptions[regs->int_no],
 				regs->err_code, regs->eip);
 #endif

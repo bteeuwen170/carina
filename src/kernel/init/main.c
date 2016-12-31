@@ -71,8 +71,8 @@ void kernel_main(void)
 	serial_init(COM0);
 
 	/* TODO Other format (UTC) */
-	kprintf("Welcome to Elarix! (compiled on %s %s)\n",
-			__DATE__, __TIME__);
+	kprintf("Welcome to Elarix %d.%d! (compiled on %s %s)\n",
+			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
 
 	/* TODO Move */
 	kprintf(KP_CON "Elarix has been loaded by %s\n",

@@ -96,8 +96,8 @@ isr:
 	push %eax
 
 	mov %esp, %edi
-
 	call _isr
+
 	#mov %rbx, %rsp
 	pop %eax
 

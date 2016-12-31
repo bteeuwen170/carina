@@ -65,7 +65,7 @@ entry:
 	bt $21, %eax
 	jb nocpuid
 
-#ifdef ARCH_i686
+#ifdef ARCH_i386
 	/* Check if PAE is available */
 	mov $0x01, %eax
 	cpuid

@@ -42,7 +42,7 @@ static void gdt_set(const u8 gate, const u32 base, const u32 limit,
 	gdt[gate].base_hi	= (base >> 24) & 0xFF;
 }
 
-/* FIXME Not i686 compatible ! */
+/* FIXME Not i386 compatible ! */
 void gdt_init(void)
 {
 	u32 tss_base, tss_limit;

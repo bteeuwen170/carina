@@ -4,22 +4,20 @@
 
 # TODO Improve cross compiling mechanics
 
-VERSION_MAJOR	= 0
-VERSION_MINOR	= 1
-RELEASE		= $(VERSION_MAJOR).$(VERSION_MINOR)
+RELEASE_MAJOR	= 0
+RELEASE_MINOR	= 1
+RELEASEFLAGS	= -D RELEASE_MAJOR=$(RELEASE_MAJOR) -D RELEASE_MINOR=$(RELEASE_MINOR)
 
 ARCH		:= x86_64
 ARCH32		= $(ARCH)
-ARCHQEMU	= $(ARCH)
+
+ifeq ($(ARCH),i386)
+ARCHT		= x86
+endif
 
 ifeq ($(ARCH),x86_64)
 ARCHT		= x86
-ARCH32		= i686
-endif
-
-ifeq ($(ARCH),i686)
-ARCHT		= x86
-ARCHQEMU	= i386
+ARCH32		= i386
 endif
 
 
@@ -35,7 +33,7 @@ AS		:= $(ARCH)-elf-elarix-as
 LD		:= $(ARCH)-elf-elarix-ld
 
 BOCHS		:= bochs
-QEMU		:= qemu-system-$(ARCHQEMU)
+QEMU		:= qemu-system-$(ARCH)
 
 
 # Flags
@@ -43,7 +41,7 @@ QEMU		:= qemu-system-$(ARCHQEMU)
 ARCHFLAG	= -D ARCH_$(ARCH)
 CONFIGFLAGS	= -D CONFIG_X86_PAE
 # Possible config flags:
-#  if ARCH_i686 || ARCH_x86_64
+#  if ARCH_i386 || ARCH_x86_64
 #    CONFIG_X86_PAE	Enable PAE (always true if ARCH_x86_64)
 #  endif
 MAKEFLAGS	:= -s --no-print-directory
@@ -51,9 +49,9 @@ MAKEFLAGS	:= -s --no-print-directory
 # TEMP TODO Relocate in arch directory
 TYPES		= src/kernel/include/sys/types.h
 # TEMP
-ASFLAGS		:= $(ARCHFLAG) $(CONFIGFLAGS)
-CFLAGS		:= $(ARCHFLAG) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Wno-unused-parameter -Wno-return-type #-Os
-CFLAGS32	:= $(ARCHFLAG) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
+ASFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAG) $(CONFIGFLAGS)
+CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAG) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Wno-unused-parameter -Wno-return-type #-Os
+CFLAGS32	:= $(RELEASEFLAGS) $(ARCHFLAG) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
 LDFLAGS		:= -nostdlib -z max-page-size=4096 #-s #-Os
 
 BOCHSFLAGS	:= -f cfg/bochs.rc -q

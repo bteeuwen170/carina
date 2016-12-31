@@ -104,8 +104,8 @@ isr:
 	push %rax
 
 	mov %rsp, %rdi
-
 	call _isr
+
 	#mov %rbx, %rsp
 	pop %rax
 

@@ -25,7 +25,7 @@
 #ifndef _X86_CPU_H
 #define _X86_CPU_H
 
-#ifdef ARCH_i686
+#ifdef ARCH_i386
 #   include "../../include-32/asm/cpu.h"
 #endif
 #ifdef ARCH_x86_64

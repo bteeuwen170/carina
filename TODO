@@ -25,7 +25,7 @@ Kernel
 - Always return void from initialization functions
 - Move paging source file to cpu/
 - Don't include arch specific files outside of arch dir
-- Use sse + sse2 on > x86_64 and use mmx (+ sse) or sse + sse2 on i686
+- Use sse + sse2 on > x86_64 and use mmx (+ sse) or sse + sse2 on i386
 - Inconsistency between use of kernel integer data types and
   C integer data types
 - Split all driver header files into it's own directory
@@ -49,7 +49,7 @@ Toolchain
 - Libc
 - Self contained autoconf and automake
 - Put up precompiled version
-- i686 libgcc broken
+- i386 libgcc broken
 
 
  Legend

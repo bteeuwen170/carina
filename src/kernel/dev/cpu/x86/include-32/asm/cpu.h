@@ -22,8 +22,6 @@
  *
  */
 
-/* TODO Right now just a copy of the 64-bit file */
-
 struct segment_desc {
 	u16	limit_lo;
 	u8	base_lo[3];
@@ -41,8 +39,7 @@ struct idt_desc {
 	u16	segment;
 	u8	zero;
 	u8	flags;
-	u16	offset_hi[3];
-	u32	reserved0;
+	u16	offset_hi;
 } __attribute__ ((packed));
 
 struct int_stack {
