@@ -2,6 +2,7 @@
 # src/kernel/Makefile
 #
 
+include src/kernel/arch/$(ARCHT)/Makefile
 include src/kernel/dev/Makefile
 include src/kernel/fs/Makefile
 include src/kernel/init/Makefile

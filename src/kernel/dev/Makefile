@@ -3,7 +3,6 @@
 #
 
 #include src/kernel/dev/acpi/Makefile
-include src/kernel/dev/cpu/$(ARCHT)/Makefile
 include src/kernel/dev/block/Makefile
 include src/kernel/dev/char/Makefile
 include src/kernel/dev/pci/Makefile
