@@ -2,6 +2,5 @@
 # src/kernel/dev/sound/Makefile
 #
 
-kernel-o += src/kernel/dev/sound/ac97.o \
-	    src/kernel/dev/sound/pcspk.o \
-	    src/kernel/dev/sound/sb16.o
+kernel-$(CONFIG_AC97) += src/kernel/dev/sound/ac97.o
+kernel-$(CONFIG_SB16) += src/kernel/dev/sound/sb16.o

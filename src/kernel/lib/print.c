@@ -17,7 +17,7 @@
 #include <kernel.h>
 #include <kbd.h>
 
-#include <char/serial/serial.h>
+#include <char/serial.h>
 #include <video/fb.h>
 #include <video/vga.h>
 
@@ -354,9 +354,11 @@ void kprint(const char *prefix, char *fmt, ...)
 	while (*str)
 		printcc(*(str++), color);
 
+#ifdef CONFIG_SERIAL
 	/* TEMP */
 	u32 i;
 	for (i = 0; i < strlen(fmtbuf); i++)
 		serial_out(COM0, fmtbuf[i]);
 	serial_out(COM0, 0x0D);
+#endif
 }

@@ -2,4 +2,4 @@
 # src/kernel/fs/ramfs/Makefile
 #
 
-kernel-o += src/kernel/fs/ramfs/ramfs.o
+kernel-$(CONFIG_RAMFS) += src/kernel/fs/ramfs/ramfs.o

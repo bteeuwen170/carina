@@ -4,4 +4,4 @@
 
 include src/kernel/dev/video/fonts/Makefile
 
-kernel-o += src/kernel/dev/video/vga.o
+kernel-$(CONFIG_VGA) += src/kernel/dev/video/vga.o

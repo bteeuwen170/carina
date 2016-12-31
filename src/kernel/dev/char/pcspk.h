@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/dev/char/serial/serial.h
+ * src/kernel/dev/char/pcspk.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,17 +22,15 @@
  *
  */
 
-#ifndef _SERIAL_H
-#define _SERIAL_H
+#ifndef _PCSPK_H
+#define _PCSPK_H
 
-#define COM0	0x3F8
-#define COM1	0x2F8
-#define COM2	0x3E8
-#define COM3	0x2E8
+void pcspk_play(const u16 freq);
+void pcspk_stop(void);
 
-u16 serial_in(const u16 port);
-void serial_out(const u16 port, const u8 value);
-
-void serial_init(const u16 port);
+void pcspk_fj(void); /* Frere Jacques */
+void pcspk_mi(void); /* The Secret Of Monkey Island intro */
+void pcspk_hc(void); /* Eagles - Hotel California */
+void pcspk_acri(void); /* Bob Acri - Sleep Away */
 
 #endif

@@ -61,7 +61,9 @@ void printc(char c)
 
 void printcc(char c, u8 color)
 {
+#ifdef CONFIG_VGA
 	vga_putch(c, color);
+#endif
 }
 
 void prints(char *str)

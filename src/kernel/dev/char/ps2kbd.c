@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/dev/kbd/ps2.c
+ * src/kernel/dev/char/ps2kbd.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *

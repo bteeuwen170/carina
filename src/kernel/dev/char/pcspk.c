@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/dev/sound/pcspk.c
+ * src/kernel/dev/char/pcspk.c
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *

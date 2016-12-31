@@ -74,3 +74,4 @@ void tty_exit(void)
 }
 
 MODULE(tty, &tty_init, &tty_exit);
+MODULE_DEP(pty);

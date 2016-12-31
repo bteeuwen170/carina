@@ -33,11 +33,11 @@ u64 ticks;
 
 time_t uptime(void)
 {
-#if ARCH_i386
+#ifdef ARCH_i386
 	/* XXX TEMP XXX */
 	return ((u32) ticks) / 1000;
 #endif
-#if ARCH_x86_64
+#ifdef ARCH_x86_64
 	return ticks / 1000;
 #endif
 }

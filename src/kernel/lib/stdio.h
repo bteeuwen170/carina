@@ -53,6 +53,11 @@ void printcc(char c, u8 color);
 
 void prints(char *str);
 
+/* XXX TEMP XXX */
+#ifdef CONFIG_KEYBOARD
 char getch(void);
+#else
+static inline char getch(void) { return 0; }
+#endif
 
 #endif

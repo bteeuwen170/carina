@@ -36,10 +36,10 @@
 #include <asm/8259.h>
 #include <asm/cpu.h>
 
-#include <char/serial/serial.h>
+#include <char/pcspk.h>
+#include <char/serial.h>
 #include <sound/ac97.h>
 #include <sound/sb16.h>
-#include <sound/pcspk.h>
 #include <timer/pit.h>
 #include <video/vga.h>
 
@@ -62,13 +62,19 @@ void kernel_main(void)
 	/* FIXME Memory map cannot be printed before vga_init() */
 	mm_init(mboot->mmap_addr, mboot->mmap_len);
 
+#ifdef CONFIG_RAMFS
 	ramfs_init();
+#endif
 
 	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
 	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
 	/* Initialize early video and debugging hardware */
+#ifdef CONFIG_VGA
 	vga_init();
+#endif
+#ifdef CONFIG_SERIAL
 	serial_init(COM0);
+#endif
 
 	/* TODO Other format (UTC) */
 	kprintf("Welcome to Elarix %d.%d! (compiled on %s %s)\n",
@@ -145,20 +151,26 @@ void kernel_main(void)
 	dprintf("cpu0", KP_DBG "interrupts enabled\n");
 	/* TODO Actually get starting cpu */
 
+	timer_init();
+
 	/* TODO Modules */
 	/* acpi_init(); */
+#ifdef CONFIG_CMOS
 	cmos_init();
-	timer_init();
+#endif
+#ifdef CONFIG_PS2KBD
 	ps2kbd_init();
-	/* FIXME Corrupts video memory */
-	/* ide_init(); */
-#if CONFIG_AC97
+#endif
+#ifdef CONFIG_ATA
+	ide_init();
+#endif
+#ifdef CONFIG_AC97
 	ac97_init();
 #endif
-#if CONFIG_SB16
+#ifdef CONFIG_SB16
 	sb16_init();
 #endif
-#if CONFIG_PCI
+#ifdef CONFIG_PCI
 	pci_init();
 #endif
 
@@ -229,14 +241,19 @@ void kernel_main(void)
 			kprintf("res: %d", res2);
 
 		/* Audio */
+#ifdef CONFIG_AC97
+		} else if (strcmp(cmd, "pac") == 0) {
+			ac97_play();
+#endif
+#ifdef CONFIG_SB16
+		} else if (strcmp(cmd, "psb") == 0) {
+			sb16_play();
+#endif
+#ifdef CONFIG_PCSPK
 		} else if (strcmp(cmd, "beep") == 0) {
 			pcspk_play(835);
 			sleep(10);
 			pcspk_stop();
-		} else if (strcmp(cmd, "pac") == 0) {
-			ac97_play();
-		} else if (strcmp(cmd, "psb") == 0) {
-			sb16_play();
 		} else if (strcmp(cmd, "fj") == 0) {
 			pcspk_fj();
 		} else if (strcmp(cmd, "mi") == 0) {
@@ -245,6 +262,7 @@ void kernel_main(void)
 			pcspk_hc();
 		} else if (strcmp(cmd, "acri") == 0) {
 			pcspk_acri();
+#endif
 
 		/* Other */
 		} else if (strcmp(cmd, "reboot") == 0) {
@@ -252,7 +270,9 @@ void kernel_main(void)
 		} else if (strcmp(cmd, "halt") == 0) {
 			panic("halt", 0, 0);
 		} else if (strcmp(cmd, "clear") == 0) {
+#ifdef CONFIG_VGA
 			vga_clear();
+#endif
 		} else if (strcmp(cmd, "uptime") == 0) {
 			kprintf("uptime: %d seconds\n", uptime());
 		} else if (cmd[0] != '\0') {

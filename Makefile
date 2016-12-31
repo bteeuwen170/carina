@@ -39,8 +39,11 @@ QEMU		:= qemu-system-$(ARCH)
 # Flags
 
 ARCHFLAG	= -D ARCH_$(ARCH)
+MAKEFLAGS	= -s --no-print-directory
+
 CONFIGFLAGS	= $(shell sed -e '/^\s*\\\#/d' -e '/^\s*$$/d' -e 's/^/-D /g' .config)
-MAKEFLAGS	:= -s --no-print-directory
+#MAKEFLAGS	+= $(shell sed -e '/^\s*\\\#/d' -e '/^\s*$$/d' -e 's/^/\n/g' .config)
+include .config
 
 # TEMP TODO Relocate in arch directory
 TYPES		= src/kernel/include/sys/types.h

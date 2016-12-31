@@ -2,4 +2,4 @@
 # src/kernel/dev/pci/Makefile
 #
 
-kernel-o += src/kernel/dev/pci/pci.o
+kernel-$(CONFIG_PCI) += src/kernel/dev/pci/pci.o
