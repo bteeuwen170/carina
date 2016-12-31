@@ -1,4 +1,4 @@
-/*
+ /*
  *
  * Elarix
  * src/kernel/dev/cpu/x86/boot/boot-64.S

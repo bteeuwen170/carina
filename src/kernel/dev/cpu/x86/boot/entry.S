@@ -21,7 +21,7 @@
  * USA.
  *
  */
- 
+
 .code32
 
 #.set KERN_VMA,		0xFFFFFFFF80000000
@@ -39,7 +39,9 @@ mboot_header:
 	.long -(MB_MAGIC + MB_FLAGS)
 
 .section .bss
-.lcomm mboot_addr, 88
+.global mboot
+.align 4
+.lcomm mboot, 8
 
  
 .section .text
@@ -49,8 +51,7 @@ entry:
 	cli
 
 	/* Save the Multiboot info struct */
-	/* XXX TODO Store in safer location XXX */
-	mov %ebx, %edi
+	mov %ebx, mboot
 
 	/* TODO What is this again??? */
 	#mov $0xFF, %al

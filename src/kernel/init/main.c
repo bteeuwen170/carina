@@ -49,7 +49,10 @@
 
 extern void usrmode_enter();
 
-void kernel_main(struct mboot_info *mboot)
+extern struct mboot_info *mboot;
+
+/* void kernel_main(struct mboot_info *mboot) */
+void kernel_main(void)
 {
 #if 1 /* XXX MOVE XXX Arch init */
 	SPINLOCK(main);
@@ -64,7 +67,6 @@ void kernel_main(struct mboot_info *mboot)
 	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
 	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
 	/* Initialize early video and debugging hardware */
-	asm volatile ("hlt");
 	vga_init();
 	serial_init(COM0);
 
