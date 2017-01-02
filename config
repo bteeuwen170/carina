@@ -1,0 +1,89 @@
+/*
+ * config
+ */
+
+menu "CPU"
+{
+	if (ARCH_i386) {
+		config CONFIG_X86_PAE
+			"Enable Physical Address Extension on boot";
+	}
+
+	if (ARCH_x86_64) {
+		set_config CONFIG_X86_PAE;
+	}
+}
+
+menu "File systems"
+{
+	config CONFIG_RAMFS
+		"RAMFS support";
+}
+
+menu "Bus devices"
+{
+	if (ARCH_x86) {
+		config CONFIG_PCI
+			"PCI bus support";
+	}
+}
+
+menu "Char devices"
+{
+	if (ARCH_x86) {
+		config CONFIG_CMOS
+			"CMOS support";
+
+		config CONFIG_PCSPK
+			"PC Speaker support";
+
+		config CONFIG_SERIAL
+			"Serial port support";
+	}
+
+	menuconfig CONFIG_KEYBOARD
+		"Keyboard support"
+	{
+		if (ARCH_x86) {
+			config CONFIG_PS2KBD
+				"PS/2 keyboard support";
+		}
+	}
+
+	config CONFIG_PTY
+		"Pseudo-telyTYpe terminal support";
+	
+	if (CONFIG_PTY) {
+		config CONFIG_TTY
+			"TelyTYpe terminal support";
+	}
+}
+
+menu "Block devices"
+{
+	if (CONFIG_PCI) {
+		config CONFIG_ATA
+			"ATA support";
+	}
+}
+
+menu "Sound devices"
+{
+	if (CONFIG_PCI) {
+		config CONFIG_AC97
+			"Intel AC97 support";
+	}
+
+	if (ARCH_x86) {
+		config CONFIG_SB16
+			"Soundblaster 16 support";
+	}
+}
+
+menu "Video devices"
+{
+	if (ARCH_x86) {
+		config CONFIG_VGA
+			"VGA text-mode support";
+	}
+}

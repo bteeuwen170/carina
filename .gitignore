@@ -11,6 +11,6 @@ root/boot/kernel
 toolchain/*
 !toolchain/Makefile
 !toolchain/*.patch
-util/*
+util/menuconfig/menuconfig
 
 bx_enh_dbg.ini

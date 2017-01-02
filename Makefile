@@ -38,7 +38,10 @@ QEMU		:= qemu-system-$(ARCH)
 
 # Flags
 
-ARCHFLAG	= -D ARCH_$(ARCH)
+ARCHFLAGS	= -D ARCH_$(ARCH)
+ifneq ($(ARCH),$(ARCHT))
+ARCHFLAGS	+= -D ARCH_$(ARCHT)
+endif
 MAKEFLAGS	= -s --no-print-directory
 
 CONFIGFLAGS	= $(shell sed -e '/^\s*\\\#/d' -e '/^\s*$$/d' -e 's/^/-D /g' .config)
@@ -48,10 +51,14 @@ include .config
 # TEMP TODO Relocate in arch directory
 TYPES		= src/kernel/include/sys/types.h
 # TEMP
-ASFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAG) $(CONFIGFLAGS)
-CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAG) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Wno-unused-parameter -Wno-return-type #-Os
-CFLAGS32	:= $(RELEASEFLAGS) $(ARCHFLAG) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
+ASFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS)
+CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
+CFLAGS32	:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os
 LDFLAGS		:= -nostdlib -z max-page-size=4096 #-s #-Os
+export ASFLAGS CFLAGS CFLAGS32 LDFLAGS
+
+HOSTCFLAGS	:= -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -g #-Os
+export HOSTCFLAGS
 
 BOCHSFLAGS	:= -f cfg/bochs.rc -q
 KVMFLAGS	:= -enable-kvm
@@ -69,7 +76,7 @@ debug: kernel iso qemu
 
 CLEAN_FILES	+= root/grub.img \
 		   root/boot/kernel \
-		   util/menu/menu
+		   util/menuconfig/menuconfig
 
 PHONY += clean
 # TODO Clean toolchain TODO Not POSIX complient apperently
@@ -78,12 +85,13 @@ clean:
 	find dbg/ -type f -not -path '*/\.*' -delete -exec echo "  RM      {}" \;
 	find root/ -type d -empty -delete -exec echo "  RMDIR   {}" \;
 	find src/ -type f -name '*.o' -delete -exec echo "  RM      {}" \;
+	find util/menuconfig -type f -name '*.o' -delete -exec echo "  RM      {}" \;
 #TODO Can be done way nicer
 #find ./ -type f -path '$(shell echo "${CLEAN_FILES}" | sed -e "s/ /' -o -path '/g")' -exec echo "  RM      {}" \;
 
 PHONY += menuconfig
 menuconfig:
-	$(MAKE) -C util/menu/ all
+	$(MAKE) -C util/menuconfig/ menuconfig
 
 # TODO Implement this differently
 PHONY += fstree
