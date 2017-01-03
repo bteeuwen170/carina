@@ -23,6 +23,7 @@
  */
 
 #include <kbd.h>
+#include <kernel.h>
 #include <module.h>
 
 #include <asm/cpu.h>
@@ -94,10 +95,12 @@ static const char kbd_keymap_alt[KEYMAP_SIZE] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0,
 	0, 0, 0, '-',
-	0, 0, 0, '+'
+	0, 0, 0, '+',
+	0, 0, 0,
+	0, 0
 };
 
-static char kbuf = -1;
+static volatile char kbuf = -1;
 
 static u8 modifiers = 0, skip;
 

@@ -29,7 +29,7 @@
 #include "pit.h"
 
 /* TODO Should store as 10ms */
-u64 ticks;
+volatile u64 ticks;
 
 time_t uptime(void)
 {

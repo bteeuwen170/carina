@@ -55,9 +55,9 @@ extern struct mboot_info *mboot;
 void kernel_main(void)
 {
 #if 1 /* XXX MOVE XXX Arch init */
-	SPINLOCK(main);
+	/* SPINLOCK(main);
 
-	spin_lock(main);
+	spin_lock(main); */
 
 	/* FIXME Memory map cannot be printed before vga_init() */
 	mm_init(mboot->mmap_addr, mboot->mmap_len);

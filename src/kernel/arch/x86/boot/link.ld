@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/link.ld
+ * src/kernel/arch/x86/boot/link.ld
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,12 +22,9 @@
  *
  */
 
-LOAD_VMA = 0x100000;
-/* KERN_VMA = 0xFFFFFFFF80000000; */
-
 SECTIONS
 {
-	. = LOAD_VMA;
+	. = 0x100000;
 
 	.mboot ALIGN(4096) : {
 		*(.mboot)

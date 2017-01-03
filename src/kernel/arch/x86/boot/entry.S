@@ -24,8 +24,6 @@
 
 .code32
 
-#.set KERN_VMA,		0xFFFFFFFF80000000
-
 .section .mboot
 
 .set MB_MAGIC,		0x1BADB002

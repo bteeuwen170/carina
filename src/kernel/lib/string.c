@@ -184,6 +184,7 @@ char *strtrm(char *str)
 	return str;
 }
 
+/* FIXME */
 long strtol(const char *str, char **ptr, int base)
 {
 	long n;
@@ -194,6 +195,8 @@ long strtol(const char *str, char **ptr, int base)
 	if (base == 0) {
 		/* TODO */
 	}
+
+	n = 0;
 
 	for (;;) {
 		if ((*str >= '0' && *str <= '7') ||
