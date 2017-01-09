@@ -61,7 +61,7 @@ static u8 cmos_in(const u8 reg)
 int cmos_init(void)
 {
 	dprintf(devname,
-			"current time is %02x%02x/%02x/%02x %02x:%02x:%02x UTC\n",
+			"current time is %02x%02x-%02x-%02x %02x:%02x:%02x UTC\n",
 			cmos_in(CMOS_CENTURY), cmos_in(CMOS_YEAR),
 			cmos_in(CMOS_MONTH), cmos_in(CMOS_DAY),
 			cmos_in(CMOS_HOURS), cmos_in(CMOS_MINUTES),
