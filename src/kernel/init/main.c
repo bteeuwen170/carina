@@ -286,7 +286,7 @@ void kernel_main(void)
 		for (i = 1; i < strlen(cmd); i++)
 			cmd[i] = 0;
 		cmd[0] = '\0';
-	} 
+	}
 #endif
 }
 

@@ -21,7 +21,7 @@
  * USA.
  *
  */
- 
+
 .code32
 
 .section .text

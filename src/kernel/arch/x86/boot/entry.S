@@ -41,7 +41,7 @@ mboot_header:
 .align 4
 .lcomm mboot, 8
 
- 
+
 .section .text
 
 entry:

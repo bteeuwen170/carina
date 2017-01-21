@@ -89,7 +89,7 @@ void pcspk_fj(void)
 	pcspk_play(659);
 	sleep(450);
 	pcspk_play(698);
-	sleep(450); 
+	sleep(450);
 	pcspk_play(783);
 
 	sleep(900);

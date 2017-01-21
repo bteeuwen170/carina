@@ -21,7 +21,7 @@
  * USA.
  *
  */
- 
+
 .code64
 
 .section .text
