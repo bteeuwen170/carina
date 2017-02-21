@@ -42,8 +42,8 @@ void ps2kbd_exit(void);
 /* int serial_init(void);
 void serial_exit(void); */
 
-int tty_init(void);
-void tty_exit(void);
+/* int tty_init(void);
+void tty_exit(void); */
 
 int pci_init(void);
 void pci_exit(void);
@@ -56,8 +56,11 @@ void ac97_exit(void);
 int sb16_init(void);
 void sb16_exit(void);
 
-int vga_init(void);
-void vga_exit(void);
+int vga_con_init(void);
+void vga_con_exit(void);
+
+int con_init(void);
+void con_exit(void);
 
 /* int devfs_init(void);
 void devfs_exit(void);

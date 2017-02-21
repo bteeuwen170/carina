@@ -23,6 +23,7 @@
  */
 
 #include <kernel.h>
+#include <list.h>
 #include <module.h>
 #include <pci.h>
 

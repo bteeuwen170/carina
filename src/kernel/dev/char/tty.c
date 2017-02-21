@@ -69,7 +69,6 @@ int tty_init(void)
 
 void tty_exit(void)
 {
-	
 	/* TODO */
 }
 

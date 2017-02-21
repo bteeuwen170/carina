@@ -73,7 +73,7 @@
 struct fs_driver {
 	struct list_head l;
 
-	const char	*name;
+	const char *name;
 
 	/* Read the superblock: sp, data */
 	struct superblock *(*read_sb) (struct superblock *);
@@ -193,12 +193,14 @@ struct file_ops {
 	/* Delete a file object: ip, fp */
 	int (*close) (struct inode *, struct file *);
 	/* Read n bytes at off from fp into buf: fp, buf, off, n */
-	int (*read) (struct file *, void *, off_t, size_t);
+	int (*read) (struct file *, char *, off_t, size_t);
 	/* Write n bytes from buf into fp at off: fp, buf, off, n */
-	int (*write) (struct file *, const void *, off_t, size_t);
+	int (*write) (struct file *, const char *, off_t, size_t);
 	/* Read next directory: fp, TODO */
 	int (*readdir) (struct file *, struct usr_dirent *);
-	/* TODO (ioctl), (sync / fsync) */
+	/* I/O control: fp, cmd, arg */
+	int (*ioctl) (struct file *, unsigned int, unsigned long);
+	/* TODO (sync / fsync) */
 };
 
 extern struct superblock *root_sb;

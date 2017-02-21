@@ -55,7 +55,6 @@ int tty_init(void)
 	int res;
 
 	res = dev_reg(0, devname, &tty_file_ops);
-
 	if (res < 0)
 		panic("%s: unable to register tty (%d)", devname, res);
 

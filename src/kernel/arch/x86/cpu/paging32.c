@@ -64,19 +64,19 @@ void paging_init(struct mboot_info *mboot)
 	ac = mboot->mem_lo + mboot->mem_hi;
 
 	/* XXX TEMP XXX */
-	pages	= ((ac > (1 << 22)) ? 1 << 20 : ac >> 2) + 0x100;
-	pte	= PTE(pages);
-	pdte	= PDTE(pages);
+	pages = ((ac > (1 << 22)) ? 1 << 20 : ac >> 2) + 0x100;
+	pte = PTE(pages);
+	pdte = PDTE(pages);
 #ifdef CONFIG_X86_PAE
-	pdpte	= PDPE(pages);
+	pdpte = PDPE(pages);
 #endif
 #ifdef ARCH_x86_64
-	pml4e	= PML4E(pages);
+	pml4e = PML4E(pages);
 #endif
 
-	pdpt_off	= pml4e * PAGE_SIZE;
-	pdt_off		= (pml4e + pdpte) * PAGE_SIZE;
-	pt_off		= (pml4e + pdpte + pdte) * PAGE_SIZE;
+	pdpt_off = pml4e * PAGE_SIZE;
+	pdt_off = (pml4e + pdpte) * PAGE_SIZE;
+	pt_off = (pml4e + pdpte + pdte) * PAGE_SIZE;
 
 #ifdef ARCH_x86_64
 	pml4 = (void *) BASE_OFF;

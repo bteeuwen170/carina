@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/include/issue.h
+ * src/kernel/include/ioctl.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,9 +22,9 @@
  *
  */
 
-#ifndef _ISSUE_H
-#define _ISSUE_H
+#ifndef _IOCTL_H
+#define _IOCTL_H
 
-#define ELARIX_VER 0.1
+#define IO_CLEAR	1
 
 #endif

@@ -23,6 +23,7 @@
  */
 
 #include <fs.h>
+#include <ioctl.h>
 #include <issue.h>
 #include <kbd.h>
 #include <kernel.h>
@@ -41,7 +42,6 @@
 #include <sound/ac97.h>
 #include <sound/sb16.h>
 #include <timer/pit.h>
-#include <video/vga.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,11 +70,16 @@ void kernel_main(void)
 	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
 	/* Initialize early video and debugging hardware */
 #ifdef CONFIG_VGA
-	vga_init();
+	vga_con_init();
 #endif
 #ifdef CONFIG_SERIAL
-	serial_init(COM0);
+	/* serial_init(COM0); */
+	/* serial_con_init(COM0); */
 #endif
+
+	/* TMP XXX */
+	con_init();
+	con_ioctl(0, IO_CLEAR, 0);
 
 	/* TODO Other format (UTC) */
 	kprintf("Welcome to Elarix %d.%d! (compiled on %s %s)\n",
@@ -96,18 +101,17 @@ void kernel_main(void)
 	/* ioapic_init(); */
 #endif
 
-#if 0
+#if 1
 	/* Initialize video hardware properly */
 	dprintf("fb", KP_DBG "addr is %#x\n", mboot->framebuffer_addr);
 	dprintf("fb", KP_DBG "bpp is %#x\n", mboot->framebuffer_bpp);
 	dprintf("fb", KP_DBG "pitch is %#x\n", mboot->framebuffer_pitch);
 	dprintf("fb", KP_DBG "type is %#x\n", mboot->framebuffer_type);
 
-	/* TODO Switch */
 	if (mboot->framebuffer_type == 1) {
 		u64 *fb = (u64 *) (u64) mboot->framebuffer_addr;
 		u32 color = ((1 << mboot->framebuffer_blue_mask_size) - 1) <<
-			mboot->framebuffer_blue_field_position;
+				mboot->framebuffer_blue_field_position;
 		u8 *pixel;
 		u16 i, j;
 
@@ -123,7 +127,7 @@ void kernel_main(void)
 				break;
 			case 32:
 				pixel = fb + mboot->framebuffer_pitch *
-					i + 4 * i;
+						i + 4 * i;
 				*pixel = color;
 				break;
 			default:
@@ -134,12 +138,13 @@ void kernel_main(void)
 
 		for (j = 0; j < 1024; j++) {
 			u32 v = j * (mboot->framebuffer_bpp / 8) + 2 *
-				mboot->framebuffer_pitch;
+					mboot->framebuffer_pitch;
 			/* u32 i = j * 4 + 32 * 3200; */
 			fb[v + 0] = 0 & 255;
 			fb[v + 1] = 255 & 255;
 			fb[v + 2] = 255 & 255;
 		}
+
 		for (;;)
 			asm volatile ("hlt");
 	} else {
@@ -270,9 +275,7 @@ void kernel_main(void)
 		} else if (strcmp(cmd, "halt") == 0) {
 			panic("halt", 0, 0);
 		} else if (strcmp(cmd, "clear") == 0) {
-#ifdef CONFIG_VGA
-			vga_clear();
-#endif
+			/* TODO */
 		} else if (strcmp(cmd, "uptime") == 0) {
 			kprintf("uptime: %d seconds\n", uptime());
 		} else if (cmd[0] != '\0') {

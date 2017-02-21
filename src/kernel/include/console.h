@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/include/issue.h
+ * src/kernel/include/console.h
  *
  * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
@@ -22,9 +22,40 @@
  *
  */
 
-#ifndef _ISSUE_H
-#define _ISSUE_H
+#ifndef _CONSOLE_H
+#define _CONSOLE_H
 
-#define ELARIX_VER 0.1
+#include <list.h>
+
+#define CUR_BLOCK	0
+#define CUR_VBAR	1
+#define CUR_HBAR	2
+
+
+struct con_ops {
+	/* Clear the console */
+	void (*clear) (void);
+	/* Set cursor mode: mode */
+	void (*cursor) (int);
+	/* Move the cursor: x, y */
+	void (*move) (int, int);
+	/* palette TODO XXX */
+	void (*palette) (void); /* TODO */
+	/* Write a byte to the console: c */
+	void (*putc) (const char);
+	/* Scroll the console up or down: n */
+	void (*scroll) (int);
+};
+
+struct con_driver {
+	struct list_head l;
+
+	const char *name;
+
+	struct con_ops *op;
+};
+
+int con_reg(struct con_driver *driver);
+void con_unreg(struct con_driver *driver);
 
 #endif

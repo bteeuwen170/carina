@@ -19,7 +19,6 @@
 
 #include <char/serial.h>
 #include <video/fb.h>
-#include <video/vga.h>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -333,26 +332,9 @@ void kprint(const char *prefix, char *fmt, ...)
 	va_end(args);
 
 	char *str = fmtbuf;
-	u8 color = VGA_COLOR_LIGHT_GREY;
-
-	/* switch (kp) {
-	case KP_ERR:
-		color = VGA_COLOR_LIGHT_RED;
-		break;
-	case KP_WARN:
-		color = VGA_COLOR_YELLOW;
-		break;
-	case KP_DBG:
-		color = VGA_COLOR_LIGHT_GREEN;
-		break;
-	case KP_INFO:
-	default:
-		color = VGA_COLOR_LIGHT_GREY;
-		break;
-	} */
 
 	while (*str)
-		printcc(*(str++), color);
+		printcc(*(str++), 0);
 
 #ifdef CONFIG_SERIAL
 	/* TEMP */

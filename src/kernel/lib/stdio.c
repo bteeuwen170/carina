@@ -25,8 +25,6 @@
 #include <kbd.h>
 #include <kernel.h>
 
-#include <video/vga.h>
-
 #include <stdio.h>
 #include <string.h>
 
@@ -56,13 +54,14 @@ void panic(char *reason, u32 err_code, uintptr_t ip)
 
 void printc(char c)
 {
-	printcc(c, vga_fgcolor);
+	printcc(c, 0);
 }
 
 void printcc(char c, u8 color)
 {
 #ifdef CONFIG_VGA
-	vga_putch(c, color);
+	/* vga_putch(c, color); */
+	con_write(0, &c, 0, 1);
 #endif
 }
 
