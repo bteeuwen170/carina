@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/arch/x86/cpu/lapic.c
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,8 +23,8 @@
  */
 
 #include <lapic.h>
+#include <kernel.h>
 
-#include <stdio.h>
 #include <string.h>
 
 static i8 lapic_avail(void) {
@@ -36,7 +36,7 @@ static i8 lapic_avail(void) {
 
 void lapic_eoi(void)
 {
-	
+	/* TODO */
 }
 
 i8 lapic_init(void)

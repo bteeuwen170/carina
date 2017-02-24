@@ -1,9 +1,9 @@
 /*
  *
  * Elarix
- * src/kernel/lib/stdio.c
+ * src/kernel/init/panic.c
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,16 +22,10 @@
  *
  */
 
-#include <kbd.h>
 #include <kernel.h>
-
-#include <stdio.h>
-#include <string.h>
 
 /*
  * TODO This has to be safer
- * Don't use kprintf, switch to VGA if double fault, etc...
- * TODO Also relocate in other file
  * TODO Seperate panic for isrs
  * TODO Dump registers (at least rip/eip)
  */
@@ -50,23 +44,4 @@ void panic(char *reason, u32 err_code, uintptr_t ip)
 
 	for (;;)
 		asm volatile ("hlt");
-}
-
-void printc(char c)
-{
-	printcc(c, 0);
-}
-
-void printcc(char c, u8 color)
-{
-#ifdef CONFIG_VGA
-	/* vga_putch(c, color); */
-	con_write(0, &c, 0, 1);
-#endif
-}
-
-void prints(char *str)
-{
-	while (*str)
-		printc(*(str++));
 }

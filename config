@@ -83,7 +83,7 @@ menu "Sound devices"
 menu "Video devices"
 {
 	if (ARCH_x86) {
-		config CONFIG_VGA
+		config CONFIG_VGA_CON
 			"VGA text-mode support";
 	}
 }

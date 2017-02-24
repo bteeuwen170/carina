@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/fs/sb.c
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -36,8 +36,7 @@ struct superblock *sb_alloc(struct fs_driver *driver)
 
 	/* TODO Check if doesn't exist already */
 
-	sp = kmalloc(sizeof(struct superblock));
-	if (!sp)
+	if (!(sp = kmalloc(sizeof(struct superblock))))
 		return NULL;
 
 	list_init(&sp->l);

@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/fs/inode.c
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -48,7 +48,6 @@ struct inode *inode_alloc(struct superblock *sp)
 		ip = sp->op->alloc_inode(sp);
 	else
 		ip = kmalloc(sizeof(struct inode));
-
 	if (!ip)
 		return NULL;
 
@@ -110,6 +109,9 @@ struct inode *inode_get(struct superblock *sp, ino_t inum)
 
 void inode_put(struct inode *ip)
 {
+	if (!ip)
+		return;
+
 	ip->refs--;
 
 	if (!ip->refs)

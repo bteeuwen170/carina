@@ -28,17 +28,25 @@
 
 #include <asm/cpu.h>
 
+#include <string.h>
+
 static const char devname[] = "vga_con";
 
 #define VGA_WIDTH	80
 #define VGA_HEIGHT	25
 
+static const u8 colors[] = {
+	0, 4, 2, 6, 1, 5, 3, 7,
+	8, 12, 10, 14, 9, 13, 11, 15
+};
+
 static u16 *buf = (u16 *) 0xB8000;
 
-static u8 x = 0, y = 0;
-static u8 fg = 0x07, bg = 0x00;
+static u8 x, y;
+static u8 fg = 0x07, fgm = 0, bg = 0x00;
 
-static int state = 0;
+static int state;
+static char esc_buf[42]; /* XXX Safe? */
 
 static void putc(char c, u8 x, u8 y)
 {
@@ -100,40 +108,131 @@ void vga_clear(void)
 
 void vga_putc(const char c)
 {
-	switch (state) {
-	case 0:
-		switch (c) {
-		case '\b':
-			if (!x)
-				break;
+	char escn_buf[19];
+	int i = 0, j = 0;
+	long n;
 
-			x--;
-			putc(' ', x, y);
-			break;
-		case '\n':
-			x = 0;
-			y++;
-			break;
-		case '\t':
+	if (state == 0 && c == '\033') {
+		state = 1;
+		return;
+	} else if (state == 1 && c == '[') {
+		switch (c) {
+		case '3':
+		case '[':
+			state = 2;
+			return;
+		case 'T':
 			x += 8;
 			break;
-		case '\r':
-			break;
-		default:
-			putc(c, x, y);
-			x++;
-		}
-
-		if (x >= VGA_WIDTH) {
-			x -= VGA_WIDTH;
-			y++;
-		}
-
-		if (y >= VGA_HEIGHT)
+		case 'D':
 			vga_scroll(1);
+			return;
+		case 'M':
+			vga_scroll(-1);
+			return;
+		case '7':
+		case '8':
+		case '(':
+		case ')':
+		default:
+			state = 0;
+			return;
+		}
+	} else if (state > 1) {
+		switch (c) {
+		case '2':
+			if (state == 2)
+				state = 3;
+			else
+				state = 0;
+			return;
+		case 'J':
+			if (state == 3)
+				vga_clear();
 
-		vga_move(x, y);
+			state = 0;
+			return;
+		case 'm':
+			while (esc_buf[i]) {
+				memset(escn_buf, 0, 19);
+
+				while (esc_buf[i] && esc_buf[i] != ';' &&
+						esc_buf[i] != 'm')
+					escn_buf[j++] = esc_buf[i++];
+
+				/* TODO Use pointers to avoid extra buffer */
+				n = strtol(escn_buf, NULL, 10);
+
+				if (n == 0)
+					fgm = 0;
+				else if (n == 1)
+					fgm = 8;
+				else if (n >= 30 && n <= 37)
+					fg = colors[n - 30 + fgm];
+				else if (n >= 40 && n <= 47)
+					bg = colors[n - 40 + fgm];
+
+				if (esc_buf[i] == ';')
+					i++;
+				j = 0;
+			}
+		case 'g':
+			state = 0;
+			return;
+		/* TODO Implement other escape seqs. */
+		default:
+			esc_buf[state++ - 2] = c;
+			return;
+		}
+	} else {
+		if (state)
+			memset(esc_buf, 0, 42);
+
+		state = 0;
 	}
+
+	switch (c) {
+	case '\b':
+		if (!x)
+			break;
+
+		x--;
+		putc(' ', x, y);
+		break;
+	case '\n':
+		x = 0;
+		y++;
+		break;
+	case '\t':
+		x += 8;
+		break;
+	case '\r':
+		break;
+	default:
+		putc(c, x, y);
+		x++;
+	}
+
+	if (x >= VGA_WIDTH) {
+		x -= VGA_WIDTH;
+		y++;
+	}
+
+	if (y >= VGA_HEIGHT)
+		vga_scroll(1);
+
+	vga_move(x, y);
+}
+
+static int vga_con_probe(void)
+{
+	/* XXX TEMP */
+	dev_init((dev_t) { 0, 0 });
+}
+
+static void vga_con_fini(void)
+{
+	/* TODO */
 }
 
 static struct con_ops vga_con_ops = {
@@ -146,9 +245,12 @@ static struct con_ops vga_con_ops = {
 };
 
 static struct con_driver vga_con_driver = {
-	.name = devname,
+	.name	= devname,
 
-	.op = &vga_con_ops
+	.op	= &vga_con_ops,
+
+	.probe	= &vga_con_probe,
+	.fini	= &vga_con_fini
 };
 
 int vga_con_init(void)
@@ -156,9 +258,9 @@ int vga_con_init(void)
 	int res;
 
 	res = con_reg(&vga_con_driver);
-	if (res < 0)
+	/* if (res < 0)
 		panic("%s: unable to register console driver (%d)",
-				devname, res);
+				devname, res); */
 
 	return 0;
 }
@@ -169,3 +271,4 @@ void vga_con_exit(void)
 }
 
 MODULE(vga_con, &vga_con_init, &vga_con_exit);
+MODULE_BEFORE(con);

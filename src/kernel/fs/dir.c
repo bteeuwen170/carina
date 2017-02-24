@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/fs/dir.c
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -30,12 +30,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-static struct dirent *dirent_alloc(struct dirent *dp, const char *name)
+struct dirent *dirent_alloc(struct dirent *dp, const char *name)
 {
 	struct dirent *dep;
 
-	dep = kmalloc(sizeof(struct dirent));
-	if (!dep)
+	if (!(dep = kmalloc(sizeof(struct dirent))))
 		return NULL;
 
 	if (strlen(name) > NAME_MAX) {
@@ -44,6 +43,8 @@ static struct dirent *dirent_alloc(struct dirent *dp, const char *name)
 	}
 
 	list_init(&dep->l);
+	if (dp)
+		list_add(&dp->ip->del, &dep->l);
 
 	strncpy(dep->name, name, NAME_MAX);
 
@@ -62,8 +63,7 @@ struct dirent *dirent_alloc_root(struct inode *ip)
 	if (!ip)
 		return NULL;
 
-	dep = dirent_alloc(NULL, "/");
-	if (!dep)
+	if (!(dep = dirent_alloc(NULL, "/")))
 		return NULL;
 
 	dep->ip = ip;
@@ -85,22 +85,49 @@ static void dirent_dealloc(struct dirent *dep)
 
 struct dirent *dirent_get(const char *path)
 {
-	struct dirent *dep;
+	struct dirent *dep, *dec;
+	char name_buf[NAME_MAX + 1];
+	int i = 0;
 
 	/* Incorrect */
 	/*dep = kmalloc(sizeof(struct dirent));
 	if (!dep)
 		return NULL;*/
 
-	if (*path == '/')
+	if (*path == '/') {
 		dep = root_sb->root;
-	else
+		path++;
+	} else {
 		dep = cproc->cwd;
+	}
 
-	/* while (*path) {
+	/* inode_put parent */
 
-	} */
+	while (*path) {
+		memset(name_buf, 0, NAME_MAX + 1);
 
+		while (*path && *path != '/')
+			name_buf[i++] = *(path++);
+
+		if (strcmp(name_buf, "..") == 0) {
+			dep = dep->dp;
+		} else if (strcmp(name_buf, ".") != 0) {
+			list_for_each(dec, &dep->ip->del, l) {
+				if (strcmp(dec->name, name_buf) == 0) {
+					dep = dec;
+					goto ret;
+				}
+			}
+
+			return NULL;
+		}
+
+		if (*path == '/')
+			path++;
+		i = 0;
+	}
+
+ret:
 	dep->refs++;
 
 	return dep;
@@ -109,13 +136,24 @@ struct dirent *dirent_get(const char *path)
 struct usr_dirent *usr_dirent_get(struct file *fp)
 {
 	struct usr_dirent *udp;
+	struct dirent *dep;
+	int i = 0;
 
-	udp = kmalloc(sizeof(struct usr_dirent));
+	if (!(udp = kmalloc(sizeof(struct usr_dirent))))
+		return NULL;
 
-	udp->inum = fp->dep->ip->inum;
-	strncpy(udp->name, fp->dep->name, NAME_MAX);
+	list_for_each(dep, &fp->dep->ip->del, l) {
+		if (i++ == fp->off) {
+			fp->off++;
 
-	return udp;
+			udp->inum = dep->ip->inum;
+			strncpy(udp->name, dep->name, NAME_MAX);
+
+			return udp;
+		}
+	}
+
+	return NULL;
 }
 
 void dirent_put(struct dirent *dep)

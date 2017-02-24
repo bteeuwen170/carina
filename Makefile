@@ -21,8 +21,6 @@ ARCH32		= i386
 endif
 
 
-# Binaries
-
 HOSTCC		:= gcc
 HOSTLD		:= ld
 export HOSTCC HOSTLD
@@ -35,8 +33,6 @@ LD		:= $(ARCH)-elf-elarix-ld
 BOCHS		:= bochs
 QEMU		:= qemu-system-$(ARCH)
 
-
-# Flags
 
 ARCHFLAGS	= -D ARCH_$(ARCH)
 ifneq ($(ARCH),$(ARCHT))
@@ -52,9 +48,9 @@ include .config
 TYPES		= src/kernel/include/sys/types.h
 # TEMP
 ASFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS)
-CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os #-fomit-frame-pointer
-CFLAGS32	:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-Os #-fno-omit-frame-pointer
-LDFLAGS		:= -nostdlib -z max-page-size=4096 #-Os #-s
+CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fomit-frame-pointer
+CFLAGS32	:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fno-omit-frame-pointer
+LDFLAGS		:= -nostdlib -z max-page-size=4096
 export ASFLAGS CFLAGS CFLAGS32 LDFLAGS
 
 HOSTCFLAGS	:= -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -g #-Os
@@ -70,8 +66,12 @@ include src/kernel/Makefile
 #include util/Makefile
 include toolchain/Makefile
 
-PHONY += all debug
-all: kernel iso
+PHONY += all release debug
+all: release
+release: CFLAGS+=-Os -s
+release: LDFLAGS+=-Os -s
+release: kernel iso
+debug: CFLAGS+=-g
 debug: kernel iso qemu
 
 CLEAN_FILES	+= root/grub.img \

@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/init/main.c
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -59,36 +59,11 @@ void kernel_main(void)
 
 	spin_lock(main); */
 
-	/* FIXME Memory map cannot be printed before vga_init() */
-	mm_init(mboot->mmap_addr, mboot->mmap_len);
-
-#ifdef CONFIG_RAMFS
-	ramfs_init();
-#endif
-
 	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
 	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
-	/* Initialize early video and debugging hardware */
-#ifdef CONFIG_VGA
-	vga_con_init();
-#endif
-#ifdef CONFIG_SERIAL
-	/* serial_init(COM0); */
-	/* serial_con_init(COM0); */
-#endif
 
-	/* TMP XXX */
-	con_init();
-	con_ioctl(0, IO_CLEAR, 0);
-
-	/* TODO Other format (UTC) */
-	kprintf("Welcome to Elarix %d.%d! (compiled on %s %s)\n",
-			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
-
-	/* TODO Move */
-	kprintf(KP_CON "Elarix has been loaded by %s\n",
-			mboot->boot_loader_name);
-	kprintf(KP_CON "cmdline: %s\n", mboot->cmdline);
+	/* FIXME Memory map cannot be printed before console initialization */
+	mm_init(mboot->mmap_addr, mboot->mmap_len);
 
 	/* cpu_info(); */
 
@@ -101,7 +76,7 @@ void kernel_main(void)
 	/* ioapic_init(); */
 #endif
 
-#if 1
+#if 0
 	/* Initialize video hardware properly */
 	dprintf("fb", KP_DBG "addr is %#x\n", mboot->framebuffer_addr);
 	dprintf("fb", KP_DBG "bpp is %#x\n", mboot->framebuffer_bpp);
@@ -152,6 +127,32 @@ void kernel_main(void)
 	}
 #endif
 
+#ifdef CONFIG_RAMFS
+	ramfs_init();
+#endif
+	sv_mount(0, "ramfs");
+
+#ifdef CONFIG_VGA_CON
+	vga_con_init();
+#endif
+#ifdef CONFIG_SERIAL
+	/* serial_init(COM0); */
+	/* serial_con_init(COM0); */
+#endif
+#ifdef CONFIG_CONSOLE
+	con_init();
+	kprintf("\033[2J");
+#endif
+
+	/* TODO Other format (UTC) */
+	kprintf("\033[1;34mWelcome to Elarix %d.%d! (compiled on %s %s)\033[0;37m\n",
+			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
+
+	/* TODO Move */
+	kprintf(KP_CON "Elarix has been loaded by %s\n",
+			mboot->boot_loader_name);
+	kprintf(KP_CON "cmdline: %s\n", mboot->cmdline);
+
 	asm volatile ("sti");
 	dprintf("cpu0", KP_DBG "interrupts enabled\n");
 	/* TODO Actually get starting cpu */
@@ -195,7 +196,7 @@ void kernel_main(void)
 
 	cmd[0] = '\0';
 
-	kprintf("\e[1;34mSV Shell:\n$ ");
+	kprintf("SV Shell:\n$ ");
 
 	for (;;) {
 		char c;
@@ -228,22 +229,20 @@ void kernel_main(void)
 		kprintf("%c", c);
 
 		/* File system */
-		if (strcmp(cmd, "finit") == 0) {
-			sv_mount(0, "ramfs");
-		} else if (strcmp(cmd, "ls") == 0) {
+		if (strcmp(cmd, "ls") == 0) {
 			struct usr_dirent udep;
-			int tmpfd = sys_open("/", 0, 0);
+			int fd = sys_open("/", 0, 0);
 
-			int res = sys_readdir(tmpfd, &udep);
-			kprintf("fd: %d, res: %d\n", tmpfd, res);
-			if (res > 0) {
-			/* while (sys_readdir(tmpfd, &udep)) { */
-				kprintf("entry: %s\n", udep.name);
-			/* } */
+			while (sys_readdir(fd, &udep)) {
+				kprintf("%s\n", udep.name);
 			}
 		} else if (strcmp(cmd, "mkdir test") == 0) {
 			int res2 = sys_mkdir("/test", 0);
 			kprintf("res: %d", res2);
+		} else if (strcmp(cmd, "popen") == 0) {
+			int fd2 = sys_open("/con0", 0, 0);
+
+			sys_write(fd2, "hi\n", 3);
 
 		/* Audio */
 #ifdef CONFIG_AC97

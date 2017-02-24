@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/fs/fs.c
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -69,18 +69,15 @@ int sys_open(const char *path, int flags, mode_t mode)
 	int fd = -1;
 	(void) flags;
 
-	dep = dirent_get(path);
-	if (!dep)
+	if (!(dep = dirent_get(path)))
 		goto err;
 
-	fp = file_alloc(dep);
-	if (!fp)
+	if (!(fp = file_alloc(dep)))
 		goto err;
 
 	fp->mode = mode;
 
-	fd = fd_alloc(fp);
-	if (fd < 0)
+	if ((fd = fd_alloc(fp)) < 0)
 		goto err;
 	/* open_namei 0.99 namei.c <- from <- open.c (sys_open) */
 
@@ -101,22 +98,30 @@ err:
 {
 } */
 
-/* int sys_write(int fd, const char *buf, size_t n)
+int sys_write(int fd, const char *buf, size_t n)
 {
-} */
+	/* XXX FIXME TEMP */
+	struct file *fp;
+
+	if (!(fp = file_get(fd)))
+		return -EBADF;
+
+	fp->dep->ip->fop->write(fp, buf, 0, n);
+}
 
 int sys_readdir(int fd, struct usr_dirent *udep)
 {
 	struct file *fp;
 	struct usr_dirent *ludep;
 
-	fp = file_get(fd);
-	if (!fp)
+	if (!(fp = file_get(fd)))
 		return -EBADF;
 
-	ludep = usr_dirent_get(fp);
-	if (!ludep)
-		return -1; /* TODO */
+	if (!(fp->dep->ip->mode & IM_DIR))
+		return -ENOTDIR;
+
+	if (!(ludep = usr_dirent_get(fp)))
+		return 0;
 
 	/* TODO Update atime */
 	/* TODO Loop */
@@ -142,8 +147,7 @@ int sys_mkdir(const char *path, mode_t mode)
 {
 	struct dirent *dep;
 
-	dep = dirent_get(path);
-	if (!dep)
+	if (!(dep = dirent_get(path)))
 		goto err;
 	/* TODO */
 err:

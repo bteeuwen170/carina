@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/dev/pci/pci.c
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,7 +29,6 @@
 
 #include <asm/cpu.h>
 
-#include <stdio.h>
 #include <stdlib.h>
 
 static const char devname[] = "pci";

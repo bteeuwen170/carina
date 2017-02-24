@@ -5,7 +5,7 @@
  * Wirzenius wrote this portably, Torvalds fucked it up :-)
  *
  * (C) 1991  Linus Torvalds
- * Last modified by Bastiaan Teeuwen on 2016/09/19
+ * Last modified by Bastiaan Teeuwen on 2017-02-24
  *
  */
 
@@ -331,16 +331,5 @@ void kprint(const char *prefix, char *fmt, ...)
 
 	va_end(args);
 
-	char *str = fmtbuf;
-
-	while (*str)
-		printcc(*(str++), 0);
-
-#ifdef CONFIG_SERIAL
-	/* TEMP */
-	u32 i;
-	for (i = 0; i < strlen(fmtbuf); i++)
-		serial_out(COM0, fmtbuf[i]);
-	serial_out(COM0, 0x0D);
-#endif
+	con_write(0, fmtbuf, 0, strlen(fmtbuf));
 }

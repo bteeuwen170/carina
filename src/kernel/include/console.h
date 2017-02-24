@@ -53,6 +53,9 @@ struct con_driver {
 	const char *name;
 
 	struct con_ops *op;
+
+	int	(*probe) (void);
+	void	(*fini) (void);
 };
 
 int con_reg(struct con_driver *driver);

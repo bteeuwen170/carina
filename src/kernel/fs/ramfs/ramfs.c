@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/fs/ramfs/ramfs.c
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -99,7 +99,6 @@ static struct inode *ramfs_inode_alloc(struct superblock *sp,
 	(void) dev;
 
 	ip = inode_alloc(sp);
-
 	if (!ip)
 		return NULL;
 
@@ -138,15 +137,20 @@ static struct superblock *ramfs_read_sb(struct superblock *sp)
 	dep = dirent_alloc_root(ip);
 	sp->root = dep;
 
+	dep = dirent_alloc(sp->root, ".");
+	if (!dep)
+		return NULL;
+	dep->ip = ip;
+
+	dep = dirent_alloc(sp->root, "..");
+	if (!dep)
+		return NULL;
+	dep->ip = ip;
+
 	return sp;
 }
 
-static struct sb_ops ramfs_sb_ops = {
-	.alloc_inode	= NULL,
-	.dealloc_inode	= NULL,
-	.write_inode	= NULL,
-	.delete_inode	= NULL
-};
+static struct sb_ops ramfs_sb_ops = { NULL };
 
 static struct inode_ops ramfs_inode_ops = {
 	.create		= &ramfs_create,
@@ -159,17 +163,9 @@ static struct inode_ops ramfs_inode_ops = {
 	.move		= &ramfs_move
 };
 
-static struct file_ops ramfs_file_ops = {
-	.read		= NULL,
-	.write		= NULL
-};
+static struct file_ops ramfs_file_ops = { NULL };
 
-static struct file_ops ramfs_dir_ops = {
-	.open		= NULL,
-	.close		= NULL,
-	.read		= NULL,
-	.readdir	= NULL
-};
+static struct file_ops ramfs_dir_ops = { NULL };
 
 static struct fs_driver ramfs_driver = {
 	.name		= devname,

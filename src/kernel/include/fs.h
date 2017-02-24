@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/include/fs.h
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -44,7 +44,6 @@
 
 /* Inode mode */
 #define IM_FTM		0170000
-/* #define IM_SOCK	0140000 */	/* Socket */
 #define IM_LNK		0120000	/* Symbolic link */
 #define IM_REG		0100000	/* Regular file */
 #define IM_BLK		0060000	/* Block device */
@@ -145,8 +144,6 @@ struct file {
 	int	refs;			/* Reference count */
 
 	struct dirent	*dep;		/* Associated directory entry pointer */
-
-	struct file_ops	*op;
 };
 
 struct sb_ops {
@@ -179,7 +176,7 @@ struct inode_ops {
 	/* Move a dirent: odp, odep, dp, dep */
 	int (*move) (struct inode *, struct dirent *, /* XXX Eq to rename on l */
 			struct inode *, struct dirent *);
-	/* TODO (mknod), (perm), (setattr / getattr), (readlink) */
+	/* TODO (perm), (setattr / getattr), (readlink) */
 };
 
 struct dirent_ops {
@@ -213,7 +210,7 @@ struct inode *inode_alloc(struct superblock *sp);
 struct inode *inode_get(struct superblock *sp, ino_t inum);
 void inode_put(struct inode *ip);
 
-/* struct dirent *dirent_alloc(struct dirent *dp, const char *name); */
+struct dirent *dirent_alloc(struct dirent *dp, const char *name);
 struct dirent *dirent_alloc_root(struct inode *ip);
 
 struct dirent *dirent_get(const char *path);
@@ -229,6 +226,7 @@ int fs_reg(struct fs_driver *driver);
 void fs_unreg(struct fs_driver *driver);
 
 /* XXX TMP XXX */
+int sys_write(int fd, const char *buf, size_t n);
 int sys_open(const char *path, int flags, mode_t mode);
 int sys_readdir(int fd, struct usr_dirent *udep);
 int sys_mkdir(const char *path, mode_t mode);
@@ -256,6 +254,8 @@ struct device {
 
 int dev_reg(u8 major, const char *name, struct file_ops *op);
 void dev_unreg(u8 major);
+
+int dev_init(dev_t dev);
 
 /* END dev.h */
 

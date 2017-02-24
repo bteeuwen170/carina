@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/lib/string.c
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -187,14 +187,35 @@ char *strtrm(char *str)
 /* FIXME */
 long strtol(const char *str, char **ptr, int base)
 {
+#if 0
+	int n = 0;
+
+	if (!*str)
+		return -1;
+
+	if (!base)
+		base = 10;
+
+	if (*str == '-')
+		str++;
+
+	do {
+		if (*str < '0' || *str > '9')
+			return -1;
+
+		n *= base;
+		n += *str - '0';
+	} while (*(++str));
+
+	return (str[0] == '-') ? -n : n;
+#else
 	long n;
 
 	if (*str == '+' || *str == '-')
 		str++;
 
-	if (base == 0) {
-		/* TODO */
-	}
+	if (base == 0)
+		base = 10;
 
 	n = 0;
 
@@ -216,6 +237,7 @@ long strtol(const char *str, char **ptr, int base)
 	/* TODO Memcpy */
 
 	return (*str == '-' ? -1 : 1) * n;
+#endif
 }
 
 /* TODO See header file */

@@ -72,36 +72,37 @@ int con_write(struct file *fp, const char *buf, off_t off, size_t n)
 	for (i = 0; i < n; i++)
 		list_for_each(driver, &consoles, l)
 			driver->op->putc(buf[i]);
+
+#ifdef CONFIG_SERIAL /* TODO Write a serial console driver! */
+	for (i = 0; i < n; i++)
+		serial_out(0x3F8, buf[i]);
+	serial_out(0x3F8, 0x0D);
+#endif
 }
 
 int con_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
 {
-	struct con_driver *driver;
-
-	switch (cmd) {
-	case IO_CLEAR:
-		list_for_each(driver, &consoles, l)
-			driver->op->clear();
-		break;
-	}
+	/* TODO */
 }
 
 static struct file_ops con_file_ops = {
 	.open		= &con_open,
 	.close		= &con_close,
-	.read		= NULL,
 	.write		= &con_write,
-	.readdir	= NULL,
 	.ioctl		= &con_ioctl
 };
 
+/* XXX Register all console drivers FIRST */
 int con_init(void)
 {
+	struct con_driver *driver;
 	int res;
 
-	res = dev_reg(0, devname, &con_file_ops);
-	if (res < 0)
+	if ((res = dev_reg(0, devname, &con_file_ops)) < 0)
 		panic("%s: unable to register console (%d)", devname, res);
+
+	list_for_each(driver, &consoles, l)
+		driver->probe();
 
 	return 0;
 }

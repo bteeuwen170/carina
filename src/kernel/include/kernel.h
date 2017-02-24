@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/include/kernel.h
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef _PRINT_H
-#define _PRINT_H
+#ifndef _KERNEL_H
+#define _KERNEL_H
 
 /* Loglevels */
 #if 0
@@ -63,5 +63,7 @@ void kprint(const char *prefix, char *fmt, ...);
 #define kprintf(...) 	kprint(NULL, __VA_ARGS__)
 
 i8 get_kp();
+
+void panic(char *reason, u32 err_code, uintptr_t ip);
 
 #endif

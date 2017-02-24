@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/fs/dev.c
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,6 +24,7 @@
 
 #include <errno.h>
 #include <fs.h>
+#include <kernel.h>
 #include <limits.h>
 
 #include <stdlib.h>
@@ -49,4 +50,20 @@ void dev_unreg(u8 major)
 {
 	devices[major].name = NULL;
 	devices[major].op = NULL;
+}
+
+int dev_init(dev_t dev)
+{
+	struct dirent *dep;
+	char name[NAME_MAX + 1];
+
+	sprintf(name, "%s%d", devices[dev.major].name, dev.minor);
+
+	if (!(dep = dirent_alloc(root_sb->root, name)))
+		return -ENOMEM;
+
+	dep->ip = inode_alloc(root_sb);
+	dep->ip->fop = devices[dev.major].op;
+
+	return 0;
 }

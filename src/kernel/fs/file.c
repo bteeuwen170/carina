@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/fs/file.c
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -38,8 +38,7 @@ struct file *file_alloc(struct dirent *dep)
 	if (file_cnt + 1 > FD_MAX)
 		return NULL;
 
-	fp = kmalloc(sizeof(struct file));
-	if (!fp)
+	if (!(fp = kmalloc(sizeof(struct file))))
 		return NULL;
 
 	fp->mode = 0;
@@ -48,8 +47,6 @@ struct file *file_alloc(struct dirent *dep)
 	fp->refs = 1;
 
 	fp->dep = dep;
-
-	fp->op = dep->ip->fop;
 
 	file_cnt++;
 

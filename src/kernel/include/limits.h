@@ -3,7 +3,7 @@
  * Elarix
  * src/kernel/include/limits.h
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,7 +33,7 @@
 /* #define CPUS_MAX	8 */	/* Max. CPUs */
 
 /* #define CHILD_MAX	512 */	/* Max. processes */
-#define DEV_MAX		256	/* Max. devices */
+#define DEV_MAX		256	/* Max. device drivers */
 #define ERRNO_MAX	4095	/* Max. errno */
 #define FD_MAX		32	/* Max. file descriptors per process */
 #define FILE_MAX	32	/* Max. files that may be open at once */
