@@ -34,6 +34,7 @@ Kernel
   instead
 - Linked list generic solution
 - Scroll buffer with shortcuts to move up and down
+- Implement PCI devices just like any other if possible
 
 Makefile
 - Seperate kernel-o and kernel-l (objects and libs)

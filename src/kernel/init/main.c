@@ -274,7 +274,7 @@ void kernel_main(void)
 		} else if (strcmp(cmd, "halt") == 0) {
 			panic("halt", 0, 0);
 		} else if (strcmp(cmd, "clear") == 0) {
-			/* TODO */
+			kprintf("\033[2J");
 		} else if (strcmp(cmd, "uptime") == 0) {
 			kprintf("uptime: %d seconds\n", uptime());
 		} else if (cmd[0] != '\0') {

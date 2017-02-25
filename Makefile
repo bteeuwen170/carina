@@ -142,7 +142,7 @@ ifeq ($(ARCHT),x86)
 PHONY += bochs
 bochs: iso
 	echo -e "\033[1m> Starting Bochs...\033[0m"
-	$(BOCHS) $(BOCHSFLAGS)
+	$(BOCHS) $(BOCHSFLAGS) &> /dev/null
 endif
 
 # The 2>/dev/null is to suppress GTK warnings
