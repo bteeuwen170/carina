@@ -237,8 +237,8 @@ void kernel_main(void)
 				kprintf("%s\n", udep.name);
 			}
 		} else if (strcmp(cmd, "mkdir test") == 0) {
-			int res2 = sys_mkdir("/test", 0);
-			kprintf("res: %d", res2);
+			int res2 = sys_mkdir("/dev", 0);
+			kprintf("res: %d\n", res2);
 		} else if (strcmp(cmd, "popen") == 0) {
 			int fd2 = sys_open("/con0", 0, 0);
 

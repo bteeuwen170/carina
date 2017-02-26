@@ -41,6 +41,6 @@
 /* #define LINK_MAX	32 */	/* Max. links for a file */
 #define NAME_MAX	255	/* Max. length of a file name */
 /* #define NGROUPS_MAX	8 */	/* Max. GIDs per process */
-/* #define PATH_MAX	4095 */	/* Max. length of a path name */
+#define PATH_MAX	4095	/* Max. length of a path name */
 
 #endif

@@ -145,11 +145,32 @@ int sys_readdir(int fd, struct usr_dirent *udep)
 
 int sys_mkdir(const char *path, mode_t mode)
 {
-	struct dirent *dep;
+	struct inode *ip;
+	struct dirent *dp, *dep;
+	const char *i, *n;
+	char p[PATH_MAX + 1];
+	int j, res;
 
-	if (!(dep = dirent_get(path)))
+	ip = NULL; /* TEMP */
+
+	for (i = path, n = path, p[0] = '\0', j = 0; *i; i++, j++) {
+		if (*i == '/') {
+			strncpy(p, path, j + 1);
+			p[j + 1] = '\0';
+
+			n = i + 1;
+		}
+	}
+
+	if (!(dp = dirent_get(p))) {
+		res = -ENOENT;
 		goto err;
-	/* TODO */
+	}
+
+	if (!(dep = dirent_alloc(dp, n)))
+		goto err;
+
+	return 0;
 err:
 	return -1;
 }

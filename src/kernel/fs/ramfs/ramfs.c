@@ -98,8 +98,7 @@ static struct inode *ramfs_inode_alloc(struct superblock *sp,
 	struct inode *ip;
 	(void) dev;
 
-	ip = inode_alloc(sp);
-	if (!ip)
+	if (!(ip = inode_alloc(sp)))
 		return NULL;
 
 	ip->mode = mode;
@@ -130,20 +129,16 @@ static struct superblock *ramfs_read_sb(struct superblock *sp)
 
 	sp->op = &ramfs_sb_ops;
 
-	ip = ramfs_inode_alloc(sp, IM_DIR | 0755, (dev_t) { 0, 0 });
-	if (!ip)
+	if (!(ip = ramfs_inode_alloc(sp, IM_DIR | 0755, (dev_t) { 0, 0 })))
 		return NULL;
-
 	dep = dirent_alloc_root(ip);
 	sp->root = dep;
 
-	dep = dirent_alloc(sp->root, ".");
-	if (!dep)
+	if (!(dep = dirent_alloc(sp->root, ".")))
 		return NULL;
 	dep->ip = ip;
 
-	dep = dirent_alloc(sp->root, "..");
-	if (!dep)
+	if (!(dep = dirent_alloc(sp->root, "..")))
 		return NULL;
 	dep->ip = ip;
 

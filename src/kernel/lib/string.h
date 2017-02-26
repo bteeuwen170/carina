@@ -40,6 +40,8 @@ char *strcat(char *dest, const char *src);
 int strcmp(const char *src1, const char *src2);
 /* int strncmp(const char *src1, const char *src2, size_t n); */
 
+/* int strstr(const char *src1, const char *src2); */
+
 size_t strlen(const char *str);
 size_t strnlen(const char *str, size_t n);
 

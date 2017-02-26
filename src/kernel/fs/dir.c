@@ -34,6 +34,11 @@ struct dirent *dirent_alloc(struct dirent *dp, const char *name)
 {
 	struct dirent *dep;
 
+	if (dp)
+		list_for_each(dep, &dp->ip->del, l)
+			if (strcmp(dep->name, name) == 0)
+				return NULL;
+
 	if (!(dep = kmalloc(sizeof(struct dirent))))
 		return NULL;
 
