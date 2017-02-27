@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/init/main.c
+ * src/kernel/kernel/main.c
  *
  * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
