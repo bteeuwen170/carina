@@ -48,22 +48,17 @@ static u8 fg = 0x07, fgm = 0, bg = 0x00;
 static int state;
 static char esc_buf[42]; /* XXX Safe? */
 
-static void putc(char c, u8 x, u8 y)
+static void vga_con_putc(char c, u8 x, u8 y)
 {
 	buf[y * VGA_WIDTH + x] = ((u16) c) | ((u16) fg | bg << 4) << 8;
 }
 
-void vga_cursor(int mode)
+static void vga_con_cursor(int mode)
 {
 	/* TODO */
 }
 
-void vga_palette()
-{
-	/* TODO */
-}
-
-void vga_move(int _x, int _y)
+static void vga_con_move(int _x, int _y)
 {
 	u16 l;
 
@@ -78,7 +73,7 @@ void vga_move(int _x, int _y)
 	io_outb(0x3D5, l);
 }
 
-void vga_scroll(int n)
+static void vga_con_scroll(int n)
 {
 	int i;
 
@@ -95,18 +90,18 @@ void vga_scroll(int n)
 		buf[i++] = ((u16) ' ') | ((u16) fg | bg << 4) << 8;
 }
 
-void vga_clear(void)
+static void vga_con_clear(void)
 {
 	u8 xi, yi;
 
 	for (xi = 0; xi < VGA_WIDTH; xi++)
 		for (yi = 0; yi < VGA_HEIGHT; yi++)
-			putc(' ', xi, yi);
+			vga_con_putc(' ', xi, yi);
 
-	vga_move(0, 0);
+	vga_con_move(0, 0);
 }
 
-void vga_putc(const char c)
+void vga_con_write(const char c)
 {
 	char escn_buf[19];
 	int i = 0, j = 0;
@@ -125,10 +120,10 @@ void vga_putc(const char c)
 			x += 8;
 			break;
 		case 'D':
-			vga_scroll(1);
+			vga_con_scroll(1);
 			return;
 		case 'M':
-			vga_scroll(-1);
+			vga_con_scroll(-1);
 			return;
 		case '7':
 		case '8':
@@ -148,7 +143,7 @@ void vga_putc(const char c)
 			return;
 		case 'J':
 			if (state == 3)
-				vga_clear();
+				vga_con_clear();
 
 			state = 0;
 			return;
@@ -197,7 +192,7 @@ void vga_putc(const char c)
 			break;
 
 		x--;
-		putc(' ', x, y);
+		vga_con_putc(' ', x, y);
 		break;
 	case '\n':
 		x = 0;
@@ -209,7 +204,7 @@ void vga_putc(const char c)
 	case '\r':
 		break;
 	default:
-		putc(c, x, y);
+		vga_con_putc(c, x, y);
 		x++;
 	}
 
@@ -219,9 +214,9 @@ void vga_putc(const char c)
 	}
 
 	if (y >= VGA_HEIGHT)
-		vga_scroll(1);
+		vga_con_scroll(1);
 
-	vga_move(x, y);
+	vga_con_move(x, y);
 }
 
 static int vga_con_probe(void)
@@ -235,22 +230,12 @@ static void vga_con_fini(void)
 	/* TODO */
 }
 
-static struct con_ops vga_con_ops = {
-	.clear		= &vga_clear,
-	.cursor		= &vga_cursor,
-	.move		= &vga_move,
-	.palette	= NULL,
-	.putc		= &vga_putc,
-	.scroll		= &vga_scroll
-};
-
 static struct con_driver vga_con_driver = {
 	.name	= devname,
 
-	.op	= &vga_con_ops,
-
 	.probe	= &vga_con_probe,
-	.fini	= &vga_con_fini
+	.fini	= &vga_con_fini,
+	.write	= &vga_con_write
 };
 
 int vga_con_init(void)

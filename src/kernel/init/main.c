@@ -232,10 +232,21 @@ void kernel_main(void)
 			struct usr_dirent udep;
 			int fd = sys_open("/", 0, 0);
 
-			while (sys_readdir(fd, &udep)) {
+			kprintf("fd: %d\n", fd);
+
+			while (sys_readdir(fd, &udep) > 0) {
 				kprintf("%s\n", udep.name);
 			}
-		} else if (strcmp(cmd, "mkdir test") == 0) {
+		} else if (strcmp(cmd, "ls /dev") == 0) {
+			struct usr_dirent udep;
+			int fd = sys_open("/dev", 0, 0);
+
+			kprintf("fd: %d\n", fd);
+
+			while (sys_readdir(fd, &udep) > 0) {
+				kprintf("%s\n", udep.name);
+			}
+		} else if (strcmp(cmd, "mkdir dev") == 0) {
 			int res2 = sys_mkdir("/dev", 0);
 			kprintf("res: %d\n", res2);
 		} else if (strcmp(cmd, "popen") == 0) {

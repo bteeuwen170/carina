@@ -64,8 +64,8 @@ struct mountp *sv_mount(struct fs_driver *driver, const char *name)
 
 int sys_open(const char *path, int flags, mode_t mode)
 {
-	struct dirent *dep;
-	struct file *fp;
+	struct dirent *dep = NULL;
+	struct file *fp = NULL;
 	int res = -1;
 	(void) flags;
 
@@ -162,7 +162,7 @@ err:
 
 int sys_mkdir(const char *path, mode_t mode)
 {
-	struct dirent *dp, *dep;
+	struct dirent *dp = NULL, *dep = NULL, *cdep = NULL, *pdep = NULL;
 	const char *i, *n;
 	char p[PATH_MAX + 1];
 	int j, res = -1;
@@ -190,10 +190,27 @@ int sys_mkdir(const char *path, mode_t mode)
 		res = -ENOMEM;
 		goto err;
 	}
+	dep->ip->mode = IM_DIR | mode;
+
+	if (!(cdep = dirent_alloc(dep, "."))) {
+		res = -1; /* TODO */
+		goto err;
+	}
+	cdep->ip = dep->ip;
+
+	if (!(pdep = dirent_alloc(dep, ".."))) {
+		res = -1; /* TODO */
+		goto err;
+	}
+	pdep->ip = dep->ip;
 
 	return 0;
 
 err:
+	if (pdep)
+		dirent_put(pdep);
+	if (cdep)
+		dirent_put(cdep);
 	if (dep && dep->ip)
 		inode_put(dep->ip);
 	if (dep)

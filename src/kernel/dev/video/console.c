@@ -71,7 +71,7 @@ int con_write(struct file *fp, const char *buf, off_t off, size_t n)
 
 	for (i = 0; i < n; i++)
 		list_for_each(driver, &consoles, l)
-			driver->op->putc(buf[i]);
+			driver->write(buf[i]);
 
 #ifdef CONFIG_SERIAL /* TODO Write a serial console driver! */
 	for (i = 0; i < n; i++) {

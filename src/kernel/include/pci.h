@@ -95,8 +95,8 @@ struct pci_driver {
 	const char		*name;
 	const struct pci_dev_id	*ids;
 
-	int	(*probe) (struct pci_dev *);
-	void	(*fini) (struct pci_dev *);
+	int (*probe) (struct pci_dev *);
+	void (*fini) (struct pci_dev *);
 };
 
 u32 pci_ind(struct pci_dev *dev, u32 reg);

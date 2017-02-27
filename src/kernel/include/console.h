@@ -31,31 +31,14 @@
 #define CUR_VBAR	1
 #define CUR_HBAR	2
 
-
-struct con_ops {
-	/* Clear the console */
-	void (*clear) (void);
-	/* Set cursor mode: mode */
-	void (*cursor) (int);
-	/* Move the cursor: x, y */
-	void (*move) (int, int);
-	/* palette TODO XXX */
-	void (*palette) (void); /* TODO */
-	/* Write a byte to the console: c */
-	void (*putc) (const char);
-	/* Scroll the console up or down: n */
-	void (*scroll) (int);
-};
-
 struct con_driver {
 	struct list_head l;
 
 	const char *name;
 
-	struct con_ops *op;
-
-	int	(*probe) (void);
-	void	(*fini) (void);
+	int (*probe) (void);
+	void (*fini) (void);
+	void (*write) (const char);
 };
 
 int con_reg(struct con_driver *driver);
