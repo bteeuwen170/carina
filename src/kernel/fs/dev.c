@@ -54,14 +54,22 @@ void dev_unreg(u8 major)
 
 int dev_init(dev_t dev)
 {
-	struct dirent *dep;
+	struct dirent *dp, *dep;
 	char name[NAME_MAX + 1];
+	int res;
 
 	sprintf(name, "%s%d", devices[dev.major].name, dev.minor);
 
-	if (!(dep = dirent_alloc(root_sb->root, name)))
-		return -ENOMEM;
+	if (!(dp = dirent_get("/dev"))) {
+		if ((res = sv_mkdir("/dev", 0)) != 0)
+			return res;
 
+		if (!(dp = dirent_get("/dev")))
+			return -1; /* TODO */
+	}
+
+	if (!(dep = dirent_alloc(dp, name)))
+		return -ENOMEM;
 	dep->ip = inode_alloc(root_sb);
 	dep->ip->fop = devices[dev.major].op;
 

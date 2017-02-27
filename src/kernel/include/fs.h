@@ -202,6 +202,8 @@ struct file_ops {
 
 extern struct superblock *root_sb;
 
+int sv_mkdir(const char *path, mode_t mode);
+
 struct superblock *sb_alloc(struct fs_driver *driver);
 
 struct inode *inode_alloc(struct superblock *sp);

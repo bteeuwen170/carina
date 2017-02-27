@@ -250,7 +250,7 @@ void kernel_main(void)
 			int res2 = sys_mkdir("/dev", 0);
 			kprintf("res: %d\n", res2);
 		} else if (strcmp(cmd, "popen") == 0) {
-			int fd2 = sys_open("/con0", 0, 0);
+			int fd2 = sys_open("/dev/con0", 0, 0);
 
 			sys_write(fd2, "hi\n", 3);
 

@@ -67,7 +67,7 @@ int con_write(struct file *fp, const char *buf, off_t off, size_t n)
 	/* TODO NO, don't write to every console, very bad, very very bad XXX */
 
 	struct con_driver *driver;
-	int i;
+	size_t i;
 
 	for (i = 0; i < n; i++)
 		list_for_each(driver, &consoles, l)
@@ -102,7 +102,7 @@ int con_init(void)
 	int res;
 
 	if ((res = dev_reg(0, devname, &con_file_ops)) < 0)
-		panic("%s: unable to register console (%d)", devname, res);
+		kprintf("%s: unable to register console (%d)", devname, res);
 
 	list_for_each(driver, &consoles, l)
 		driver->probe();

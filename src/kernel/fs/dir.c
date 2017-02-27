@@ -34,6 +34,8 @@ struct dirent *dirent_alloc(struct dirent *dp, const char *name)
 {
 	struct dirent *dep;
 
+	/* TODO Remove all forward slashes from name */
+
 	if (dp)
 		list_for_each(dep, &dp->ip->del, l)
 			if (strcmp(dep->name, name) == 0)
@@ -94,11 +96,6 @@ struct dirent *dirent_get(const char *path)
 	char name_buf[NAME_MAX + 1];
 	int i = 0;
 
-	/* Incorrect */
-	/*dep = kmalloc(sizeof(struct dirent));
-	if (!dep)
-		return NULL;*/
-
 	if (*path == '/') {
 		dep = root_sb->root;
 		path++;
@@ -106,7 +103,7 @@ struct dirent *dirent_get(const char *path)
 		dep = cproc->cwd;
 	}
 
-	/* inode_put parent */
+	/* TODO inode_put parent? */
 
 	while (*path) {
 		memset(name_buf, 0, NAME_MAX + 1);
@@ -120,14 +117,15 @@ struct dirent *dirent_get(const char *path)
 			list_for_each(dec, &dep->ip->del, l) {
 				if (strcmp(dec->name, name_buf) == 0) {
 					dep = dec;
-					goto ret;
+					goto con;
 				}
 			}
 
 			return NULL;
 		}
 
-		if (*path == '/')
+con:
+		while (*path == '/')
 			path++;
 		i = 0;
 	}

@@ -23,6 +23,7 @@
  */
 
 #include <console.h>
+#include <fs.h>
 #include <kernel.h>
 #include <module.h>
 
@@ -243,9 +244,9 @@ int vga_con_init(void)
 	int res;
 
 	res = con_reg(&vga_con_driver);
-	/* if (res < 0)
-		panic("%s: unable to register console driver (%d)",
-				devname, res); */
+	if (res < 0)
+		kprintf("%s: unable to register console driver (%d)",
+				devname, res);
 
 	return 0;
 }

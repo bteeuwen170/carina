@@ -52,6 +52,11 @@ struct mountp *sv_mount(struct fs_driver *driver, const char *name)
 	return NULL;
 }
 
+int sv_mkdir(const char *path, mode_t mode)
+{
+	/* XXX TEMP? */ return sys_mkdir(path, mode);
+}
+
 /* TODO Move to proc/ */
 /* int sys_chdir(const char *path)
 {
@@ -168,7 +173,7 @@ int sys_mkdir(const char *path, mode_t mode)
 	int j, res = -1;
 
 	for (i = path, n = path, p[0] = '\0', j = 0; *i; i++, j++) {
-		if (*i == '/') {
+		if (*i == '/' && *(i + 1)) {
 			strncpy(p, path, j + 1);
 			p[j + 1] = '\0';
 
