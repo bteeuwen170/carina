@@ -66,28 +66,34 @@ int sys_open(const char *path, int flags, mode_t mode)
 {
 	struct dirent *dep;
 	struct file *fp;
-	int fd = -1;
+	int res = -1;
 	(void) flags;
 
-	if (!(dep = dirent_get(path)))
+	if (!(dep = dirent_get(path))) {
+		res = -ENOENT;
 		goto err;
+	}
 
-	if (!(fp = file_alloc(dep)))
+	if (!(fp = file_alloc(dep))) {
+		res = -EMFILE; /* FIXME Right? */
 		goto err;
+	}
 
 	fp->mode = mode;
 
-	if ((fd = fd_alloc(fp)) < 0)
+	if ((res = fd_alloc(fp)) < 0)
 		goto err;
 	/* open_namei 0.99 namei.c <- from <- open.c (sys_open) */
 
-	return fd;
+	return res;
 
 err:
-	file_dealloc(fp);
-	/* fd_dealloc(fd); */
+	if (fp)
+		file_put(fp);
+	if (dep)
+		dirent_put(dep);
 
-	return fd;
+	return res;
 }
 
 /* int sys_close(int fd)
@@ -113,12 +119,17 @@ int sys_readdir(int fd, struct usr_dirent *udep)
 {
 	struct file *fp;
 	struct usr_dirent *ludep;
+	int res = -1;
 
-	if (!(fp = file_get(fd)))
-		return -EBADF;
+	if (!(fp = file_get(fd))) {
+		res = -EBADF;
+		goto err;
+	}
 
-	if (!(fp->dep->ip->mode & IM_DIR))
-		return -ENOTDIR;
+	if (!(fp->dep->ip->mode & IM_DIR)) {
+		res = -ENOTDIR;
+		goto err;
+	}
 
 	if (!(ludep = usr_dirent_get(fp)))
 		return 0;
@@ -129,6 +140,12 @@ int sys_readdir(int fd, struct usr_dirent *udep)
 	memcpy(udep, ludep, sizeof(struct usr_dirent));
 
 	return 1;
+
+err:
+	/* if (ludep)
+		kfree(ludep); */
+
+	return res;
 }
 
 /* int sys_link(const char *oldpath, const char *path)
@@ -145,13 +162,10 @@ int sys_readdir(int fd, struct usr_dirent *udep)
 
 int sys_mkdir(const char *path, mode_t mode)
 {
-	struct inode *ip;
 	struct dirent *dp, *dep;
 	const char *i, *n;
 	char p[PATH_MAX + 1];
-	int j, res;
-
-	ip = NULL; /* TEMP */
+	int j, res = -1;
 
 	for (i = path, n = path, p[0] = '\0', j = 0; *i; i++, j++) {
 		if (*i == '/') {
@@ -167,12 +181,27 @@ int sys_mkdir(const char *path, mode_t mode)
 		goto err;
 	}
 
-	if (!(dep = dirent_alloc(dp, n)))
+	if (!(dep = dirent_alloc(dp, n))) {
+		res = -1; /* TODO */
 		goto err;
+	}
+
+	if (!(dep->ip = inode_alloc(dp->ip->sp))) {
+		res = -ENOMEM;
+		goto err;
+	}
 
 	return 0;
+
 err:
-	return -1;
+	if (dep && dep->ip)
+		inode_put(dep->ip);
+	if (dep)
+		dirent_put(dep);
+	if (dp)
+		dirent_put(dp);
+
+	return res;
 }
 
 /* int sys_rmdir(const char *path)

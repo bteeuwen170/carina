@@ -43,8 +43,7 @@ int fd_alloc(struct file *fp)
 	return -EMFILE;
 }
 
-/* void fd_dealloc(int fd)
+void fd_dealloc(int fd)
 {
-	[>XXX Unsafe<]
-	cproc->fd[fd] = NULL;
-} */
+	cproc->fd[fd] = 0;
+}

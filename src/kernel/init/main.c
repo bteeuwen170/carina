@@ -65,15 +65,67 @@ void kernel_main(void)
 	/* FIXME Memory map cannot be printed before console initialization */
 	mm_init(mboot->mmap_addr, mboot->mmap_len);
 
-	/* cpu_info(); */
+#endif
+
+#ifdef CONFIG_RAMFS
+	ramfs_init();
+#endif
+	sv_mount(0, "ramfs");
+
+#ifdef CONFIG_VGA_CON
+	vga_con_init();
+#endif
+#ifdef CONFIG_SERIAL
+	/* serial_init(COM0); */
+	/* serial_con_init(COM0); */
+#endif
+#ifdef CONFIG_CONSOLE
+	con_init();
+	kprintf("\033[2J");
+#endif
+
+	/* TODO Other format (UTC) */
+	kprintf("\033[1;34mWelcome to Elarix %d.%d! (compiled on %s %s)\033[0;37m\n",
+			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
+
+	/* TODO Move */
+	kprintf(KP_CON "Elarix has been loaded by %s\n",
+			mboot->boot_loader_name);
+	kprintf(KP_CON "cmdline: %s\n", mboot->cmdline);
+	cpu_info();
 
 	/* Initialize mandatory hardware */
 	pic_remap();
-	/* pic_disable(); */
 	idt_init();
 	/* tss_init(); */
 	/* lapic_init(); */
 	/* ioapic_init(); */
+
+	asm volatile ("sti");
+	dprintf("cpu0", KP_DBG "interrupts enabled\n");
+	/* TODO Actually get starting cpu */
+
+	timer_init();
+
+	/* TODO Modules */
+	/* acpi_init(); */
+#ifdef CONFIG_CMOS
+	cmos_init();
+#endif
+#ifdef CONFIG_PS2KBD
+	ps2kbd_init();
+#endif
+#ifdef CONFIG_ATA
+	ide_init();
+#endif
+#ifdef CONFIG_AC97
+	ac97_init();
+#endif
+#ifdef CONFIG_SB16
+	sb16_init();
+#endif
+#ifdef CONFIG_PCI
+	pci_init();
 #endif
 
 #if 0
@@ -125,59 +177,6 @@ void kernel_main(void)
 	} else {
 		/* TODO Return error */
 	}
-#endif
-
-#ifdef CONFIG_RAMFS
-	ramfs_init();
-#endif
-	sv_mount(0, "ramfs");
-
-#ifdef CONFIG_VGA_CON
-	vga_con_init();
-#endif
-#ifdef CONFIG_SERIAL
-	/* serial_init(COM0); */
-	/* serial_con_init(COM0); */
-#endif
-#ifdef CONFIG_CONSOLE
-	con_init();
-	kprintf("\033[2J");
-#endif
-
-	/* TODO Other format (UTC) */
-	kprintf("\033[1;34mWelcome to Elarix %d.%d! (compiled on %s %s)\033[0;37m\n",
-			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
-
-	/* TODO Move */
-	kprintf(KP_CON "Elarix has been loaded by %s\n",
-			mboot->boot_loader_name);
-	kprintf(KP_CON "cmdline: %s\n", mboot->cmdline);
-
-	asm volatile ("sti");
-	dprintf("cpu0", KP_DBG "interrupts enabled\n");
-	/* TODO Actually get starting cpu */
-
-	timer_init();
-
-	/* TODO Modules */
-	/* acpi_init(); */
-#ifdef CONFIG_CMOS
-	cmos_init();
-#endif
-#ifdef CONFIG_PS2KBD
-	ps2kbd_init();
-#endif
-#ifdef CONFIG_ATA
-	ide_init();
-#endif
-#ifdef CONFIG_AC97
-	ac97_init();
-#endif
-#ifdef CONFIG_SB16
-	sb16_init();
-#endif
-#ifdef CONFIG_PCI
-	pci_init();
 #endif
 
 	/* Temporary and crappy code */

@@ -31,6 +31,11 @@ static const char devname[] = "fs";
 
 ino_t inodes = 0;
 
+/* static int write_inode(struct inode *ip)
+{
+	[>TODO<]
+} */
+
 static void inode_delete(struct inode *ip)
 {
 	if (ip->sp->op->delete_inode) {
@@ -99,10 +104,9 @@ struct inode *inode_get(struct superblock *sp, ino_t inum)
 {
 	struct inode *ip;
 
-	list_for_each(ip, &sp->il, l) {
+	list_for_each(ip, &sp->il, l)
 		if (ip->inum == inum)
 			return ip;
-	}
 
 	return inode_alloc(sp);
 }

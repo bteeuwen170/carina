@@ -154,7 +154,7 @@ struct sb_ops {
 	/* Write an inode to disk: ip */
 	int (*write_inode) (struct inode *);
 	/* Delete an inode from disk: ip */
-	int (*delete_inode) (struct inode *);
+	void (*delete_inode) (struct inode *);
 	/* TODO (sync) */
 };
 
@@ -205,8 +205,6 @@ extern struct superblock *root_sb;
 struct superblock *sb_alloc(struct fs_driver *driver);
 
 struct inode *inode_alloc(struct superblock *sp);
-/* void inode_dealloc(struct inode *ip); */
-
 struct inode *inode_get(struct superblock *sp, ino_t inum);
 void inode_put(struct inode *ip);
 
@@ -217,10 +215,11 @@ struct dirent *dirent_get(const char *path);
 struct usr_dirent *usr_dirent_get(struct file *fp);
 
 struct file *file_alloc(struct dirent *dep);
-void file_dealloc(struct file *fp);
 struct file *file_get(int fd);
+void file_put(int fd);
 
 int fd_alloc(struct file *fp);
+void fd_dealloc(int fd);
 
 int fs_reg(struct fs_driver *driver);
 void fs_unreg(struct fs_driver *driver);

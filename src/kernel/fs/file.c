@@ -53,7 +53,7 @@ struct file *file_alloc(struct dirent *dep)
 	return fp;
 }
 
-void file_dealloc(struct file *fp)
+static void file_dealloc(struct file *fp)
 {
 	if (!fp)
 		return;
@@ -66,4 +66,14 @@ void file_dealloc(struct file *fp)
 struct file *file_get(int fd)
 {
 	return cproc->fd[fd];
+}
+
+void file_put(int fd)
+{
+	cproc->fd[fd]->refs--;
+
+	if (!cproc->fd[fd]->refs) {
+		file_dealloc(cproc->fd[fd]);
+		fd_dealloc(fd);
+	}
 }
