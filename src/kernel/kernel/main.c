@@ -31,6 +31,7 @@
 #include <lock.h>
 #include <mboot.h>
 #include <pci.h>
+#include <proc.h>
 #include <reboot.h>
 #include <sys/time.h>
 
@@ -195,7 +196,7 @@ void kernel_main(void)
 
 	cmd[0] = '\0';
 
-	kprintf("SV Shell:\n$ ");
+	kprintf("SV Shell:\n%s $ ", cproc->cwd->name);
 
 	for (;;) {
 		char c;
@@ -228,31 +229,40 @@ void kernel_main(void)
 		kprintf("%c", c);
 
 		/* File system */
-		if (strcmp(cmd, "ls") == 0) {
+		if (strncmp(cmd, "ls", 2) == 0) {
 			struct usr_dirent udep;
-			int fd = sys_open("/", 0, 0);
+			int fd;
 
-			kprintf("fd: %d\n", fd);
-
-			while (sys_readdir(fd, &udep) > 0) {
-				kprintf("%s\n", udep.name);
+			if (strcmp(cmd, "ls") == 0) {
+				fd = sys_open(".", 0, 0);
+			} else {
+				char *ccmd = cmd;
+				ccmd += 3;
+				fd = sys_open(ccmd, 0, 0);
 			}
-		} else if (strcmp(cmd, "ls /dev") == 0) {
-			struct usr_dirent udep;
-			int fd = sys_open("/dev", 0, 0);
 
-			kprintf("fd: %d\n", fd);
+			/* kprintf("fd: %d\n", fd); */
 
-			while (sys_readdir(fd, &udep) > 0) {
-				kprintf("%s\n", udep.name);
-			}
-		} else if (strcmp(cmd, "mkdir dev") == 0) {
-			int res2 = sys_mkdir("/dev", 0);
+			while (sys_readdir(fd, &udep) > 0)
+				kprintf("%s ", udep.name);
+			kprintf("\n");
+
+			sys_close(fd);
+		} else if (strncmp(cmd, "cd", 2) == 0) {
+			char *ccmd = cmd;
+			ccmd += 3;
+
+			int res2 = sys_chdir(ccmd);
+			kprintf("res: %d\n", res2);
+		} else if (strcmp(cmd, "mkdir test") == 0) {
+			int res2 = sys_mkdir("/test", 0);
 			kprintf("res: %d\n", res2);
 		} else if (strcmp(cmd, "popen") == 0) {
-			int fd2 = sys_open("/dev/con0", 0, 0);
+			int fd = sys_open("/dev/con0", 0, 0);
 
-			sys_write(fd2, "hi\n", 3);
+			sys_write(fd, "hi\n", 3);
+
+			sys_close(fd);
 
 		/* Audio */
 #ifdef CONFIG_AC97
@@ -293,7 +303,7 @@ void kernel_main(void)
 
 		p = 0;
 
-		kprintf("$ ");
+		kprintf("%s $ ", cproc->cwd->name);
 
 		for (i = 1; i < strlen(cmd); i++)
 			cmd[i] = 0;

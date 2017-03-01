@@ -38,7 +38,7 @@ char *strcat(char *dest, const char *src);
 /* char *strncat(char *dest, const char *src, size_t n); */
 
 int strcmp(const char *src1, const char *src2);
-/* int strncmp(const char *src1, const char *src2, size_t n); */
+int strncmp(const char *src1, const char *src2, size_t n);
 
 /* int strstr(const char *src1, const char *src2); */
 

@@ -134,7 +134,18 @@ int strcmp(const char *src1, const char *src2)
 	return *(unsigned char *) src1 - *(unsigned char *) src2;
 }
 
-/* TODO strncmp */
+/* TODO Safer! XXX */
+int strncmp(const char *src1, const char *src2, size_t n)
+{
+	n--;
+
+	while (*src1 == *src2 && *src1 && n--) {
+		src1++;
+		src2++;
+	}
+
+	return *(unsigned char *) src1 - *(unsigned char *) src2;
+}
 
 size_t strlen(const char *str)
 {

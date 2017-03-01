@@ -50,16 +50,6 @@ void con_unreg(struct con_driver *driver)
 	list_rm(&driver->l);
 }
 
-int con_open(struct inode *ip, struct file *fp)
-{
-
-}
-
-int con_close(struct inode *ip, struct file *fp)
-{
-
-}
-
 int con_write(struct file *fp, const char *buf, off_t off, size_t n)
 {
 	(void) off;
@@ -81,6 +71,8 @@ int con_write(struct file *fp, const char *buf, off_t off, size_t n)
 	}
 	serial_out(0x3F8, 0x0D);
 #endif
+
+	return n;
 }
 
 int con_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
@@ -89,8 +81,6 @@ int con_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
 }
 
 static struct file_ops con_file_ops = {
-	.open		= &con_open,
-	.close		= &con_close,
 	.write		= &con_write,
 	.ioctl		= &con_ioctl
 };

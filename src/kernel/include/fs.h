@@ -202,8 +202,6 @@ struct file_ops {
 
 extern struct superblock *root_sb;
 
-int sv_mkdir(const char *path, mode_t mode);
-
 struct superblock *sb_alloc(struct fs_driver *driver);
 
 struct inode *inode_alloc(struct superblock *sp);
@@ -223,12 +221,16 @@ void file_put(int fd);
 int fd_alloc(struct file *fp);
 void fd_dealloc(int fd);
 
+int sv_mkdir(const char *path, mode_t mode);
+
 int fs_reg(struct fs_driver *driver);
 void fs_unreg(struct fs_driver *driver);
 
 /* XXX TMP XXX */
+int sys_chdir(const char *path);
 int sys_write(int fd, const char *buf, size_t n);
 int sys_open(const char *path, int flags, mode_t mode);
+int sys_close(int fd);
 int sys_readdir(int fd, struct usr_dirent *udep);
 int sys_mkdir(const char *path, mode_t mode);
 /* XXX END TMP XXX */

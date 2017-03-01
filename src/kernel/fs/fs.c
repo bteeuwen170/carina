@@ -26,8 +26,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <fs.h>
-#include <limits.h>
 #include <kernel.h>
+#include <limits.h>
+#include <proc.h>
 #include <sys/types.h> /* XXX TEMP for syntax highlighting */
 
 #include <stdlib.h>
@@ -47,6 +48,7 @@ struct mountp *sv_mount(struct fs_driver *driver, const char *name)
 	sp = sb_alloc(driver);
 
 	/* TEMP */ root_sb = list_entry(fs_drivers.next, struct fs_driver, l)->read_sb(sp);
+	cproc->cwd = root_sb->root;
 	/* TODO */
 
 	return NULL;
@@ -58,9 +60,31 @@ int sv_mkdir(const char *path, mode_t mode)
 }
 
 /* TODO Move to proc/ */
-/* int sys_chdir(const char *path)
+int sys_chdir(const char *path)
 {
-} */
+	struct dirent *dep;
+	int res = -1;
+
+	if (!(dep = dirent_get(path))) {
+		res -ENOENT;
+		goto err;
+	}
+
+	if (!(dep->ip->mode & IM_DIR)) {
+		res = -ENOTDIR;
+		goto err;
+	}
+
+	cproc->cwd = dep;
+
+	return 0;
+
+err:
+	if (dep)
+		dirent_put(dep);
+
+	return res;
+}
 
 /* TODO Move to ipc/ */
 /* int sys_pipe(int fd[2])
@@ -85,6 +109,7 @@ int sys_open(const char *path, int flags, mode_t mode)
 	}
 
 	fp->mode = mode;
+	/* dep->ip->fop->open(dep->ip, fp); */
 
 	if ((res = fd_alloc(fp)) < 0)
 		goto err;
@@ -101,9 +126,17 @@ err:
 	return res;
 }
 
-/* int sys_close(int fd)
+int sys_close(int fd)
 {
-} */
+	if (fd > FD_MAX)
+		return -EBADF;
+
+	/* dep->ip->fop->close(dep->ip, fp); */
+
+	file_put(fd);
+
+	return 0;
+}
 
 /* int sys_read(int fd, char *buf, size_t n)
 {
@@ -117,7 +150,7 @@ int sys_write(int fd, const char *buf, size_t n)
 	if (!(fp = file_get(fd)))
 		return -EBADF;
 
-	fp->dep->ip->fop->write(fp, buf, 0, n);
+	return fp->dep->ip->fop->write(fp, buf, 0, n);
 }
 
 int sys_readdir(int fd, struct usr_dirent *udep)
@@ -152,6 +185,11 @@ err:
 
 	return res;
 }
+
+/* int sys_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
+{
+
+} */
 
 /* int sys_link(const char *oldpath, const char *path)
 {
