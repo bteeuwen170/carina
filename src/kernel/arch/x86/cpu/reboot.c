@@ -24,29 +24,25 @@
 
 #include <asm/cpu.h>
 
-/* #include <kbd/ps2.h> */
+#define PS2_CMD		0x64
+#define PS2_IO		0x60
+
+#define PS2_RESET	0xFE
 
 #define bit(n) (1 << (n))
 #define check_flag(flags, n) ((flags) & bit(n))
 
 void reboot(void)
 {
-#if 0
-	u8 trash;
+	u8 r;
 
 	asm volatile ("cli");
 
 	do {
-		trash = io_inb(PS2_CMD);
-		if (check_flag(trash, 0) != 0)
+		r = io_inb(PS2_CMD);
+		if (r & 1)
 			io_inb(PS2_IO);
-	} while (check_flag(trash, 1) != 0);
+	} while (r & 2);
 
 	io_outb(PS2_CMD, PS2_RESET);
-#endif
-
-	asm volatile ("cli");
-
-	for (;;)
-		asm volatile ("hlt");
 }

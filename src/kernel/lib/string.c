@@ -173,8 +173,12 @@ char *strrev(char *str)
 
 char *strnrev(char *str, size_t n)
 {
-	char cur;
-	char *e = str + n - 1;
+	char cur, *e;
+
+	if (!str || !n)
+		return str;
+
+	e = str + n - 1;
 
 	while (str < e) {
 		cur = *str;
@@ -183,18 +187,6 @@ char *strnrev(char *str, size_t n)
 	}
 
 	return str;
-/* 
-
-	unsigned int i;
-	unsigned int n = strlen(str) - 1;
-
-	for (i = 0; i < strlen(str) / 2; i++) {
-		str[i] += str[n];
-		str[n] = str[i] - str[n];
-		str[i] = str[i] - str[n--];
-	}
-
-	return str; */
 }
 
 char *strtrm(char *str)

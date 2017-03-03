@@ -92,7 +92,7 @@ void kernel_main(void)
 	/* TODO Move */
 	kprintf(KP_CON "Elarix has been loaded by %s\n",
 			mboot->boot_loader_name);
-	kprintf(KP_CON "cmdline: %s\n", mboot->cmdline);
+	kprintf("cmdline: %s\n", mboot->cmdline);
 	cpu_info();
 
 	/* Initialize mandatory hardware */
@@ -256,8 +256,8 @@ void kernel_main(void)
 			char *ccmd = cmd;
 			ccmd += 3;
 
-			int res2 = sys_chdir(ccmd);
-			kprintf("res: %d\n", res2);
+			/* int res2 = */ sys_chdir(ccmd);
+			/* kprintf("res: %d\n", res2); */
 		} else if (strcmp(cmd, "cwd") == 0) {
 			sys_cwdir(cmd);
 			kprintf("%s\n", cmd);
