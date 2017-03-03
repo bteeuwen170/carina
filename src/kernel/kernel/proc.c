@@ -25,3 +25,4 @@
 #include <proc.h>
 
 struct process _cproc;
+struct process *cproc = &_cproc;

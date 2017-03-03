@@ -192,7 +192,7 @@ void kernel_main(void)
 	panic("Init was killed", 0, 0);
 #else
 	char cmd[64];
-	u8 i, p = 0;
+	u8 p = 0;
 
 	sys_cwdir(cmd);
 	kprintf("SV Shell:\n%s $ ", cmd);

@@ -48,7 +48,7 @@ struct process {
 
 /* XXX TEMP until scheduler is working */
 extern struct process _cproc;
-static struct process *cproc = &_cproc;
+extern struct process *cproc;
 /* XXX BAD */
 
 #endif
