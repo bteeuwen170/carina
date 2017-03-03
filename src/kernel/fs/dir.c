@@ -94,7 +94,7 @@ struct dirent *dirent_get(const char *path)
 {
 	struct dirent *dep, *dec;
 	char name_buf[NAME_MAX + 1];
-	int i = 0;
+	int i;
 
 	if (*path == '/') {
 		dep = root_sb->root;
@@ -108,8 +108,8 @@ struct dirent *dirent_get(const char *path)
 	while (*path) {
 		memset(name_buf, 0, NAME_MAX + 1);
 
-		while (*path && *path != '/')
-			name_buf[i++] = *path++;
+		for (i = 0; *path && *path != '/'; i++)
+			name_buf[i] = *path++;
 
 		if (strcmp(name_buf, "..") == 0) {
 			dep = dep->dp;
@@ -117,6 +117,7 @@ struct dirent *dirent_get(const char *path)
 			list_for_each(dec, &dep->ip->del, l) {
 				if (strcmp(dec->name, name_buf) == 0) {
 					dep = dec;
+
 					goto con;
 				}
 			}
@@ -127,10 +128,8 @@ struct dirent *dirent_get(const char *path)
 con:
 		while (*path == '/')
 			path++;
-		i = 0;
 	}
 
-ret:
 	dep->refs++;
 
 	return dep;
