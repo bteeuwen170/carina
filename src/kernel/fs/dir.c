@@ -109,7 +109,7 @@ struct dirent *dirent_get(const char *path)
 		memset(name_buf, 0, NAME_MAX + 1);
 
 		while (*path && *path != '/')
-			name_buf[i++] = *(path++);
+			name_buf[i++] = *path++;
 
 		if (strcmp(name_buf, "..") == 0) {
 			dep = dep->dp;

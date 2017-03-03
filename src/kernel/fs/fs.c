@@ -66,7 +66,7 @@ int sys_chdir(const char *path)
 	int res = -1;
 
 	if (!(dep = dirent_get(path))) {
-		res -ENOENT;
+		res = -ENOENT;
 		goto err;
 	}
 
@@ -84,6 +84,39 @@ err:
 		dirent_put(dep);
 
 	return res;
+}
+
+int sys_cwdir(char *path)
+{
+	struct dirent *dep = cproc->cwd;
+	char buf[PATH_MAX];
+	char *pb = buf, *nb = buf;
+	int res = -1;
+
+	buf[0] = '\0';
+
+	do {
+		strcat(buf, dep->name);
+		if (dep != root_sb->root)
+			strcat(buf, "/");
+
+		dep = dep->dp;
+	} while (dep != root_sb->root);
+
+	while (*nb++) {
+		if (*nb == '\0') {
+			strnrev(pb, nb - pb);
+		} else if (*nb == '/') {
+			strnrev(pb, nb - pb);
+			pb = nb + 1;
+		}
+	}
+
+	strrev(buf);
+
+	strcpy(path, buf);
+
+	return 0;
 }
 
 /* TODO Move to ipc/ */
@@ -128,14 +161,28 @@ err:
 
 int sys_close(int fd)
 {
+	struct file *fp = NULL;
+	int res = -1;
+
 	if (fd > FD_MAX)
 		return -EBADF;
 
+	if (!(fp = file_get(fd))) {
+		res = -EBADF;
+		goto err;
+	}
+
 	/* dep->ip->fop->close(dep->ip, fp); */
 
-	file_put(fd);
+	file_put(fp);
 
 	return 0;
+
+err:
+	if (fp)
+		file_put(fp);
+
+	return res;
 }
 
 /* int sys_read(int fd, char *buf, size_t n)

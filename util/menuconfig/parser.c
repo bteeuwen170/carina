@@ -24,12 +24,12 @@ static char *strtrm(char *str)
 {
 	char *trim;
 
-	while (isspace(*(str++)));
+	while (isspace(*str++));
 	if (*str == '\0')
 		return str;
 
 	trim = str + strlen(str) - 1;
-	while (trim > str && isspace(*(trim--)));
+	while (trim > str && isspace(*trim--));
 
 	*(trim + 2) = '\0';
 
@@ -129,12 +129,12 @@ static char *ident_read(char *buf)
 {
 	char *m1, *m2, *ident;
 
-	while (isspace(*(buf++)));
+	while (isspace(*buf++));
 	m1 = strpbrk(buf, " \t\n\v\f\r");
 	if (!m1)
 		return NULL;
 
-	while (isspace(*(m1++)));
+	while (isspace(*m1++));
 	m2 = strpbrk(--m1, " \t\n\v\f\r;");
 	if (!m2)
 		return NULL;

@@ -168,6 +168,23 @@ size_t strnlen(const char *str, size_t n)
 
 char *strrev(char *str)
 {
+	return strnrev(str, strlen(str));
+}
+
+char *strnrev(char *str, size_t n)
+{
+	char cur;
+	char *e = str + n - 1;
+
+	while (str < e) {
+		cur = *str;
+		*str++ = *e;
+		*e-- = cur;
+	}
+
+	return str;
+/* 
+
 	unsigned int i;
 	unsigned int n = strlen(str) - 1;
 
@@ -177,7 +194,7 @@ char *strrev(char *str)
 		str[i] = str[i] - str[n--];
 	}
 
-	return str;
+	return str; */
 }
 
 char *strtrm(char *str)
@@ -216,7 +233,7 @@ long strtol(const char *str, char **ptr, int base)
 
 		n *= base;
 		n += *str - '0';
-	} while (*(++str));
+	} while (*++str);
 
 	return (str[0] == '-') ? -n : n;
 #else
@@ -233,10 +250,10 @@ long strtol(const char *str, char **ptr, int base)
 	for (;;) {
 		if ((*str >= '0' && *str <= '7') ||
 				((*str == '8' || *str == '9') && base > 8))
-			n = n * base + *(str++) - '0';
+			n = n * base + *str++ - '0';
 		else if (((*str >= 'a' && *str <= 'f') ||
 				(*str >= 'A' && *str <= 'F')) && base == 16)
-			n = n * base + *(str++) - 'A' + 10;
+			n = n * base + *str++ - 'A' + 10;
 		else
 			break;
 	}

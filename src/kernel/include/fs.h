@@ -213,10 +213,11 @@ struct dirent *dirent_alloc_root(struct inode *ip);
 
 struct dirent *dirent_get(const char *path);
 struct usr_dirent *usr_dirent_get(struct file *fp);
+void dirent_put(struct dirent *dep);
 
 struct file *file_alloc(struct dirent *dep);
 struct file *file_get(int fd);
-void file_put(int fd);
+void file_put(struct file *fp);
 
 int fd_alloc(struct file *fp);
 void fd_dealloc(int fd);
@@ -228,6 +229,7 @@ void fs_unreg(struct fs_driver *driver);
 
 /* XXX TMP XXX */
 int sys_chdir(const char *path);
+int sys_cwdir(char *path);
 int sys_write(int fd, const char *buf, size_t n);
 int sys_open(const char *path, int flags, mode_t mode);
 int sys_close(int fd);

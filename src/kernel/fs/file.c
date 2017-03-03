@@ -68,12 +68,11 @@ struct file *file_get(int fd)
 	return cproc->fd[fd];
 }
 
-void file_put(int fd)
+void file_put(struct file *fp)
 {
-	cproc->fd[fd]->refs--;
+	fp->refs--;
 
-	if (!cproc->fd[fd]->refs) {
-		file_dealloc(cproc->fd[fd]);
-		fd_dealloc(fd);
+	if (!fp->refs) {
+		file_dealloc(fp);
 	}
 }

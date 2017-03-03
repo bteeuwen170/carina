@@ -50,13 +50,13 @@ menu "Char devices"
 		}
 	}
 
-	config CONFIG_PTY
+	/* config CONFIG_PTY
 		"Pseudo-telyTYpe terminal support";
-	
+
 	if (CONFIG_PTY) {
 		config CONFIG_TTY
 			"TelyTYpe terminal support";
-	}
+	} */
 }
 
 menu "Block devices"
@@ -82,6 +82,7 @@ menu "Sound devices"
 
 menu "Video devices"
 {
+	if (CONFIG_CONSOLE
 	if (ARCH_x86) {
 		config CONFIG_VGA_CON
 			"VGA text-mode support";

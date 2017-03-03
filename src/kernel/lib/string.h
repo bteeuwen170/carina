@@ -46,6 +46,7 @@ size_t strlen(const char *str);
 size_t strnlen(const char *str, size_t n);
 
 char *strrev(char *str);
+char *strnrev(char *str, size_t n);
 
 char *strtrm(char *str);
 

@@ -87,7 +87,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 		/* Format flags */
 		while (!(flags & FLAG_DONE)) {
 			/* XXX Can't contain multiple % right */
-			switch (*(++fmt)) {
+			switch (*++fmt) {
 			case '-':
 				flags |= FLAG_LEFT;
 				break;
@@ -109,7 +109,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 		}
 
 		/* Min. width */
-		if (*(fmt++) == '*') {
+		if (*fmt++ == '*') {
 			width = va_arg(args, int);
 
 			if (width < 0) {
@@ -122,7 +122,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 		}
 
 		/* Precision */
-		if (*(fmt++) == '.') {
+		if (*fmt++ == '.') {
 			if (*fmt == '*')
 				prec = va_arg(args, int);
 			else
@@ -133,7 +133,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 		}
 
 		/* Length */
-		switch (*(fmt++)) {
+		switch (*fmt++) {
 		case 'h':
 			if (*fmt == 'h') {
 				len = LEN_CHAR;

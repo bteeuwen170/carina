@@ -194,9 +194,10 @@ void kernel_main(void)
 	char cmd[64];
 	u8 i, p = 0;
 
-	cmd[0] = '\0';
+	sys_cwdir(cmd);
+	kprintf("SV Shell:\n%s $ ", cmd);
 
-	kprintf("SV Shell:\n%s $ ", cproc->cwd->name);
+	cmd[0] = '\0';
 
 	for (;;) {
 		char c;
@@ -221,7 +222,10 @@ void kernel_main(void)
 
 			kprintf("%c", c);
 
-			p++;
+			if (c == '\t')
+				p += 8;
+			else
+				p++;
 
 			continue;
 		}
@@ -254,9 +258,15 @@ void kernel_main(void)
 
 			int res2 = sys_chdir(ccmd);
 			kprintf("res: %d\n", res2);
-		} else if (strcmp(cmd, "mkdir test") == 0) {
-			int res2 = sys_mkdir("/test", 0);
-			kprintf("res: %d\n", res2);
+		} else if (strcmp(cmd, "cwd") == 0) {
+			sys_cwdir(cmd);
+			kprintf("%s\n", cmd);
+		} else if (strncmp(cmd, "mkdir", 5) == 0) {
+			char *ccmd = cmd;
+			ccmd += 6;
+
+			/* int res2 = */ sys_mkdir(ccmd, 0);
+			/* kprintf("res: %d\n", res2); */
 		} else if (strcmp(cmd, "popen") == 0) {
 			int fd = sys_open("/dev/con0", 0, 0);
 
@@ -301,13 +311,11 @@ void kernel_main(void)
 			kprintf("shell: command not found: %s\n", cmd);
 		}
 
-		p = 0;
+		sys_cwdir(cmd);
+		kprintf("%s $ ", cmd);
 
-		kprintf("%s $ ", cproc->cwd->name);
-
-		for (i = 1; i < strlen(cmd); i++)
-			cmd[i] = 0;
 		cmd[0] = '\0';
+		p = 0;
 	}
 #endif
 }

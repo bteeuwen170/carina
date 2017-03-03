@@ -162,7 +162,7 @@ int main(int argc, char **argv)
 	if (argc != 2)
 		return 1;
 
-	mp = config_parse(*(++argv));
+	mp = config_parse(*++argv);
 	if (!mp)
 		return 1;
 
