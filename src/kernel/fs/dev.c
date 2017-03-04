@@ -60,11 +60,13 @@ int dev_init(dev_t dev)
 
 	sprintf(name, "%s%d", devices[dev.major].name, dev.minor);
 
-	if (!(dp = dirent_get("/dev"))) {
-		if ((res = sv_mkdir("/dev", 0)) != 0)
-			return res;
+	if (!(dp = dirent_get("/sys/dev"))) {
+		if ((res = sv_mkdir("/sys/dev", 0)) != 0)
+			if ((res = sv_mkdir("/sys", 0)) == 0)
+				if ((res = sv_mkdir("/sys/dev", 0)) != 0)
+					return res;
 
-		if (!(dp = dirent_get("/dev")))
+		if (!(dp = dirent_get("/sys/dev")))
 			return -1; /* TODO */
 	}
 

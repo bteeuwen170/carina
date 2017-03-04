@@ -268,7 +268,7 @@ void kernel_main(void)
 			/* int res2 = */ sys_mkdir(ccmd, 0);
 			/* kprintf("res: %d\n", res2); */
 		} else if (strcmp(cmd, "popen") == 0) {
-			int fd = sys_open("/dev/con0", 0, 0);
+			int fd = sys_open("/sys/dev/con0", 0, 0);
 
 			sys_write(fd, "hi\n", 3);
 
