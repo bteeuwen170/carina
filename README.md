@@ -42,36 +42,36 @@ filesystem hierarchy layout:
 
 	/                       Root
 	├── app                 Applications
-	│   ├── bin             Application binaries
-	│   ├── cfg             Application configuration files
-	│   ├── inc             C include files
-	│   ├── lib             Shared libraries
-	│   ├── shr             Application data
-	│   └── tmp             Application cache
+	│   ├── bin             Application binaries
+	│   ├── cfg             Application configuration files
+	│   ├── inc             C include files
+	│   ├── lib             Shared libraries
+	│   ├── shr             Application data
+	│   └── tmp             Application cache
 	├── boot                Boot loader files
-	│   └── grub            GRUB configuration
+	│   └── grub            GRUB configuration
 	├── cfg                 System configuration files
 	├── mnt                 Mounting points
-	├── sys                 Kernel files (sysfs)
-	│   ├── dev             Device files (devfs)
-	│   ├── lck             Lock files
-	│   ├── krn             Kernel files
-	│   └── prc             Process information
-	├── tmp                 Temporary files (tmpfs)
+	├── sys                 Kernel files
+	│   ├── dev             Device files (ramfs)
+	│   ├── lck             Lock files (ramfs)
+	│   ├── krn             Kernel files (ramfs)
+	│   └── prc             Process information (ramfs)
+	├── tmp                 Temporary files (ramfs)
 	└── usr                 Users home directories
-	    └── [user]          User home directory
-	        ├── .app        User-specific applications folder
-	        │   ├── bin     User-specific application binaries
-	        │   ├── cfg     User-specific application configuration files
-	        │   ├── inc     User-specific C include files
-	        │   ├── lib     User-specific shared libraries
-	        │   ├── shr     User-specific application data
-	        │   └── tmp     User-specific application cache
-	        ├── Documents   User documents
-	        ├── Downloads   User downloads
-	        ├── Music       User music
-	        ├── Pictures    User pictures
-	        └── Videos      User videos
+	    └── [user]          User home directory
+	        ├── .app        User-specific applications folder
+	        │   ├── bin     User-specific application binaries
+	        │   ├── cfg     User-specific application configuration files
+	        │   ├── inc     User-specific C include files
+	        │   ├── lib     User-specific shared libraries
+	        │   ├── shr     User-specific application data
+	        │   └── tmp     User-specific application cache
+	        ├── Documents   User documents
+	        ├── Downloads   User downloads
+	        ├── Music       User music
+	        ├── Pictures    User pictures
+	        └── Videos      User videos
 
 
 ## About

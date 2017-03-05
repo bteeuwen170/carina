@@ -1,0 +1,9 @@
+#
+# /cfg/users: user configuration
+#
+
+[root]
+uid = 0
+gid = 0
+home = "/usr/root"
+shell = "/app/bin/shell"

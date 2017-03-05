@@ -1,0 +1,6 @@
+#
+# /cfg/groups: group configuration
+#
+
+[root]
+gid = 0
