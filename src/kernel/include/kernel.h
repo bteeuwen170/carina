@@ -59,6 +59,8 @@
 
 void kprint(const char *prefix, char *fmt, ...);
 
+void kprint_init(void); /* XXX TEMP XXX */
+
 #define dprintf(...) 	kprint( __VA_ARGS__)
 #define kprintf(...) 	kprint(NULL, __VA_ARGS__)
 

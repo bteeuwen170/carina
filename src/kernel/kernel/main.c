@@ -60,6 +60,16 @@ void kernel_main(void)
 
 	spin_lock(main); */
 
+	/* for (;;)
+		asm volatile ("hlt"); */
+
+	/* Initialize mandatory hardware */
+	pic_remap();
+	idt_init();
+	/* tss_init(); */
+	/* lapic_init(); */
+	/* ioapic_init(); */
+
 	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
 	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
 
@@ -82,6 +92,7 @@ void kernel_main(void)
 #endif
 #ifdef CONFIG_CONSOLE
 	con_init();
+	kprint_init();
 	kprintf("\033[2J");
 #endif
 
@@ -94,13 +105,6 @@ void kernel_main(void)
 			mboot->boot_loader_name);
 	kprintf("cmdline: %s\n", mboot->cmdline);
 	cpu_info();
-
-	/* Initialize mandatory hardware */
-	pic_remap();
-	idt_init();
-	/* tss_init(); */
-	/* lapic_init(); */
-	/* ioapic_init(); */
 
 	asm volatile ("sti");
 	dprintf("cpu0", KP_DBG "interrupts enabled\n");

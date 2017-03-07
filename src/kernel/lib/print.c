@@ -14,8 +14,9 @@
  * TODO Implement color
  */
 
-#include <kernel.h>
+#include <fs.h> /* TEMP */
 #include <kbd.h>
+#include <kernel.h>
 
 #include <char/serial.h>
 #include <video/fb.h>
@@ -304,6 +305,8 @@ i32 sprintf(char *buf, const char *fmt, ...)
 	return res;
 }
 
+int fd = -1;
+
 /* This function is a mess */
 void kprint(const char *prefix, char *fmt, ...)
 {
@@ -331,5 +334,11 @@ void kprint(const char *prefix, char *fmt, ...)
 
 	va_end(args);
 
-	con_write(0, fmtbuf, 0, strlen(fmtbuf));
+	if (fd >= 0)
+		sys_write(fd, fmtbuf, strlen(fmtbuf));
+}
+
+void kprint_init(void)
+{
+	fd = sys_open("/sys/dev/con0", 0, 0);
 }

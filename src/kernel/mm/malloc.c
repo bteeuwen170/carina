@@ -106,7 +106,6 @@ void mm_init(u32 addr, u32 len)
 				 mmap + mmap->size + sizeof(mmap->size));
 	}
 
-	/* FIXME Always off by 1 for some reason */
 	dprintf(devname, "%u MB memory\n", mem / 1024 / 1024 + 1);
 
 	/* FIXME How much padding is really required? */
