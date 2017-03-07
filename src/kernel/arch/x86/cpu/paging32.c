@@ -50,14 +50,16 @@ static u32 get_parent(u32 entry, u32 size)
 /* TODO Only identity map the kernel binary itself */
 void paging_init(struct mboot_info *mboot)
 {
-	u32 pml4e = 0, pdpte = 0, pdte = 0, pte = 0, pages = 0;
-	u32 pdpt_off = 0, pdt_off = 0, pt_off = 0;
-#ifdef CONFIG_X86_PAE
+	u32 pml4e = 0, pdpte = 0, pdte, pte, pages;
+#if defined(ARCH_i386) && defined(CONFIG_X86_PAE)
+	u64 *pdpt, *pdt, *pt;
+	u64 ac, off, pdpt_off, pdt_off, pt_off;
+#elif defined(ARCH_i386)
+	u32 *pdt, *pt;
+	u32 ac, off, pdt_off, pt_off;
+#elif defined(ARCH_x86_64)
 	u64 *pml4, *pdpt, *pdt, *pt;
-	u64 ac, off;
-#else
-	u32 *pml4, *pdpt, *pdt, *pt;
-	u32 ac, off;
+	u64 ac, off, pdpt_off, pdt_off, pt_off;
 #endif
 	u32 i;
 
@@ -74,7 +76,9 @@ void paging_init(struct mboot_info *mboot)
 	pml4e = PML4E(pages);
 #endif
 
+#ifdef CONFIG_X86_PAE
 	pdpt_off = pml4e * PAGE_SIZE;
+#endif
 	pdt_off = (pml4e + pdpte) * PAGE_SIZE;
 	pt_off = (pml4e + pdpte + pdte) * PAGE_SIZE;
 
