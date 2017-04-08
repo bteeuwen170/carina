@@ -72,8 +72,3 @@ filesystem hierarchy layout:
 	        ├── Music       User music
 	        ├── Pictures    User pictures
 	        └── Videos      User videos
-
-
-## About
-
-Please refer to [my website](https://teeuwen.github.io/projects/elarix).
