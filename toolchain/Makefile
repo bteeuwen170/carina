@@ -5,6 +5,11 @@
 # FIXME Not foolproofly written
 # FIXME Unnecessary redownloading of source files
 
+#ASFLAGS = $(HOSTASFLAGS)
+#CFLAGS = $(HOSTCFLAGS)
+#LDFLAGS = $(HOSTLDFLAGS)
+#export ASFLAGS CFLAGS LDFLAGS
+
 # I shoud really use autoconf for this...
 
 export USE_AUTOCONF_VER = 2.64
@@ -93,6 +98,6 @@ toolchain/gcc-4.9.4: toolchain/gcc-4.9.4.tar.gz
 	@ln -s ../binutils-2.27/build/opcodes toolchain/gcc-4.9.4/opcodes
 	@echo -e "\033[1;37m> Building GCC 4.9.4...\033[0m"
 	@mkdir toolchain/gcc-4.9.4/build/
-	@cd toolchain/gcc-4.9.4/build/ && ../configure --prefix=/usr/local --target=$(ARCH)-elf-elarix --enable-languages=c --disable-bootstrap --without-headers --disable-nls --disable-multilib --disable-libssp && make all-gcc && make all-target-libgcc
+	@cd toolchain/gcc-4.9.4/build/ && ../configure --prefix=/usr/local --target=$(ARCH)-elf-elarix --enable-languages=c --disable-bootstrap --without-headers --disable-nls --disable-multilib --disable-libssp --disable-libquadmath && make all-gcc && make all-target-libgcc
 	@echo -e "\033[1;37m> Requesting permission to install GCC 4.9.4...\033[0m"
 	@cd toolchain/gcc-4.9.4/build/ && sudo make install
