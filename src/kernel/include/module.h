@@ -43,9 +43,6 @@ void ps2kbd_exit(void);
 /* int serial_init(void);
 void serial_exit(void); */
 
-/* int tty_init(void);
-void tty_exit(void); */
-
 int pci_init(void);
 void pci_exit(void);
 

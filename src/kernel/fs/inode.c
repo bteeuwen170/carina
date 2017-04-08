@@ -38,8 +38,8 @@ ino_t inodes = 0;
 
 static void inode_delete(struct inode *ip)
 {
-	if (ip->sp->op->delete_inode) {
-		ip->sp->op->delete_inode(ip);
+	if (ip->sp->op->inode_delete) {
+		ip->sp->op->inode_delete(ip);
 	} else {
 		/* TODO */
 	}
@@ -49,8 +49,8 @@ struct inode *inode_alloc(struct superblock *sp)
 {
 	struct inode *ip;
 
-	if (sp->op->alloc_inode)
-		ip = sp->op->alloc_inode(sp);
+	if (sp->op->inode_alloc)
+		ip = sp->op->inode_alloc(sp);
 	else
 		ip = kmalloc(sizeof(struct inode));
 	if (!ip)
@@ -66,6 +66,7 @@ struct inode *inode_alloc(struct superblock *sp)
 	ip->refs = 1;
 	ip->links = 0;
 
+	ip->dev = (dev_t) { 0, 0 };
 	/* TODO Set to current user */
 	ip->uid = cproc->uid;
 	ip->gid = cproc->gid;
@@ -94,8 +95,8 @@ static void inode_dealloc(struct inode *ip)
 	if (ip->sp->flags & SF_KEEP)
 		return;
 
-	if (ip->sp->op->dealloc_inode)
-		ip->sp->op->dealloc_inode(ip);
+	if (ip->sp->op->inode_dealloc)
+		ip->sp->op->inode_dealloc(ip);
 	else
 		kfree(ip);
 }

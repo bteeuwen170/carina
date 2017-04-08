@@ -223,7 +223,7 @@ void vga_con_write(const char c)
 static int vga_con_probe(void)
 {
 	/* XXX TEMP */
-	dev_init((dev_t) { 0, 0 });
+	dev_init((dev_t) { MAJOR_CON, 0 });
 }
 
 static void vga_con_fini(void)

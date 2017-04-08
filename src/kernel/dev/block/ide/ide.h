@@ -1,9 +1,9 @@
 /*
  *
  * Elarix
- * src/kernel/dev/block/ide/ata.h
+ * src/kernel/dev/block/ide/ide.h
  *
- * Copyright (C) 2016 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
+ * Copyright (C) 2017 Bastiaan Teeuwen <bastiaan.teeuwen170@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,11 +22,11 @@
  *
  */
 
-#ifndef _IDE_ATA_H
-#define _IDE_ATA_H
+#ifndef _IDE_H
+#define _IDE_H
 
-#define ATA_CHANNELS		2
-#define ATA_DRIVES		2
+#define IDE_CHANNELS		2
+#define IDE_DRIVES		2
 
 #define ATA_SECTOR_SIZE		512
 #define ATAPI_SECTOR_SIZE	2048
@@ -170,5 +170,8 @@ struct ata_channel {
 	u16	bus_master;
 	u8	nint;
 };
+
+void ide_outb(u8 ch, u8 reg, u8 data);
+u8 ide_inb(u8 ch, u8 reg);
 
 #endif

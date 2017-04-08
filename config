@@ -49,21 +49,20 @@ menu "Char devices"
 				"PS/2 keyboard support";
 		}
 	}
-
-	/* config CONFIG_PTY
-		"Pseudo-telyTYpe terminal support";
-
-	if (CONFIG_PTY) {
-		config CONFIG_TTY
-			"TelyTYpe terminal support";
-	} */
 }
 
 menu "Block devices"
 {
 	if (CONFIG_PCI) {
-		config CONFIG_ATA
-			"ATA support";
+		menuconfig CONFIG_IDE
+			"IDE support"
+		{
+			config CONFIG_ATA
+				"ATA support";
+
+			config CONFIG_ATAPI
+				"ATAPI support";
+		}
 	}
 }
 

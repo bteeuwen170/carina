@@ -80,8 +80,8 @@ void kernel_main(void)
 
 #ifdef CONFIG_RAMFS
 	ramfs_init();
-#endif
 	sv_mount(0, "ramfs");
+#endif
 
 #ifdef CONFIG_VGA_CON
 	vga_con_init();
@@ -114,14 +114,20 @@ void kernel_main(void)
 
 	/* TODO Modules */
 	/* acpi_init(); */
+#ifdef CONFIG_IDE
+	ide_init();
+#endif
+#ifdef CONFIG_ATA
+	ata_init();
+#endif
+#ifdef CONFIG_ATAPI
+	atapi_init();
+#endif
 #ifdef CONFIG_CMOS
 	cmos_init();
 #endif
 #ifdef CONFIG_PS2KBD
 	ps2kbd_init();
-#endif
-#ifdef CONFIG_ATA
-	ide_init();
 #endif
 #ifdef CONFIG_AC97
 	ac97_init();

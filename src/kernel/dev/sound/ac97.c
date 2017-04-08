@@ -66,7 +66,7 @@ struct ac97_dev {
 struct ac97_dev deva;
 struct ac97_dev *dev = &deva;
 
-static void buffer_fill(unsigned char *data, u32 n, u32 off)
+static void buffer_fill(u8 *data, u32 n, u32 off)
 {
 	dev->buf[n].addr = (uintptr_t) data + (off * 32 * 2);
 	dev->buf[n].len = 32;

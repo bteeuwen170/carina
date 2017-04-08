@@ -58,6 +58,8 @@ int dev_init(dev_t dev)
 	char name[NAME_MAX + 1];
 	int res;
 
+	/* TODO Check if minor doesn't exist already */
+
 	sprintf(name, "%s%d", devices[dev.major].name, dev.minor);
 
 	if (!(dp = dirent_get("/sys/dev"))) {

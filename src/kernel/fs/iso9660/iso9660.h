@@ -26,16 +26,18 @@
 #define _ISO9660_H
 
 struct iso9660_sb {
-	u8	unused0[8];
-	char	sys_indent[32];
-	char	vol_indent[32];
-	u8	reserved0[8];
+	u8	type;
+	char	signature[5];
+	u8	version;
+#if 1
+	u8	data[2041];
+#else
+	u8	reserved0;
+	u8	unused0[64];
 	u8	reserved1[8];
-	u64	blocks;
-	u8	reserved2[32];
-	u32	unused1[2];
 	/* TODO */
-};
+#endif
+} __attribute__ ((packed));
 
 struct iso9660_date {
 	char	year[4];

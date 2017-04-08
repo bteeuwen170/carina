@@ -91,13 +91,14 @@ int con_init(void)
 	struct con_driver *driver;
 	int res;
 
-	if ((res = dev_reg(0, devname, &con_file_ops)) < 0)
-		kprintf("%s: unable to register console (%d)", devname, res);
+	if ((res = dev_reg(MAJOR_CON, devname, &con_file_ops)) < 0)
+		kprintf("%s: unable to register console driver (%d)",
+				devname, res);
+	else
+		list_for_each(driver, &consoles, l)
+			driver->probe();
 
-	list_for_each(driver, &consoles, l)
-		driver->probe();
-
-	return 0;
+	return res;
 }
 
 void con_exit(void)

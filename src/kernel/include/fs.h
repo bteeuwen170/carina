@@ -104,6 +104,7 @@ struct inode {
 	int	refs;			/* Reference count */
 	link_t	links;			/* Link count */
 
+	dev_t	dev;			/* Device ID (only for devices) */
 	uid_t	uid;			/* User ID */
 	gid_t	gid;			/* Group ID */
 
@@ -114,7 +115,7 @@ struct inode {
 	off_t	size;			/* File size in bytes */
 
 	struct superblock	*sp;	/* Associated superblock */
-	struct list_head	del;	/* List of children */
+	struct list_head	del;	/* List of children (only for dirs.) */
 
 	struct inode_ops	*op;
 	struct file_ops		*fop;
@@ -148,13 +149,13 @@ struct file {
 
 struct sb_ops {
 	/* Allocate a memory inode: sp */
-	struct inode *(*alloc_inode) (struct superblock *);
+	struct inode *(*inode_alloc) (struct superblock *);
 	/* Deallocate a memory inode: ip */
-	void (*dealloc_inode) (struct inode *);
+	void (*inode_dealloc) (struct inode *);
 	/* Write an inode to disk: ip */
-	int (*write_inode) (struct inode *);
+	int (*inode_write) (struct inode *);
 	/* Delete an inode from disk: ip */
-	void (*delete_inode) (struct inode *);
+	void (*inode_delete) (struct inode *);
 	/* TODO (sync) */
 };
 
@@ -244,7 +245,7 @@ int sys_mkdir(const char *path, mode_t mode);
 
 #define MAJOR_ZERO	0
 #define MAJOR_MEM	1
-#define MAJOR_PTY	2
+#define MAJOR_CON	2
 #define MAJOR_KBD	3
 #define MAJOR_MOUSE	4
 #define MAJOR_DISK	5
