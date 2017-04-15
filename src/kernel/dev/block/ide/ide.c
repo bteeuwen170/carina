@@ -34,7 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ata.h"
+#include "ide.h"
 
 static const char devname[] = "ide";
 

@@ -102,7 +102,7 @@ static void vga_con_clear(void)
 	vga_con_move(0, 0);
 }
 
-void vga_con_write(const char c)
+static void vga_con_write(const char c)
 {
 	char escn_buf[19];
 	int i = 0, j = 0;

@@ -22,13 +22,14 @@
  *
  */
 
+#include <errno.h>
 #include <fs.h>
 #include <kernel.h>
 #include <module.h>
 
 #include <timer/pit.h>
 
-#include "ata.h"
+#include "ide.h"
 
 static const char devname[] = "opt";
 
@@ -38,8 +39,8 @@ static int atapi_read(struct file *fp, char *buf, off_t off, size_t n)
 	u32 status, i;
 	u8 packet[12];
 
-	if (fp->dev->type != ATA_DEV_TYPE_ATAPI)
-		return -;
+	/* if (fp->dep->ip->dev->type != ATA_DEV_TYPE_ATAPI)
+		return -EINVAL; */
 
 	if (n != ATAPI_SECTOR_SIZE)
 		return -EINVAL;

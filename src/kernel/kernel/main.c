@@ -39,7 +39,6 @@
 #include <asm/cpu.h>
 
 #include <char/pcspk.h>
-#include <char/serial.h>
 #include <sound/ac97.h>
 #include <sound/sb16.h>
 #include <timer/pit.h>
@@ -83,14 +82,17 @@ void kernel_main(void)
 	sv_mount(0, "ramfs");
 #endif
 
-#ifdef CONFIG_VGA_CON
+#ifdef CONFIG_CONSOLE
+
+#ifdef CONFIG_CONSOLE_SERIAL
+	/* serial_init(COM0); */
+	serial_con_init();
+#endif
+
+#ifdef CONFIG_CONSOLE_VGA
 	vga_con_init();
 #endif
-#ifdef CONFIG_SERIAL
-	/* serial_init(COM0); */
-	/* serial_con_init(COM0); */
-#endif
-#ifdef CONFIG_CONSOLE
+
 	con_init();
 	kprint_init();
 	kprintf("\033[2J");

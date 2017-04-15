@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/dev/char/serial.c
+ * src/kernel/dev/video/serial_con.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,12 +22,18 @@
  *
  */
 
+#include <console.h>
+#include <fs.h>
 #include <kernel.h>
 #include <module.h>
 
 #include <asm/cpu.h>
 
-static const char devname[] = "serial";
+#include <string.h>
+
+static const char devname[] = "serial_con";
+
+const u16 port = 0x3F8;
 
 /* TODO Do more testing */
 /* Taken from http://www.sci.muni.cz/docs/pc/serport.txt */
@@ -76,47 +82,49 @@ static i8 serial_chip_detect(const u16 addr)
 	return 4;
 }
 
-u16 serial_read(const u16 port)
-{
-	return io_inb(port + 5) & 0x01;
-}
-
-u16 serial_in(const u16 port)
-{
-	while (!serial_read(port));
-
-	return io_inb(port);
-}
-
-u16 serial_free(const u16 port)
+static u16 serial_free(const u16 port)
 {
 	return io_inb(port + 5) & 0x20;
 }
 
-void serial_out(const u16 port, const u8 value)
+static void serial_out(const u16 port, const char value)
 {
 	while (!serial_free(port));
 
 	io_outb(port, value);
 }
 
-void serial_init(const u16 port)
+static void serial_con_write(const char c)
 {
+	if (c == '\n')
+		serial_out(port, '\r');
+
+	serial_out(port, c);
+}
+
+static int serial_con_probe(void)
+{
+	/* XXX TEMP */
+
 	switch (serial_chip_detect(port)) {
-	case 0:
-		return;
 	case 1:
 		dprintf(devname, "%s\n", "detected 8250 serial interface");
+		dev_init((dev_t) { MAJOR_CON, 1 });
 		break;
 	case 2:
 		dprintf(devname, "%s\n", "detected 8250 with scratch regs");
+		dev_init((dev_t) { MAJOR_CON, 2 });
 		break;
 	case 3:
 		dprintf(devname, "%s\n", "detected 16450 serial interface");
+		dev_init((dev_t) { MAJOR_CON, 3 });
 		break;
 	case 4:
 		dprintf(devname, "%s\n", "detected 16550A serial interface");
+		dev_init((dev_t) { MAJOR_CON, 4 });
 		break;
+	default:
+		return 1;
 	}
 
 	io_outb(port + 1, 0x00);
@@ -126,12 +134,39 @@ void serial_init(const u16 port)
 	io_outb(port + 3, 0x03);
 	io_outb(port + 2, 0xC7);
 	io_outb(port + 4, 0x0B);
-	/* TODO Register the serial input handler */
+
+	return 0;
 }
 
-/* void serial_exit(void)
+static void serial_con_fini(void)
 {
-	[>TODO<]
+	/* TODO */
 }
 
-MODULE(serial, &serial_init, &serial_exit); */
+static struct con_driver serial_con_driver = {
+	.name	= devname,
+
+	.probe	= &serial_con_probe,
+	.fini	= &serial_con_fini,
+	.write	= &serial_con_write
+};
+
+int serial_con_init(void)
+{
+	int res;
+
+	res = con_reg(&serial_con_driver);
+	if (res < 0)
+		kprintf("%s: unable to register console driver (%d)",
+				devname, res);
+
+	return 0;
+}
+
+void serial_con_exit(void)
+{
+	/* TODO */
+}
+
+MODULE(serial_con, &serial_con_init, &serial_con_exit);
+MODULE_BEFORE(con);

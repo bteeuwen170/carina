@@ -18,7 +18,6 @@
 #include <kbd.h>
 #include <kernel.h>
 
-#include <char/serial.h>
 #include <video/fb.h>
 
 #include <stdarg.h>

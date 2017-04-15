@@ -63,15 +63,6 @@ int con_write(struct file *fp, const char *buf, off_t off, size_t n)
 		list_for_each(driver, &consoles, l)
 			driver->write(buf[i]);
 
-#ifdef CONFIG_SERIAL /* TODO Write a serial console driver! */
-	for (i = 0; i < n; i++) {
-		if (buf[i] == '\n')
-			serial_out(0x3F8, '\r');
-		serial_out(0x3F8, buf[i]);
-	}
-	serial_out(0x3F8, 0x0D);
-#endif
-
 	return n;
 }
 

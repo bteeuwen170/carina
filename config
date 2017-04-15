@@ -36,9 +36,6 @@ menu "Char devices"
 
 		config CONFIG_PCSPK
 			"PC Speaker support";
-
-		config CONFIG_SERIAL
-			"Serial port support";
 	}
 
 	menuconfig CONFIG_KEYBOARD
@@ -81,9 +78,15 @@ menu "Sound devices"
 
 menu "Video devices"
 {
-	if (CONFIG_CONSOLE
-	if (ARCH_x86) {
-		config CONFIG_VGA_CON
-			"VGA text-mode support";
+	menuconfig CONFIG_CONSOLE
+		"Console support"
+	{
+		if (ARCH_x86) {
+			config CONFIG_CONSOLE_SERIAL
+				"Serial console support";
+
+			config CONFIG_CONSOLE_VGA
+				"VGA text-mode support";
+		}
 	}
 }
