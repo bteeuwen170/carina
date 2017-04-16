@@ -155,7 +155,7 @@ char *strstr(const char *src1, const char *src2)
 		do {
 			if (!(c = *src1++))
 				return NULL;
-		} while (c != c);
+		} while (c != t);
 	} while (strncmp(src1, src2, strlen(src2)));
 
 	return (char *) src1 - 1;

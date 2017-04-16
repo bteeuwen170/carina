@@ -228,6 +228,11 @@ static int vga_con_probe(void)
 {
 	vga_minor = ++console_minor_last;
 
+	/*
+	 * TODO Detect if present
+	 * NOTE Disable vga in qemu using "-vga none"
+	 */
+
 	return dev_init((dev_t) { MAJOR_CON, vga_minor });
 }
 

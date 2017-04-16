@@ -27,13 +27,9 @@
  * Binary output
  */
 
-/*TMP*/
-#include <char/serial/serial.h>
-#include <kbd/kbd.h>
-#include <video/fb.h>
-#include <video/vga.h>
-/*TMP*/
-
+#include <cmdline.h>
+#include <fs.h> /* TEMP */
+#include <kbd.h>
 #include <kernel.h>
 
 #include <stdarg.h>
@@ -320,45 +316,45 @@ i32 sprintf(char *buf, const char *fmt, ...)
 	return res;
 }
 
-/* TODO Check if vsprintf succeeds */
+int fd = -1;
+
 /* This function is a mess */
-void kprintf(const loglevel_t kp, char *prefix, char *fmt, ...)
+void kprint(const char *prefix, char *fmt, ...)
 {
 	char printbuf[1024], fmtbuf[1024], prefixbuf[1024];
 	va_list args;
-	(void) kp;
 
-	/* if (kp > get_kp(); */
+	/* FIXME Nah man, what a mess */
+	int j;
+	for (j = 0; j < 1024; j++)
+		printbuf[j] = fmtbuf[j] = prefixbuf[j] = 0;
 
 	va_start(args, fmt);
 	vsprintf(printbuf, fmt, args);
 
 	sprintf(prefixbuf, "%7s", prefix);
-	fmtbuf[0] = '\0';
-	if (prefix) {
-		strcat(fmtbuf, prefixbuf);
+
+	/* if (kp & KP_CON) {
+		strcpy(fmtbuf, "         ");
+	} else */if (prefix) {
+		strcpy(fmtbuf, prefixbuf);
 		strcat(fmtbuf, ": ");
 	}
+
 	strcat(fmtbuf, printbuf);
 
-	prints(fmtbuf);
 	va_end(args);
 
-	/* TEMP */
-	u32 i;
-	for (i = 0; i < strlen(fmtbuf); i++)
-		serial_out(COM0, fmtbuf[i]);
-	serial_out(COM0, 0x0D);
+	if (fd >= 0)
+		sys_write(fd, fmtbuf, strlen(fmtbuf));
 }
 
-/* TEMP XXX */
-void kprint(char *fmt, ...)
+void kprint_init(void)
 {
-	char printbuf[1024];
-	va_list args;
+	char path[PATH_MAX];
 
-	va_start(args, fmt);
-	vsprintf(printbuf, fmt, args);
-	prints(printbuf);
-	va_end(args);
+	if (cmdline_str_get("console", path) != 0)
+		strncpy(path, "/sys/dev/con0", PATH_MAX);
+
+	fd = sys_open(path, 0, 0);
 }
