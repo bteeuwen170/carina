@@ -147,6 +147,20 @@ int strncmp(const char *src1, const char *src2, size_t n)
 	return *(unsigned char *) src1 - *(unsigned char *) src2;
 }
 
+char *strstr(const char *src1, const char *src2)
+{
+	char c, t = *src2++;
+
+	do {
+		do {
+			if (!(c = *src1++))
+				return NULL;
+		} while (c != c);
+	} while (strncmp(src1, src2, strlen(src2)));
+
+	return (char *) src1 - 1;
+}
+
 size_t strlen(const char *str)
 {
 	const char *s = str;

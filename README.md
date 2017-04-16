@@ -37,38 +37,45 @@ Issue this command to build the elarix kernel:
 
 
 ## File system tree
+
 Elarix does not adhere to the FHS standard, instead it uses this
 filesystem hierarchy layout:
 
-	/                       Root
-	├── app                 Applications
-	│   ├── bin             Application binaries
-	│   ├── cfg             Application configuration files
-	│   ├── inc             C include files
-	│   ├── lib             Shared libraries
-	│   ├── shr             Application data
-	│   └── tmp             Application cache
-	├── boot                Boot loader files
+	/                       root
+	├── app                 applications
+	│   ├── bin             application binaries
+	│   ├── cfg             application configuration files
+	│   ├── inc             c include files
+	│   ├── lib             shared libraries
+	│   ├── shr             application data
+	│   └── tmp             application cache
+	├── boot                boot loader files
 	│   └── grub            GRUB configuration
-	├── cfg                 System configuration files
-	├── mnt                 Mounting points
-	├── sys                 Kernel files
-	│   ├── dev             Device files (ramfs)
-	│   ├── lck             Lock files (ramfs)
-	│   ├── krn             Kernel files (ramfs)
-	│   └── prc             Process information (ramfs)
-	├── tmp                 Temporary files (ramfs)
-	└── usr                 Users home directories
-	    └── [user]          User home directory
-	        ├── .app        User-specific applications folder
-	        │   ├── bin     User-specific application binaries
-	        │   ├── cfg     User-specific application configuration files
-	        │   ├── inc     User-specific C include files
-	        │   ├── lib     User-specific shared libraries
-	        │   ├── shr     User-specific application data
-	        │   └── tmp     User-specific application cache
-	        ├── Documents   User documents
-	        ├── Downloads   User downloads
-	        ├── Music       User music
-	        ├── Pictures    User pictures
-	        └── Videos      User videos
+	├── cfg                 system configuration files
+	├── mnt                 mounting points
+	├── sys                 kernel files (ramfs)
+	│   ├── dev             device files
+	│   ├── lck             lock files
+	│   ├── krn             kernel files
+	│   └── prc             process information
+	├── tmp                 temporary files (ramfs)
+	└── usr                 users home directories
+	    └── [user]          user home directory
+	        ├── .app        user-specific applications folder
+	        │   ├── bin     user-specific application binaries
+	        │   ├── cfg     user-specific application configuration files
+	        │   ├── inc     user-specific C include files
+	        │   ├── lib     user-specific shared libraries
+	        │   ├── shr     user-specific application data
+	        │   └── tmp     user-specific application cache
+	        ├── Documents   user documents
+	        ├── Downloads   user downloads
+	        ├── Music       user music
+	        ├── Pictures    user pictures
+	        └── Videos      user videos
+
+## cmdline
+
+The following cmdline options are supported:
+
+console=                    specify the system console

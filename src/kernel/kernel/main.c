@@ -22,6 +22,7 @@
  *
  */
 
+#include <cmdline.h>
 #include <fs.h>
 #include <ioctl.h>
 #include <issue.h>
@@ -69,6 +70,9 @@ void kernel_main(void)
 	/* lapic_init(); */
 	/* ioapic_init(); */
 
+	/* FIXME Avoid warning */
+	strncpy(cmdline, (const char *) mboot->cmdline, 4096);
+
 	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
 	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
 
@@ -105,7 +109,7 @@ void kernel_main(void)
 	/* TODO Move */
 	kprintf(KP_CON "Elarix has been loaded by %s\n",
 			mboot->boot_loader_name);
-	kprintf("cmdline: %s\n", mboot->cmdline);
+	kprintf("cmdline: %s\n", cmdline);
 	cpu_info();
 
 	asm volatile ("sti");

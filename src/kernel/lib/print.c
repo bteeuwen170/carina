@@ -5,7 +5,7 @@
  * Wirzenius wrote this portably, Torvalds fucked it up :-)
  *
  * (C) 1991  Linus Torvalds
- * Last modified by Bastiaan Teeuwen on 2017-02-24
+ * Last modified by Bastiaan Teeuwen on 2017-04-16
  *
  */
 
@@ -14,11 +14,10 @@
  * TODO Implement color
  */
 
+#include <cmdline.h>
 #include <fs.h> /* TEMP */
 #include <kbd.h>
 #include <kernel.h>
-
-#include <video/fb.h>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -339,5 +338,10 @@ void kprint(const char *prefix, char *fmt, ...)
 
 void kprint_init(void)
 {
-	fd = sys_open("/sys/dev/con0", 0, 0);
+	char path[PATH_MAX];
+
+	if (cmdline_str_get("console", path) != 0)
+		strncpy(path, "/sys/dev/con0", PATH_MAX);
+
+	fd = sys_open(path, 0, 0);
 }

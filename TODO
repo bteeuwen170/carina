@@ -6,6 +6,7 @@ General (AKA angry notes to self)
 - RESERVED IS ___NOT___ THE SAME AS UNUSED!!!
 - Create devel branch once basic posix things are implemented like vfs and pipes
 - Don't cast unused to void, use gcc flag instead
+- Create documentation
 
 Bootloader
 - Write own bootloader
