@@ -34,6 +34,12 @@
 int ide_init(void);
 void ide_exit(void);
 
+int ata_init(void);
+void ata_exit(void);
+
+int atapi_init(void);
+void atapi_exit(void);
+
 int cmos_init(void);
 void cmos_exit(void);
 

@@ -38,8 +38,10 @@
 
 static const char devname[] = "ide";
 
-static struct ata_channel channels[IDE_CHANNELS];
-static struct ata_dev devices[IDE_CHANNELS * IDE_DRIVES];
+struct ata_channel ide_channels[IDE_CHANNELS];
+struct ata_dev ide_devices[IDE_CHANNELS * IDE_DRIVES];
+
+static int ide_minor_last = -1;
 
 static const struct pci_dev_id ide_ids[] = {
 	PCI_DEV_ID(0x8086, 0x7010, PCI_ANY_ID, PCI_ANY_ID, 0x01, 0x01, 0),
@@ -50,19 +52,19 @@ static const struct pci_dev_id ide_ids[] = {
 void ide_outb(u8 ch, u8 reg, u8 data)
 {
 	if (reg > ATA_REG_CMD && reg < ATA_REG_CTRL)
-		ide_outb(ch, ATA_REG_CTRL, channels[ch].nint | ATA_CMD_BUSY);
+		ide_outb(ch, ATA_REG_CTRL, ide_channels[ch].nint | ATA_CMD_BUSY);
 
 	if (reg < 0x08)
-		io_outb(channels[ch].base + reg - 0x00, data);
+		io_outb(ide_channels[ch].base + reg - 0x00, data);
 	else if (reg < 0x0C)
-		io_outb(channels[ch].base + reg - 0x06, data);
+		io_outb(ide_channels[ch].base + reg - 0x06, data);
 	else if (reg < 0x0E)
-		io_outb(channels[ch].ctrl + reg - 0x0A, data);
+		io_outb(ide_channels[ch].ctrl + reg - 0x0A, data);
 	else if (reg < 0x16)
-		io_outb(channels[ch].bus_master + reg - 0x0E, data);
+		io_outb(ide_channels[ch].bus_master + reg - 0x0E, data);
 
 	if (reg > ATA_REG_CMD && reg < ATA_REG_CTRL)
-		ide_outb(ch, ATA_REG_CTRL, channels[ch].nint);
+		ide_outb(ch, ATA_REG_CTRL, ide_channels[ch].nint);
 }
 
 u8 ide_inb(u8 ch, u8 reg)
@@ -70,19 +72,19 @@ u8 ide_inb(u8 ch, u8 reg)
 	u8 res;
 
 	if (reg > ATA_REG_CMD && reg < ATA_REG_CTRL)
-		ide_outb(ch, ATA_REG_CTRL, channels[ch].nint | ATA_CMD_BUSY);
+		ide_outb(ch, ATA_REG_CTRL, ide_channels[ch].nint | ATA_CMD_BUSY);
 
 	if (reg < 0x08)
-		res = io_inb(channels[ch].base + reg - 0x00);
+		res = io_inb(ide_channels[ch].base + reg - 0x00);
 	else if (reg < 0x0C)
-		res = io_inb(channels[ch].base + reg - 0x06);
+		res = io_inb(ide_channels[ch].base + reg - 0x06);
 	else if (reg < 0x0E)
-		res = io_inb(channels[ch].ctrl + reg - 0x0A);
+		res = io_inb(ide_channels[ch].ctrl + reg - 0x0A);
 	else if (reg < 0x16)
-		res = io_inb(channels[ch].bus_master + reg - 0x0E);
+		res = io_inb(ide_channels[ch].bus_master + reg - 0x0E);
 
 	if (reg > ATA_REG_CMD && reg < ATA_REG_CTRL)
-		ide_outb(ch, ATA_REG_CTRL, channels[ch].nint);
+		ide_outb(ch, ATA_REG_CTRL, ide_channels[ch].nint);
 
 	return res;
 }
@@ -93,31 +95,30 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 	char *str;
 	u32 i, status;
 
-	dev = kmalloc(sizeof(struct ata_dev));
+	/* FIXME XXX XXX Something is very wrong here! XXX XXX FIXME */
+	if (ch == 0) return;
+	/* FIXME XXX XXX Something is very wrong here! XXX XXX FIXME */
 
-	if (!dev)
-		goto err;
+	dev = &ide_devices[++ide_minor_last];
 
 	dev->ch = ch;
 	dev->drv = drv;
 
-	/* Primary channel */
 	if (ch == 0) {
 		irq_unmask(IRQ_ATA0);
-		channels[ch].base = card->cfg->bar_0;
-		channels[ch].ctrl = card->cfg->bar_1;
+		ide_channels[ch].base = card->cfg->bar_0;
+		ide_channels[ch].ctrl = card->cfg->bar_1;
 
 		card->cfg->int_line = 14;
-	/* Secondary channel */
 	} else if (ch == 1) {
 		irq_unmask(IRQ_ATA1);
-		channels[ch].base = card->cfg->bar_2;
-		channels[ch].ctrl = card->cfg->bar_3;
+		ide_channels[ch].base = card->cfg->bar_2;
+		ide_channels[ch].ctrl = card->cfg->bar_3;
 
 		card->cfg->int_line = 15;
 	}
 
-	channels[ch].bus_master = (card->cfg->bar_4 & 0xFFFFFFFC) +
+	ide_channels[ch].bus_master = (card->cfg->bar_4 & 0xFFFFFFFC) +
 			((ch) ? 0 : 8);
 
 	/* Select the drive */
@@ -157,7 +158,7 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 	}
 
 	for (i = 0; i < sizeof(struct ata_ident); i++)
-		((u16 *) &dev->ident)[i] = io_inw(channels[ch].base);
+		((u16 *) &dev->ident)[i] = io_inw(ide_channels[ch].base);
 
 	/* This wasn't documented ANYWHERE */
 	str = ((char *) &dev->ident.model);
@@ -180,6 +181,9 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 	dprintf(devname, KP_CON "%u sectors (%u MB)\n",
 			dev->size, dev->size * ATA_SECTOR_SIZE / 1024 / 1024);
 
+	dev_init((dev_t) { (dev->type ? MAJOR_OPTICAL: MAJOR_DISK),
+			ide_minor_last });
+
 	return;
 
 	/* TODO Provide error information */
@@ -187,8 +191,6 @@ err:
 	dprintf(devname, KP_ERR "drive error (%u, %u)\n", drv, ch);
 
 ret:
-	kfree(dev);
-
 	return;
 
 }

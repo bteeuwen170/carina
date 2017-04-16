@@ -155,6 +155,13 @@ struct ata_ident {
 #define ATA_DEV_TYPE_ATA	0x00	/* ATA device */
 #define ATA_DEV_TYPE_ATAPI	0x01	/* ATAPI device */
 
+struct ata_channel {
+	u16	base;
+	u16	ctrl;
+	u16	bus_master;
+	u8	nint;
+};
+
 struct ata_dev {
 	u8			ch;
 	u8			drv;
@@ -164,12 +171,8 @@ struct ata_dev {
 	struct ata_ident	ident;
 };
 
-struct ata_channel {
-	u16	base;
-	u16	ctrl;
-	u16	bus_master;
-	u8	nint;
-};
+extern struct ata_channel ide_channels[];
+extern struct ata_dev ide_devices[];
 
 void ide_outb(u8 ch, u8 reg, u8 data);
 u8 ide_inb(u8 ch, u8 reg);

@@ -27,6 +27,7 @@
 #include <kernel.h>
 #include <module.h>
 
+#include <asm/cpu.h>
 #include <timer/pit.h>
 
 #include "ide.h"
@@ -36,11 +37,14 @@ static const char devname[] = "opt";
 /* static int atapi_read(struct ata_dev *dev, u64 addr, u16 ss, u32 off, u8 *buf) */
 static int atapi_read(struct file *fp, char *buf, off_t off, size_t n)
 {
+	struct ata_dev *dev;
 	u32 status, i;
 	u8 packet[12];
 
-	/* if (fp->dep->ip->dev->type != ATA_DEV_TYPE_ATAPI)
-		return -EINVAL; */
+	dev = &ide_devices[fp->dep->ip->dev.minor];
+
+	if (dev->type != ATA_DEV_TYPE_ATAPI)
+		return -EINVAL;
 
 	if (n != ATAPI_SECTOR_SIZE)
 		return -EINVAL;
@@ -70,10 +74,10 @@ static int atapi_read(struct file *fp, char *buf, off_t off, size_t n)
 
 	packet[0] = ATAPI_CMD_READ;
 	packet[1] = 0;
-	packet[2] = (addr >> 24) & 0xFF;
-	packet[3] = (addr >> 16) & 0xFF;
-	packet[4] = (addr >> 8) & 0xFF;
-	packet[5] = addr & 0xFF;
+	packet[2] = (off >> 24) & 0xFF;
+	packet[3] = (off >> 16) & 0xFF;
+	packet[4] = (off >> 8) & 0xFF;
+	packet[5] = off & 0xFF;
 	packet[6] = 0;
 	packet[7] = 0;
 	packet[8] = 0;
@@ -82,18 +86,18 @@ static int atapi_read(struct file *fp, char *buf, off_t off, size_t n)
 	packet[11] = 0;
 
 	for (i = 0; i < 11; i += 2)
-		io_outw(channels[dev->ch].base, ((packet[i] & 0xFF) |
+		io_outw(ide_channels[dev->ch].base, ((packet[i] & 0xFF) |
 					(packet[i + 1] & 0xFF) << 8));
 
 	/* FIXME Not right from here onwards */
 	while (status & ATA_CMD_BUSY)
-		status = ide_inb(channels[dev->ch].base, ATA_REG_STATUS);
+		status = ide_inb(ide_channels[dev->ch].base, ATA_REG_STATUS);
 
 	if (status & ATA_CMD_ERR)
 		return -1;
 
 	for (i = 0; i < 4; i++)
-		buf[i] = io_inw(channels[dev->ch].base);
+		buf[i] = io_inw(ide_channels[dev->ch].base);
 
 	return 0;
 }
@@ -137,11 +141,11 @@ static int ide_eject(struct ata_dev *dev)
 	packet[11] = 0;
 
 	for (i = 0; i < 11; i += 2)
-		io_outw(channels[dev->ch].base, ((packet[i] & 0xFF) |
+		io_outw(ide_channels[dev->ch].base, ((packet[i] & 0xFF) |
 					(packet[i + 1] & 0xFF) << 8));
 
 	while (status & ATA_CMD_BUSY)
-		status = ide_inb(channels[dev->ch].base, ATA_REG_STATUS);
+		status = ide_inb(ide_channels[dev->ch].base, ATA_REG_STATUS);
 
 	if (status & ATA_CMD_ERR)
 		return -1;

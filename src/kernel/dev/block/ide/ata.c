@@ -40,12 +40,12 @@ static const char devname[] = "dsk";
 
 static int ata_read(struct file *fp, char *buf, off_t off, size_t n)
 {
-
+	return -1;
 }
 
 static int ata_write(struct file *fp, const char *buf, off_t off, size_t n)
 {
-
+	return -1;
 }
 
 static struct file_ops ata_file_ops = {
@@ -57,7 +57,7 @@ int ata_init(void)
 {
 	int res;
 
-	if ((res = dev_reg(MAJOR_OPTICAL, devname, &ata_file_ops)) < 0)
+	if ((res = dev_reg(MAJOR_DISK, devname, &ata_file_ops)) < 0)
 		kprintf("%s: unable to register ata driver (%d)",
 				devname, res);
 

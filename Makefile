@@ -150,7 +150,7 @@ endif
 PHONY += qemu
 qemu: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) -cdrom bin/elarix.iso #2>/dev/null
+	$(QEMU) $(QEMUFLAGS) -cdrom bin/elarix.iso 2>/dev/null
 
 PHONY += qemud
 qemud: iso
