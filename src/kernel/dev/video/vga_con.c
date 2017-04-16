@@ -42,6 +42,7 @@ static const u8 colors[] = {
 };
 
 static u16 *buf = (u16 *) 0xB8000;
+static u16 vga_minor;
 
 static u8 x, y;
 static u8 fg = 0x07, fgm = 0, bg = 0x00;
@@ -102,11 +103,14 @@ static void vga_con_clear(void)
 	vga_con_move(0, 0);
 }
 
-static void vga_con_write(const char c)
+static void vga_con_write(u16 minor, const char c)
 {
 	char escn_buf[19];
 	int i = 0, j = 0;
 	long n;
+
+	if (minor != vga_minor)
+		return;
 
 	if (state == 0 && c == '\033') {
 		state = 1;
@@ -222,11 +226,12 @@ static void vga_con_write(const char c)
 
 static int vga_con_probe(void)
 {
-	/* XXX TEMP */
-	dev_init((dev_t) { MAJOR_CON, 0 });
+	vga_minor = ++console_minor_last;
+
+	return dev_init((dev_t) { MAJOR_CON, vga_minor });
 }
 
-static void vga_con_fini(void)
+static void vga_con_fini(u16 minor)
 {
 	/* TODO */
 }

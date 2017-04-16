@@ -37,9 +37,11 @@ struct con_driver {
 	const char *name;
 
 	int (*probe) (void);
-	void (*fini) (void);
-	void (*write) (const char);
+	void (*fini) (u16 minor);
+	void (*write) (u16 minor, const char);
 };
+
+extern int console_minor_last;
 
 int con_reg(struct con_driver *driver);
 void con_unreg(struct con_driver *driver);

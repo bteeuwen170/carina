@@ -33,11 +33,11 @@
 
 static const char devname[] = "serial_con";
 
-const u16 port = 0x3F8;
+static int serial_minor[] = { 0, 0, 0, 0 };
 
 /* TODO Do more testing */
 /* Taken from http://www.sci.muni.cz/docs/pc/serport.txt */
-static i8 serial_chip_detect(const u16 addr)
+static i8 serial_detect(const u16 addr)
 {
 	i32 od;
 
@@ -94,8 +94,21 @@ static void serial_out(const u16 port, const char value)
 	io_outb(port, value);
 }
 
-static void serial_con_write(const char c)
+static void serial_con_write(u16 minor, const char c)
 {
+	u16 port;
+
+	if (minor == serial_minor[0])
+		port = 0x3F8;
+	else if (minor == serial_minor[1])
+		port = 0x2F8;
+	else if (minor == serial_minor[2])
+		port = 0x3E8;
+	else if (minor == serial_minor[3])
+		port = 0x2E8;
+	else
+		return;
+
 	if (c == '\n')
 		serial_out(port, '\r');
 
@@ -104,41 +117,62 @@ static void serial_con_write(const char c)
 
 static int serial_con_probe(void)
 {
-	/* XXX TEMP */
+	int i;
+	u16 port;
 
-	switch (serial_chip_detect(port)) {
-	case 1:
-		dprintf(devname, "%s\n", "detected 8250 serial interface");
-		dev_init((dev_t) { MAJOR_CON, 1 });
-		break;
-	case 2:
-		dprintf(devname, "%s\n", "detected 8250 with scratch regs");
-		dev_init((dev_t) { MAJOR_CON, 2 });
-		break;
-	case 3:
-		dprintf(devname, "%s\n", "detected 16450 serial interface");
-		dev_init((dev_t) { MAJOR_CON, 3 });
-		break;
-	case 4:
-		dprintf(devname, "%s\n", "detected 16550A serial interface");
-		dev_init((dev_t) { MAJOR_CON, 4 });
-		break;
-	default:
-		return 1;
+	for (i = 0; i < 4; i++) {
+		switch (i) {
+		case 0:
+			port = 0x3F8;
+			break;
+		case 1:
+			port = 0x2F8;
+			break;
+		case 2:
+			port = 0x3E8;
+			break;
+		case 3:
+			port = 0x2E8;
+			break;
+		}
+
+		switch (serial_detect(port)) {
+		case 1:
+			dprintf(devname, "%s\n",
+					"detected 8250 serial interface");
+			break;
+		case 2:
+			dprintf(devname, "%s\n",
+					"detected 8250 with scratch regs");
+			break;
+		case 3:
+			dprintf(devname, "%s\n",
+					"detected 16450 serial interface");
+			break;
+		case 4:
+			dprintf(devname, "%s\n",
+					"detected 16550A serial interface");
+			break;
+		default:
+			continue;
+		}
+
+		io_outb(port + 1, 0x00);
+		io_outb(port + 3, 0x80);
+		io_outb(port + 0, 0x03);
+		io_outb(port + 1, 0x00);
+		io_outb(port + 3, 0x03);
+		io_outb(port + 2, 0xC7);
+		io_outb(port + 4, 0x0B);
+
+		serial_minor[i] = ++console_minor_last;
+		dev_init((dev_t) { MAJOR_CON, serial_minor[i] });
 	}
-
-	io_outb(port + 1, 0x00);
-	io_outb(port + 3, 0x80);
-	io_outb(port + 0, 0x03);
-	io_outb(port + 1, 0x00);
-	io_outb(port + 3, 0x03);
-	io_outb(port + 2, 0xC7);
-	io_outb(port + 4, 0x0B);
 
 	return 0;
 }
 
-static void serial_con_fini(void)
+static void serial_con_fini(u16 minor)
 {
 	/* TODO */
 }

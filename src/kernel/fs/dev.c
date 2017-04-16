@@ -75,6 +75,7 @@ int dev_init(dev_t dev)
 	if (!(dep = dirent_alloc(dp, name)))
 		return -ENOMEM;
 	dep->ip = inode_alloc(root_sb);
+	dep->ip->dev = dev;
 	dep->ip->fop = devices[dev.major].op;
 
 	return 0;

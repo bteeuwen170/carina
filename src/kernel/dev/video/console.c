@@ -32,6 +32,7 @@
 static const char devname[] = "con";
 
 static LIST_HEAD(consoles);
+int console_minor_last = -1;
 
 int con_reg(struct con_driver *driver)
 {
@@ -54,14 +55,13 @@ int con_write(struct file *fp, const char *buf, off_t off, size_t n)
 {
 	(void) off;
 
-	/* TODO NO, don't write to every console, very bad, very very bad XXX */
-
 	struct con_driver *driver;
 	size_t i;
 
-	for (i = 0; i < n; i++)
-		list_for_each(driver, &consoles, l)
-			driver->write(buf[i]);
+	/* FIXME What a crappy way of doing things... */
+	list_for_each(driver, &consoles, l)
+		for (i = 0; i < n; i++)
+			driver->write(fp->dep->ip->dev.minor, buf[i]);
 
 	return n;
 }
@@ -95,6 +95,7 @@ int con_init(void)
 void con_exit(void)
 {
 	/* TODO */
+	dev_unreg(MAJOR_CON);
 }
 
 MODULE(con, &con_init, &con_exit);

@@ -84,13 +84,13 @@ void kernel_main(void)
 
 #ifdef CONFIG_CONSOLE
 
+#ifdef CONFIG_CONSOLE_VGA
+	vga_con_init();
+#endif
+
 #ifdef CONFIG_CONSOLE_SERIAL
 	/* serial_init(COM0); */
 	serial_con_init();
-#endif
-
-#ifdef CONFIG_CONSOLE_VGA
-	vga_con_init();
 #endif
 
 	con_init();
