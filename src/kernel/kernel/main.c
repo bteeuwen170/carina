@@ -304,14 +304,6 @@ void kernel_main(void)
 			pcspk_play(835);
 			sleep(10);
 			pcspk_stop();
-		} else if (strcmp(cmd, "fj") == 0) {
-			pcspk_fj();
-		} else if (strcmp(cmd, "mi") == 0) {
-			pcspk_mi();
-		} else if (strcmp(cmd, "hc") == 0) {
-			pcspk_hc();
-		} else if (strcmp(cmd, "acri") == 0) {
-			pcspk_acri();
 #endif
 
 		/* Other */
