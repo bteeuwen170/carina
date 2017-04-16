@@ -131,18 +131,8 @@ static struct superblock *ramfs_read_sb(struct superblock *sp)
 
 	if (!(ip = ramfs_inode_alloc(sp, IM_DIR | 0755, (dev_t) { 0, 0 })))
 		return NULL;
-	dep = dirent_alloc_root(ip);
-	sp->root = dep;
 
-	if (!(dep = dirent_alloc(sp->root, ".")))
-		return NULL;
-	dep->ip = ip;
-
-	if (!(dep = dirent_alloc(sp->root, "..")))
-		return NULL;
-	dep->ip = ip;
-
-	return sp;
+	return ip;
 }
 
 static struct sb_ops ramfs_sb_ops = { NULL };

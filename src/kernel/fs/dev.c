@@ -72,6 +72,8 @@ int dev_init(dev_t dev)
 			return -1; /* TODO */
 	}
 
+	/* TODO mknod */
+
 	if (!(dep = dirent_alloc(dp, name)))
 		return -ENOMEM;
 	dep->ip = inode_alloc(root_sb);

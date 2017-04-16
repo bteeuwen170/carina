@@ -22,13 +22,36 @@
  *
  */
 
+#include <fs.h>
+
+#include <stdlib.h>
+
 static const char devname[] = "ramfs";
 
-static int iso9660_read(struct superblock *sp, u64 addr, u8 *buf)
-{
-	/* FIXME static reference */
-	return atapi_read(sp->dev, addr, 0, 0, buf);
-}
+struct iso9660_sb {
+	u8	type;
+	char	signature[5];
+	u8	version;
+#if 1
+	u8	data[2041];
+#else
+	u8	reserved0;
+	u8	unused0[64];
+	u8	reserved1[8];
+	/* TODO */
+#endif
+} __attribute__ ((packed));
+
+struct iso9660_date {
+	char	year[4];
+	char	month[2];
+	char	day[2];
+	char	hour[2];
+	char	minute[2];
+	char	second[2];
+	char	centisecond[2];
+	i8	timezone;
+};
 
 static struct inode *iso9660_inode_alloc(struct superblock *sp)
 {
@@ -40,14 +63,14 @@ static struct inode *iso9660_inode_alloc(struct superblock *sp)
 	return ip;
 }
 
-static struct superblock *iso9660_read_sb(struct superblock *sp)
+static struct inode *iso9660_read_sb(struct superblock *sp)
 {
 #if 1
 	struct iso9660_sb sb;
 	int i;
 
 	for (i = 16; i < 32; i++) {
-		iso9660_read(sp, i, &sb);
+		/* iso9660_read(sp, i, &sb); */
 
 		if (strncmp(sb.signature, "CD001", 5) != 0 || sb.version != 1)
 			return NULL;
@@ -80,22 +103,7 @@ static struct superblock *iso9660_read_sb(struct superblock *sp)
 #endif
 }
 
-static struct sb_ops iso9660_sb_ops = {
-	NULL
-};
-static struct inode_ops ramfs_inode_ops = {
-	NULL
-};
-
-static struct file_ops ramfs_file_ops = {
-	NULL
-};
-
-static struct file_ops ramfs_dir_ops = {
-	NULL
-};
-
-static struct fs_driver ramfs_driver = {
+static struct fs_driver iso9660_driver = {
 	.name		= devname,
 
 	.read_sb	= &iso9660_read_sb
@@ -113,4 +121,4 @@ void iso9660_exit(void)
 	fs_unreg(&iso9660_driver);
 }
 
-MODULE(ramfs, &iso9660_init, &iso9660_exit);
+MODULE(iso9660, &iso9660_init, &iso9660_exit);

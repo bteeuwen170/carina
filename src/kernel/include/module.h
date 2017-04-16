@@ -73,10 +73,10 @@ void con_exit(void);
 void devfs_exit(void);
 
 int ext2_init(void);
-void ext2_exit(void);
+void ext2_exit(void);*/
 
 int iso9660_init(void);
-void iso9660_exit(void); */
+void iso9660_exit(void);
 
 int ramfs_init(void);
 void ramfs_exit(void);

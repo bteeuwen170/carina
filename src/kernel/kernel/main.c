@@ -83,7 +83,12 @@ void kernel_main(void)
 
 #ifdef CONFIG_RAMFS
 	ramfs_init();
-	sv_mount(0, "ramfs");
+	sys_mount(NULL, "/", "ramfs");
+#endif
+
+#ifdef CONFIG_ISO9660
+	/* iso9660_init();
+	sv_mount(0, NULL); */
 #endif
 
 #ifdef CONFIG_CONSOLE

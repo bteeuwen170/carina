@@ -18,6 +18,8 @@ menu "File systems"
 {
 	config CONFIG_RAMFS
 		"RAMFS support";
+	config CONFIG_ISO9660
+		"ISO9660 support";
 }
 
 menu "Bus devices"

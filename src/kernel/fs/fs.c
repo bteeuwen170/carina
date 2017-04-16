@@ -28,6 +28,7 @@
 #include <fs.h>
 #include <kernel.h>
 #include <limits.h>
+#include <list.h>
 #include <proc.h>
 #include <sys/types.h> /* XXX TEMP for syntax highlighting */
 
@@ -40,23 +41,47 @@ static LIST_HEAD(fs_drivers);
 
 struct superblock *root_sb;
 
-struct mountp *sv_mount(struct fs_driver *driver, const char *name)
-{
-	struct superblock *sp;
-	(void) name;
-
-	sp = sb_alloc(driver);
-
-	/* TEMP */ root_sb = list_entry(fs_drivers.next, struct fs_driver, l)->read_sb(sp);
-	cproc->cwd = root_sb->root;
-	/* TODO */
-
-	return NULL;
-}
-
 int sv_mkdir(const char *path, mode_t mode)
 {
 	/* XXX TEMP? */ return sys_mkdir(path, mode);
+}
+
+int sys_mount(const char *device, const char *path, const char *fs)
+{
+	struct fs_driver *driver;
+	struct superblock *sp;
+	struct inode *ip;
+	struct dirent *dep, *dp;
+
+	list_for_each(driver, &fs_drivers, l)
+		if (strcmp(driver->name, fs) == 0)
+			goto foundfs;
+
+	return -EINVAL;
+
+foundfs:
+	if (device == NULL && strcmp(path, "/") == 0 &&
+			strcmp(fs, "ramfs") == 0) {
+		root_sb = sp = sb_alloc(NULL); /* XXX */
+
+		ip = driver->read_sb(sp);
+
+		/* XXX Only change cwd if initial */
+		cproc->cwd = sp->root = dep = dirent_alloc_root(ip);
+	} else {
+		/* TODO */
+		return -1;
+	}
+
+	if (!(dp = dirent_alloc(dep, ".")))
+		return -ENOMEM;
+	dp->ip = ip;
+
+	if (!(dp = dirent_alloc(dep, "..")))
+		return -ENOMEM;
+	dp->ip = ip;
+
+	return 0;
 }
 
 /* TODO Move to proc/ */

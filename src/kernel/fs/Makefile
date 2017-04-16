@@ -2,6 +2,7 @@
 # src/kernel/fs/Makefile
 #
 
+include src/kernel/fs/iso9660/Makefile
 include src/kernel/fs/ramfs/Makefile
 
 kernel-o += src/kernel/fs/dev.o \

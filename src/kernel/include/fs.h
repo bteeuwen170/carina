@@ -75,7 +75,7 @@ struct fs_driver {
 	const char *name;
 
 	/* Read the superblock: sp, data */
-	struct superblock *(*read_sb) (struct superblock *);
+	struct inode *(*read_sb) (struct superblock *);
 };
 
 struct superblock {
@@ -229,6 +229,7 @@ int fs_reg(struct fs_driver *driver);
 void fs_unreg(struct fs_driver *driver);
 
 /* XXX TMP XXX */
+int sys_mount(const char *device, const char *path, const char *fs);
 int sys_chdir(const char *path);
 int sys_cwdir(char *path);
 int sys_write(int fd, const char *buf, size_t n);
@@ -265,6 +266,7 @@ int dev_init(dev_t dev);
 
 /* END dev.h */
 
+#if 0
 /* BEGIN mount.h */
 
 struct mountp {
@@ -275,8 +277,7 @@ struct mountp {
 	char *name;		/* Device path or name */
 };
 
-struct mountp *sv_mount(struct fs_driver *driver, const char *name);
-
 /* END mount.h */
+#endif
 
 #endif
