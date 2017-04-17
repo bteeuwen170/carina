@@ -34,23 +34,25 @@
 
 static const char devname[] = "opt";
 
-/* static int atapi_read(struct ata_dev *dev, u64 addr, u16 ss, u32 off, u8 *buf) */
-static int atapi_read(struct file *fp, char *buf, off_t off, size_t n)
+/* static int atapi_read(struct file *fp, char *buf, off_t off, size_t n) */
+int atapi_read(u16 minor, char *buf, off_t off, size_t n)
 {
 	struct ata_dev *dev;
-	u32 status, i;
+	u32 i;
 	u8 packet[12];
 
-	dev = &ide_devices[fp->dep->ip->dev.minor];
+	/* dev = &ide_devices[fp->dep->ip->dev.minor]; */
+	dev = &ide_devices[minor];
 
 	if (dev->type != ATA_DEV_TYPE_ATAPI)
 		return -EINVAL;
 
-	if (n != ATAPI_SECTOR_SIZE)
+	/* XXX Only allow ATAPI_SECTOR_SIZE? */
+	if (n % ATAPI_SECTOR_SIZE != 0)
 		return -EINVAL;
 
 	/* Enable interrupts */
-	ide_outb(dev->ch, ATA_REG_CTRL, 0x00);
+	ide_outb(dev->ch, ATA_REG_CTRL, 0);
 
 	/* Select the drive */
 	ide_outb(dev->ch, ATA_REG_DRVSEL, 0xA0 | (dev->drv << 4));
@@ -63,15 +65,6 @@ static int atapi_read(struct file *fp, char *buf, off_t off, size_t n)
 	ide_outb(dev->ch, ATA_REG_LBA1, ATAPI_SECTOR_SIZE & 0xFF);
 	ide_outb(dev->ch, ATA_REG_LBA2, ATAPI_SECTOR_SIZE >> 8);
 
-	/* Send the packet */
-	ide_outb(dev->ch, ATA_REG_CMD, ATA_CMD_PACKET);
-
-	while (status & ATA_CMD_BUSY)
-		status = ide_inb(dev->ch, ATA_REG_STATUS);
-
-	if (status & ATA_CMD_ERR)
-		return -1;
-
 	packet[0] = ATAPI_CMD_READ;
 	packet[1] = 0;
 	packet[2] = (off >> 24) & 0xFF;
@@ -81,23 +74,29 @@ static int atapi_read(struct file *fp, char *buf, off_t off, size_t n)
 	packet[6] = 0;
 	packet[7] = 0;
 	packet[8] = 0;
-	packet[9] = 1; /* Number of sectors to write */
+	packet[9] = n / ATAPI_SECTOR_SIZE;
 	packet[10] = 0;
 	packet[11] = 0;
+
+	/* Send the packet */
+	ide_outb(dev->ch, ATA_REG_CMD, ATA_CMD_PACKET);
+
+	if (ide_poll(dev->ch) != 0)
+		return -1;
 
 	for (i = 0; i < 11; i += 2)
 		io_outw(ide_channels[dev->ch].base, ((packet[i] & 0xFF) |
 					(packet[i + 1] & 0xFF) << 8));
 
-	/* FIXME Not right from here onwards */
-	while (status & ATA_CMD_BUSY)
-		status = ide_inb(ide_channels[dev->ch].base, ATA_REG_STATUS);
+	for (i = 0; i < n / ATAPI_SECTOR_SIZE; i++) {
+		if (ide_poll(dev->ch) != 0)
+			return -1;
 
-	if (status & ATA_CMD_ERR)
-		return -1;
+		asm volatile ("rep insw" :: "D" (buf), "c" (n / 2),
+				"d" (ide_channels[dev->ch].base) : "memory");
+	}
 
-	for (i = 0; i < 4; i++)
-		buf[i] = io_inw(ide_channels[dev->ch].base);
+	while (ide_inb(dev->ch, ATA_REG_STATUS) & (ATA_CMD_BUSY | ATA_CMD_DDR));
 
 	return 0;
 }

@@ -89,6 +89,21 @@ u8 ide_inb(u8 ch, u8 reg)
 	return res;
 }
 
+int ide_poll(u8 ch)
+{
+	u8 i, status;
+
+	for (i = 0; i < 4; i++)
+		ide_inb(ch, ATA_REG_STATUS_ALT);
+
+	while ((status = ide_inb(ch, ATA_REG_STATUS)) & ATA_CMD_BUSY);
+
+	if (status & ATA_CMD_ERR)
+		return 1;
+
+	return 0;
+}
+
 static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 {
 	struct ata_dev *dev;

@@ -87,8 +87,7 @@ void kernel_main(void)
 #endif
 
 #ifdef CONFIG_ISO9660
-	/* iso9660_init();
-	sv_mount(0, NULL); */
+	iso9660_init();
 #endif
 
 #ifdef CONFIG_CONSOLE
@@ -282,6 +281,12 @@ void kernel_main(void)
 		} else if (strcmp(cmd, "cwd") == 0) {
 			sys_cwdir(cmd);
 			kprintf("%s\n", cmd);
+		} else if (strncmp(cmd, "mount", 5) == 0) {
+			/* char *ccmd = cmd;
+			ccmd += 6; */
+
+			int res2 = sys_mount("/sys/dev/opt0", "/mnt", "iso9660");
+			kprintf("res: %d\n", res2);
 		} else if (strncmp(cmd, "mkdir", 5) == 0) {
 			char *ccmd = cmd;
 			ccmd += 6;

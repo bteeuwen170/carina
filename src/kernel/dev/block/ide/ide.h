@@ -177,4 +177,6 @@ extern struct ata_dev ide_devices[];
 void ide_outb(u8 ch, u8 reg, u8 data);
 u8 ide_inb(u8 ch, u8 reg);
 
+int ide_poll(u8 ch);
+
 #endif

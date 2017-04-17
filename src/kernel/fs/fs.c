@@ -52,6 +52,7 @@ int sys_mount(const char *device, const char *path, const char *fs)
 	struct superblock *sp;
 	struct inode *ip;
 	struct dirent *dep, *dp;
+	int res = -1;
 
 	list_for_each(driver, &fs_drivers, l)
 		if (strcmp(driver->name, fs) == 0)
@@ -60,28 +61,56 @@ int sys_mount(const char *device, const char *path, const char *fs)
 	return -EINVAL;
 
 foundfs:
+	if (!(sp = sb_alloc(driver)))
+		return -ENOMEM;
+
 	if (device == NULL && strcmp(path, "/") == 0 &&
 			strcmp(fs, "ramfs") == 0) {
-		root_sb = sp = sb_alloc(NULL); /* XXX */
+		root_sb = sp;
 
 		ip = driver->read_sb(sp);
 
 		/* XXX Only change cwd if initial */
 		cproc->cwd = sp->root = dep = dirent_alloc_root(ip);
 	} else {
-		/* TODO */
-		return -1;
+		if (!(dep = dirent_get(device))) {
+			res = -ENOENT;
+			goto err;
+		}
+
+		/* TODO Error checking */
+		sp->dev = dep->ip->dev;
+
+		ip = driver->read_sb(sp);
+
+		sp->root = dirent_alloc_root(ip);
+
+		if (!(dep = dirent_get(path))) {
+			res = -ENOENT;
+			goto err;
+		}
+
 	}
 
-	if (!(dp = dirent_alloc(dep, ".")))
-		return -ENOMEM;
+	if (!(dp = dirent_alloc(dep, "."))) {
+		res = -ENOMEM;
+		goto err;
+	}
 	dp->ip = ip;
 
-	if (!(dp = dirent_alloc(dep, "..")))
-		return -ENOMEM;
+	if (!(dp = dirent_alloc(dep, ".."))) {
+		res = -ENOMEM;
+		goto err;
+	}
 	dp->ip = ip;
 
 	return 0;
+
+err:
+	/* if (sp)
+		sb_dealloc(sp); */
+
+	return res;
 }
 
 /* TODO Move to proc/ */
@@ -116,7 +145,6 @@ int sys_cwdir(char *path)
 	struct dirent *dep = cproc->cwd;
 	char buf[PATH_MAX];
 	char *pb = buf, *nb = buf;
-	int res = -1;
 
 	buf[0] = '\0';
 

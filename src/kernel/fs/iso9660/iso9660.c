@@ -23,10 +23,13 @@
  */
 
 #include <fs.h>
+#include <kernel.h>
+#include <module.h>
 
 #include <stdlib.h>
+#include <string.h>
 
-static const char devname[] = "ramfs";
+static const char devname[] = "iso9660";
 
 struct iso9660_sb {
 	u8	type;
@@ -70,7 +73,7 @@ static struct inode *iso9660_read_sb(struct superblock *sp)
 	int i;
 
 	for (i = 16; i < 32; i++) {
-		/* iso9660_read(sp, i, &sb); */
+		int ret = atapi_read(sp->dev.minor, &sb, i, 2048);
 
 		if (strncmp(sb.signature, "CD001", 5) != 0 || sb.version != 1)
 			return NULL;

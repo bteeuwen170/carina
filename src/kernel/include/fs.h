@@ -69,15 +69,6 @@
 #define IM_OW		0000002	/* Other write */
 #define IM_OE		0000001	/* Other execute */
 
-struct fs_driver {
-	struct list_head l;
-
-	const char *name;
-
-	/* Read the superblock: sp, data */
-	struct inode *(*read_sb) (struct superblock *);
-};
-
 struct superblock {
 	struct list_head l;
 
@@ -199,6 +190,15 @@ struct file_ops {
 	/* I/O control: fp, cmd, arg */
 	int (*ioctl) (struct file *, unsigned int, unsigned long);
 	/* TODO (sync / fsync) */
+};
+
+struct fs_driver {
+	struct list_head l;
+
+	const char *name;
+
+	/* Read the superblock: sp, data */
+	struct inode *(*read_sb) (struct superblock *);
 };
 
 extern struct superblock *root_sb;
