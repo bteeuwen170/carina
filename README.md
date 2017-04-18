@@ -78,4 +78,4 @@ filesystem hierarchy layout:
 
 The following cmdline options are supported:
 
-console=                    specify the system console
+	console=                specify the system console

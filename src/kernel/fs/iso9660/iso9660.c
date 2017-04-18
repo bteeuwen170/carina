@@ -31,21 +31,7 @@
 
 static const char devname[] = "iso9660";
 
-struct iso9660_sb {
-	u8	type;
-	char	signature[5];
-	u8	version;
-#if 1
-	u8	data[2041];
-#else
-	u8	reserved0;
-	u8	unused0[64];
-	u8	reserved1[8];
-	/* TODO */
-#endif
-} __attribute__ ((packed));
-
-struct iso9660_date {
+struct iso9660_time {
 	char	year[4];
 	char	month[2];
 	char	day[2];
@@ -54,7 +40,58 @@ struct iso9660_date {
 	char	second[2];
 	char	centisecond[2];
 	i8	timezone;
-};
+} __attribute__ ((packed));
+
+struct iso9660_dirent {
+	u8	length;
+	u8	length_ext;
+
+	u32	addr;
+	u8	unused0[4];
+
+	u32	size;
+	u8	unused1[4];
+
+	struct iso9660_time mtime;
+
+	u8	flags;
+
+	u8	unit_size;
+	u8	unit_gap;
+
+	u16	disk;
+	u8	unused2[2];
+
+	u8	name_len;
+	char	name[];
+} __attribute__ ((packed));
+
+struct iso9660_sb {
+	u8	type;
+	char	signature[5];
+	u8	version;
+	u8	reserved0;
+
+	char	sys_ident[32];
+	char	vol_ident[32];
+	u8	reserved1[8];
+
+	u32	blocks;
+	u8	unused0[4];
+	u8	reserved2[32];
+
+	u16	disks;
+	u8	unused1[2];
+	u16	disk;
+	u8	unused2[2];
+
+	u16	block_size;
+	u8	unused3[24];
+
+	struct iso9660_dirent root;
+
+	u8	unused6[1858];
+} __attribute__ ((packed));
 
 static struct inode *iso9660_inode_alloc(struct superblock *sp)
 {
@@ -82,7 +119,12 @@ static struct inode *iso9660_read_sb(struct superblock *sp)
 			break;
 	}
 
-	kprintf("FOUND SB!\n");
+	kprintf("sys: %s\n", sb.sys_ident);
+	kprintf("vol: %s\n", sb.vol_ident);
+	kprintf("# of blocks: %d   block size: %d", sb.blocks, sb.block_size);
+	kprintf(" (%d MB)\n", (sb.blocks * sb.block_size) / 1024);
+
+	return NULL;
 #else
 	struct inode *ip;
 	struct dirent *dep;
