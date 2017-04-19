@@ -40,6 +40,7 @@ static const char devname[] = "fs";
 static LIST_HEAD(fs_drivers);
 
 struct superblock *root_sb;
+struct dirent root_dep;
 
 int sv_mkdir(const char *path, mode_t mode)
 {
@@ -49,9 +50,9 @@ int sv_mkdir(const char *path, mode_t mode)
 int sys_mount(const char *device, const char *path, const char *fs)
 {
 	struct fs_driver *driver;
-	struct superblock *sp;
+	struct superblock *sp = NULL;
 	struct inode *ip;
-	struct dirent *dep, *dp;
+	struct dirent *dep;
 	int res = -1;
 
 	list_for_each(driver, &fs_drivers, l)
@@ -64,14 +65,35 @@ foundfs:
 	if (!(sp = sb_alloc(driver)))
 		return -ENOMEM;
 
-	if (device == NULL && strcmp(path, "/") == 0 &&
-			strcmp(fs, "ramfs") == 0) {
+	if (device == NULL && strcmp(path, "/") == 0) {
+		if (root_sb) {
+			res = -EINVAL;
+			goto err;
+		}
+
 		root_sb = sp;
 
-		ip = driver->read_sb(sp);
+		list_init(&root_dep.l);
 
-		/* XXX Only change cwd if initial */
-		cproc->cwd = sp->root = dep = dirent_alloc_root(ip);
+		root_dep.name[0] = '/';
+		root_dep.name[1] = '\0';
+
+		root_dep.refs = 1;
+
+		root_dep.ip = driver->read_sb(sp);
+		cproc->cwd = root_dep.dp = &root_dep;
+
+		if (!(dep = dirent_alloc(&root_dep, "."))) {
+			res = -ENOMEM;
+			goto err;
+		}
+		dep->ip = root_dep.ip;
+
+		if (!(dep = dirent_alloc(&root_dep, ".."))) {
+			res = -ENOMEM;
+			goto err;
+		}
+		dep->ip = root_dep.ip;
 	} else {
 		if (!(dep = dirent_get(device))) {
 			res = -ENOENT;
@@ -81,28 +103,16 @@ foundfs:
 		/* TODO Error checking */
 		sp->dev = dep->ip->dev;
 
-		ip = driver->read_sb(sp);
-
-		sp->root = dirent_alloc_root(ip);
-
+		/* TODO Check if dir is empty */
 		if (!(dep = dirent_get(path))) {
 			res = -ENOENT;
 			goto err;
 		}
 
-	}
+		inode_put(dep->ip);
 
-	if (!(dp = dirent_alloc(dep, "."))) {
-		res = -ENOMEM;
-		goto err;
+		dep->ip = driver->read_sb(sp);
 	}
-	dp->ip = ip;
-
-	if (!(dp = dirent_alloc(dep, ".."))) {
-		res = -ENOMEM;
-		goto err;
-	}
-	dp->ip = ip;
 
 	return 0;
 
@@ -150,11 +160,11 @@ int sys_cwdir(char *path)
 
 	do {
 		strcat(buf, dep->name);
-		if (dep != root_sb->root)
+		if (dep != &root_dep)
 			strcat(buf, "/");
 
 		dep = dep->dp;
-	} while (dep != root_sb->root);
+	} while (dep != &root_dep);
 
 	while (*nb++) {
 		if (*nb == '\0') {

@@ -42,7 +42,13 @@ struct superblock *sb_alloc(struct fs_driver *driver)
 	list_init(&sp->l);
 
 	sp->dev = (dev_t) { 0, 0 };
+	sp->name[0] = '\0';
 	sp->flags = 0;
+
+	sp->blocks = 0;
+	sp->block_size = 0;
+
+	sp->device = NULL;
 
 	sp->root = NULL;
 	list_init(&sp->il);

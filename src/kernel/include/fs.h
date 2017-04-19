@@ -72,15 +72,18 @@
 struct superblock {
 	struct list_head l;
 
-	dev_t	dev;		/* Device identifier */
-	u8	flags;		/* Superblock flags */
+	dev_t	dev;			/* Device identifier */
+	char	name[NAME_MAX + 1];	/* Device name */
+	u8	flags;			/* Superblock flags */
 
-	/* u64	fb; */		/* First block */
-	/* u16	bsize; */		/* Block size */
-	/* u64	size_max; */	/* Max. file size */
+	u64	blocks;			/* First block */
+	u16	block_size;		/* Block size */
+	/* u64	size_max; */		/* Max. file size */
 
-	struct dirent *root;	/* Root dirent */
-	struct list_head il;	/* Inodes */
+	void *device;			/* Device specific superblock (opt.) */
+
+	struct inode *root;		/* Root dirent */
+	struct list_head il;		/* Inodes */
 
 	struct sb_ops *op;
 };
@@ -166,8 +169,10 @@ struct inode_ops {
 	/* Create a special file: dp, dep, mode, dev */
 	int (*mknod) (struct inode *, struct dirent *, mode_t, dev_t);
 	/* Move a dirent: odp, odep, dp, dep */
-	int (*move) (struct inode *, struct dirent *, /* XXX Eq to rename on l */
+	int (*move) (struct inode *, struct dirent *,
 			struct inode *, struct dirent *);
+	/* Look up a directory entry: dp, name */
+	struct dirent *(*lookup) (struct dirent *, const char *);
 	/* TODO (perm), (setattr / getattr), (readlink) */
 };
 
@@ -202,6 +207,7 @@ struct fs_driver {
 };
 
 extern struct superblock *root_sb;
+extern struct dirent root_dep;
 
 struct superblock *sb_alloc(struct fs_driver *driver);
 
@@ -210,7 +216,6 @@ struct inode *inode_get(struct superblock *sp, ino_t inum);
 void inode_put(struct inode *ip);
 
 struct dirent *dirent_alloc(struct dirent *dp, const char *name);
-struct dirent *dirent_alloc_root(struct inode *ip);
 
 struct dirent *dirent_get(const char *path);
 struct usr_dirent *usr_dirent_get(struct file *fp);
@@ -232,9 +237,9 @@ void fs_unreg(struct fs_driver *driver);
 int sys_mount(const char *device, const char *path, const char *fs);
 int sys_chdir(const char *path);
 int sys_cwdir(char *path);
-int sys_write(int fd, const char *buf, size_t n);
 int sys_open(const char *path, int flags, mode_t mode);
 int sys_close(int fd);
+int sys_write(int fd, const char *buf, size_t n);
 int sys_readdir(int fd, struct usr_dirent *udep);
 int sys_mkdir(const char *path, mode_t mode);
 /* XXX END TMP XXX */

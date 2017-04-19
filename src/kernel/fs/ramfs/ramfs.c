@@ -92,6 +92,13 @@ static int ramfs_move(struct inode *odp, struct dirent *odep,
 	return 0;
 }
 
+static struct dirent *ramfs_lookup(struct dirent *dp, const char *name)
+{
+	(void) dp, (void) name;
+
+	return NULL;
+}
+
 static struct inode *ramfs_inode_alloc(struct superblock *sp,
 		mode_t mode, dev_t dev)
 {
@@ -120,10 +127,9 @@ static struct inode *ramfs_inode_alloc(struct superblock *sp,
 	return ip;
 }
 
-static struct superblock *ramfs_read_sb(struct superblock *sp)
+static struct inode *ramfs_read_sb(struct superblock *sp)
 {
 	struct inode *ip;
-	struct dirent *dep;
 
 	sp->flags = SF_KEEP;
 
@@ -145,7 +151,8 @@ static struct inode_ops ramfs_inode_ops = {
 	.mkdir		= &ramfs_mkdir,
 	.rmdir		= &ramfs_rmdir,
 	.mknod		= &ramfs_mknod,
-	.move		= &ramfs_move
+	.move		= &ramfs_move,
+	.lookup		= &ramfs_lookup
 };
 
 static struct file_ops ramfs_file_ops = { NULL };
