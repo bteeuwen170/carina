@@ -52,7 +52,7 @@ struct inode *inode_alloc(struct superblock *sp)
 	if (sp->op->inode_alloc)
 		ip = sp->op->inode_alloc(sp);
 	else
-		ip = kmalloc(sizeof(struct inode));
+		ip = kcalloc(1, sizeof(struct inode));
 	if (!ip)
 		return NULL;
 
@@ -76,7 +76,8 @@ struct inode *inode_alloc(struct superblock *sp)
 	ip->ctime = 0;
 	ip->mtime = 0;
 
-	ip->size = 0;
+	if (!ip->size)
+		ip->size = 0;
 
 	ip->sp = sp;
 	list_init(&ip->del);

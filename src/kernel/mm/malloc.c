@@ -64,6 +64,16 @@ void *kmalloc(size_t size)
 	return p;
 }
 
+/* XXX an extemely crappy implementation of calloc */
+void *kcalloc(size_t nmemb, size_t size)
+{
+	void *p = kmalloc(nmemb * size);
+
+	memset(p, 0, nmemb * size);
+
+	return p;
+}
+
 /*void *krealloc(void *ptr, size_t size)
 {
 	void *p = kmalloc(size);
