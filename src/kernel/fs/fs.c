@@ -77,7 +77,7 @@ foundfs:
 
 		root_dep.name[0] = '/';
 		root_dep.name[1] = '\0';
-		root_dep.mode = IM_DIR;
+		root_dep.mode = FM_DIR;
 
 		root_dep.refs = 1;
 
@@ -137,7 +137,7 @@ int sys_chdir(const char *path)
 		goto err;
 	}
 
-	if (!(dep->mode & IM_DIR)) {
+	if (!(dep->mode & FM_DIR)) {
 		res = -ENOTDIR;
 		goto err;
 	}
@@ -277,7 +277,7 @@ int sys_readdir(int fd, struct usr_dirent *udep)
 		goto err;
 	}
 
-	if (!(fp->dep->mode & IM_DIR)) {
+	if (!(fp->dep->mode & FM_DIR)) {
 		res = -ENOTDIR;
 		goto err;
 	}
@@ -341,7 +341,7 @@ int sys_mkdir(const char *path, mode_t mode)
 		res = -1; /* TODO */
 		goto err;
 	}
-	dep->mode = IM_DIR | mode;
+	dep->mode = FM_DIR | mode;
 
 	if (!(dep->ip = inode_alloc(dp->ip->sp))) {
 		res = -ENOMEM;
