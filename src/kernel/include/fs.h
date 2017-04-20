@@ -173,6 +173,8 @@ struct inode_ops {
 			struct inode *, struct dirent *);
 	/* Look up a directory entry: dp, name */
 	struct dirent *(*lookup) (struct dirent *, const char *);
+	/* Read directory: dp */
+	int (*readdir) (struct dirent *);
 	/* TODO (perm), (setattr / getattr), (readlink) */
 };
 

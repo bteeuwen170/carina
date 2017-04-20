@@ -61,10 +61,8 @@ struct inode *inode_alloc(struct superblock *sp)
 	if (!ip->inum)
 		ip->inum = ++inodes;
 	/* ip->flags = 0; */
-	ip->mode = 0;
 
 	ip->refs = 1;
-	ip->links = 0;
 
 	ip->dev = (dev_t) { 0, 0 };
 	/* TODO Set to current user */
@@ -76,14 +74,8 @@ struct inode *inode_alloc(struct superblock *sp)
 	ip->ctime = 0;
 	ip->mtime = 0;
 
-	if (!ip->size)
-		ip->size = 0;
-
 	ip->sp = sp;
 	list_init(&ip->del);
-
-	ip->op = NULL;
-	ip->fop = NULL;
 
 	return ip;
 }

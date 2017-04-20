@@ -22,6 +22,7 @@
  *
  */
 
+#include <errno.h>
 #include <fs.h>
 #include <kernel.h>
 #include <module.h>
@@ -31,36 +32,34 @@
 
 static const char devname[] = "iso9660";
 
+#define ISO9660_DF_DIR	0x02
+
 struct iso9660_time {
-	char	year[4];
-	char	month[2];
-	char	day[2];
-	char	hour[2];
-	char	minute[2];
-	char	second[2];
-	char	centisecond[2];
+	u8	year;
+	u8	month;
+	u8	day;
+	u8	hour;
+	u8	minute;
+	u8	second;
 	i8	timezone;
 } __attribute__ ((packed));
 
 struct iso9660_dirent {
 	u8	length;
-	u8	length_ext;
+	u8	unused0;
 
 	u32	addr;
-	u8	unused0[4];
-
-	u32	size;
 	u8	unused1[4];
+	u32	size;
+	u8	unused2[4];
 
 	struct iso9660_time mtime;
 
 	u8	flags;
-
-	u8	unit_size;
-	u8	unit_gap;
+	u8	unused3[2];
 
 	u16	disk;
-	u8	unused2[2];
+	u8	unused4[2];
 
 	u8	name_len;
 	char	name[];
@@ -70,25 +69,23 @@ struct iso9660_sb {
 	u8	type;
 	char	signature[5];
 	u8	version;
-	u8	reserved0;
-	u8	unused0[32];
+	u8	unused0[33];
 
 	char	vol_ident[32];
-	u8	reserved1[8];
+	u8	unused1[8];
 
 	u32	blocks;
-	u8	unused1[4];
-	u8	reserved2[32];
+	u8	unused2[36];
 
 	u16	disks;
-	u8	unused2[2];
-	u16	disk;
 	u8	unused3[2];
+	u16	disk;
+	u8	unused4[2];
 
 	u16	block_size;
-	u8	unused4[24];
+	u8	unused5[26];
 
-	struct iso9660_dirent root;
+	char	root[34];
 
 	u8	unused6[1858];
 } __attribute__ ((packed));
@@ -98,18 +95,9 @@ static struct inode_ops iso9660_inode_ops;
 /*static struct file_ops iso9660_file_ops;
 static struct file_ops iso9660_dir_ops; */
 
-/* static struct inode *iso9660_inode_alloc(struct superblock *sp)
-{
-	struct inode *ip;
-
-	if (!(ip = inode_alloc(sp)))
-		return NULL;
-
-	return ip;
-} */
-
 static struct dirent *iso9660_lookup(struct dirent *dp, const char *name)
 {
+#if 0
 	struct inode *ip = NULL;
 	struct dirent *dep;
 	struct iso9660_dirent dev_dep;
@@ -137,8 +125,62 @@ static struct dirent *iso9660_lookup(struct dirent *dp, const char *name)
 err:
 	if (ip)
 		inode_put(ip);
-
+#endif
 	return NULL;
+}
+
+static int iso9660_readdir(struct dirent *dp)
+{
+	struct inode *ip = NULL;
+	struct dirent *dep;
+	struct iso9660_dirent *dev_dp, *dev_dep;
+	char buf[2048], name[NAME_MAX + 1];
+	off_t addr, i;
+
+	dev_dp = (struct iso9660_dirent *) &((struct iso9660_sb *) dp->ip->sp->device)->root;
+
+	addr = dev_dp->addr;
+
+	atapi_read(dp->ip->sp->dev.minor, &buf, addr, 2048);
+
+	for (i = 0; i < 2048; i += dev_dep->length) {
+		dev_dep = buf + i;
+
+		if (!dev_dep->length)
+			break;
+
+		if (!(ip = inode_alloc(dp->ip->sp)))
+			goto err;
+
+		memcpy(name, dev_dep->name, dev_dep->name_len);
+		name[dev_dep->name_len] = '\0';
+
+		if (!(dep = dirent_alloc(dp, name)))
+			goto err;
+
+		ip->inum = addr;
+		if (dev_dep->flags & ISO9660_DF_DIR)
+			ip->mode |= IM_DIR;
+		else
+			ip->mode |= IM_REG;
+
+		ip->links = 1;
+
+		/* TODO Read from disk */
+		ip->atime = 0;
+		ip->ctime = 0;
+		ip->mtime = 0;
+
+		ip->size = dev_dep->size;
+	}
+
+	return 0;
+
+err:
+	if (ip)
+		inode_put(ip);
+
+	return -1;
 }
 
 static struct inode *iso9660_read_sb(struct superblock *sp)
@@ -171,7 +213,11 @@ static struct inode *iso9660_read_sb(struct superblock *sp)
 
 	if (!(ip = inode_alloc(sp)))
 		return NULL;
-	return NULL;
+	ip->inum = i;
+	ip->mode |= IM_DIR;
+	ip->op = &iso9660_inode_ops; /* XXX HERE? */
+
+	sp->device = dev_sp;
 
 	sp->root = ip;
 
@@ -214,7 +260,8 @@ static struct inode_ops iso9660_inode_ops = {
 	.rmdir		= NULL,
 	.mknod		= NULL,
 	.move		= NULL,
-	.lookup		= &iso9660_lookup
+	.lookup		= &iso9660_lookup,
+	.readdir	= &iso9660_readdir
 };
 
 static struct fs_driver iso9660_driver = {

@@ -152,7 +152,8 @@ static struct inode_ops ramfs_inode_ops = {
 	.rmdir		= &ramfs_rmdir,
 	.mknod		= &ramfs_mknod,
 	.move		= &ramfs_move,
-	.lookup		= &ramfs_lookup
+	.lookup		= &ramfs_lookup,
+	.readdir	= NULL
 };
 
 static struct file_ops ramfs_file_ops = { NULL };

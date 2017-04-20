@@ -112,6 +112,8 @@ foundfs:
 		inode_put(dep->ip);
 
 		dep->ip = driver->read_sb(sp);
+
+		dep->ip->op->readdir(dep);
 	}
 
 	return 0;
