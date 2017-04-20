@@ -92,8 +92,6 @@ struct inode {
 	struct list_head l;
 
 	ino_t	inum;			/* Inode number */
-	/* u8	flags; */			/* Inode flags */
-	mode_t	mode;			/* Inode mode */
 
 	int	refs;			/* Reference count */
 	link_t	links;			/* Link count */
@@ -119,6 +117,7 @@ struct dirent {
 	struct list_head l;
 
 	char	name[NAME_MAX + 1];	/* File name */
+	mode_t	mode;			/* File mode */
 
 	int	refs;			/* Reference count */
 
@@ -134,9 +133,10 @@ struct usr_dirent {
 
 struct file {
 	mode_t	mode;			/* File mode */
-	off_t	off;			/* Current offset */
 
 	int	refs;			/* Reference count */
+
+	off_t	off;			/* Current offset */
 
 	struct dirent	*dep;		/* Associated directory entry pointer */
 };

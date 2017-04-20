@@ -36,7 +36,6 @@ static const char devname[] = "ramfs";
 static struct sb_ops ramfs_sb_ops;
 static struct inode_ops ramfs_inode_ops;
 static struct file_ops ramfs_file_ops;
-static struct file_ops ramfs_dir_ops;
 
 static int ramfs_mknod(struct inode *dp, struct dirent *dep,
 		mode_t mode, dev_t dev)
@@ -94,12 +93,16 @@ static int ramfs_move(struct inode *odp, struct dirent *odep,
 
 static struct dirent *ramfs_lookup(struct dirent *dp, const char *name)
 {
-	(void) dp, (void) name;
+	struct dirent *dep;
+
+	list_for_each(dep, &dp->ip->del, l)
+		if (strcmp(dep->name, name) == 0)
+			return dep;
 
 	return NULL;
 }
 
-static struct inode *ramfs_inode_alloc(struct superblock *sp,
+/* static struct inode *ramfs_inode_alloc(struct superblock *sp,
 		mode_t mode, dev_t dev)
 {
 	struct inode *ip;
@@ -120,12 +123,12 @@ static struct inode *ramfs_inode_alloc(struct superblock *sp,
 		ip->fop = &ramfs_file_ops;
 		break;
 	default:
-		/* TODO */
+		[>TODO<]
 		break;
 	}
 
 	return ip;
-}
+} */
 
 static struct inode *ramfs_read_sb(struct superblock *sp)
 {
@@ -135,8 +138,13 @@ static struct inode *ramfs_read_sb(struct superblock *sp)
 
 	sp->op = &ramfs_sb_ops;
 
-	if (!(ip = ramfs_inode_alloc(sp, IM_DIR | 0755, (dev_t) { 0, 0 })))
+	/* if (!(ip = ramfs_inode_alloc(sp, IM_DIR | 0755, (dev_t) { 0, 0 })))
+		return NULL; */
+	if (!(ip = inode_alloc(sp)))
 		return NULL;
+
+	ip->op = &ramfs_inode_ops;
+	ip->fop = &ramfs_file_ops;
 
 	return ip;
 }
@@ -157,8 +165,6 @@ static struct inode_ops ramfs_inode_ops = {
 };
 
 static struct file_ops ramfs_file_ops = { NULL };
-
-static struct file_ops ramfs_dir_ops = { NULL };
 
 static struct fs_driver ramfs_driver = {
 	.name		= devname,

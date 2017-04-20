@@ -27,6 +27,7 @@
 #include <kernel.h>
 #include <module.h>
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -97,6 +98,38 @@ static struct file_ops iso9660_dir_ops; */
 
 static struct dirent *iso9660_lookup(struct dirent *dp, const char *name)
 {
+	struct dirent *dep;
+
+	list_for_each(dep, &dp->ip->del, l)
+		if (strcmp(dep->name, name) == 0)
+			return dep;
+
+#if 0
+	if (!(ip = inode_alloc(dp->ip->sp)))
+		goto err;
+
+	ip->inum = addr;
+	if (dev_dep->flags & ISO9660_DF_DIR)
+		ip->mode |= IM_DIR;
+	else
+		ip->mode |= IM_REG;
+
+	ip->links = 1;
+
+	/* TODO Read from disk */
+	ip->atime = 0;
+	ip->ctime = 0;
+	ip->mtime = 0;
+
+	ip->size = dev_dep->size;
+
+	/* XXX A very dirty hack */
+	dep->ip->op->readdir(dp);
+
+	list_for_each(dep, &dp->ip->del, l) {
+		if (strcmp(dep->name, name) == 0)
+			return dep;
+#endif
 #if 0
 	struct inode *ip = NULL;
 	struct dirent *dep;
@@ -131,10 +164,9 @@ err:
 
 static int iso9660_readdir(struct dirent *dp)
 {
-	struct inode *ip = NULL;
 	struct dirent *dep;
 	struct iso9660_dirent *dev_dp, *dev_dep;
-	char buf[2048], name[NAME_MAX + 1];
+	char buf[2048], name[NAME_MAX + 1], *sep;
 	off_t addr, i;
 
 	dev_dp = (struct iso9660_dirent *) &((struct iso9660_sb *) dp->ip->sp->device)->root;
@@ -143,44 +175,24 @@ static int iso9660_readdir(struct dirent *dp)
 
 	atapi_read(dp->ip->sp->dev.minor, &buf, addr, 2048);
 
-	for (i = 0; i < 2048; i += dev_dep->length) {
+	for (i = 254; i < 2048; i += dev_dep->length) {
 		dev_dep = buf + i;
 
 		if (!dev_dep->length)
 			break;
 
-		if (!(ip = inode_alloc(dp->ip->sp)))
-			goto err;
-
 		memcpy(name, dev_dep->name, dev_dep->name_len);
 		name[dev_dep->name_len] = '\0';
+		sep = strchr(name, ';');
+		*sep = '\0';
+
+		stolower(name);
 
 		if (!(dep = dirent_alloc(dp, name)))
-			goto err;
-
-		ip->inum = addr;
-		if (dev_dep->flags & ISO9660_DF_DIR)
-			ip->mode |= IM_DIR;
-		else
-			ip->mode |= IM_REG;
-
-		ip->links = 1;
-
-		/* TODO Read from disk */
-		ip->atime = 0;
-		ip->ctime = 0;
-		ip->mtime = 0;
-
-		ip->size = dev_dep->size;
+			return -ENOMEM;
 	}
 
 	return 0;
-
-err:
-	if (ip)
-		inode_put(ip);
-
-	return -1;
 }
 
 static struct inode *iso9660_read_sb(struct superblock *sp)
@@ -214,7 +226,6 @@ static struct inode *iso9660_read_sb(struct superblock *sp)
 	if (!(ip = inode_alloc(sp)))
 		return NULL;
 	ip->inum = i;
-	ip->mode |= IM_DIR;
 	ip->op = &iso9660_inode_ops; /* XXX HERE? */
 
 	sp->device = dev_sp;

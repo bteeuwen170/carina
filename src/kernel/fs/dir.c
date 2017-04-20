@@ -71,41 +71,31 @@ static void dirent_dealloc(struct dirent *dep)
 	else
 		kfree(ip); */
 }
-#include <kernel.h>
 
 struct dirent *dirent_get(const char *path)
 {
 	struct dirent *dep, *dec;
 	char name_buf[NAME_MAX + 1];
-	const char *_path = path;
 	int i;
 
-	if (*_path == '/') {
+	if (*path == '/') {
 		dep = &root_dep;
-		_path++;
+		path++;
 	} else {
 		dep = cproc->cwd;
 	}
 
-	/* TODO inode_put parent? */
-
-	while (*_path) {
-		memset(name_buf, 0, NAME_MAX + 1);
-
-		for (i = 0; *_path && *_path != '/'; i++)
-			name_buf[i] = *_path++;
+	while (*path) {
+		for (i = 0; *path && *path != '/'; i++)
+			name_buf[i] = *path++;
+		name_buf[i] = '\0';
 
 		if (strcmp(name_buf, "..") == 0) {
+			dec = dep;
 			dep = dep->dp;
+
+			dirent_put(dec);
 		} else if (strcmp(name_buf, ".") != 0) {
-			list_for_each(dec, &dep->ip->del, l) {
-				if (strcmp(dec->name, name_buf) == 0) {
-					dep = dec;
-
-					goto con;
-				}
-			}
-
 			if (!(dep = dep->ip->op->lookup(dep, name_buf)))
 				return NULL;
 
@@ -113,11 +103,12 @@ struct dirent *dirent_get(const char *path)
 		}
 
 con:
-		while (*_path == '/')
-			_path++;
+		while (*path == '/')
+			path++;
 	}
 
-	dep->refs++;
+	if (dep != cproc->cwd)
+		dep->refs++;
 
 	return dep;
 }
@@ -147,6 +138,9 @@ struct usr_dirent *usr_dirent_get(struct file *fp)
 
 void dirent_put(struct dirent *dep)
 {
+	if (dep == &root_dep)
+		return;
+
 	dep->refs--;
 
 	if (!dep->refs)

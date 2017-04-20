@@ -41,6 +41,7 @@ int strcmp(const char *src1, const char *src2);
 int strncmp(const char *src1, const char *src2, size_t n);
 
 char *strstr(const char *src1, const char *src2);
+char *strchr(const char *src, const char c);
 
 size_t strlen(const char *str);
 size_t strnlen(const char *str, size_t n);

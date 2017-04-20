@@ -81,14 +81,6 @@ char tolower(char c)
 		return (c + 32);
 
 	return c;
-	while (*s) {
-		if (('A' <= *s) && *s <= 'Z')
-			*s = 'a' + (*s - 'A');
-
-		s++;
-	}
-
-	return 0;
 }
 
 char *stolower(char *str)

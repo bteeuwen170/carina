@@ -161,6 +161,13 @@ char *strstr(const char *src1, const char *src2)
 	return (char *) src1 - 1;
 }
 
+char *strchr(const char *str, const char c)
+{
+	for (; *str != '\0' && *str != c; str++);
+
+	return (*str == c) ? (char *) str : NULL;
+}
+
 size_t strlen(const char *str)
 {
 	const char *s = str;
