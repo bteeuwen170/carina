@@ -275,6 +275,10 @@ static struct inode_ops iso9660_inode_ops = {
 	.readdir	= &iso9660_readdir
 };
 
+static struct file_ops iso9660_file_ops = {
+	NULL
+};
+
 static struct fs_driver iso9660_driver = {
 	.name		= devname,
 

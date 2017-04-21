@@ -211,6 +211,15 @@ struct fs_driver {
 extern struct superblock *root_sb;
 extern struct dirent root_dep;
 
+struct file *fs_open(const char *path, int flags, mode_t mode);
+int fs_close(struct file *fp);
+int fs_read(struct file *fp, char *buf, off_t off, size_t n);
+int fs_write(struct file *fp, const char *buf, off_t off, size_t n);
+int fs_readdir(struct file *fp, struct usr_dirent *udep);
+
+int fs_reg(struct fs_driver *driver);
+void fs_unreg(struct fs_driver *driver);
+
 struct superblock *sb_alloc(struct fs_driver *driver);
 
 struct inode *inode_alloc(struct superblock *sp);
@@ -218,31 +227,18 @@ struct inode *inode_get(struct superblock *sp, ino_t inum);
 void inode_put(struct inode *ip);
 
 struct dirent *dirent_alloc(struct dirent *dp, const char *name);
-
 struct dirent *dirent_get(const char *path);
 struct usr_dirent *usr_dirent_get(struct file *fp);
 void dirent_put(struct dirent *dep);
 
 struct file *file_alloc(struct dirent *dep);
-struct file *file_get(int fd);
 void file_put(struct file *fp);
 
-int fd_alloc(struct file *fp);
-void fd_dealloc(int fd);
-
-int sv_mkdir(const char *path, mode_t mode);
-
-int fs_reg(struct fs_driver *driver);
-void fs_unreg(struct fs_driver *driver);
-
 /* XXX TMP XXX */
+int sv_mkdir(const char *path, mode_t mode);
 int sys_mount(const char *device, const char *path, const char *fs);
 int sys_chdir(const char *path);
 int sys_cwdir(char *path);
-int sys_open(const char *path, int flags, mode_t mode);
-int sys_close(int fd);
-int sys_write(int fd, const char *buf, size_t n);
-int sys_readdir(int fd, struct usr_dirent *udep);
 int sys_mkdir(const char *path, mode_t mode);
 /* XXX END TMP XXX */
 

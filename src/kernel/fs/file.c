@@ -63,11 +63,6 @@ static void file_dealloc(struct file *fp)
 	file_cnt--;
 }
 
-struct file *file_get(int fd)
-{
-	return cproc->fd[fd];
-}
-
 void file_put(struct file *fp)
 {
 	fp->refs--;

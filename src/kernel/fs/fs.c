@@ -51,7 +51,6 @@ int sys_mount(const char *device, const char *path, const char *fs)
 {
 	struct fs_driver *driver;
 	struct superblock *sp = NULL;
-	struct inode *ip;
 	struct dirent *dep;
 	int res = -1;
 
@@ -190,31 +189,24 @@ int sys_cwdir(char *path)
 {
 } */
 
-int sys_open(const char *path, int flags, mode_t mode)
+struct file *fs_open(const char *path, int flags, mode_t mode)
 {
 	struct dirent *dep = NULL;
 	struct file *fp = NULL;
-	int res = -1;
 	(void) flags;
 
-	if (!(dep = dirent_get(path))) {
-		res = -ENOENT;
+	if (!(dep = dirent_get(path)))
 		goto err;
-	}
 
-	if (!(fp = file_alloc(dep))) {
-		res = -EMFILE; /* FIXME Right? */
+	if (!(fp = file_alloc(dep)))
 		goto err;
-	}
 
 	fp->mode = mode;
-	/* dep->ip->fop->open(dep->ip, fp); */
 
-	if ((res = fd_alloc(fp)) < 0)
-		goto err;
+	/* dep->ip->fop->open(dep->ip, fp); */
 	/* open_namei 0.99 namei.c <- from <- open.c (sys_open) */
 
-	return res;
+	return fp;
 
 err:
 	if (fp)
@@ -222,60 +214,32 @@ err:
 	if (dep)
 		dirent_put(dep);
 
-	return res;
+	return NULL;
 }
 
-int sys_close(int fd)
+int fs_close(struct file *fp)
 {
-	struct file *fp = NULL;
-	int res = -1;
-
-	if (fd > FD_MAX)
-		return -EBADF;
-
-	if (!(fp = file_get(fd))) {
-		res = -EBADF;
-		goto err;
-	}
-
 	/* dep->ip->fop->close(dep->ip, fp); */
 
 	file_put(fp);
 
 	return 0;
-
-err:
-	if (fp)
-		file_put(fp);
-
-	return res;
 }
 
-/* int sys_read(int fd, char *buf, size_t n)
+int fs_read(struct file *fp, char *buf, off_t off, size_t n)
 {
-} */
-
-int sys_write(int fd, const char *buf, size_t n)
-{
-	/* XXX FIXME TEMP */
-	struct file *fp;
-
-	if (!(fp = file_get(fd)))
-		return -EBADF;
-
-	return fp->dep->ip->fop->write(fp, buf, 0, n);
+	return fp->dep->ip->fop->read(fp, buf, off, n);
 }
 
-int sys_readdir(int fd, struct usr_dirent *udep)
+int fs_write(struct file *fp, const char *buf, off_t off, size_t n)
 {
-	struct file *fp;
+	return fp->dep->ip->fop->write(fp, buf, off, n);
+}
+
+int fs_readdir(struct file *fp, struct usr_dirent *udep)
+{
 	struct usr_dirent *ludep;
 	int res = -1;
-
-	if (!(fp = file_get(fd))) {
-		res = -EBADF;
-		goto err;
-	}
 
 	if (!(fp->dep->mode & FM_DIR)) {
 		res = -ENOTDIR;

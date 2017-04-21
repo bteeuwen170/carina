@@ -255,23 +255,21 @@ void kernel_main(void)
 		/* File system */
 		if (strncmp(cmd, "ls", 2) == 0) {
 			struct usr_dirent udep;
-			int fd;
+			struct file *fp;
 
 			if (strcmp(cmd, "ls") == 0) {
-				fd = sys_open(".", 0, 0);
+				fp = fs_open(".", 0, 0);
 			} else {
 				char *ccmd = cmd;
 				ccmd += 3;
-				fd = sys_open(ccmd, 0, 0);
+				fp = fs_open(ccmd, 0, 0);
 			}
 
-			/* kprintf("fd: %d\n", fd); */
-
-			while (sys_readdir(fd, &udep) > 0)
+			while (fs_readdir(fp, &udep) > 0)
 				kprintf("%s ", udep.name);
 			kprintf("\n");
 
-			sys_close(fd);
+			fs_close(fp);
 		} else if (strncmp(cmd, "cd", 2) == 0) {
 			char *ccmd = cmd;
 			ccmd += 3;
@@ -294,11 +292,11 @@ void kernel_main(void)
 			/* int res2 = */ sys_mkdir(ccmd, 0);
 			/* kprintf("res: %d\n", res2); */
 		} else if (strcmp(cmd, "popen") == 0) {
-			int fd = sys_open("/sys/dev/con0", 0, 0);
+			struct file *fp = fs_open("/sys/dev/con1", 0, 0);
 
-			sys_write(fd, "hi\n", 3);
+			fs_write(fp, "hi\n", 0, 3);
 
-			sys_close(fd);
+			fs_close(fp);
 
 		/* Audio */
 #ifdef CONFIG_AC97

@@ -303,7 +303,7 @@ i32 sprintf(char *buf, const char *fmt, ...)
 	return res;
 }
 
-int fd = -1;
+struct file *fp;
 
 /* This function is a mess */
 void kprint(const char *prefix, char *fmt, ...)
@@ -332,8 +332,8 @@ void kprint(const char *prefix, char *fmt, ...)
 
 	va_end(args);
 
-	if (fd >= 0)
-		sys_write(fd, fmtbuf, strlen(fmtbuf));
+	if (fp)
+		fs_write(fp, fmtbuf, 0, strlen(fmtbuf));
 }
 
 void kprint_init(void)
@@ -343,5 +343,6 @@ void kprint_init(void)
 	if (cmdline_str_get("console", path) != 0)
 		strncpy(path, "/sys/dev/con0", PATH_MAX);
 
-	fd = sys_open(path, 0, 0);
+	if (!(fp = fs_open(path, 0, 0)))
+		panic("unable to mount initialize kprint", 0, 0);
 }

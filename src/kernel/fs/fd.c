@@ -27,6 +27,7 @@
 #include <limits.h>
 #include <proc.h>
 
+#if 0
 int fd_alloc(struct file *fp)
 {
 	int fd;
@@ -47,3 +48,4 @@ void fd_dealloc(int fd)
 {
 	cproc->fd[fd] = 0;
 }
+#endif
