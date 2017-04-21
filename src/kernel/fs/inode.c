@@ -85,7 +85,7 @@ struct inode *inode_alloc(struct superblock *sp)
 
 static void inode_dealloc(struct inode *ip)
 {
-	struct dirent *dep;
+	/* struct dirent *dep; */
 
 	if (!ip->links)
 		inode_delete(ip);
@@ -93,7 +93,7 @@ static void inode_dealloc(struct inode *ip)
 	if (ip->sp->flags & SF_KEEP)
 		return;
 
-	/* for_each_list(dep, &ip->del, l) {
+	/* list_for_each(dep, &ip->del, l) {
 		dirent_put
 	} */
 

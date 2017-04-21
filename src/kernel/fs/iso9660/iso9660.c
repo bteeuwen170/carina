@@ -93,8 +93,22 @@ struct iso9660_sb {
 
 static struct sb_ops iso9660_sb_ops;
 static struct inode_ops iso9660_inode_ops;
-/*static struct file_ops iso9660_file_ops;
-static struct file_ops iso9660_dir_ops; */
+static struct file_ops iso9660_file_ops;
+
+static struct inode *iso9660_inode_alloc(struct superblock *sp)
+{
+	struct inode *ip;
+
+	(void) sp;
+
+	if (!(ip = kcalloc(1, sizeof(struct inode))))
+		return NULL;
+
+	ip->op = &iso9660_inode_ops;
+	ip->fop = &iso9660_file_ops;
+
+	return ip;
+}
 
 static struct dirent *iso9660_lookup(struct dirent *dp, const char *name)
 {
@@ -221,16 +235,16 @@ static struct inode *iso9660_read_sb(struct superblock *sp)
 	sp->blocks = dev_sp->blocks;
 	sp->block_size = dev_sp->block_size;
 
-	sp->op = &iso9660_sb_ops;
+	sp->device = dev_sp;
 
 	if (!(ip = inode_alloc(sp)))
 		return NULL;
-	ip->inum = i;
-	ip->op = &iso9660_inode_ops; /* XXX HERE? */
 
-	sp->device = dev_sp;
+	ip->inum = i;
 
 	sp->root = ip;
+
+	sp->op = &iso9660_sb_ops;
 
 #if 0
 	kprintf("# of blocks: %d   block size: %d", sp->blocks, sp->block_size);
@@ -240,7 +254,12 @@ static struct inode *iso9660_read_sb(struct superblock *sp)
 	return ip;
 }
 
-static struct sb_ops iso9660_sb_ops = { NULL };
+static struct sb_ops iso9660_sb_ops = {
+	.inode_alloc	= &iso9660_inode_alloc,
+	.inode_dealloc	= NULL,
+	.inode_write	= NULL,
+	.inode_delete	= NULL
+};
 
 static struct inode_ops iso9660_inode_ops = {
 	.create		= NULL,

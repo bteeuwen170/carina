@@ -37,6 +37,21 @@ static struct sb_ops ramfs_sb_ops;
 static struct inode_ops ramfs_inode_ops;
 static struct file_ops ramfs_file_ops;
 
+static struct inode *ramfs_inode_alloc(struct superblock *sp)
+{
+	struct inode *ip;
+
+	(void) sp;
+
+	if (!(ip = kcalloc(1, sizeof(struct inode))))
+		return NULL;
+
+	ip->op = &ramfs_inode_ops;
+	ip->fop = &ramfs_file_ops;
+
+	return ip;
+}
+
 static int ramfs_mknod(struct inode *dp, struct dirent *dep,
 		mode_t mode, dev_t dev)
 {
@@ -147,7 +162,12 @@ static struct inode *ramfs_read_sb(struct superblock *sp)
 	return ip;
 }
 
-static struct sb_ops ramfs_sb_ops = { NULL };
+static struct sb_ops ramfs_sb_ops = {
+	.inode_alloc	= &ramfs_inode_alloc,
+	.inode_dealloc	= NULL,
+	.inode_write	= NULL,
+	.inode_delete	= NULL
+};
 
 static struct inode_ops ramfs_inode_ops = {
 	.create		= &ramfs_create,
@@ -162,7 +182,9 @@ static struct inode_ops ramfs_inode_ops = {
 	.readdir	= NULL
 };
 
-static struct file_ops ramfs_file_ops = { NULL };
+static struct file_ops ramfs_file_ops = {
+	NULL
+};
 
 static struct fs_driver ramfs_driver = {
 	.name		= devname,
