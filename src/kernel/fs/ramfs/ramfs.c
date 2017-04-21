@@ -47,7 +47,7 @@ static int ramfs_mknod(struct inode *dp, struct dirent *dep,
 
 static int ramfs_create(struct inode *dp, struct dirent *dep, mode_t mode)
 {
-	return ramfs_mknod(dp, dep, mode | FM_REG, (dev_t) { 0, 0 });
+	return ramfs_mknod(dp, dep, mode | DT_REG, (dev_t) { 0, 0 });
 }
 
 static int ramfs_link(struct inode *dp, struct dirent *dep, struct dirent *name)
@@ -73,7 +73,7 @@ static int ramfs_rmlink(struct inode *dp, struct dirent *dep)
 
 static int ramfs_mkdir(struct inode *dp, struct dirent *dep, mode_t mode)
 {
-	return ramfs_mknod(dp, dep, mode | FM_DIR, (dev_t) { 0, 0 });
+	return ramfs_mknod(dp, dep, mode | DT_DIR, (dev_t) { 0, 0 });
 }
 
 static int ramfs_rmdir(struct inode *dp, struct dirent *dep)
@@ -138,8 +138,6 @@ static struct inode *ramfs_read_sb(struct superblock *sp)
 
 	sp->op = &ramfs_sb_ops;
 
-	/* if (!(ip = ramfs_inode_alloc(sp, IM_DIR | 0755, (dev_t) { 0, 0 })))
-		return NULL; */
 	if (!(ip = inode_alloc(sp)))
 		return NULL;
 

@@ -284,7 +284,6 @@ void kernel_main(void)
 			ccmd += 6; */
 
 			int res2 = sys_mount("/sys/dev/opt0", "/mnt", "iso9660");
-			kprintf("res: %d\n", res2);
 		} else if (strncmp(cmd, "mkdir", 5) == 0) {
 			char *ccmd = cmd;
 			ccmd += 6;

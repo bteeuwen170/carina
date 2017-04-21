@@ -42,32 +42,33 @@
 #define IF_SYNC	16	/* Synchronous updates */
 #endif
 
-/* File mode */
-#define FM_FTM		0170000
-#define FM_LNK		0120000	/* Symbolic link */
-#define FM_REG		0100000	/* Regular file */
-#define FM_BLK		0060000	/* Block device */
-#define FM_DIR		0040000	/* Directory */
-#define FM_CHR		0020000	/* Character device */
-#define FM_FIFO		0010000	/* Pipe */
+/* Inode mode */
+#define IM_SUID		0004000	/* Set UID on execution */
+#define IM_SGID		0002000	/* Set GID on execution */
 
-#define FM_SUID		0004000	/* Set UID on execution */
-#define FM_SGID		0002000	/* Set GID on execution */
+#define IM_UM		0000700
+#define IM_UR		0000400	/* Owner read */
+#define IM_UW		0000200	/* Owner write */
+#define IM_UE		0000100	/* Owner execute */
 
-#define FM_UM		0000700
-#define FM_UR		0000400	/* Owner read */
-#define FM_UW		0000200	/* Owner write */
-#define FM_UE		0000100	/* Owner execute */
+#define IM_GM		0000070
+#define IM_GR		0000040	/* Group read */
+#define IM_GW		0000020	/* Group write */
+#define IM_GE		0000010	/* Group execute */
 
-#define FM_GM		0000070
-#define FM_GR		0000040	/* Group read */
-#define FM_GW		0000020	/* Group write */
-#define FM_GE		0000010	/* Group execute */
+#define IM_OM		0000007
+#define IM_OR		0000004	/* Other read */
+#define IM_OW		0000002	/* Other write */
+#define IM_OE		0000001	/* Other execute */
 
-#define FM_OM		0000007
-#define FM_OR		0000004	/* Other read */
-#define FM_OW		0000002	/* Other write */
-#define FM_OE		0000001	/* Other execute */
+/* Directory entry type */
+#define DT_FTM		0170000
+#define DT_LNK		0120000	/* Symbolic link */
+#define DT_REG		0100000	/* Regular file */
+#define DT_BLK		0060000	/* Block device */
+#define DT_DIR		0040000	/* Directory */
+#define DT_CHR		0020000	/* Character device */
+#define DT_FIFO		0010000	/* Pipe */
 
 struct superblock {
 	struct list_head l;
@@ -92,6 +93,7 @@ struct inode {
 	struct list_head l;
 
 	ino_t	inum;			/* Inode number */
+	mode_t	mode;			/* Inode mode */
 
 	int	refs;			/* Reference count */
 	link_t	links;			/* Link count */
@@ -117,7 +119,7 @@ struct dirent {
 	struct list_head l;
 
 	char	name[NAME_MAX + 1];	/* File name */
-	mode_t	mode;			/* File mode */
+	mode_t	type;			/* Directory entry type */
 
 	int	refs;			/* Reference count */
 
@@ -132,8 +134,6 @@ struct usr_dirent {
 };
 
 struct file {
-	mode_t	mode;			/* File mode */
-
 	int	refs;			/* Reference count */
 
 	off_t	off;			/* Current offset */

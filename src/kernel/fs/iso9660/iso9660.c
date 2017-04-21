@@ -176,7 +176,7 @@ static int iso9660_readdir(struct dirent *dp)
 	atapi_read(dp->ip->sp->dev.minor, &buf, addr, 2048);
 
 	for (i = 254; i < 2048; i += dev_dep->length) {
-		dev_dep = buf + i;
+		dev_dep = (struct iso9660_dirent *) buf + i;
 
 		if (!dev_dep->length)
 			break;
@@ -197,7 +197,6 @@ static int iso9660_readdir(struct dirent *dp)
 
 static struct inode *iso9660_read_sb(struct superblock *sp)
 {
-#if 1
 	struct inode *ip;
 	struct iso9660_sb *dev_sp;
 	int i;
@@ -217,6 +216,7 @@ static struct inode *iso9660_read_sb(struct superblock *sp)
 	}
 
 	strncpy(sp->name, dev_sp->vol_ident, NAME_MAX);
+	strtrm(sp->name);
 
 	sp->blocks = dev_sp->blocks;
 	sp->block_size = dev_sp->block_size;
@@ -232,32 +232,12 @@ static struct inode *iso9660_read_sb(struct superblock *sp)
 
 	sp->root = ip;
 
-	kprintf("name: %s\n", sp->name);
+#if 0
 	kprintf("# of blocks: %d   block size: %d", sp->blocks, sp->block_size);
 	kprintf(" (%d MB)\n", (sp->blocks * sp->block_size) / 1024);
+#endif
 
 	return ip;
-#else
-	struct inode *ip;
-	struct dirent *dep;
-
-	sp->op = &iso9660_sb_ops;
-
-	if (!(ip = iso9660_inode_alloc(sp, IM_DIR | 0755, (dev_t) { 0, 0 })))
-		return NULL;
-	dep = dirent_alloc_root(ip);
-	sp->root = dep;
-
-	if (!(dep = dirent_alloc(sp->root, ".")))
-		return NULL;
-	dep->ip = ip;
-
-	if (!(dep = dirent_alloc(sp->root, "..")))
-		return NULL;
-	dep->ip = ip;
-
-	return sp;
-#endif
 }
 
 static struct sb_ops iso9660_sb_ops = { NULL };

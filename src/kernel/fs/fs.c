@@ -76,12 +76,16 @@ foundfs:
 
 		root_dep.name[0] = '/';
 		root_dep.name[1] = '\0';
-		root_dep.mode = FM_DIR;
+		root_dep.type = DT_DIR;
 
 		root_dep.refs = 1;
 
 		root_dep.ip = driver->read_sb(sp);
 		cproc->cwd = root_dep.dp = &root_dep;
+
+		root_dep.ip->mode = IM_UM | IM_GR | IM_GE | IM_OR | IM_OE;
+
+		root_dep.ip->uid = root_dep.ip->gid = 0;
 
 		if (!(dep = dirent_alloc(&root_dep, "."))) {
 			res = -ENOMEM;
@@ -116,6 +120,9 @@ foundfs:
 		dep->ip->op->readdir(dep);
 	}
 
+	dprintf(devname, "successfully mounted %s (%s) on %s\n",
+			device, dep->ip->sp->name, path);
+
 	return 0;
 
 err:
@@ -136,7 +143,7 @@ int sys_chdir(const char *path)
 		goto err;
 	}
 
-	if (!(dep->mode & FM_DIR)) {
+	if (!(dep->type & DT_DIR)) {
 		res = -ENOTDIR;
 		goto err;
 	}
@@ -201,8 +208,6 @@ struct file *fs_open(const char *path, int flags, mode_t mode)
 	if (!(fp = file_alloc(dep)))
 		goto err;
 
-	fp->mode = mode;
-
 	/* dep->ip->fop->open(dep->ip, fp); */
 	/* open_namei 0.99 namei.c <- from <- open.c (sys_open) */
 
@@ -241,7 +246,7 @@ int fs_readdir(struct file *fp, struct usr_dirent *udep)
 	struct usr_dirent *ludep;
 	int res = -1;
 
-	if (!(fp->dep->mode & FM_DIR)) {
+	if (!(fp->dep->type & DT_DIR)) {
 		res = -ENOTDIR;
 		goto err;
 	}
@@ -305,12 +310,13 @@ int sys_mkdir(const char *path, mode_t mode)
 		res = -1; /* TODO */
 		goto err;
 	}
-	dep->mode = FM_DIR | mode;
+	dep->type = DT_DIR;
 
 	if (!(dep->ip = inode_alloc(dp->ip->sp))) {
 		res = -ENOMEM;
 		goto err;
 	}
+	dep->ip->mode |= mode;
 	dep->ip->op = dp->ip->op;
 
 	if (!(cdep = dirent_alloc(dep, "."))) {

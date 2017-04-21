@@ -41,7 +41,6 @@ struct file *file_alloc(struct dirent *dep)
 	if (!(fp = kmalloc(sizeof(struct file))))
 		return NULL;
 
-	fp->mode = 0;
 	fp->off = 0;
 
 	fp->refs = 1;

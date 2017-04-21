@@ -64,15 +64,18 @@ struct inode *inode_alloc(struct superblock *sp)
 
 	ip->refs = 1;
 
-	ip->dev = (dev_t) { 0, 0 };
+	ip->dev = sp->dev;
 	/* TODO Set to current user */
 	ip->uid = cproc->uid;
 	ip->gid = cproc->gid;
 
 	/* TODO Get current time */
-	ip->atime = 0;
-	ip->ctime = 0;
-	ip->mtime = 0;
+	if (!ip->atime)
+		ip->atime = 60;
+	if (!ip->ctime)
+		ip->ctime = 60;
+	if (!ip->mtime)
+		ip->mtime = 60;
 
 	ip->sp = sp;
 	list_init(&ip->del);
