@@ -80,7 +80,10 @@ foundfs:
 
 		root_dep.refs = 1;
 
-		root_dep.ip = driver->read_sb(sp);
+		if (!(root_dep.ip = driver->read_sb(sp))) {
+			res = -ENOMEM;
+			goto err;
+		}
 		cproc->cwd = root_dep.dp = &root_dep;
 
 		root_dep.ip->mode = IM_UM | IM_GR | IM_GE | IM_OR | IM_OE;
@@ -107,15 +110,27 @@ foundfs:
 		/* TODO Error checking */
 		sp->dev = dep->ip->dev;
 
-		/* TODO Check if dir is empty */
 		if (!(dep = dirent_get(path))) {
 			res = -ENOENT;
 			goto err;
 		}
 
+		if (!(dep->type & DT_DIR)) {
+			res = -ENOTDIR;
+			goto err;
+		}
+
+		if (dep->ip->del.next->next->next != &dep->ip->del) {
+			res = -EBUSY;
+			goto err;
+		}
+
 		inode_put(dep->ip);
 
-		dep->ip = driver->read_sb(sp);
+		if (!(dep->ip = driver->read_sb(sp))) {
+			res = -ENOMEM;
+			goto err;
+		}
 
 		dep->ip->op->readdir(dep);
 	}

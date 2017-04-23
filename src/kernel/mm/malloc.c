@@ -25,6 +25,8 @@
 #include <mboot.h>
 #include <kernel.h>
 
+#include <string.h>
+
 static const char devname[] = "mm";
 
 const char *mmap_types[5] = {

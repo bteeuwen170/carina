@@ -237,14 +237,13 @@ static struct inode *iso9660_read_sb(struct superblock *sp)
 
 	sp->device = dev_sp;
 
+	sp->op = &iso9660_sb_ops;
+
 	if (!(ip = inode_alloc(sp)))
 		return NULL;
-
 	ip->inum = i;
 
 	sp->root = ip;
-
-	sp->op = &iso9660_sb_ops;
 
 #if 0
 	kprintf("# of blocks: %d   block size: %d", sp->blocks, sp->block_size);

@@ -35,6 +35,7 @@
 #define HEAP_SIZE (1 * 1024 * 1024)
 
 void *kmalloc(size_t size);
+void *kcalloc(size_t nbmd, size_t size);
 void *krealloc(void *ptr, size_t size);
 void kfree(void *ptr);
 
