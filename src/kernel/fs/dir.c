@@ -40,7 +40,7 @@ struct dirent *dirent_alloc(struct dirent *dp, const char *name)
 		if (strcmp(dep->name, name) == 0)
 			return NULL;
 
-	if (!(dep = kmalloc(sizeof(struct dirent))))
+	if (!(dep = kcalloc(1, sizeof(struct dirent))))
 		return NULL;
 
 	if (strlen(name) > NAME_MAX) {
@@ -55,7 +55,6 @@ struct dirent *dirent_alloc(struct dirent *dp, const char *name)
 
 	dep->refs = 1;
 
-	dep->ip = NULL;
 	dep->dp = dp;
 
 	return dep;

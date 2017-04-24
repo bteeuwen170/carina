@@ -63,11 +63,11 @@
 
 /* Directory entry type */
 #define DT_FTM		0170000
-#define DT_LNK		0120000	/* Symbolic link */
+#define DT_LINK		0120000	/* Symbolic link */
 #define DT_REG		0100000	/* Regular file */
-#define DT_BLK		0060000	/* Block device */
+#define DT_BLOCK	0060000	/* Block device */
 #define DT_DIR		0040000	/* Directory */
-#define DT_CHR		0020000	/* Character device */
+#define DT_CHAR		0020000	/* Character device */
 #define DT_FIFO		0010000	/* Pipe */
 
 struct superblock {

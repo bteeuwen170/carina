@@ -54,6 +54,8 @@ int sys_mount(const char *device, const char *path, const char *fs)
 	struct dirent *dep;
 	int res = -1;
 
+	/* TODO Check if device is a block device */
+
 	list_for_each(driver, &fs_drivers, l)
 		if (strcmp(driver->name, fs) == 0)
 			goto foundfs;
@@ -104,6 +106,11 @@ foundfs:
 	} else {
 		if (!(dep = dirent_get(device))) {
 			res = -ENOENT;
+			goto err;
+		}
+
+		if (dep->type != DT_BLOCK) {
+			res = -ENOTBLK;
 			goto err;
 		}
 

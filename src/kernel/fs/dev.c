@@ -76,6 +76,12 @@ int dev_init(dev_t dev)
 
 	if (!(dep = dirent_alloc(dp, name)))
 		return -ENOMEM;
+
+	if (dev.major == MAJOR_DISK || dev.major == MAJOR_OPTICAL)
+		dep->type = DT_BLOCK;
+	else
+		dep->type = DT_CHAR;
+
 	dep->ip = inode_alloc(root_sb);
 	dep->ip->dev = dev;
 	dep->ip->fop = devices[dev.major].op;
