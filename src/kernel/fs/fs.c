@@ -261,6 +261,11 @@ int fs_readdir(struct file *fp, struct usr_dirent *udep)
 	struct usr_dirent *ludep;
 	int res = -1;
 
+	if (!fp) {
+		res = -EBADF;
+		goto err;
+	}
+
 	if (!(fp->dep->type & DT_DIR)) {
 		res = -ENOTDIR;
 		goto err;

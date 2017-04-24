@@ -263,11 +263,13 @@ void kernel_main(void)
 				fp = fs_open(cmd + 3, 0, 0);
 			}
 
-			while (fs_readdir(fp, &udep) > 0)
-				kprintf("%s ", udep.name);
-			kprintf("\n");
+			if (fp) {
+				while (fs_readdir(fp, &udep) > 0)
+					kprintf("%s ", udep.name);
+				kprintf("\n");
 
-			fs_close(fp);
+				fs_close(fp);
+			}
 		} else if (strncmp(cmd, "cd", 2) == 0) {
 			sys_chdir(cmd + 3);
 		} else if (strcmp(cmd, "cwd") == 0) {
