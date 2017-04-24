@@ -260,9 +260,7 @@ void kernel_main(void)
 			if (strcmp(cmd, "ls") == 0) {
 				fp = fs_open(".", 0, 0);
 			} else {
-				char *ccmd = cmd;
-				ccmd += 3;
-				fp = fs_open(ccmd, 0, 0);
+				fp = fs_open(cmd + 3, 0, 0);
 			}
 
 			while (fs_readdir(fp, &udep) > 0)
@@ -271,25 +269,23 @@ void kernel_main(void)
 
 			fs_close(fp);
 		} else if (strncmp(cmd, "cd", 2) == 0) {
-			char *ccmd = cmd;
-			ccmd += 3;
-
-			/* int res2 = */ sys_chdir(ccmd);
-			/* kprintf("res: %d\n", res2); */
+			sys_chdir(cmd + 3);
 		} else if (strcmp(cmd, "cwd") == 0) {
 			sys_cwdir(cmd);
 			kprintf("%s\n", cmd);
 		} else if (strncmp(cmd, "mount", 5) == 0) {
-			/* char *ccmd = cmd;
-			ccmd += 6; */
+			char dev[64], mountp[64];
+			size_t l;
 
-			int res2 = sys_mount("/sys/dev/opt0", "/mnt", "iso9660");
+			l = strchr(cmd + 6, ' ') - cmd - 6;
+			strncpy(dev, cmd + 6, l);
+			dev[l] = '\0';
+
+			strcpy(mountp, strchr(strchr(cmd + 6, ' '), ' ') + 1);
+
+			sys_mount(dev, mountp, "iso9660");
 		} else if (strncmp(cmd, "mkdir", 5) == 0) {
-			char *ccmd = cmd;
-			ccmd += 6;
-
-			/* int res2 = */ sys_mkdir(ccmd, 0);
-			/* kprintf("res: %d\n", res2); */
+			sys_mkdir(cmd + 6, 0);
 		} else if (strcmp(cmd, "popen") == 0) {
 			struct file *fp = fs_open("/sys/dev/con1", 0, 0);
 
