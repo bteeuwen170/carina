@@ -25,13 +25,12 @@
 #ifndef _ERRNO_H
 #define _ERRNO_H
 
-#include <limits.h>
-
 #define EPERM		1	/* Operation not permitted */
 #define ENOENT		2	/* No such file or directory */
 #define EBADF		9	/* Invalid file descriptor */
 #define ENOMEM		12	/* Out of memory */
 #define EACCES		13	/* Permission denied */
+#define EFAULT		14	/* Invalid address */
 #define ENOTBLK		15	/* Block device required */
 #define EBUSY		16	/* Device or resource busy */
 #define EEXIST		17	/* File exists */
@@ -41,6 +40,7 @@
 #define EMFILE		24	/* Too many open files */
 #define ENOSPC		28	/* No space left on device */
 #define EROFS		30	/* Read-only file system */
+#define ENAMETOOLONG	36	/* File name too long */
 
 /* static inline void *__attribute__((warn_unused_result)) ERR_PTR(intptr_t errno)
 {

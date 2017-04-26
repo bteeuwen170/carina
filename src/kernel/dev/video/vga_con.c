@@ -22,7 +22,7 @@
  *
  */
 
-#include <console.h>
+#include <dev.h>
 #include <fs.h>
 #include <kernel.h>
 #include <module.h>
@@ -33,6 +33,8 @@
 
 static const char devname[] = "vga_con";
 
+static struct driver vga_con_driver;
+
 #define VGA_WIDTH	80
 #define VGA_HEIGHT	25
 
@@ -42,7 +44,6 @@ static const u8 colors[] = {
 };
 
 static u16 *buf = (u16 *) 0xB8000;
-static u16 vga_minor;
 
 static u8 x, y;
 static u8 fg = 0x07, fgm = 0, bg = 0x00;
@@ -103,14 +104,11 @@ static void vga_con_clear(void)
 	vga_con_move(0, 0);
 }
 
-static void vga_con_write(u16 minor, const char c)
+static void vga_con_put(const char c)
 {
 	char escn_buf[19];
 	int i = 0, j = 0;
 	long n;
-
-	if (minor != vga_minor)
-		return;
 
 	if (state == 0 && c == '\033') {
 		state = 1;
@@ -224,41 +222,59 @@ static void vga_con_write(u16 minor, const char c)
 	vga_con_move(x, y);
 }
 
-static int vga_con_probe(void)
+int vga_con_write(struct file *fp, const char *buf, off_t off, size_t n)
 {
-	vga_minor = ++console_minor_last;
+	size_t i;
 
+	for (i = 0; i < n; i++)
+		vga_con_put(buf[i]);
+
+	return n;
+}
+
+static int vga_con_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
+{
+	/* TODO */
+	return 0;
+}
+
+static int vga_con_probe(struct device *dp)
+{
 	/*
 	 * TODO Detect if present
 	 * NOTE Disable vga in qemu using "-vga none"
 	 */
 
-	return dev_init((dev_t) { MAJOR_CON, vga_minor });
+	return 0;
 }
 
-static void vga_con_fini(u16 minor)
+static void vga_con_fini(struct device *dp)
 {
 	/* TODO */
 }
 
-static struct con_driver vga_con_driver = {
+static struct file_ops vga_con_file_ops = {
+	.write	= &vga_con_write,
+	.ioctl	= &vga_con_ioctl
+};
+
+static struct driver vga_con_driver = {
 	.name	= devname,
 
+	.fop	= &vga_con_file_ops,
 	.probe	= &vga_con_probe,
-	.fini	= &vga_con_fini,
-	.write	= &vga_con_write
+	.fini	= &vga_con_fini
 };
 
 int vga_con_init(void)
 {
 	int res;
+	dev_t dev;
 
-	res = con_reg(&vga_con_driver);
-	if (res < 0)
-		kprintf("%s: unable to register console driver (%d)",
-				devname, res);
+	if ((res = driver_reg(&vga_con_driver)) < 0)
+		return res;
 
-	return 0;
+	return device_reg(MAJOR_CON, &vga_con_driver, &dev);
 }
 
 void vga_con_exit(void)

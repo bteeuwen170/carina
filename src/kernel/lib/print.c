@@ -15,7 +15,8 @@
  */
 
 #include <cmdline.h>
-#include <fs.h> /* TEMP */
+#include <fs.h>
+#include <dev.h>
 #include <kbd.h>
 #include <kernel.h>
 
@@ -291,13 +292,13 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 	return str - buf;
 }
 
-i32 sprintf(char *buf, const char *fmt, ...)
+int sprintf(char *str, const char *fmt, ...)
 {
 	int res;
 	va_list args;
 
 	va_start(args, fmt);
-	res = vsprintf(buf, fmt, args);
+	res = vsprintf(str, fmt, args);
 	va_end(args);
 
 	return res;
@@ -332,17 +333,18 @@ void kprint(const char *prefix, char *fmt, ...)
 
 	va_end(args);
 
-	if (fp)
-		fs_write(fp, fmtbuf, 0, strlen(fmtbuf));
+	vga_con_write(fp, fmtbuf, 0, strlen(fmtbuf));
+	/* if (fp)
+		file_write(fp, fmtbuf, 0, strlen(fmtbuf)); */
 }
 
 void kprint_init(void)
 {
 	char path[PATH_MAX];
 
-	if (cmdline_str_get("console", path) != 0)
-		strncpy(path, "/sys/dev/con0", PATH_MAX);
+	/* if (cmdline_str_get("console", path) != 0) */
+		/* strncpy(path, "/con0", PATH_MAX);
 
-	if (!(fp = fs_open(path, 0, 0)))
-		panic("unable to mount initialize kprint", 0, 0);
+	if (file_open(path, 0, &fp) < 0)
+		panic("unable to mount initialize kprint", 0, 0); */
 }

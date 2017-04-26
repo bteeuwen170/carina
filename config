@@ -18,8 +18,13 @@ menu "File systems"
 {
 	config CONFIG_RAMFS
 		"RAMFS support";
-	config CONFIG_ISO9660
+
+	menuconfig CONFIG_ISO9660
 		"ISO9660 support";
+	{
+		config CONFIG_ROCKRIDGE
+			"Rock Ridge support";
+	}
 }
 
 menu "Bus devices"
@@ -50,7 +55,8 @@ menu "Char devices"
 	}
 }
 
-menu "Block devices"
+menuconfig CONFIG_BLOCK
+	"Block devices"
 {
 	if (CONFIG_PCI) {
 		menuconfig CONFIG_IDE
@@ -65,7 +71,8 @@ menu "Block devices"
 	}
 }
 
-menu "Sound devices"
+menuconfig CONFIG_SOUND
+	"Sound devices"
 {
 	if (CONFIG_PCI) {
 		config CONFIG_AC97

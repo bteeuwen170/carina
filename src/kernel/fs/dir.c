@@ -24,124 +24,100 @@
 
 #include <errno.h>
 #include <fs.h>
-#include <limits.h>
+#include <list.h>
 #include <proc.h>
 
 #include <stdlib.h>
 #include <string.h>
 
-struct dirent *dirent_alloc(struct dirent *dp, const char *name)
+static int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
 {
-	struct dirent *dep;
+	struct dirent *cdep;
+	int res;
 
-	/* TODO Remove all forward slashes from name */
+	list_for_each(cdep, &dp->del, l) {
+		if (cdep->inum == dp->inum && strcmp(cdep->name, name) == 0) {
+			cdep->refs++;
 
-	list_for_each(dep, &dp->ip->del, l)
-		if (strcmp(dep->name, name) == 0)
-			return NULL;
+			*dep = cdep;
 
-	if (!(dep = kcalloc(1, sizeof(struct dirent))))
-		return NULL;
-
-	if (strlen(name) > NAME_MAX) {
-		kfree(dep);
-		return NULL;
+			return 0;
+		}
 	}
 
-	list_init(&dep->l);
-	list_add(&dp->ip->del, &dep->l);
+	if ((res = dp->sp->fsdp->op->lookup(dp, name, &cdep)) < 0)
+		return res;
 
-	strncpy(dep->name, name, NAME_MAX);
+	*dep = cdep;
 
-	dep->refs = 1;
-
-	dep->dp = dp;
-
-	return dep;
+	return 0;
 }
 
-static void dirent_dealloc(struct dirent *dep)
+int dir_get(const char *path, struct dirent **dep)
 {
-	/* if (!dep->ip->links)
-		inode_delete(ip);
+	struct superblock *sp;
+	struct inode *dp = NULL;
+	struct dirent *pdep, *cdep = NULL;
+	char name[NAME_MAX + 1];
+	int res, i;
 
-	if (ip->sp->op->dealloc_inode)
-		ip->sp->op->dealloc_inode(ip);
+	if (*path == '/')
+		cdep = fs_root;
 	else
-		kfree(ip); */
-}
-
-struct dirent *dirent_get(const char *path)
-{
-	struct dirent *dep, *dec;
-	char name_buf[NAME_MAX + 1];
-	int i;
-
-	if (*path == '/') {
-		dep = &root_dep;
-		path++;
-	} else {
-		dep = cproc->cwd;
-	}
+		cdep = cproc->cwd;
 
 	while (*path) {
-		for (i = 0; *path && *path != '/'; i++)
-			name_buf[i] = *path++;
-		name_buf[i] = '\0';
-
-		if (strcmp(name_buf, "..") == 0) {
-			dec = dep;
-			dep = dep->dp;
-
-			dirent_put(dec);
-		} else if (strcmp(name_buf, ".") != 0) {
-			if (!(dep = dep->ip->op->lookup(dep, name_buf)))
-				return NULL;
-
-			goto con;
-		}
-
-con:
 		while (*path == '/')
 			path++;
-	}
 
-	if (dep != cproc->cwd)
-		dep->refs++;
+		for (i = 0; *path && *path != '/'; i++)
+			name[i] = *path++;
+		name[i] = '\0';
 
-	return dep;
-}
+		if (strcmp(name, "..") == 0) {
+			pdep = cdep;
+			cdep = cdep->pdep;
 
-struct usr_dirent *usr_dirent_get(struct file *fp)
-{
-	struct usr_dirent *udp;
-	struct dirent *dep;
-	int i = 0;
+			dir_put(pdep);
+		} else if (name[0] && strcmp(name, ".") != 0) {
+			if ((res = inode_get(cdep->sp, cdep->inum, &dp)) < 0)
+				return res;
 
-	if (!(udp = kmalloc(sizeof(struct usr_dirent))))
-		return NULL;
+			pdep = cdep;
 
-	list_for_each(dep, &fp->dep->ip->del, l) {
-		if (i++ == fp->off) {
-			fp->off++;
+			if ((res = dir_lookup(dp, name, &cdep)) < 0)
+				return res;
 
-			udp->inum = dep->ip->inum;
-			strncpy(udp->name, dep->name, NAME_MAX);
+			if ((sp = sb_lookup(cdep))) {
+				cdep->inum = sp->root->inum;
+				cdep->sp = sp;
+			}
 
-			return udp;
+			cdep->pdep = pdep;
+
+			inode_put(dp);
 		}
 	}
 
-	return NULL;
+	*dep = cdep;
+
+	return 0;
 }
 
-void dirent_put(struct dirent *dep)
+void dir_put(struct dirent *dep)
 {
-	if (dep == &root_dep)
+	if (!dep)
 		return;
 
-	dep->refs--;
+	if (dep->pdep != fs_root)
+		dir_put(dep->pdep);
+
+	/* if (!dep->refs < 0)
+		panic("dirent %d (%s) has a invalid reference count",
+				dep->inum, dep->name); */
 
 	if (!dep->refs)
-		dirent_dealloc(dep);
+		kfree(dep);
+
+	kfree(dep);
 }

@@ -28,7 +28,7 @@
 #define _LIMITS_H
 
 /* FIXME Not here */
-/* #define BLOCK_SIZE	1024 */	/* Block size */
+#define BLOCK_SIZE	4096	/* Block size */
 /* #define SECTOR_SIZE	512 */	/* Sector size */
 /* #define CPUS_MAX	8 */	/* Max. CPUs */
 

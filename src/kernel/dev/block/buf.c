@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/include/console.h
+ * src/kernel/dev/block/buf.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -21,29 +21,3 @@
  * USA.
  *
  */
-
-#ifndef _CONSOLE_H
-#define _CONSOLE_H
-
-#include <list.h>
-
-#define CUR_BLOCK	0
-#define CUR_VBAR	1
-#define CUR_HBAR	2
-
-struct con_driver {
-	struct list_head l;
-
-	const char *name;
-
-	int (*probe) (void);
-	void (*fini) (u16 minor);
-	void (*write) (u16 minor, const char);
-};
-
-extern int console_minor_last;
-
-int con_reg(struct con_driver *driver);
-void con_unreg(struct con_driver *driver);
-
-#endif

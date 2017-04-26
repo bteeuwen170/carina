@@ -23,6 +23,7 @@
  */
 
 #include <console.h>
+#include <dev.h>
 #include <fs.h>
 #include <kernel.h>
 #include <module.h>
@@ -94,7 +95,7 @@ static void serial_out(const u16 port, const char value)
 	io_outb(port, value);
 }
 
-static void serial_con_write(u16 minor, const char c)
+static void serial_con_write(u32 minor, const char c)
 {
 	u16 port;
 
@@ -166,13 +167,13 @@ static int serial_con_probe(void)
 		io_outb(port + 4, 0x0B);
 
 		serial_minor[i] = ++console_minor_last;
-		dev_init((dev_t) { MAJOR_CON, serial_minor[i] });
+		/* dev_init(DEV(MAJOR_CON, serial_minor[i])); */
 	}
 
 	return 0;
 }
 
-static void serial_con_fini(u16 minor)
+static void serial_con_fini(u32 minor)
 {
 	/* TODO */
 }

@@ -304,13 +304,13 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 /* TODO scanf, fscanf, sscanf */
 /* TODO fputs */
 
-i32 sprintf(char *buf, const char *fmt, ...)
+int sprintf(char *str, const char *fmt, ...)
 {
 	int res;
 	va_list args;
 
 	va_start(args, fmt);
-	res = vsprintf(buf, fmt, args);
+	res = vsprintf(str, fmt, args);
 	va_end(args);
 
 	return res;

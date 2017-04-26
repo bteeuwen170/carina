@@ -22,6 +22,7 @@
  *
  */
 
+#include <dev.h>
 #include <fs.h>
 #include <kernel.h>
 #include <module.h>
@@ -57,9 +58,9 @@ int ata_init(void)
 {
 	int res;
 
-	if ((res = dev_reg(MAJOR_DISK, devname, &ata_file_ops)) < 0)
+	/* if ((res = dev_reg(MAJOR_DISK, devname, &ata_file_ops)) < 0)
 		kprintf("%s: unable to register ata driver (%d)",
-				devname, res);
+				devname, res); */
 
 	return res;
 }

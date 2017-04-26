@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/fs/sb.c
+ * src/kernel/fs/super.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,40 +22,93 @@
  *
  */
 
+#include <errno.h>
 #include <fs.h>
-#include <list.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 static LIST_HEAD(superblocks);
 
-struct superblock *sb_alloc(struct fs_driver *driver)
+int sb_get(struct fs_driver *fsdp, dev_t dev, u8 flags, struct superblock **sp)
 {
-	struct superblock *sp;
-	(void) driver;
+	struct superblock *csp;
+	int res;
 
-	/* TODO Check if doesn't exist already */
+	list_for_each(csp, &superblocks, l) {
+		if (csp->dev == dev) {
+			*sp = csp;
 
-	if (!(sp = kmalloc(sizeof(struct superblock))))
-		return NULL;
+			return 0;
+		}
+	}
 
-	list_init(&sp->l);
+	if (!(csp = kmalloc(sizeof(struct superblock))))
+		return -ENOMEM;
 
-	sp->dev = (dev_t) { 0, 0 };
-	sp->name[0] = '\0';
-	sp->flags = 0;
+	list_init(&csp->l);
 
-	sp->blocks = 0;
-	sp->block_size = 0;
+	csp->dev = dev;
+	csp->name[0] = '\0';
+	csp->flags = flags;
 
-	sp->device = NULL;
+	csp->blocks = 0;
+	csp->block_size = 0;
 
-	sp->root = NULL;
-	list_init(&sp->il);
+	list_init(&csp->bl);
+	list_init(&csp->il);
 
-	sp->op = NULL;
+	csp->root = NULL;
+	csp->pdep = NULL;
 
-	list_add(&superblocks, &sp->il);
+	csp->fsdp = fsdp;
 
-	return sp;
+	if ((res = fsdp->op->sb_get(csp)) < 0)
+		goto err;
+
+	list_add(&superblocks, &csp->l);
+
+	*sp = csp;
+
+	return 0;
+
+err:
+	if (csp->root)
+		inode_put(csp->root);
+	kfree(csp);
+
+	return res;
+}
+
+int sb_put(struct superblock *sp)
+{
+	struct superblock *csp;
+	int res;
+
+	list_for_each(csp, &superblocks, l) {
+		if (csp->dev == sp->dev) {
+			if ((res = csp->fsdp->op->sb_put(csp)) < 0)
+				return res;
+
+			list_rm(&csp->l);
+
+			return res;
+		}
+	}
+
+	return -EINVAL;
+}
+
+struct superblock *sb_lookup(struct dirent *dep)
+{
+	struct superblock *csp;
+
+	list_for_each(csp, &superblocks, l)
+		if (!csp->pdep)
+			continue;
+		else if (csp->pdep->sp == dep->sp &&
+				csp->pdep->inum == dep->inum)
+			return csp;
+
+	return NULL;
 }

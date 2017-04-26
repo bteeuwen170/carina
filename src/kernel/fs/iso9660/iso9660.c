@@ -22,6 +22,7 @@
  *
  */
 
+#include <dev.h>
 #include <errno.h>
 #include <fs.h>
 #include <kernel.h>
@@ -63,8 +64,22 @@ struct iso9660_dirent {
 	u8	unused4[2];
 
 	u8	name_len;
-	char	name[];
+	char	name[32];
 } __attribute__ ((packed));
+
+#ifdef CONFIG_ROCKRIDGE
+struct iso9660_rockridge_dirent {
+	u8	mtime[7];
+	u8	atime[7];
+	u8	ctime[7];
+	u8	btime[7];
+
+	mode_t	mode;
+	uid_t	uid;
+	gid_t	gid;
+	dev_t	rdev;
+} __attribute__ ((packed));
+#endif
 
 struct iso9660_sb {
 	u8	type;
@@ -91,139 +106,23 @@ struct iso9660_sb {
 	u8	unused6[1858];
 } __attribute__ ((packed));
 
-static struct sb_ops iso9660_sb_ops;
-static struct inode_ops iso9660_inode_ops;
+static struct fs_ops iso9660_fs_ops;
 static struct file_ops iso9660_file_ops;
 
-static struct inode *iso9660_inode_alloc(struct superblock *sp)
+static int iso9660_sb_get(struct superblock *sp)
 {
-	struct inode *ip;
-
-	(void) sp;
-
-	if (!(ip = kcalloc(1, sizeof(struct inode))))
-		return NULL;
-
-	ip->op = &iso9660_inode_ops;
-	ip->fop = &iso9660_file_ops;
-
-	return ip;
-}
-
-static struct dirent *iso9660_lookup(struct dirent *dp, const char *name)
-{
-	struct dirent *dep;
-
-	list_for_each(dep, &dp->ip->del, l)
-		if (strcmp(dep->name, name) == 0)
-			return dep;
-
-#if 0
-	if (!(ip = inode_alloc(dp->ip->sp)))
-		goto err;
-
-	ip->inum = addr;
-	if (dev_dep->flags & ISO9660_DF_DIR)
-		ip->mode |= IM_DIR;
-	else
-		ip->mode |= IM_REG;
-
-	ip->links = 1;
-
-	/* TODO Read from disk */
-	ip->atime = 0;
-	ip->ctime = 0;
-	ip->mtime = 0;
-
-	ip->size = dev_dep->size;
-
-	/* XXX A very dirty hack */
-	dep->ip->op->readdir(dp);
-
-	list_for_each(dep, &dp->ip->del, l) {
-		if (strcmp(dep->name, name) == 0)
-			return dep;
-#endif
-#if 0
-	struct inode *ip = NULL;
-	struct dirent *dep;
-	struct iso9660_dirent dev_dep;
-	u32 i;
-
-	for (i = ((struct iso9660_sb *) dp->ip->sp->device)->root.size; i;
-			i -= dp->ip->sp->block_size) {
-		/* XXX TEMP XXX */ atapi_read(dp->ip->sp->dev.minor, &dev_dep,
-				((struct iso9660_sb *)
-				dp->ip->sp->device)->root.addr,
-				2048);
-	}
-
-	if (!(ip = inode_alloc(dp->ip->sp)))
-		goto err;
-	/* TODO Fill in more */
-	ip->size = dev_dep.size; /* XXX Right? */
-
-	if (!(dep = dirent_alloc(dp, name)))
-		goto err;
-	dep->ip = ip;
-
-	return dep;
-
-err:
-	if (ip)
-		inode_put(ip);
-#endif
-	return NULL;
-}
-
-static int iso9660_readdir(struct dirent *dp)
-{
-	struct dirent *dep;
-	struct iso9660_dirent *dev_dp, *dev_dep;
-	char buf[2048], name[NAME_MAX + 1], *sep;
-	off_t addr, i;
-
-	dev_dp = (struct iso9660_dirent *) &((struct iso9660_sb *) dp->ip->sp->device)->root;
-
-	addr = dev_dp->addr;
-
-	atapi_read(dp->ip->sp->dev.minor, &buf, addr, 2048);
-
-	for (i = 254; i < 2048; i += dev_dep->length) {
-		dev_dep = (struct iso9660_dirent *) buf + i;
-
-		if (!dev_dep->length)
-			break;
-
-		memcpy(name, dev_dep->name, dev_dep->name_len);
-		name[dev_dep->name_len] = '\0';
-		sep = strchr(name, ';');
-		*sep = '\0';
-
-		stolower(name);
-
-		if (!(dep = dirent_alloc(dp, name)))
-			return -ENOMEM;
-	}
-
-	return 0;
-}
-
-static struct inode *iso9660_read_sb(struct superblock *sp)
-{
-	struct inode *ip;
 	struct iso9660_sb *dev_sp;
-	int i;
+	int res, i;
 
 	if (!(dev_sp = kmalloc(sizeof(struct iso9660_sb))))
-		return NULL;
+		return -ENOMEM;
 
 	for (i = 16; i < 32; i++) {
-		/* XXX TEMP XXX */ atapi_read(sp->dev.minor, dev_sp, i, 2048);
+		/* XXX TEMP XXX */ atapi_read(MINOR(sp->dev), dev_sp, i, 2048);
 
 		if (strncmp(dev_sp->signature, "CD001", 5) != 0 ||
 				dev_sp->version != 1)
-			return NULL;
+			return -EINVAL;
 
 		if (dev_sp->type == 1)
 			break;
@@ -235,52 +134,162 @@ static struct inode *iso9660_read_sb(struct superblock *sp)
 	sp->blocks = dev_sp->blocks;
 	sp->block_size = dev_sp->block_size;
 
-	sp->device = dev_sp;
+	if ((res = inode_get(sp, ((struct iso9660_dirent *)
+			dev_sp->root)->addr, &sp->root)) < 0)
+		goto err;
 
-	sp->op = &iso9660_sb_ops;
+	sp->root->inum = i * sp->block_size + 156;
 
-	if (!(ip = inode_alloc(sp)))
-		return NULL;
-	ip->inum = i;
+	sp->root->block = ((struct iso9660_dirent *) dev_sp->root)->addr;
+	sp->root->size = ((struct iso9660_dirent *) dev_sp->root)->size;
 
-	sp->root = ip;
+	return 0;
 
-#if 0
-	kprintf("# of blocks: %d   block size: %d", sp->blocks, sp->block_size);
-	kprintf(" (%d MB)\n", (sp->blocks * sp->block_size) / 1024);
-#endif
+err:
+	kfree(dev_sp);
 
-	return ip;
+	return res;
 }
 
-static struct sb_ops iso9660_sb_ops = {
-	.inode_alloc	= &iso9660_inode_alloc,
-	.inode_dealloc	= NULL,
-	.inode_write	= NULL,
-	.inode_delete	= NULL
-};
+static int iso9660_alloc(struct inode *ip)
+{
+	struct iso9660_dirent *ddep;
+	char *buf;
 
-static struct inode_ops iso9660_inode_ops = {
-	.create		= NULL,
-	.link		= NULL,
-	.symlink	= NULL,
-	.rmlink		= NULL,
-	.mkdir		= NULL,
-	.rmdir		= NULL,
-	.mknod		= NULL,
-	.move		= NULL,
-	.lookup		= &iso9660_lookup,
-	.readdir	= &iso9660_readdir
+	/* XXX TEMP */
+	ip->size = 2048;
+
+	/* FIXME How do we clean this crap up? */
+	if (!(buf = kmalloc(ip->size)))
+		return -ENOMEM;
+
+	/* XXX TEMP XXX */ atapi_read(MINOR(ip->sp->dev), buf, (off_t) ip->inum / ip->sp->block_size, ip->size);
+
+	ddep = (struct iso9660_dirent *) (buf + ip->inum % ip->sp->block_size);
+
+	ip->block = ddep->addr;
+	ip->size = ddep->size;
+
+	/* XXX TEMP XXX */
+	ip->mode = I_DIR;
+	ip->fop = &iso9660_file_ops;
+	/* TODO */
+	return 0;
+}
+
+static int iso9660_lookup(struct inode *dp, const char *name,
+		struct dirent **dep)
+{
+	struct dirent *cdep;
+	struct iso9660_dirent *ddep;
+	char *buf, nbuf[NAME_MAX + 1];
+	off_t p;
+
+	if (!(buf = kmalloc(dp->size)))
+		return -ENOMEM;
+
+	/* XXX TEMP XXX */ atapi_read(MINOR(dp->sp->dev), buf, (off_t) dp->block, dp->size);
+
+	for (p = 0; p < dp->size; p += ddep->length) {
+		ddep = (struct iso9660_dirent *) (buf + p);
+
+		if (!ddep->length)
+			break;
+
+		memcpy(nbuf, ddep->name, ddep->name_len);
+		nbuf[ddep->name_len] = '\0';
+		*strchr(nbuf, ';') = '\0';
+
+		if (strcmp(nbuf, name) != 0)
+			continue;
+
+		/* TODO put_block here */
+
+		if (!(cdep = kmalloc(sizeof(struct dirent))))
+			return -ENOMEM;
+
+		list_init(&cdep->l);
+		cdep->refs = 1;
+
+		cdep->inum = dp->block * dp->sp->block_size + p;
+		strcpy(cdep->name, nbuf);
+
+		cdep->sp = dp->sp;
+		cdep->pdep = NULL;
+
+		*dep = cdep;
+
+		return 0;
+	}
+
+	return -ENOENT;
+}
+
+static int iso9660_readdir(struct file *fp, char *_name)
+{
+	struct iso9660_dirent *ddep;
+	char *buf;
+	off_t p, i;
+
+	if (!(buf = kmalloc(fp->dp->size)))
+		return -ENOMEM;
+
+	/* XXX TEMP XXX */ atapi_read(MINOR(fp->dp->sp->dev), buf, (off_t) fp->dp->block, fp->dp->size);
+
+	for (p = 0, i = 0; p < fp->dp->size; p += ddep->length, i++) {
+		ddep = (struct iso9660_dirent *) (buf + p);
+
+		if (!ddep->length)
+			break;
+		else if (i != fp->off)
+			continue;
+
+		/* TODO put_block here */
+
+		if (ddep->name[0] == 0) {
+			_name[0] = '.';
+			_name[1] = '\0';
+		} else if (ddep->name[0] == 1) {
+			_name[0] = _name[1] = '.';
+			_name[2] = '\0';
+		} else {
+			memcpy(_name, ddep->name, ddep->name_len);
+			_name[ddep->name_len] = '\0';
+
+			if ((buf = strrchr(_name, ';'))) {
+				*--buf = '\0';
+				if (*--buf == '.')
+					*buf = '\0';
+			}
+		}
+
+		fp->off++;
+
+		return 0;
+	}
+
+	return -EFAULT;
+}
+
+static struct fs_ops iso9660_fs_ops = {
+	.sb_get		= &iso9660_sb_get,
+	.sb_put		= NULL,
+
+	.alloc		= &iso9660_alloc,
+	.lookup		= &iso9660_lookup
 };
 
 static struct file_ops iso9660_file_ops = {
-	NULL
+	.read		= NULL,
+	.write		= NULL,
+	.readdir	= &iso9660_readdir,
+	.ioctl		= NULL
 };
 
 static struct fs_driver iso9660_driver = {
-	.name		= devname,
+	.name	= devname,
 
-	.read_sb	= &iso9660_read_sb
+	.op	= &iso9660_fs_ops
 };
 
 int iso9660_init(void)

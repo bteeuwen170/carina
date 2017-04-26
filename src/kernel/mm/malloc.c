@@ -37,10 +37,6 @@ const char *mmap_types[5] = {
 	"rsvd"
 };
 
-/* FIXME This is utter crap */
-#define BLOCK_SIZE	4096
-#define BLOCKS_MAX	(BLOCK_SIZE * sizeof(u8))
-
 extern uintptr_t kern_end;
 size_t mem;
 

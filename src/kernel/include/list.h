@@ -35,12 +35,18 @@ struct list_head {
 
 static inline void list_init(struct list_head *head)
 {
+	if (!head)
+		return;
+
 	head->prev = head;
 	head->next = head;
 }
 
 static inline void list_add(struct list_head *next, struct list_head *entry)
 {
+	if (!next || !entry)
+		return;
+
 	next->prev->next = entry;
 	next->prev = entry;
 
@@ -55,6 +61,9 @@ static inline void list_add(struct list_head *next, struct list_head *entry)
 
 static inline void list_adda(struct list_head *prev, struct list_head *entry)
 {
+	if (!prev || !entry)
+		return;
+
 	entry->prev = prev;
 	entry->next = prev->next;
 
@@ -64,6 +73,9 @@ static inline void list_adda(struct list_head *prev, struct list_head *entry)
 
 static inline void list_mv(struct list_head *next, struct list_head *entry)
 {
+	if (!next || !entry)
+		return;
+
 	entry->prev->next = entry->next;
 	entry->next->prev = entry->prev;
 
@@ -72,6 +84,9 @@ static inline void list_mv(struct list_head *next, struct list_head *entry)
 
 static inline void list_mva(struct list_head *prev, struct list_head *entry)
 {
+	if (!prev || !entry)
+		return;
+
 	entry->prev->next = entry->next;
 	entry->next->prev = entry->prev;
 
@@ -80,6 +95,9 @@ static inline void list_mva(struct list_head *prev, struct list_head *entry)
 
 static inline void list_rm(struct list_head *entry)
 {
+	if (!entry)
+		return;
+
 	entry->prev->next = entry->next;
 	entry->next->prev = entry->prev;
 

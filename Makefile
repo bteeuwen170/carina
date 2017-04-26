@@ -97,7 +97,7 @@ menuconfig:
 PHONY += fstree
 fstree: root/tmp/
 root/tmp/:
-	echo -e "\033[1m> Creating Elarix root filesystem tree...\033[0m"
+	echo -e "\033[1m> Creating Elarix root file system tree...\033[0m"
 	mkdir -p root/
 	mkdir -p root/app/
 	mkdir -p root/app/bin/
@@ -136,7 +136,8 @@ bin/elarix.iso: bin/kernel
 	grub-mkimage -p root/boot/grub -c root/boot/grub/grub.cfg -o bin/grub.img -O i386-pc biosdisk iso9660 normal multiboot ext2 boot
 	cat /usr/lib/grub/i386-pc/cdboot.img bin/grub.img > root/grub.img
 	echo -e "\033[1m> Creating Elarix iso...\033[0m"
-	genisoimage -A "Elarix" -input-charset "iso8859-1" -R -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/elarix.iso root
+	#genisoimage -A "Elarix" -input-charset "utf-8" -R -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/elarix.iso root
+	genisoimage -A "Elarix" -input-charset "utf-8" -l -allow-leading-dots -allow-multidot -no-iso-translate -relaxed-filenames -allow-lowercase -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/elarix.iso root
 
 ifeq ($(ARCHT),x86)
 PHONY += bochs

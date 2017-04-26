@@ -23,6 +23,7 @@
  */
 
 #include <cmdline.h>
+#include <dev.h>
 #include <fs.h>
 #include <ioctl.h>
 #include <issue.h>
@@ -81,15 +82,6 @@ void kernel_main(void)
 
 #endif
 
-#ifdef CONFIG_RAMFS
-	ramfs_init();
-	sys_mount(NULL, "/", "ramfs");
-#endif
-
-#ifdef CONFIG_ISO9660
-	iso9660_init();
-#endif
-
 #ifdef CONFIG_CONSOLE
 
 #ifdef CONFIG_CONSOLE_VGA
@@ -101,7 +93,6 @@ void kernel_main(void)
 	serial_con_init();
 #endif
 
-	con_init();
 	kprint_init();
 	kprintf("\033[2J");
 #endif
@@ -115,6 +106,17 @@ void kernel_main(void)
 			mboot->boot_loader_name);
 	kprintf("cmdline: %s\n", cmdline);
 	cpu_info();
+
+	devfs_init();
+
+#ifdef CONFIG_RAMFS
+	/* ramfs_init();
+	fs_mount(NULL, "/", "ramfs"); */
+#endif
+
+#ifdef CONFIG_ISO9660
+	iso9660_init();
+#endif
 
 	asm volatile ("sti");
 	dprintf("cpu0", KP_DBG "interrupts enabled\n");
@@ -211,10 +213,13 @@ void kernel_main(void)
 
 	panic("Init was killed", 0, 0);
 #else
+	fs_mount(DEV(MAJOR_OPT, 0), "/", "iso9660", M_RO);
+	fs_mount(0, "/sys/dev", "devfs", 0);
+
 	char cmd[64];
 	u8 p = 0;
 
-	sys_cwdir(cmd);
+	fs_cwdir(cmd);
 	kprintf("SV Shell:\n%s $ ", cmd);
 
 	cmd[0] = '\0';
@@ -254,7 +259,23 @@ void kernel_main(void)
 
 		/* File system */
 		if (strncmp(cmd, "ls", 2) == 0) {
-			struct usr_dirent udep;
+			struct file *fp;
+			char nbuf[NAME_MAX + 1];
+			int res;
+
+			if (strcmp(cmd, "ls") == 0)
+				res = file_open(".", O_RO, &fp);
+			else
+				res = file_open(cmd + 3, O_RO, &fp);
+
+			if (res == 0) {
+				while (file_readdir(fp, nbuf) == 0)
+					kprintf("%s ", nbuf);
+				kprintf("\n");
+
+				file_close(fp);
+			}
+			/* struct usr_dirent udep;
 			struct file *fp;
 
 			if (strcmp(cmd, "ls") == 0) {
@@ -269,31 +290,30 @@ void kernel_main(void)
 				kprintf("\n");
 
 				fs_close(fp);
-			}
+			} */
 		} else if (strncmp(cmd, "cd", 2) == 0) {
-			sys_chdir(cmd + 3);
+			fs_chdir(cmd + 3);
 		} else if (strcmp(cmd, "cwd") == 0) {
-			sys_cwdir(cmd);
+			fs_cwdir(cmd);
 			kprintf("%s\n", cmd);
 		} else if (strncmp(cmd, "mount", 5) == 0) {
-			char dev[64], mountp[64];
+			/* char dev[64];
 			size_t l;
 
 			l = strchr(cmd + 6, ' ') - cmd - 6;
 			strncpy(dev, cmd + 6, l);
 			dev[l] = '\0';
 
-			strcpy(mountp, strchr(strchr(cmd + 6, ' '), ' ') + 1);
-
-			sys_mount(dev, mountp, "iso9660");
+			sys_mount(dev, strrchr(cmd, ' ') + 1,
+					"iso9660"); */
 		} else if (strncmp(cmd, "mkdir", 5) == 0) {
-			sys_mkdir(cmd + 6, 0);
+			kprintf("%d\n", fs_mkdir(cmd + 6, 0));
 		} else if (strcmp(cmd, "popen") == 0) {
-			struct file *fp = fs_open("/sys/dev/con1", 0, 0);
+			/* struct file *fp = fs_open("/sys/dev/con1", 0, 0);
 
 			fs_write(fp, "hi\n", 0, 3);
 
-			fs_close(fp);
+			fs_close(fp); */
 
 		/* Audio */
 #ifdef CONFIG_AC97
@@ -324,7 +344,7 @@ void kernel_main(void)
 			kprintf("shell: command not found: %s\n", cmd);
 		}
 
-		sys_cwdir(cmd);
+		fs_cwdir(cmd);
 		kprintf("%s $ ", cmd);
 
 		cmd[0] = '\0';

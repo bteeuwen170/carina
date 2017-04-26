@@ -22,7 +22,7 @@
  *
  */
 
-#include <fs.h>
+#include <dev.h>
 #include <kernel.h>
 #include <module.h>
 #include <pci.h>
@@ -154,20 +154,64 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 		status = ide_inb(ch, ATA_REG_STATUS);
 
 	if (status & ATA_CMD_ERR || status & ATA_CMD_DDR) {
-		u8 cl = ide_inb(ch, ATA_REG_LBA1);
-		u8 cd = ide_inb(ch, ATA_REG_LBA2);
+		u8 lba0 = ide_inb(ch, ATA_REG_LBA0);
+		u8 lba1 = ide_inb(ch, ATA_REG_LBA1);
+		u8 lba2 = ide_inb(ch, ATA_REG_LBA2);
+		u8 packet[12];
+		u8 buf[2];
 
-		if ((cl == 0x14 && cd == 0xEB) ||
-				(cl == 0x69 && cd == 0x96))
-			dev->type = ATA_DEV_TYPE_ATAPI;
-		else if ((cl == 0x00 && cd == 0x00) ||
-				(cl == 0x3C && ch == 0xC3))
+		if (lba0 == 0x01 && lba1 == 0x00 && lba2 == 0x00) {
 			dev->type = ATA_DEV_TYPE_ATA;
-		else
-			goto err;
+		} else if (lba0 == 0x01 && lba1 == 0x14 && lba2 == 0xEB) {
+			dev->type = ATA_DEV_TYPE_ATAPI;
 
-		ide_outb(ch, ATA_REG_CMD, ATAPI_CMD_IDENT);
-		sleep(1);
+			ide_outb(ch, ATA_REG_CMD, ATAPI_CMD_IDENT);
+			sleep(1);
+
+#if 0
+			/* Set PIO mode */
+			ide_outb(dev->ch, ATA_REG_FEATURES, 0);
+
+			/* Set buffer size */
+			ide_outb(dev->ch, ATA_REG_LBA1, ATAPI_SECTOR_SIZE >> 8);
+			ide_outb(dev->ch, ATA_REG_LBA2, ATAPI_SECTOR_SIZE >> 8);
+
+			packet[0] = ATAPI_CMD_READ_CAPACITY;
+			packet[1] = 0;
+			packet[2] = 0;
+			packet[3] = 0;
+			packet[4] = 0;
+			packet[5] = 0;
+			packet[6] = 0;
+			packet[7] = 0;
+			packet[8] = 0;
+			packet[9] = 0;
+			packet[10] = 0;
+			packet[11] = 0;
+
+			/* Send the packet */
+			ide_outb(dev->ch, ATA_REG_CMD, ATA_CMD_PACKET);
+
+			if (ide_poll(dev->ch) != 0)
+				return -1;
+
+			for (i = 0; i < 11; i += 2)
+				io_outw(ide_channels[dev->ch].base, ((packet[i] & 0xFF) |
+							(packet[i + 1] & 0xFF) << 8));
+
+			for (i = 0; i < n / ATAPI_SECTOR_SIZE; i++) {
+				if (ide_poll(dev->ch) != 0)
+					return -1;
+
+				asm volatile ("rep insw" :: "D" (buf), "c" (8 / 2),
+						"d" (ide_channels[dev->ch].base) : "memory");
+			}
+
+			while (ide_inb(dev->ch, ATA_REG_STATUS) & (ATA_CMD_BUSY | ATA_CMD_DDR));
+#endif
+		} else {
+			goto err;
+		}
 	} else {
 		goto err;
 	}
@@ -196,8 +240,7 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 	dprintf(devname, KP_CON "%u sectors (%u MB)\n",
 			dev->size, dev->size * ATA_SECTOR_SIZE / 1024 / 1024);
 
-	dev_init((dev_t) { (dev->type ? MAJOR_OPTICAL: MAJOR_DISK),
-			ide_minor_last });
+	/* device_reg(DEV((dev->type ? MAJOR_OPTICAL: MAJOR_DISK), ide_minor_last)); */
 
 	return;
 

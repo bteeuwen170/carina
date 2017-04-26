@@ -22,47 +22,236 @@
  *
  */
 
+#include <dev.h>
+#include <errno.h>
 #include <fs.h>
+#include <limits.h>
+
+#include <stdlib.h>
+#include <string.h>
 
 static const char devname[] = "devfs";
 
-static int devfs_mknod(struct inode *dp, struct dirent *dep,
-		mode_t mode, dev_t dev)
+static const char *major_names[] = {
+	NULL,
+	"zero", "mem", "con", "kbd", "mce", "dsk", "opt", "snd", "rtc",
+	[63] = "etc"
+};
+
+static u32 minor_last[MAJOR_MAX] = { 0 };
+
+static LIST_HEAD(drivers);
+static LIST_HEAD(devices);
+
+static struct file_ops devfs_file_ops;
+
+int driver_reg(struct driver *drip)
 {
-	(void) dp, (void) dep, (void) mode, (void) dev;
+	struct driver *cdrip;
+
+	list_for_each(cdrip, &drivers, l)
+		if (strcmp(cdrip->name, drip->name) == 0)
+			return -EEXIST;
+
+	list_add(&drivers, &drip->l);
 
 	return 0;
 }
 
-static struct superblock *devfs_read_sb(struct superblock *sp)
+void driver_unreg(struct driver *drip)
 {
-	struct inode *ip;
-	struct dirent *dep;
+	struct device *devp;
 
-	sp->flags = SF_KEEP;
+	if (!drip)
+		return;
 
-	sp->op = &devfs_sb_ops;
+	list_for_each(devp, &devices, l)
+		if (devp->drip == drip)
+			device_unreg(devp);
 
-	ip = devfs_inode_alloc(sp, IM_DIR | 0755, (dev_t) { 0, 0 });
-	if (!ip)
-		return NULL;
-
-	dep = dirent_alloc_root(ip);
-	sp->root = dep;
-
-	return sp;
+	list_rm(&drip->l);
+	kfree(drip);
 }
 
-static const struct sb_ops devfs_sb_ops = { NULL };
+int device_reg(u32 major, struct driver *drip, dev_t *dev)
+{
+	struct device *devp;
 
-static const struct inode_ops devfs_inode_ops = {
-	.mknod = &devfs_mknod
+	if (!major | !drip)
+		return -EINVAL;
+
+	if (!(devp = kmalloc(sizeof(struct device))))
+		return -ENOMEM;
+
+	list_init(&devp->l);
+	list_add(&devices, &devp->l);
+
+	devp->device = NULL;
+	*dev = devp->dev = DEV(major, minor_last[major]++);
+	devp->drip = drip;
+
+	return 0;
+}
+
+void device_unreg(struct device *devp)
+{
+	if (!devp)
+		return;
+
+	devp->drip->fini(devp);
+
+	list_rm(&devp->l);
+	kfree(devp);
+}
+
+struct device *device_get(dev_t dev)
+{
+	struct device *devp;
+
+	list_for_each(devp, &devices, l)
+		if (devp->dev == dev)
+			return devp;
+
+	return NULL;
+}
+
+/* TODO Verbose */
+void devices_probe(void)
+{
+	struct device *devp;
+
+	list_for_each(devp, &devices, l)
+		devp->drip->probe(devp);
+}
+
+static int devfs_sb_get(struct superblock *sp)
+{
+	int res;
+
+	strcpy(sp->name, "dev");
+
+	if ((res = inode_get(sp, 0, &sp->root)) < 0)
+		return res;
+
+	return 0;
+}
+
+static int devfs_alloc(struct inode *ip)
+{
+	struct device *devp;
+
+	if (!ip->inum) {
+		ip->mode = I_DIR;
+		ip->fop = &devfs_file_ops;
+
+		return 0;
+	}
+
+	list_for_each(devp, &devices, l) {
+		if (devp->dev == (ino_t) ip->inum) {
+			ip->mode = I_DEV;
+			ip->rdev = devp->dev;
+			ip->fop = devp->drip->fop;
+
+			return 0;
+		}
+	}
+
+	return -ENOENT;
+}
+
+static int devfs_lookup(struct inode *dp, const char *name, struct dirent **dep)
+{
+	struct dirent *cdep;
+	struct device *devp;
+	char nbuf[NAME_MAX + 1];
+
+	list_for_each(devp, &devices, l) {
+		sprintf(nbuf, "%s%d", major_names[MAJOR(devp->dev)],
+				MINOR(devp->dev));
+
+		if (strcmp(nbuf, name) != 0)
+			continue;
+
+		if (!(cdep = kmalloc(sizeof(struct dirent))))
+			return -ENOMEM;
+
+		list_init(&cdep->l);
+		list_add(&dp->del, &cdep->l);
+
+		cdep->refs = 1;
+
+		cdep->inum = (ino_t) devp->dev;
+		strcpy(cdep->name, nbuf);
+
+		cdep->sp = dp->sp;
+		cdep->pdep = NULL;
+
+		*dep = cdep;
+
+		return 0;
+	}
+
+	return -ENOENT;
+}
+
+static int devfs_readdir(struct file *fp, char *_name)
+{
+	struct device *devp;
+	int i = 2;
+
+	if (fp->off == 0) {
+		_name[0] = '.';
+		_name[1] = '\0';
+	} else if (fp->off == 1) {
+		_name[0] = '.';
+		_name[1] = '.';
+		_name[2] = '\0';
+	} else {
+		list_for_each(devp, &devices, l) {
+			if (i++ == fp->off) {
+				sprintf(_name, "%s%d",
+						major_names[MAJOR(devp->dev)],
+						MINOR(devp->dev));
+
+				fp->off++;
+
+				return 0;
+			}
+		}
+
+		return -EFAULT;
+	}
+
+	fp->off++;
+
+	return 0;
+}
+
+static struct fs_ops devfs_fs_ops = {
+	.sb_get		= &devfs_sb_get,
+	.sb_put		= NULL, /* TODO */
+
+	.alloc		= &devfs_alloc,
+	.lookup		= &devfs_lookup,
+
+	.mkreg		= NULL,
+	.mkdir		= NULL,
+	.mkdev		= NULL,
+	.mklnk		= NULL,
+	.rmlnk		= NULL,
+	.link		= NULL,
+	.move		= NULL
+};
+
+static struct file_ops devfs_file_ops = {
+	.readdir	= &devfs_readdir,
 };
 
 static struct fs_driver devfs_driver = {
-	.name		= devname,
+	.name	= devname,
 
-	.read_sb	= &devfs_read_sb
+	.op	= &devfs_fs_ops
 };
 
 int devfs_init(void)

@@ -24,6 +24,7 @@
 
 #include <errno.h>
 #include <fs.h>
+#include <dev.h>
 #include <kernel.h>
 #include <module.h>
 
@@ -35,7 +36,7 @@
 static const char devname[] = "opt";
 
 /* static int atapi_read(struct file *fp, char *buf, off_t off, size_t n) */
-int atapi_read(u16 minor, char *buf, off_t off, size_t n)
+int atapi_read(u32 minor, char *buf, off_t off, size_t n)
 {
 	struct ata_dev *dev;
 	u32 i;
@@ -160,9 +161,9 @@ int atapi_init(void)
 {
 	int res;
 
-	if ((res = dev_reg(MAJOR_OPTICAL, devname, &atapi_file_ops)) < 0)
+	/* if ((res = dev_reg(MAJOR_OPTICAL, devname, &atapi_file_ops)) < 0)
 		kprintf("%s: unable to register atapi driver (%d)",
-				devname, res);
+				devname, res); */
 
 	return res;
 }

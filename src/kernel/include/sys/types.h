@@ -50,16 +50,12 @@ typedef u32		uid_t;		/* User ID */
 typedef u32		gid_t;		/* Group ID */
 
 typedef i64		off_t;		/* Offset */
-typedef i64		time_t;		/* Time in seconds since epoch */
-typedef u16		mode_t;		/* Permissions */
+typedef i64		time_t;		/* Time in seconds (0 = 1970-01-01) */
 typedef u16		link_t;		/* Link count */
+typedef u32		dev_t;		/* Device ID */
+typedef u32		mode_t;		/* Open/Inode mode */
 typedef u64		ino_t;		/* Inode number */
 
 typedef __asm_uintptr_t	uintptr_t;	/* Address */
-
-typedef struct {
-	u8	major;
-	u16	minor;
-} dev_t;				/* Device ID */
 
 #endif

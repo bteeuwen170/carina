@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/fs/fd.c
+ * src/kernel/include/block.h
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,30 +22,22 @@
  *
  */
 
-#include <errno.h>
-#include <fs.h>
+#ifndef _BLOCK_H
+#define _BLOCK_H
+
 #include <limits.h>
-#include <proc.h>
+#include <list.h>
 
-#if 0
-int fd_alloc(struct file *fp)
-{
-	int fd;
+/* Block cache flags */
+#define B_KEEP 01	/* Keep block cached */
 
-	for (fd = 0; fd < FD_MAX; fd++) {
-		if (cproc->fd[fd])
-			continue;
+struct block {
+	struct list_head l;
+	int refs;
 
-		cproc->fd[fd] = fp;
+	off_t	block;			/* Block number */
+	char	buffer[BLOCK_SIZE];	/* Block number */
+	u8	flags;			/* Block cache flags */
+};
 
-		return fd;
-	}
-
-	return -EMFILE;
-}
-
-void fd_dealloc(int fd)
-{
-	cproc->fd[fd] = 0;
-}
 #endif

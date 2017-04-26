@@ -25,23 +25,27 @@
 #ifndef _STRING_H
 #define _STRING_H
 
+int sprintf(char *str, const char *fmt, ...);
+
 void *memcpy(void *dest, const void *src, size_t n);
 void *memmove(void *dest, const void *src, size_t n);
 void *memset(void *dest, int c, size_t n);
 /* int memcmp (const void *, const void *, size_t); */
 void *memchr(const void *src, int c, size_t n);
+void *memrchr(const void *src, int c, size_t n);
 
 char *strcpy(char *dest, const char *src);
 char *strncpy(char *dest, const char *src, size_t n);
 
 char *strcat(char *dest, const char *src);
-/* char *strncat(char *dest, const char *src, size_t n); */
+char *strncat(char *dest, const char *src, size_t n);
 
 int strcmp(const char *src1, const char *src2);
 int strncmp(const char *src1, const char *src2, size_t n);
 
 char *strstr(const char *src1, const char *src2);
 char *strchr(const char *src, const char c);
+char *strrchr(const char *src, const char c);
 
 size_t strlen(const char *str);
 size_t strnlen(const char *str, size_t n);

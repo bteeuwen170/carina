@@ -24,49 +24,102 @@
 
 #include <errno.h>
 #include <fs.h>
-#include <limits.h>
-#include <proc.h>
 
+#include <string.h>
 #include <stdlib.h>
 
-int file_cnt = 0;
-
-struct file *file_alloc(struct dirent *dep)
+int file_open(const char *path, mode_t mode, struct file **fp)
 {
-	struct file *fp;
+	struct file *cfp;
+	int res;
 
-	if (file_cnt + 1 > FD_MAX)
-		return NULL;
+	if (strlen(path) > PATH_MAX)
+		return -ENAMETOOLONG;
 
-	if (!(fp = kmalloc(sizeof(struct file))))
-		return NULL;
+	if (!(cfp = kcalloc(1, sizeof(struct file))))
+		return -ENOMEM;
 
-	fp->off = 0;
+	cfp->off = 0;
 
-	fp->refs = 1;
+	if ((res = dir_get(path, &cfp->dep)) < 0)
+		goto err;
+	/* TODO Handle O_CREATE */
 
-	fp->dep = dep;
+	if (cfp->dep->sp->flags & M_RO && !(mode & O_RO)) {
+		res = -EROFS;
+		goto err;
+	}
 
-	file_cnt++;
+	if ((res = inode_get(cfp->dep->sp, cfp->dep->inum, &cfp->dp)) < 0)
+		goto err;
 
-	return fp;
+	if (!(cfp->dp->mode & I_DIR) && mode & O_DIR) {
+		res = -ENOTDIR;
+		goto err;
+	}
+
+	*fp = cfp;
+
+	return 0;
+
+err:
+	if (cfp->dp)
+		inode_put(cfp->dp);
+	if (cfp->dep)
+		dir_put(cfp->dep);
+	if (cfp)
+		kfree(cfp);
+
+	return res;
 }
 
-static void file_dealloc(struct file *fp)
+int file_close(struct file *fp)
+{
+	/* TODO */
+	return 0;
+}
+
+/* int file_read(struct file *fp, char *buf, off_t off, size_t n)
 {
 	if (!fp)
-		return;
+		return -EBADF;
 
-	kfree(fp);
+	if (!n)
+		return 0;
+} */
 
-	file_cnt--;
-}
-
-void file_put(struct file *fp)
+int file_write(struct file *fp, const char *buf, off_t off, size_t n)
 {
-	fp->refs--;
+	if (!fp)
+		return -EBADF;
 
-	if (!fp->refs) {
-		file_dealloc(fp);
-	}
+	if (!n)
+		return 0;
+
+	/* TODO */
+
+	return fp->dp->fop->write(fp, buf, off, n);
 }
+
+int file_readdir(struct file *fp, char *_name)
+{
+	if (!fp)
+		return -EBADF;
+
+	if (!(fp->dp->mode & I_DIR))
+		return -ENOTDIR;
+
+	return fp->dp->fop->readdir(fp, _name);
+}
+
+/* int file_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
+{
+	if (!fp)
+		return -EBADF;
+} */
+
+/* int file_stat(struct file *fp. struct stat *sp)
+{
+	if (!fp)
+		return -EBADF;
+} */

@@ -75,11 +75,22 @@ void *memchr(const void *src, int c, size_t n)
 {
 	const unsigned char *s = src;
 
-	for (; n--; s++)
-		if (*s == c)
+	while (n--)
+		if (*s++ == c)
 			return (void *) s;
 
-	return 0;
+	return NULL;
+}
+
+void *memrchr(const void *src, int c, size_t n)
+{
+	const unsigned char *s = src + n;
+
+	while (n--)
+		if (*s-- == c)
+			return (void *) s;
+
+	return NULL;
 }
 
 char *strcpy(char *dest, const char *src)
@@ -92,11 +103,8 @@ char *strcpy(char *dest, const char *src)
 	return dest;
 }
 
-/* FIXME Does this work like it's supposed to? */
 char *strncpy(char *dest, const char *src, size_t n)
 {
-#if 1
-	/* Copied from "man strncpy" */
 	size_t i;
 
 	for (i = 0; i < n && src[i] != '\0'; i++)
@@ -106,23 +114,31 @@ char *strncpy(char *dest, const char *src, size_t n)
 		dest[i++] = '\0';
 
 	return dest;
-#else
-	char *d = dest;
-
-	while (n-- && (*dest++ = *src++));
-
-	return d;
-#endif
 }
 
 char *strcat(char *dest, const char *src)
 {
-	strcpy(dest + strlen(dest), src);
+	size_t i, l = strlen(dest);
+
+	for (i = 0; src[i] != '\0'; i++)
+		dest[l + i] = src[i];
+
+	dest[l + i] = '\0';
 
 	return dest;
 }
 
-/* TODO strncat */
+char *strncat(char *dest, const char *src, size_t n)
+{
+	size_t i, l = strlen(dest);
+
+	for (i = 0; i < n && src[i] != '\0'; i++)
+		dest[l + i] = src[i];
+
+	dest[l + i] = '\0';
+
+	return dest;
+}
 
 int strcmp(const char *src1, const char *src2)
 {
@@ -163,9 +179,22 @@ char *strstr(const char *src1, const char *src2)
 
 char *strchr(const char *str, const char c)
 {
-	for (; *str != '\0' && *str != c; str++);
+	while (*str)
+		if (*str++ == c)
+			return (char *) str;
 
-	return (*str == c) ? (char *) str : NULL;
+	return NULL;
+}
+
+char *strrchr(const char *str, const char c)
+{
+	char *p = NULL;
+
+	while (*str)
+		if (*str++ == c)
+			p = (char *) str;
+
+	return p;
 }
 
 size_t strlen(const char *str)

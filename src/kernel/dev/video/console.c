@@ -23,6 +23,7 @@
  */
 
 #include <console.h>
+#include <dev.h>
 #include <fs.h>
 #include <ioctl.h>
 #include <kernel.h>
@@ -32,7 +33,7 @@
 static const char devname[] = "con";
 
 static LIST_HEAD(consoles);
-int console_minor_last = -1;
+i64 console_minor_last = -1;
 
 int con_reg(struct con_driver *driver)
 {
@@ -61,7 +62,7 @@ int con_write(struct file *fp, const char *buf, off_t off, size_t n)
 	/* FIXME What a crappy way of doing things... */
 	list_for_each(driver, &consoles, l)
 		for (i = 0; i < n; i++)
-			driver->write(fp->dep->ip->dev.minor, buf[i]);
+			driver->write(MINOR(fp->dp->rdev), buf[i]);
 
 	return n;
 }
@@ -82,10 +83,10 @@ int con_init(void)
 	struct con_driver *driver;
 	int res;
 
-	if ((res = dev_reg(MAJOR_CON, devname, &con_file_ops)) < 0)
+	/* if ((res = dev_reg(MAJOR_CON, devname, &con_file_ops)) < 0)
 		kprintf("%s: unable to register console driver (%d)",
 				devname, res);
-	else
+	else */
 		list_for_each(driver, &consoles, l)
 			driver->probe();
 
@@ -95,7 +96,7 @@ int con_init(void)
 void con_exit(void)
 {
 	/* TODO */
-	dev_unreg(MAJOR_CON);
+	/* dev_unreg(MAJOR_CON); */
 }
 
 MODULE(con, &con_init, &con_exit);

@@ -39,7 +39,7 @@ Issue this command to build the elarix kernel:
 ## File system tree
 
 Elarix does not adhere to the FHS standard, instead it uses this
-filesystem hierarchy layout:
+file system hierarchy layout:
 
 	/                       root
 	├── app                 applications
