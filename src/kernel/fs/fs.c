@@ -170,7 +170,6 @@ foundfs:
 		cproc->cwd = fs_root;
 	} else {
 		sp->pdep = dep;
-		/* list_add(&sp->root->del, &dep->l); */
 	}
 
 	dprintf(devname, "%s (%s) has been successfully mounted on %s\n",
@@ -190,6 +189,33 @@ err:
 		inode_put(dp);
 	if (dep)
 		dir_put(dep);
+
+	return res;
+}
+
+int fs_unmount(const char *path)
+{
+	struct superblock *sp;
+	struct dirent *dep;
+	int res;
+
+	if ((res = dir_get(path, &dep)))
+		return res;
+
+	if (!(sp = sb_lookup(dep))) {
+		res = -EINVAL;
+		goto err;
+	}
+
+	if ((res = sb_put(sp)) < 0)
+		goto err;
+
+	dir_put(dep);
+
+	return 0;
+
+err:
+	dir_put(dep);
 
 	return res;
 }

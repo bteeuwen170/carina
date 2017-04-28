@@ -22,19 +22,17 @@
  *
  */
 
-#include <console.h>
+#include <errno.h>
 #include <dev.h>
 #include <fs.h>
-#include <kernel.h>
 #include <module.h>
 
 #include <asm/cpu.h>
 
 #include <string.h>
+#include <stdlib.h>
 
 static const char devname[] = "serial_con";
-
-static int serial_minor[] = { 0, 0, 0, 0 };
 
 /* TODO Do more testing */
 /* Taken from http://www.sci.muni.cz/docs/pc/serport.txt */
@@ -95,31 +93,65 @@ static void serial_out(const u16 port, const char value)
 	io_outb(port, value);
 }
 
-static void serial_con_write(u32 minor, const char c)
+static void serial_con_put(u16 port, const char c)
 {
-	u16 port;
-
-	if (minor == serial_minor[0])
-		port = 0x3F8;
-	else if (minor == serial_minor[1])
-		port = 0x2F8;
-	else if (minor == serial_minor[2])
-		port = 0x3E8;
-	else if (minor == serial_minor[3])
-		port = 0x2E8;
-	else
-		return;
-
 	if (c == '\n')
 		serial_out(port, '\r');
 
 	serial_out(port, c);
 }
 
-static int serial_con_probe(void)
+int serial_con_write(struct file *fp, const char *buf, off_t off, size_t n)
 {
-	int i;
+	struct device *devp;
+	size_t i;
+
+	if (!(devp = device_get(fp->dp->rdev)))
+		return -ENODEV;
+
+	for (i = 0; i < n; i++)
+		serial_con_put(*((u16 *) devp->device), buf[i]);
+
+	return n;
+}
+
+static int serial_con_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
+{
+	/* TODO */
+	return 0;
+}
+
+static int serial_con_probe(struct device *dp)
+{
+	return 0;
+}
+
+static void serial_con_fini(struct device *dp)
+{
+	/* TODO */
+}
+
+static struct file_ops serial_con_file_ops = {
+	.write	= &serial_con_write,
+	.ioctl	= &serial_con_ioctl
+};
+
+static struct driver serial_con_driver = {
+	.name	= devname,
+
+	.fop	= &serial_con_file_ops,
+	.probe	= &serial_con_probe,
+	.fini	= &serial_con_fini
+};
+
+int serial_con_init(void)
+{
+	struct device *devp = NULL;
 	u16 port;
+	int i, res;
+
+	if ((res = driver_reg(&serial_con_driver)) < 0)
+		return res;
 
 	for (i = 0; i < 4; i++) {
 		switch (i) {
@@ -137,26 +169,19 @@ static int serial_con_probe(void)
 			break;
 		}
 
-		switch (serial_detect(port)) {
-		case 1:
-			dprintf(devname, "%s\n",
-					"detected 8250 serial interface");
-			break;
-		case 2:
-			dprintf(devname, "%s\n",
-					"detected 8250 with scratch regs");
-			break;
-		case 3:
-			dprintf(devname, "%s\n",
-					"detected 16450 serial interface");
-			break;
-		case 4:
-			dprintf(devname, "%s\n",
-					"detected 16550A serial interface");
-			break;
-		default:
+		if (!serial_detect(port))
 			continue;
+
+		if ((res = device_reg(MAJOR_CON, &serial_con_driver, &devp)) <
+				0)
+			return res;
+
+		if (!(devp->device = kmalloc(sizeof(u16)))) {
+			res = -ENOMEM;
+			goto err;
 		}
+
+		*((u16 *) devp->device) = port;
 
 		io_outb(port + 1, 0x00);
 		io_outb(port + 3, 0x80);
@@ -165,37 +190,15 @@ static int serial_con_probe(void)
 		io_outb(port + 3, 0x03);
 		io_outb(port + 2, 0xC7);
 		io_outb(port + 4, 0x0B);
-
-		serial_minor[i] = ++console_minor_last;
-		/* dev_init(DEV(MAJOR_CON, serial_minor[i])); */
 	}
 
 	return 0;
-}
 
-static void serial_con_fini(u32 minor)
-{
-	/* TODO */
-}
+err:
+	if (devp)
+		device_unreg(devp);
 
-static struct con_driver serial_con_driver = {
-	.name	= devname,
-
-	.probe	= &serial_con_probe,
-	.fini	= &serial_con_fini,
-	.write	= &serial_con_write
-};
-
-int serial_con_init(void)
-{
-	int res;
-
-	res = con_reg(&serial_con_driver);
-	if (res < 0)
-		kprintf("%s: unable to register console driver (%d)",
-				devname, res);
-
-	return 0;
+	return res;
 }
 
 void serial_con_exit(void)
@@ -204,4 +207,3 @@ void serial_con_exit(void)
 }
 
 MODULE(serial_con, &serial_con_init, &serial_con_exit);
-MODULE_BEFORE(con);

@@ -24,7 +24,6 @@
 
 #include <dev.h>
 #include <fs.h>
-#include <kernel.h>
 #include <module.h>
 
 #include <asm/cpu.h>
@@ -269,12 +268,11 @@ static struct driver vga_con_driver = {
 int vga_con_init(void)
 {
 	int res;
-	dev_t dev;
 
 	if ((res = driver_reg(&vga_con_driver)) < 0)
 		return res;
 
-	return device_reg(MAJOR_CON, &vga_con_driver, &dev);
+	return device_reg(MAJOR_CON, &vga_con_driver, NULL);
 }
 
 void vga_con_exit(void)
@@ -283,4 +281,3 @@ void vga_con_exit(void)
 }
 
 MODULE(vga_con, &vga_con_init, &vga_con_exit);
-MODULE_BEFORE(con);

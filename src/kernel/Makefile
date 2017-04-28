@@ -35,4 +35,4 @@ PHONY += kernel
 kernel: bin/kernel
 bin/kernel: $(kernel-o) $(kernel-o32)
 	echo -e "  LD      $<"
-	$(LD) $(LDFLAGS) -T src/kernel/arch/$(ARCHT)/boot/link.ld -o bin/kernel $(kernel-o) $(kernel-o32)
+	$(LD) $(LDFLAGS) -T src/kernel/arch/$(ARCHT)/boot/link.ld -o bin/kernel $(kernel-o) $(kernel-o32) -lgcc

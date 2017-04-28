@@ -296,8 +296,8 @@ void kernel_main(void)
 		} else if (strcmp(cmd, "cwd") == 0) {
 			fs_cwdir(cmd);
 			kprintf("%s\n", cmd);
-		} else if (strncmp(cmd, "mount", 5) == 0) {
-			/* char dev[64];
+		/* } else if (strncmp(cmd, "mount", 5) == 0) {
+			char dev[64];
 			size_t l;
 
 			l = strchr(cmd + 6, ' ') - cmd - 6;
@@ -306,6 +306,8 @@ void kernel_main(void)
 
 			sys_mount(dev, strrchr(cmd, ' ') + 1,
 					"iso9660"); */
+		} else if (strcmp(cmd, "unmount") == 0) {
+			fs_unmount("/sys/dev");
 		} else if (strncmp(cmd, "mkdir", 5) == 0) {
 			kprintf("%d\n", fs_mkdir(cmd + 6, 0));
 		} else if (strcmp(cmd, "popen") == 0) {

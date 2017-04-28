@@ -198,6 +198,7 @@ int fs_mkdir(const char *path, mode_t mode);
 int fs_chdir(const char *path);
 int fs_cwdir(char *_path);
 int fs_mount(dev_t dev, const char *path, const char *fs, u8 flags);
+int fs_unmount(const char *path);
 
 int fs_reg(struct fs_driver *fsdp);
 void fs_unreg(struct fs_driver *fsdp);

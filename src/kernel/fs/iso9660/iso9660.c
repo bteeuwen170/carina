@@ -165,7 +165,8 @@ static int iso9660_alloc(struct inode *ip)
 
 	/* XXX TEMP XXX */ atapi_read(MINOR(ip->sp->dev), buf, (off_t) ip->inum / ip->sp->block_size, ip->size);
 
-	ddep = (struct iso9660_dirent *) (buf + ip->inum % ip->sp->block_size);
+	ddep = (struct iso9660_dirent *)
+			(buf + ip->inum % ip->sp->block_size);
 
 	ip->block = ddep->addr;
 	ip->size = ddep->size;

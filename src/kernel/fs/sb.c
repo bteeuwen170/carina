@@ -85,15 +85,25 @@ int sb_put(struct superblock *sp)
 	struct superblock *csp;
 	int res;
 
+	/* TODO Clear block and inode cache */
+
 	list_for_each(csp, &superblocks, l) {
-		if (csp->dev == sp->dev) {
-			if ((res = csp->fsdp->op->sb_put(csp)) < 0)
-				return res;
+		if (csp->dev != sp->dev)
+			continue;
 
-			list_rm(&csp->l);
-
+		if ((res = csp->fsdp->op->sb_put(csp)) < 0)
 			return res;
-		}
+
+		inode_put(csp->root);
+		dir_put(csp->pdep);
+
+		list_rm(&csp->l);
+
+		/* kprintf("%s\n", csp->l.next-> */
+
+		kfree(csp);
+
+		return res;
 	}
 
 	return -EINVAL;
@@ -103,11 +113,14 @@ struct superblock *sb_lookup(struct dirent *dep)
 {
 	struct superblock *csp;
 
+	/* XXX Is this completely safe? */
 	list_for_each(csp, &superblocks, l)
 		if (!csp->pdep)
 			continue;
-		else if (csp->pdep->sp == dep->sp &&
-				csp->pdep->inum == dep->inum)
+		else if ((csp->pdep->sp == dep->sp &&
+				csp->pdep->inum == dep->inum) ||
+				(csp == dep->sp &&
+				csp->root->inum == dep->inum))
 			return csp;
 
 	return NULL;

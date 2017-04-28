@@ -47,10 +47,12 @@
 struct device {
 	struct list_head l;
 
+	dev_t	dev;	/* Device ID */
+	//char	bus_id;
+
 	void *device;		/* Device specific */
 
-	dev_t		dev;	/* Device ID */
-	struct driver	*drip;	/* Associated driver pointer */
+	struct driver *drip;	/* Associated driver pointer */
 };
 
 struct driver {
@@ -71,7 +73,7 @@ struct driver {
 int driver_reg(struct driver *drip);
 void driver_unreg(struct driver *drip);
 
-int device_reg(u32 major, struct driver *drip, dev_t *dev);
+int device_reg(u32 major, struct driver *drip, struct device **devp);
 void device_unreg(struct device *devp);
 struct device *device_get(dev_t dev);
 

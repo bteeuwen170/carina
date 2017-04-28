@@ -28,7 +28,7 @@ export HOSTCC HOSTLD
 CC		:= $(ARCH)-elf-elarix-gcc
 CC32		:= $(ARCH32)-elf-elarix-gcc
 AS		:= $(ARCH)-elf-elarix-as
-LD		:= $(ARCH)-elf-elarix-ld
+LD		:= $(ARCH)-elf-elarix-gcc
 
 BOCHS		:= bochs
 QEMU		:= qemu-system-$(ARCH)
@@ -48,8 +48,8 @@ include .config
 TYPES		= src/kernel/include/sys/types.h
 # TEMP
 ASFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS)
-CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fomit-frame-pointer
-CFLAGS32	:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -nostdlib -lgcc -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fno-omit-frame-pointer
+CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fomit-frame-pointer
+CFLAGS32	:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -Werror=implicit-function-declaration -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fno-omit-frame-pointer
 LDFLAGS		:= -nostdlib -z max-page-size=4096
 export ASFLAGS CFLAGS CFLAGS32 LDFLAGS
 

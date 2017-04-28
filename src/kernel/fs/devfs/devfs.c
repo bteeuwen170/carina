@@ -73,22 +73,25 @@ void driver_unreg(struct driver *drip)
 	kfree(drip);
 }
 
-int device_reg(u32 major, struct driver *drip, dev_t *dev)
+int device_reg(u32 major, struct driver *drip, struct device **devp)
 {
-	struct device *devp;
+	struct device *cdevp;
 
 	if (!major | !drip)
 		return -EINVAL;
 
-	if (!(devp = kmalloc(sizeof(struct device))))
+	if (!(cdevp = kmalloc(sizeof(struct device))))
 		return -ENOMEM;
 
-	list_init(&devp->l);
-	list_add(&devices, &devp->l);
+	list_init(&cdevp->l);
+	list_add(&devices, &cdevp->l);
 
-	devp->device = NULL;
-	*dev = devp->dev = DEV(major, minor_last[major]++);
-	devp->drip = drip;
+	cdevp->device = NULL;
+	cdevp->dev = DEV(major, minor_last[major]++);
+	cdevp->drip = drip;
+
+	if (devp)
+		*devp = cdevp;
 
 	return 0;
 }
@@ -133,6 +136,11 @@ static int devfs_sb_get(struct superblock *sp)
 	if ((res = inode_get(sp, 0, &sp->root)) < 0)
 		return res;
 
+	return 0;
+}
+
+static int devfs_sb_put(struct superblock *sp)
+{
 	return 0;
 }
 
@@ -230,7 +238,7 @@ static int devfs_readdir(struct file *fp, char *_name)
 
 static struct fs_ops devfs_fs_ops = {
 	.sb_get		= &devfs_sb_get,
-	.sb_put		= NULL, /* TODO */
+	.sb_put		= &devfs_sb_put,
 
 	.alloc		= &devfs_alloc,
 	.lookup		= &devfs_lookup,

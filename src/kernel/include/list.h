@@ -42,24 +42,7 @@ static inline void list_init(struct list_head *head)
 	head->next = head;
 }
 
-static inline void list_add(struct list_head *next, struct list_head *entry)
-{
-	if (!next || !entry)
-		return;
-
-	next->prev->next = entry;
-	next->prev = entry;
-
-	entry->prev = next->prev;
-	entry->next = next;
-
-	/* next->next->prev = new;
-
-	new->prev = next;
-	new->next = next->next; */
-}
-
-static inline void list_adda(struct list_head *prev, struct list_head *entry)
+static inline void list_add(struct list_head *prev, struct list_head *entry)
 {
 	if (!prev || !entry)
 		return;
@@ -71,28 +54,6 @@ static inline void list_adda(struct list_head *prev, struct list_head *entry)
 	prev->next = entry;
 }
 
-static inline void list_mv(struct list_head *next, struct list_head *entry)
-{
-	if (!next || !entry)
-		return;
-
-	entry->prev->next = entry->next;
-	entry->next->prev = entry->prev;
-
-	list_add(next, entry);
-}
-
-static inline void list_mva(struct list_head *prev, struct list_head *entry)
-{
-	if (!prev || !entry)
-		return;
-
-	entry->prev->next = entry->next;
-	entry->next->prev = entry->prev;
-
-	list_adda(prev, entry);
-}
-
 static inline void list_rm(struct list_head *entry)
 {
 	if (!entry)
@@ -101,7 +62,7 @@ static inline void list_rm(struct list_head *entry)
 	entry->prev->next = entry->next;
 	entry->next->prev = entry->prev;
 
-	entry->prev = entry->next = NULL;
+	/* entry->prev = entry->next = NULL; */
 }
 
 #define list_entry(entry, par, name) \
