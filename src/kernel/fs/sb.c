@@ -63,7 +63,7 @@ int sb_get(struct fs_driver *fsdp, dev_t dev, u8 flags, struct superblock **sp)
 
 	csp->fsdp = fsdp;
 
-	if ((res = fsdp->op->sb_get(csp)) < 0)
+	if ((res = fsdp->fop->sb_get(csp)) < 0)
 		goto err;
 
 	list_add(&superblocks, &csp->l);
@@ -91,7 +91,7 @@ int sb_put(struct superblock *sp)
 		if (csp->dev != sp->dev)
 			continue;
 
-		if ((res = csp->fsdp->op->sb_put(csp)) < 0)
+		if ((res = csp->fsdp->fop->sb_put(csp)) < 0)
 			return res;
 
 		inode_put(csp->root);

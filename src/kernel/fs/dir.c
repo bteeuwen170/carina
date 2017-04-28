@@ -36,7 +36,7 @@ static int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
 	int res;
 
 	list_for_each(cdep, &dp->del, l) {
-		if (cdep->inum == dp->inum && strcmp(cdep->name, name) == 0) {
+		if (strcmp(cdep->name, name) == 0) {
 			cdep->refs++;
 
 			*dep = cdep;
@@ -45,8 +45,10 @@ static int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
 		}
 	}
 
-	if ((res = dp->sp->fsdp->op->lookup(dp, name, &cdep)) < 0)
+	if ((res = dp->sp->fsdp->fop->lookup(dp, name, &cdep)) < 0)
 		return res;
+
+	list_add(&dp->del, &cdep->l);
 
 	*dep = cdep;
 
@@ -116,8 +118,6 @@ void dir_put(struct dirent *dep)
 		panic("dirent %d (%s) has a invalid reference count",
 				dep->inum, dep->name); */
 
-	if (!dep->refs)
+	if (!(dep->sp->flags & M_KEEP) && !dep->refs)
 		kfree(dep);
-
-	kfree(dep);
 }

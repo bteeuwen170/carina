@@ -53,12 +53,12 @@ file system hierarchy layout:
 	│   └── grub            GRUB configuration
 	├── cfg                 system configuration files
 	├── mnt                 mounting points
-	├── sys                 kernel files (ramfs)
-	│   ├── dev             device files
-	│   ├── lck             lock files
-	│   ├── krn             kernel files
-	│   └── prc             process information
-	├── tmp                 temporary files (ramfs)
+	├── sys                 kernel files
+	│   ├── dev             device files (devfs)
+	│   ├── lck             lock files (lckfs)
+	│   ├── krn             kernel files (krnfs)
+	│   └── prc             process information (prcfs)
+	├── tmp                 temporary files (memfs)
 	└── usr                 users home directories
 	    └── [user]          user home directory
 	        ├── .app        user-specific applications folder

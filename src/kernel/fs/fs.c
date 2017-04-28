@@ -28,6 +28,7 @@
 #include <kernel.h>
 #include <proc.h>
 
+#include <stdlib.h>
 #include <string.h>
 
 static const char devname[] = "fs";
@@ -122,7 +123,10 @@ int fs_mount(dev_t dev, const char *path, const char *fs, u8 flags)
 	struct dirent *dep = NULL;
 	int res;
 
-	if (dev && (MINOR(dev) != MAJOR_DSK && MAJOR(dev) != MAJOR_OPT))
+	/* TODO Check if already mounted elsewhere */
+
+	if ((MAJOR(dev) != MAJOR_MEM &&
+			MAJOR(dev) != MAJOR_DSK && MAJOR(dev) != MAJOR_OPT))
 		return -ENOTBLK;
 
 	if (strlen(path) > PATH_MAX)
@@ -139,7 +143,7 @@ foundfs:
 		if ((res = dir_get(path, &dep)) < 0)
 			goto err;
 
-		if ((res = inode_get(dep->sp, dp->inum, &dp)) < 0)
+		if ((res = inode_get(dep->sp, dep->inum, &dp)) < 0)
 			goto err;
 
 		if (!(dp->mode & I_DIR)) {
@@ -165,7 +169,6 @@ foundfs:
 		fs_root->refs++;
 		fs_root->inum = sp->root->inum;
 		fs_root->sp = sp;
-		list_add(&sp->root->del, &fs_root->l);
 
 		cproc->cwd = fs_root;
 	} else {
@@ -198,6 +201,8 @@ int fs_unmount(const char *path)
 	struct superblock *sp;
 	struct dirent *dep;
 	int res;
+
+	/* TODO Run some checks first */
 
 	if ((res = dir_get(path, &dep)))
 		return res;
@@ -235,11 +240,10 @@ int fs_mkreg(const char *path, mode_t mode)
 
 int fs_mkdir(const char *path, mode_t mode)
 {
-	struct dirent *dep = NULL;
-	char pbuf[PATH_MAX], *sep;
+	struct inode *dp = NULL;
+	struct dirent *ddep = NULL, *dep;
+	char buf[PATH_MAX + 1], *sep;
 	int res, i;
-
-	pbuf[0] = '\0';
 
 	if (strlen(path) > PATH_MAX)
 		return -ENAMETOOLONG;
@@ -247,28 +251,76 @@ int fs_mkdir(const char *path, mode_t mode)
 	if (mode >= I_LINK)
 		return -EINVAL;
 
+	buf[0] = '\0';
+
 	for (i = strlen(path) - 1; i && *(path + i) == '/'; i--);
 
-	if ((sep = memrchr(path - 1, '/', i)))
-		strncat(pbuf, sep + 2, i - (sep - path));
+	if ((sep = memrchr(path, '/', i)))
+		strncat(buf, path, sep - path + 1);
 	else
-		strncat(pbuf, path, i + 1);
+		strcat(buf, "/");
 
-	/* TODO */
+	if ((res = dir_get(buf, &ddep)) < 0)
+		return res;
 
-	if ((res = dir_get(path, &dep)) < 0)
+	if ((res = inode_get(ddep->sp, ddep->inum, &dp)) < 0)
 		goto err;
 
-	if (dep->sp->flags & M_RO) {
+	buf[0] = '\0';
+
+	if ((sep = memrchr(path, '/', i)))
+		strncat(buf, sep + 2, i - (sep - path) - 1);
+	else
+		strncat(buf, path + 1, i + 1);
+
+	res = dir_get(buf, &dep);
+	if (res == 0) {
+		res = -EEXIST;
+		goto err;
+	} else if (res != -ENOENT) {
+		goto err;
+	}
+
+	if (ddep->sp->flags & M_RO) {
 		res = -EROFS;
 		goto err;
 	}
+
+	if (!ddep->sp->fsdp->fop->mkdir) {
+		res = -EPERM;
+		goto err;
+	}
+
+	if (!(dep = kmalloc(sizeof(struct dirent)))) {
+		res = -ENOMEM;
+		goto err;
+	}
+
+	list_init(&dep->l);
+	dep->refs = 1;
+
+	dep->inum = 0;
+	strcpy(dep->name, buf);
+
+	dep->sp = dp->sp;
+	dep->pdep = ddep;
+
+	if ((res = ddep->sp->fsdp->fop->mkdir(dp, dep, mode | I_DIR)) < 0)
+		goto err;
+
+	dir_put(dep);
+	inode_put(dp);
+	dir_put(ddep);
 
 	return 0;
 
 err:
 	if (dep)
 		dir_put(dep);
+	if (dp)
+		inode_put(dp);
+	if (ddep)
+		dir_put(ddep);
 
 	return res;
 }
@@ -330,7 +382,7 @@ int fs_reg(struct fs_driver *fsdp)
 	return 0;
 }
 
-void fs_unreg(struct fs_driver *dfsdp)
+void fs_unreg(struct fs_driver *fsdp)
 {
-	list_rm(&dfsdp->l);
+	list_rm(&fsdp->l);
 }

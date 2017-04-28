@@ -56,6 +56,8 @@ extern struct mboot_info *mboot;
 /* void kernel_main(struct mboot_info *mboot) */
 void kernel_main(void)
 {
+	int res;
+
 #if 1 /* XXX MOVE XXX Arch init */
 	/* SPINLOCK(main);
 
@@ -107,12 +109,22 @@ void kernel_main(void)
 	kprintf("cmdline: %s\n", cmdline);
 	cpu_info();
 
+	memfs_init();
 	devfs_init();
 
-#ifdef CONFIG_RAMFS
-	/* ramfs_init();
-	fs_mount(NULL, "/", "ramfs"); */
-#endif
+	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_ROOT),
+			"/", "memfs", 0)) < 0)
+		panic("mem (memfs) failed to mount on /", res, 0);
+
+	if ((res = fs_mkdir("/sys", 0)) < 0)
+		panic("failed to create /sys", res, 0);
+
+	if ((res = fs_mkdir("/sys/dev", 0)) < 0)
+		panic("failed to create /sys/dev", res, 0);
+
+	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_DEV),
+			"/sys/dev", "devfs", 0)) < 0)
+		panic("dev (devfs) failed to mount on /sys/dev", res, 0);
 
 #ifdef CONFIG_ISO9660
 	iso9660_init();
@@ -213,8 +225,10 @@ void kernel_main(void)
 
 	panic("Init was killed", 0, 0);
 #else
-	fs_mount(DEV(MAJOR_OPT, 0), "/", "iso9660", M_RO);
-	fs_mount(0, "/sys/dev", "devfs", 0);
+	fs_unmount("/sys/dev");
+	/* fs_unmount("/"); */
+	/* fs_mount(DEV(MAJOR_OPT, 0), "/", "iso9660", 0); */
+	/* fs_mount(0, "/sys/dev", "devfs", 0); */
 
 	char cmd[64];
 	u8 p = 0;
@@ -310,8 +324,8 @@ void kernel_main(void)
 			fs_unmount("/sys/dev");
 		} else if (strncmp(cmd, "mkdir", 5) == 0) {
 			kprintf("%d\n", fs_mkdir(cmd + 6, 0));
-		} else if (strcmp(cmd, "popen") == 0) {
-			/* struct file *fp = fs_open("/sys/dev/con1", 0, 0);
+		/* } else if (strcmp(cmd, "popen") == 0) {
+			struct file *fp = fs_open("/sys/dev/con1", 0, 0);
 
 			fs_write(fp, "hi\n", 0, 3);
 
@@ -337,7 +351,7 @@ void kernel_main(void)
 		} else if (strcmp(cmd, "reboot") == 0) {
 			reboot();
 		} else if (strcmp(cmd, "halt") == 0) {
-			panic("halt", 0, 0);
+			panic(NULL, 0, 0);
 		} else if (strcmp(cmd, "clear") == 0) {
 			kprintf("\033[2J");
 		} else if (strcmp(cmd, "uptime") == 0) {

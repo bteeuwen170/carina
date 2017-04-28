@@ -129,14 +129,9 @@ void devices_probe(void)
 
 static int devfs_sb_get(struct superblock *sp)
 {
-	int res;
-
 	strcpy(sp->name, "dev");
 
-	if ((res = inode_get(sp, 0, &sp->root)) < 0)
-		return res;
-
-	return 0;
+	return inode_get(sp, 0, &sp->root);
 }
 
 static int devfs_sb_put(struct superblock *sp)
@@ -258,8 +253,9 @@ static struct file_ops devfs_file_ops = {
 
 static struct fs_driver devfs_driver = {
 	.name	= devname,
+	.flags	= M_RO,
 
-	.op	= &devfs_fs_ops
+	.fop	= &devfs_fs_ops
 };
 
 int devfs_init(void)

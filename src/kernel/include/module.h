@@ -66,20 +66,8 @@ void serial_con_exit(void);
 int vga_con_init(void);
 void vga_con_exit(void);
 
-int con_init(void);
-void con_exit(void);
-
-/* int devfs_init(void);
-void devfs_exit(void);
-
-int ext2_init(void);
-void ext2_exit(void);*/
-
 int iso9660_init(void);
 void iso9660_exit(void);
-
-int ramfs_init(void);
-void ramfs_exit(void);
 #endif
 
 #endif

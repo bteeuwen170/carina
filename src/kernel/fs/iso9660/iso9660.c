@@ -289,8 +289,9 @@ static struct file_ops iso9660_file_ops = {
 
 static struct fs_driver iso9660_driver = {
 	.name	= devname,
+	.flags	= M_RO,
 
-	.op	= &iso9660_fs_ops
+	.fop	= &iso9660_fs_ops
 };
 
 int iso9660_init(void)

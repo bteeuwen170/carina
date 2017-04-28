@@ -42,7 +42,6 @@ int inode_get(struct superblock *sp, ino_t inum, struct inode **ip)
 		}
 	}
 
-
 	if (!(cip = kcalloc(1, sizeof(struct inode))))
 		return -ENOMEM;
 
@@ -55,7 +54,7 @@ int inode_get(struct superblock *sp, ino_t inum, struct inode **ip)
 
 	list_init(&cip->del);
 
-	if ((res = sp->fsdp->op->alloc(cip)) < 0)
+	if ((res = sp->fsdp->fop->alloc(cip)) < 0)
 		goto err;
 
 	list_add(&sp->il, &cip->l);
@@ -73,6 +72,9 @@ err:
 void inode_put(struct inode *ip)
 {
 	/* TODO */
+
+	if (!(ip->sp->flags & M_KEEP) && !ip->refs)
+		kfree(ip);
 }
 
 int inode_dirisempty(struct inode *dp)

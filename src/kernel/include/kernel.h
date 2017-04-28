@@ -66,6 +66,6 @@ void kprint_init(void); /* XXX TEMP XXX */
 
 i8 get_kp();
 
-void panic(char *reason, u32 err_code, uintptr_t ip);
+void panic(char *reason, i64 err_code, uintptr_t ip);
 
 #endif

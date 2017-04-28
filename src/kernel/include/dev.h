@@ -44,6 +44,9 @@
 #define MAJOR_ETC	63	/* Misc. */
 #define MAJOR_MAX	64
 
+#define MINOR_MEM_ROOT	0
+#define MINOR_MEM_DEV	1
+
 struct device {
 	struct list_head l;
 

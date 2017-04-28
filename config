@@ -16,9 +16,6 @@ menu "CPU"
 
 menu "File systems"
 {
-	config CONFIG_RAMFS
-		"RAMFS support";
-
 	menuconfig CONFIG_ISO9660
 		"ISO9660 support";
 	{

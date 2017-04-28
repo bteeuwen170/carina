@@ -64,9 +64,10 @@
 struct fs_driver {
 	struct list_head l;
 
-	const char *name;	/* File system name */
+	const char	*name;	/* File system name */
+	u8		flags;	/* Mount flags */
 
-	struct fs_ops *op;	/* File system operations */
+	struct fs_ops *fop;	/* File system operations */
 };
 
 struct superblock {
@@ -187,12 +188,12 @@ int inode_dirisempty(struct inode *ip); /* XXX Keep this? */
 int dir_get(const char *path, struct dirent **dep);
 void dir_put(struct dirent *dep);
 
-int fs_create(const char *path, mode_t mode);
-/* int fs_delete(const char *path); */
+/* int fs_mkreg(const char *path, mode_t mode); */
 int fs_mkdir(const char *path, mode_t mode);
 /* int fs_mkdev(const char *path, mode_t mode, dev_t dev); */
+/* int fs_mklnk(const char *src_path, const char *path); */
+/* int fs_rmlnk(const char *path); */
 /* int fs_link(const char *src_path, const char *path); */
-/* int fs_symlink(const char *src_path, const char *path); */
 /* int fs_move(const char *src_path, const char *path); */
 
 int fs_chdir(const char *path);

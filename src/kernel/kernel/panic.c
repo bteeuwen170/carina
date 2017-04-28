@@ -29,18 +29,21 @@
  * TODO Seperate panic for isrs
  * TODO Dump registers (at least rip/eip)
  */
-void panic(char *reason, u32 err_code, uintptr_t ip)
+void panic(char *reason, i64 err_code, uintptr_t ip)
 {
 	asm volatile ("cli");
 
 	/* TODO Hide cursor */
 
-	kprintf(KP_CRIT "%s @ %#x\n", reason, ip);
+	if (ip)
+		kprintf(KP_CRIT "%s @ %#x\n", reason, ip);
+	else if (reason)
+		kprintf(KP_CRIT "%s\n", reason);
 
-	/* TODO Don't always print error code */
-	kprintf(KP_CRIT "Error code: %#x\n", err_code);
+	if (err_code)
+		kprintf(KP_CRIT "Error code: %d (%#x)\n", err_code, err_code);
 
-	kprintf("The system has been halted.");
+	kprintf("The system has been halted");
 
 	for (;;)
 		asm volatile ("hlt");
