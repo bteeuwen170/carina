@@ -1,7 +1,8 @@
-*.o
 *.img
 *.iso
+*.o
 *.swp
+*.tmp
 
 bin/*
 !bin/.dummy

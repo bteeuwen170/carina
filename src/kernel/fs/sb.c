@@ -99,8 +99,6 @@ int sb_put(struct superblock *sp)
 
 		list_rm(&csp->l);
 
-		/* kprintf("%s\n", csp->l.next-> */
-
 		kfree(csp);
 
 		return res;

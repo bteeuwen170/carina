@@ -62,7 +62,7 @@ static inline void list_rm(struct list_head *entry)
 	entry->prev->next = entry->next;
 	entry->next->prev = entry->prev;
 
-	/* entry->prev = entry->next = NULL; */
+	entry->prev = entry->next = NULL;
 }
 
 #define list_entry(entry, par, name) \

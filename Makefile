@@ -40,9 +40,10 @@ ARCHFLAGS	+= -D ARCH_$(ARCHT)
 endif
 MAKEFLAGS	= -s --no-print-directory
 
-CONFIGFLAGS	= $(shell sed -e '/^\s*\\\#/d' -e '/^\s*$$/d' -e 's/^/-D /g' .config)
-#MAKEFLAGS	+= $(shell sed -e '/^\s*\\\#/d' -e '/^\s*$$/d' -e 's/^/\n/g' .config)
-include .config
+#CONFIGFLAGS	= $(shell sed -e '/\#.*$$/d;/^$$/d;s/^/-D /g;s/$$/=o/g' .config)
+CONFIGFLAGS	= $(shell sed -e '/\#.*$$/d;/^$$/d;s/^/-D /g;s/$$/=o/g' .config)
+$(shell sed -e '/\#.*$$/d;/^$$/d;s/$$/=o/g' .config > .config.tmp)
+include .config.tmp
 
 # TEMP TODO Relocate in arch directory
 TYPES		= src/kernel/include/sys/types.h
@@ -81,6 +82,8 @@ CLEAN_FILES	+= root/grub.img \
 PHONY += clean
 # TODO Clean toolchain TODO Not POSIX complient apperently
 clean:
+	echo "  RM      .config.tmp"
+	rm .config.tmp
 	find bin/ -type f -not -path '*/\.*' -delete -exec echo "  RM      {}" \;
 	find dbg/ -type f -not -path '*/\.*' -delete -exec echo "  RM      {}" \;
 	find root/ -type d -empty -delete -exec echo "  RMDIR   {}" \;
