@@ -126,7 +126,7 @@ int fs_mount(dev_t dev, const char *path, const char *fs, u8 flags)
 	/* TODO Check if already mounted elsewhere */
 
 	if ((MAJOR(dev) != MAJOR_MEM &&
-			MAJOR(dev) != MAJOR_DSK && MAJOR(dev) != MAJOR_OPT))
+			MAJOR(dev) != MAJOR_HDD && MAJOR(dev) != MAJOR_ODD))
 		return -ENOTBLK;
 
 	if (strlen(path) > PATH_MAX)
@@ -177,7 +177,7 @@ foundfs:
 
 	dprintf(devname, "%s (%s) has been successfully mounted on %s\n",
 			sp->name, fs, path);
-	if (MAJOR(dev) != MAJOR_DSK && MAJOR(dev) != MAJOR_OPT)
+	if (MAJOR(dev) != MAJOR_HDD && MAJOR(dev) != MAJOR_ODD)
 		return 0;
 
 	dprintf(devname, KP_CON "%d blocks, %d MB (%d bytes per block)\n",
@@ -238,8 +238,11 @@ int fs_mkdir(const char *path, mode_t mode)
 {
 	struct inode *dp = NULL;
 	struct dirent *ddep = NULL, *dep;
-	char buf[PATH_MAX + 1], *sep;
-	int res, i;
+	char buf[PATH_MAX + 1];
+	int res;
+
+	if (!path)
+		return -EINVAL;
 
 	if (strlen(path) > PATH_MAX)
 		return -ENAMETOOLONG;
@@ -247,14 +250,16 @@ int fs_mkdir(const char *path, mode_t mode)
 	if (mode >= I_LINK)
 		return -EINVAL;
 
-	buf[0] = '\0';
+	res = dir_get(path, &dep);
+	if (res == 0) {
+		res = -EEXIST;
+		goto err;
+	} else if (res != -ENOENT) {
+		goto err;
+	}
 
-	for (i = strlen(path) - 1; i && *(path + i) == '/'; i--);
-
-	if ((sep = memrchr(path, '/', i)))
-		strncat(buf, path, sep - path + 1);
-	else
-		strcat(buf, "/");
+	strcpy(buf, path);
+	dir_basepath(buf);
 
 	if ((res = dir_get(buf, &ddep)) < 0)
 		return res;
@@ -262,20 +267,8 @@ int fs_mkdir(const char *path, mode_t mode)
 	if ((res = inode_get(ddep->sp, ddep->inum, &dp)) < 0)
 		goto err;
 
-	buf[0] = '\0';
-
-	if ((sep = memrchr(path, '/', i)))
-		strncat(buf, sep + 2, i - (sep - path) - 1);
-	else
-		strncat(buf, path + 1, i + 1);
-
-	res = dir_get(buf, &dep);
-	if (res == 0) {
-		res = -EEXIST;
-		goto err;
-	} else if (res != -ENOENT) {
-		goto err;
-	}
+	strcpy(buf, path);
+	dir_basename(buf);
 
 	if (ddep->sp->flags & M_RO) {
 		res = -EROFS;
@@ -381,4 +374,49 @@ int fs_reg(struct fs_driver *fsdp)
 void fs_unreg(struct fs_driver *fsdp)
 {
 	list_rm(&fsdp->l);
+}
+
+void fs_init(void)
+{
+	char buf[PATH_MAX + 1];
+	dev_t root_dev;
+	int res;
+
+	if (cmdline_str_get("root", buf) != 0)
+		goto fallback;
+	dir_basename(buf);
+	if (!(root_dev = device_getbyname(buf)))
+		goto fallback;
+
+	if ((res = cmdline_str_get("rootfs", buf)) != 0) {
+		dprintf(devname, KP_ERR
+				"missing/invalid cmdline parameter: rootfs (%d)"
+				, res);
+		goto fallback;
+	}
+	if ((res = fs_mount(root_dev, "/", buf, 0)) < 0) {
+		dprintf(devname, KP_ERR "failed to mount root (%d)", res);
+		goto fallback;
+	}
+
+fallback:
+	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_ROOT),
+			"/", "memfs", 0)) < 0)
+		panic("failed to mount fallback root", res, 0);
+
+mountdev:
+	res = fs_mkdir("/sys", 0);
+	if (res == 0 || res == -EEXIST) {
+		res = fs_mkdir("/sys/dev", 0);
+		if (res < 0 && res != -EEXIST)
+			panic("failed to create /sys/dev", res, 0);
+	} else {
+		panic("failed to create /sys", res, 0);
+	}
+
+	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_DEV),
+			"/sys/dev", "devfs", 0)) < 0)
+		panic("dev (devfs) failed to mount on /sys/dev", res, 0);
+
+	return;
 }

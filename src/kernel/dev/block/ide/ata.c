@@ -37,7 +37,7 @@
 
 #include "ide.h"
 
-static const char devname[] = "dsk";
+static const char devname[] = "ata";
 
 static int ata_read(struct file *fp, char *buf, off_t off, size_t n)
 {

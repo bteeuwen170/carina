@@ -37,8 +37,8 @@
 #define MAJOR_CON	3	/* Consoles */
 #define MAJOR_KBD	4	/* Keyboards */
 #define MAJOR_MCE	5	/* Mice */
-#define MAJOR_DSK	6	/* Disk devices */
-#define MAJOR_OPT	7	/* Optical disc devices */
+#define MAJOR_HDD	6	/* Disk devices */
+#define MAJOR_ODD	7	/* Optical disc devices */
 #define MAJOR_SND	8	/* Sound hardware */
 #define MAJOR_RTC	9	/* Real time clock */
 #define MAJOR_ETC	63	/* Misc. */

@@ -187,7 +187,8 @@ int inode_dirisempty(struct inode *ip); /* XXX Keep this? */
 
 int dir_get(const char *path, struct dirent **dep);
 void dir_put(struct dirent *dep);
-int dir_lookup(struct inode *dp, const char *name, struct dirent **dep);
+int dir_basepath(char *path);
+int dir_basename(char *path);
 
 /* int fs_mkreg(const char *path, mode_t mode); */
 int fs_mkdir(const char *path, mode_t mode);

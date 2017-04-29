@@ -48,6 +48,10 @@ int file_open(const char *path, mode_t mode, struct file **fp)
 	if ((res = inode_get(cfp->dep->sp, cfp->dep->inum, &cfp->dp)) < 0)
 		goto err;
 
+	if (!cfp->dp->op) {
+		res = -EPERM;
+	}
+
 	if (cfp->dp->sp->flags & M_RO && !(mode & O_RO)) {
 		res = -EROFS;
 		goto err;
@@ -84,6 +88,9 @@ int file_close(struct file *fp)
 	if (!fp)
 		return -EBADF;
 
+	if (!fp->dp->op->read)
+		return -EPERM;
+
 	if (!n)
 		return 0;
 } */
@@ -92,6 +99,9 @@ int file_write(struct file *fp, const char *buf, off_t off, size_t n)
 {
 	if (!fp)
 		return -EBADF;
+
+	if (!fp->dp->op->write)
+		return -EPERM;
 
 	if (!n)
 		return 0;
@@ -106,6 +116,9 @@ int file_readdir(struct file *fp, char *_name)
 	if (!fp)
 		return -EBADF;
 
+	if (!fp->dp->op->readdir)
+		return -EPERM;
+
 	if (!(fp->dp->mode & I_DIR))
 		return -ENOTDIR;
 
@@ -116,10 +129,16 @@ int file_readdir(struct file *fp, char *_name)
 {
 	if (!fp)
 		return -EBADF;
+
+	if (!fp->dp->op->ioctl)
+		return -EPERM;
 } */
 
 /* int file_stat(struct file *fp. struct stat *sp)
 {
 	if (!fp)
 		return -EBADF;
+
+	if (!fp->dp->op->stat)
+		return -EPERM;
 } */

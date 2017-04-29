@@ -142,3 +142,38 @@ void dir_put(struct dirent *dep)
 	if (!(dep->sp->flags & M_KEEP) && !dep->refs)
 		kfree(dep);
 }
+
+int dir_basepath(char *path)
+{
+	char *sep;
+	int i;
+
+	if (!path)
+		return -EINVAL;
+
+	for (i = strlen(path) - 1; i && *(path + i) == '/'; i--);
+
+	if ((sep = memrchr(path, '/', i)))
+		*(sep + 1) = '\0';
+	else
+		*path = '\0';
+
+	return 0;
+}
+
+int dir_basename(char *path)
+{
+	char *sep;
+	int i;
+
+	if (!path)
+		return -EINVAL;
+
+	for (i = strlen(path) - 1; i && *(path + i) == '/'; i--);
+	*(path + i + 1) = '\0';
+
+	if ((sep = memrchr(path, '/', i)))
+		memmove(path, sep + 1, i + 1);
+
+	return 0;
+}

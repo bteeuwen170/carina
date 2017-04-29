@@ -24,6 +24,7 @@
 
 #include <cmdline.h>
 #include <dev.h>
+#include <errno.h>
 #include <fs.h>
 #include <ioctl.h>
 #include <issue.h>
@@ -83,34 +84,15 @@ void kernel_main(void)
 	mm_init(mboot->mmap_addr, mboot->mmap_len);
 #endif
 
-	memfs_init();
-	devfs_init();
-
-	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_ROOT),
-			"/", "memfs", 0)) < 0)
-		panic("mem (memfs) failed to mount on /", res, 0);
-
-	if ((res = fs_mkdir("/sys", 0)) < 0)
-		panic("failed to create /sys", res, 0);
-
-	if ((res = fs_mkdir("/sys/dev", 0)) < 0)
-		panic("failed to create /sys/dev", res, 0);
-
-	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_DEV),
-			"/sys/dev", "devfs", 0)) < 0)
-		panic("dev (devfs) failed to mount on /sys/dev", res, 0);
-
+	/* Initialize consoles */
 #ifdef CONFIG_CONSOLE
-
 #ifdef CONFIG_CONSOLE_VGA
 	vga_con_init();
 #endif
-
 #ifdef CONFIG_CONSOLE_SERIAL
 	/* serial_init(COM0); */
 	serial_con_init();
 #endif
-
 	kprint_init();
 	kprintf("\033[2J");
 #endif
@@ -124,10 +106,6 @@ void kernel_main(void)
 			mboot->boot_loader_name);
 	kprintf("cmdline: %s\n", cmdline);
 	cpu_info();
-
-#ifdef CONFIG_ISO9660
-	iso9660_init();
-#endif
 
 	asm volatile ("sti");
 	dprintf("cpu0", KP_DBG "interrupts enabled\n");
@@ -161,6 +139,15 @@ void kernel_main(void)
 #ifdef CONFIG_PCI
 	pci_init();
 #endif
+
+	/* Initialize file systems */
+	memfs_init();
+	devfs_init();
+#ifdef CONFIG_ISO9660
+	iso9660_init();
+#endif
+
+	fs_init();
 
 #if 0
 	/* Initialize video hardware properly */
@@ -224,10 +211,6 @@ void kernel_main(void)
 
 	panic("attempted to kill init", 0, 0);
 #else
-	fs_unmount("/");
-	/* fs_mount(DEV(MAJOR_OPT, 0), "/", "iso9660", 0);
-	fs_mount(DEV(MAJOR_MEM, MINOR_MEM_DEV), "/sys/dev", "devfs", 0); */
-	/* fs_unmount("/sys/dev"); */
 
 	char cmd[64];
 	u8 p = 0;
@@ -319,8 +302,8 @@ void kernel_main(void)
 
 			sys_mount(dev, strrchr(cmd, ' ') + 1,
 					"iso9660"); */
-		} else if (strcmp(cmd, "unmount") == 0) {
-			fs_unmount("/sys/dev");
+		} else if (strncmp(cmd, "unmount", 7) == 0) {
+			fs_unmount(cmd + 8);
 		} else if (strncmp(cmd, "mkdir", 5) == 0) {
 			kprintf("%d\n", fs_mkdir(cmd + 6, 0));
 		/* } else if (strcmp(cmd, "popen") == 0) {

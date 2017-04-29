@@ -22,6 +22,8 @@
  *
  */
 
+/* TODO Split this file into dev.c and devfs.c */
+
 #include <dev.h>
 #include <errno.h>
 #include <fs.h>
@@ -30,11 +32,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const char devname[] = "devfs";
+static const char devname[] = "dev";
 
 static const char *major_names[] = {
 	NULL,
-	"zero", "mem", "con", "kbd", "mce", "dsk", "opt", "snd", "rtc",
+	"zero", "mem", "con", "kbd", "mce", "hdd", "odd", "snd", "rtc",
 	[63] = "etc"
 };
 
@@ -118,6 +120,18 @@ struct device *device_get(dev_t dev)
 	return NULL;
 }
 
+dev_t device_getbyname(const char *name)
+{
+	char *mn;
+	int i;
+
+	for (i = 0; i < sizeof(major_names) / sizeof(major_names[0]); i++)
+		if (major_names[i] && (mn = strstr(name, major_names[i])))
+			return DEV(i, strtol(mn + strlen(mn), NULL, 10));
+
+	return 0;
+}
+
 /* TODO Verbose */
 void devices_probe(void)
 {
@@ -125,6 +139,38 @@ void devices_probe(void)
 
 	list_for_each(devp, &devices, l)
 		devp->drip->probe(devp);
+}
+
+static int dev_probe(struct device *dp)
+{
+	(void) dp;
+
+	return 0;
+}
+
+static int dev_fini(struct device *dp)
+{
+	(void) dp;
+
+	/* TODO */
+}
+
+static struct driver dev_driver = {
+	.name	= devname,
+
+	.op	= NULL,
+	.probe	= &dev_probe,
+	.fini	= &dev_fini
+};
+
+int dev_init(void)
+{
+	return driver_reg(&dev_driver);
+}
+
+void dev_exit(void)
+{
+
 }
 
 static int devfs_sb_get(struct superblock *sp)
@@ -252,7 +298,7 @@ static struct file_ops devfs_file_ops = {
 };
 
 static struct fs_driver devfs_driver = {
-	.name	= devname,
+	.name	= "devfs",
 	.flags	= M_RO,
 
 	.op	= &devfs_fs_ops
