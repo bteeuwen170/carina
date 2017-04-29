@@ -22,6 +22,7 @@
  *
  */
 
+#include <cmdline.h>
 #include <dev.h>
 #include <errno.h>
 #include <fs.h>
@@ -237,7 +238,7 @@ int fs_mkreg(const char *path, mode_t mode)
 int fs_mkdir(const char *path, mode_t mode)
 {
 	struct inode *dp = NULL;
-	struct dirent *ddep = NULL, *dep;
+	struct dirent *ddep = NULL, *dep = NULL;
 	char buf[PATH_MAX + 1];
 	int res;
 
@@ -264,12 +265,6 @@ int fs_mkdir(const char *path, mode_t mode)
 	if ((res = dir_get(buf, &ddep)) < 0)
 		return res;
 
-	if ((res = inode_get(ddep->sp, ddep->inum, &dp)) < 0)
-		goto err;
-
-	strcpy(buf, path);
-	dir_basename(buf);
-
 	if (ddep->sp->flags & M_RO) {
 		res = -EROFS;
 		goto err;
@@ -279,6 +274,12 @@ int fs_mkdir(const char *path, mode_t mode)
 		res = -EPERM;
 		goto err;
 	}
+
+	if ((res = inode_get(ddep->sp, ddep->inum, &dp)) < 0)
+		goto err;
+
+	strcpy(buf, path);
+	dir_basename(buf);
 
 	if (!(dep = kmalloc(sizeof(struct dirent)))) {
 		res = -ENOMEM;
@@ -398,6 +399,8 @@ void fs_init(void)
 		dprintf(devname, KP_ERR "failed to mount root (%d)", res);
 		goto fallback;
 	}
+
+	goto mountdev;
 
 fallback:
 	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_ROOT),

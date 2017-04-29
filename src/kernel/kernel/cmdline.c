@@ -27,17 +27,16 @@
 /* XXX How big should this buffer be? */
 char cmdline[4096];
 
-int cmdline_bool_get(char *param, int *val)
+/* int cmdline_bool_get(char *param, int *val)
 {
-	/* TODO */
 	return 1;
-}
+} */
 
-int cmdline_long_get(char *param, long *val)
+/* int cmdline_long_get(char *param, long *val)
 {
-	/* TODO */
+	[>TODO<]
 	return 1;
-}
+} */
 
 int cmdline_str_get(char *param, char *val)
 {

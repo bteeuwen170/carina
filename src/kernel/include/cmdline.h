@@ -27,8 +27,8 @@
 
 extern char cmdline[];
 
-int cmdline_bool_get(char *param, int *val);
-int cmdline_long_get(char *param, long *val);
+/* int cmdline_bool_get(char *param, int *val); */
+/* int cmdline_long_get(char *param, long *val); */
 int cmdline_str_get(char *param, char *val);
 
 #endif

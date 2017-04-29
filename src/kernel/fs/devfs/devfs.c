@@ -123,7 +123,7 @@ struct device *device_get(dev_t dev)
 dev_t device_getbyname(const char *name)
 {
 	char *mn;
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < sizeof(major_names) / sizeof(major_names[0]); i++)
 		if (major_names[i] && (mn = strstr(name, major_names[i])))
@@ -148,7 +148,7 @@ static int dev_probe(struct device *dp)
 	return 0;
 }
 
-static int dev_fini(struct device *dp)
+static void dev_fini(struct device *dp)
 {
 	(void) dp;
 
@@ -182,6 +182,8 @@ static int devfs_sb_get(struct superblock *sp)
 
 static int devfs_sb_put(struct superblock *sp)
 {
+	(void) sp;
+
 	return 0;
 }
 

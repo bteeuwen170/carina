@@ -50,7 +50,7 @@ int sb_get(struct fs_driver *fsdp, dev_t dev, u8 flags, struct superblock **sp)
 
 	csp->dev = dev;
 	csp->name[0] = '\0';
-	csp->flags = flags;
+	csp->flags = fsdp->flags | flags;
 
 	csp->blocks = 0;
 	csp->block_size = 0;
@@ -82,7 +82,7 @@ err:
 
 int sb_put(struct dirent *dep)
 {
-	struct superblock *csp, *tsp;
+	struct superblock *csp;
 	int res;
 
 	/* TODO Clear block and inode cache */

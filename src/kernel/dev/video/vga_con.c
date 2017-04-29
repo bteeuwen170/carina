@@ -55,11 +55,6 @@ static void vga_con_putc(char c, u8 x, u8 y)
 	buf[y * VGA_WIDTH + x] = ((u16) c) | ((u16) fg | bg << 4) << 8;
 }
 
-static void vga_con_cursor(int mode)
-{
-	/* TODO */
-}
-
 static void vga_con_move(int _x, int _y)
 {
 	u16 l;

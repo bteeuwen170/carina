@@ -50,6 +50,8 @@ static int memfs_sb_get(struct superblock *sp)
 
 static int memfs_sb_put(struct superblock *sp)
 {
+	(void) sp;
+
 	return 0;
 }
 
@@ -62,6 +64,8 @@ static int memfs_alloc(struct inode *ip)
 
 static int memfs_lookup(struct inode *dp, const char *name, struct dirent **dep)
 {
+	(void) dp, (void) name, (void) dep;
+
 	return -ENOENT;
 }
 

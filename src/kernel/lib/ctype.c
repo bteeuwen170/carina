@@ -49,15 +49,15 @@ int islower(char c)
 	return c >= 'a' && c <= 'z';
 }
 
-int isprint(char c)
+/* int isprint(char c)
 {
 
-}
+} */
 
-int ispunct(char c)
+/* int ispunct(char c)
 {
 
-}
+} */
 
 int isspace(char c)
 {

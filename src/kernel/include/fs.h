@@ -187,8 +187,17 @@ int inode_dirisempty(struct inode *ip); /* XXX Keep this? */
 
 int dir_get(const char *path, struct dirent **dep);
 void dir_put(struct dirent *dep);
+int dir_lookup(struct inode *dp, const char *name, struct dirent **dep);
 int dir_basepath(char *path);
 int dir_basename(char *path);
+
+int file_open(const char *path, mode_t mode, struct file **fp);
+int file_close(struct file *fp);
+/* int file_read(struct file *fp, char *buf, off_t off, size_t n); */
+int file_write(struct file *fp, const char *buf, off_t off, size_t n);
+int file_readdir(struct file *fp, char *_name);
+/* int file_ioctl(struct file *fp, unsigned int cmd, unsigned long arg); */
+/* int file_stat(struct file *fp, struct stat *sp); */
 
 /* int fs_mkreg(const char *path, mode_t mode); */
 int fs_mkdir(const char *path, mode_t mode);
@@ -206,12 +215,6 @@ int fs_unmount(const char *path);
 int fs_reg(struct fs_driver *fsdp);
 void fs_unreg(struct fs_driver *fsdp);
 
-int file_open(const char *path, mode_t mode, struct file **fp);
-int file_close(struct file *fp);
-/* int file_read(struct file *fp, char *buf, off_t off, size_t n); */
-int file_write(struct file *fp, const char *buf, off_t off, size_t n);
-int file_readdir(struct file *fp, char *_name);
-/* int file_ioctl(struct file *fp, unsigned int cmd, unsigned long arg); */
-/* int file_stat(struct file *fp, struct stat *sp); */
+void fs_init(void);
 
 #endif

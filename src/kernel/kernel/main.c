@@ -57,8 +57,6 @@ extern struct mboot_info *mboot;
 /* void kernel_main(struct mboot_info *mboot) */
 void kernel_main(void)
 {
-	int res;
-
 #if 1 /* XXX MOVE XXX Arch init */
 	/* SPINLOCK(main);
 

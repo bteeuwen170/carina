@@ -79,6 +79,7 @@ void driver_unreg(struct driver *drip);
 int device_reg(u32 major, struct driver *drip, struct device **devp);
 void device_unreg(struct device *devp);
 struct device *device_get(dev_t dev);
+dev_t device_getbyname(const char *name);
 
 int devfs_init(void);
 void devfs_exit(void);

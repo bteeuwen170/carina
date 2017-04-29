@@ -36,9 +36,9 @@ static const char devname[] = "serial_con";
 
 /* TODO Do more testing */
 /* Taken from http://www.sci.muni.cz/docs/pc/serport.txt */
-static i8 serial_detect(const u16 addr)
+static int serial_detect(const u16 addr)
 {
-	i32 od;
+	u8 od;
 
 	/* Check for UART presence */
 	od = io_inb(addr + 4);

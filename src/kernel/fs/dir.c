@@ -30,31 +30,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
-{
-	struct dirent *cdep;
-	int res;
-
-	list_for_each(cdep, &dp->del, l) {
-		if (strcmp(cdep->name, name) == 0) {
-			cdep->refs++;
-
-			*dep = cdep;
-
-			return 0;
-		}
-	}
-
-	if ((res = dp->sp->fsdp->op->lookup(dp, name, &cdep)) < 0)
-		return res;
-
-	list_add(&dp->del, &cdep->l);
-
-	*dep = cdep;
-
-	return 0;
-}
-
 int dir_get(const char *path, struct dirent **dep)
 {
 	struct superblock *sp;
@@ -141,6 +116,31 @@ void dir_put(struct dirent *dep)
 
 	if (!(dep->sp->flags & M_KEEP) && !dep->refs)
 		kfree(dep);
+}
+
+int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
+{
+	struct dirent *cdep;
+	int res;
+
+	list_for_each(cdep, &dp->del, l) {
+		if (strcmp(cdep->name, name) == 0) {
+			cdep->refs++;
+
+			*dep = cdep;
+
+			return 0;
+		}
+	}
+
+	if ((res = dp->sp->fsdp->op->lookup(dp, name, &cdep)) < 0)
+		return res;
+
+	list_add(&dp->del, &cdep->l);
+
+	*dep = cdep;
+
+	return 0;
 }
 
 int dir_basepath(char *path)
