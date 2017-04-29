@@ -10,9 +10,7 @@ License: GPLv2
 
 These utilities are required to build the Elarix toolchain:
 
-* GNU C Compiler (or Clang)
-* GNU autoconf 2.64
-* GNU automake 2.11.6
+* GNU C Compiler
 * GNU make
 * libtool
 
@@ -26,8 +24,9 @@ Issue this command to build the Elarix toolchain:
 ## Building Elarix
 
 These applications are required to build the Elarix kernel:
-* GNU make
+
 * Elarix toolchain
+* GNU make
 * cdrkit (for genisoimage to build an ISO image)
 * GRUB (for grub-mkimage to build an ISO image)
 
