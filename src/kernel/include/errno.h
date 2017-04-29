@@ -31,7 +31,6 @@
 #define ENOMEM		12	/* Out of memory */
 #define EACCES		13	/* Permission denied */
 #define EFAULT		14	/* Invalid address */
-#define ENOTBLK		15	/* Block device required */
 #define EBUSY		16	/* Device or resource busy */
 #define EEXIST		17	/* File exists */
 #define ENODEV		19	/* No such device */

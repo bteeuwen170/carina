@@ -128,7 +128,7 @@ int fs_mount(dev_t dev, const char *path, const char *fs, u8 flags)
 
 	if ((MAJOR(dev) != MAJOR_MEM &&
 			MAJOR(dev) != MAJOR_HDD && MAJOR(dev) != MAJOR_ODD))
-		return -ENOTBLK;
+		return -EINVAL;
 
 	if (strlen(path) > PATH_MAX)
 		return -ENAMETOOLONG;
