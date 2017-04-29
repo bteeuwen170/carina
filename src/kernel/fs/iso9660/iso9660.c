@@ -25,7 +25,6 @@
 #include <dev.h>
 #include <errno.h>
 #include <fs.h>
-#include <kernel.h>
 #include <module.h>
 
 #include <ctype.h>
@@ -106,7 +105,6 @@ struct iso9660_sb {
 	u8	unused6[1858];
 } __attribute__ ((packed));
 
-static struct fs_ops iso9660_fs_ops;
 static struct file_ops iso9660_file_ops;
 
 static int iso9660_sb_get(struct superblock *sp)
@@ -173,7 +171,7 @@ static int iso9660_alloc(struct inode *ip)
 
 	/* XXX TEMP XXX */
 	ip->mode = I_DIR;
-	ip->fop = &iso9660_file_ops;
+	ip->op = &iso9660_file_ops;
 	/* TODO */
 	return 0;
 }
@@ -291,7 +289,7 @@ static struct fs_driver iso9660_driver = {
 	.name	= devname,
 	.flags	= M_RO,
 
-	.fop	= &iso9660_fs_ops
+	.op	= &iso9660_fs_ops
 };
 
 int iso9660_init(void)

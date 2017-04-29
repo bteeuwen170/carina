@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
+int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
 {
 	struct dirent *cdep;
 	int res;
@@ -45,7 +45,7 @@ static int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
 		}
 	}
 
-	if ((res = dp->sp->fsdp->fop->lookup(dp, name, &cdep)) < 0)
+	if ((res = dp->sp->fsdp->op->lookup(dp, name, &cdep)) < 0)
 		return res;
 
 	list_add(&dp->del, &cdep->l);
@@ -59,7 +59,7 @@ int dir_get(const char *path, struct dirent **dep)
 {
 	struct superblock *sp;
 	struct inode *dp = NULL;
-	struct dirent *pdep, *cdep = NULL;
+	struct dirent *cdep = NULL, *pdep, *tdep;
 	char name[NAME_MAX + 1];
 	int res, i;
 
@@ -88,22 +88,43 @@ int dir_get(const char *path, struct dirent **dep)
 			pdep = cdep;
 
 			if ((res = dir_lookup(dp, name, &cdep)) < 0)
-				return res;
+				goto err;
 
-			if ((sp = sb_lookup(cdep))) {
+			res = sb_lookup(dp, name, &sp);
+			if (res == 0) {
+				/* TODO Check how safe this is */
+				if (!(tdep = kmalloc(sizeof(struct dirent))))
+					goto err;
+				memcpy(tdep, cdep, sizeof(struct dirent));
+
+				dir_put(cdep);
+				cdep = tdep;
+
 				cdep->inum = sp->root->inum;
 				cdep->sp = sp;
+			} else if (res != -EINVAL) {
+				goto err;
 			}
 
 			cdep->pdep = pdep;
 
 			inode_put(dp);
+
+			dp = NULL;
 		}
 	}
 
 	*dep = cdep;
 
 	return 0;
+
+err:
+	if (cdep)
+		dir_put(cdep);
+	if (dp)
+		inode_put(dp);
+
+	return res;
 }
 
 void dir_put(struct dirent *dep)

@@ -63,7 +63,7 @@ int sb_get(struct fs_driver *fsdp, dev_t dev, u8 flags, struct superblock **sp)
 
 	csp->fsdp = fsdp;
 
-	if ((res = fsdp->fop->sb_get(csp)) < 0)
+	if ((res = fsdp->op->sb_get(csp)) < 0)
 		goto err;
 
 	list_add(&superblocks, &csp->l);
@@ -80,46 +80,52 @@ err:
 	return res;
 }
 
-int sb_put(struct superblock *sp)
+int sb_put(struct dirent *dep)
 {
-	struct superblock *csp;
+	struct superblock *csp, *tsp;
 	int res;
 
 	/* TODO Clear block and inode cache */
 
 	list_for_each(csp, &superblocks, l) {
-		if (csp->dev != sp->dev)
-			continue;
+		if (csp == dep->sp && csp->root->inum == dep->inum) {
+			if ((res = csp->fsdp->op->sb_put(csp)) < 0)
+				return res;
 
-		if ((res = csp->fsdp->fop->sb_put(csp)) < 0)
-			return res;
+			inode_put(csp->root);
+			dir_put(csp->pdep);
 
-		inode_put(csp->root);
-		dir_put(csp->pdep);
+			list_rm(&csp->l);
 
-		list_rm(&csp->l);
+			kfree(csp);
 
-		kfree(csp);
-
-		return res;
+			return 0;
+		}
 	}
 
 	return -EINVAL;
 }
 
-struct superblock *sb_lookup(struct dirent *dep)
+int sb_lookup(struct inode *dp, const char *name, struct superblock **sp)
 {
 	struct superblock *csp;
+	struct dirent *dep;
+	int res;
 
-	/* XXX Is this completely safe? */
-	list_for_each(csp, &superblocks, l)
+	if ((res = dir_lookup(dp, name, &dep)) < 0)
+		return res;
+
+	list_for_each(csp, &superblocks, l) {
 		if (!csp->pdep)
 			continue;
-		else if ((csp->pdep->sp == dep->sp &&
-				csp->pdep->inum == dep->inum) ||
-				(csp == dep->sp &&
-				csp->root->inum == dep->inum))
-			return csp;
 
-	return NULL;
+		if (csp->pdep->sp->dev == dep->sp->dev &&
+				csp->pdep->inum == dep->inum) {
+			*sp = csp;
+
+			return 0;
+		}
+	}
+
+	return -EINVAL;
 }

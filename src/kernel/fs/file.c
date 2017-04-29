@@ -45,13 +45,13 @@ int file_open(const char *path, mode_t mode, struct file **fp)
 		goto err;
 	/* TODO Handle O_CREATE */
 
-	if (cfp->dep->sp->flags & M_RO && !(mode & O_RO)) {
+	if ((res = inode_get(cfp->dep->sp, cfp->dep->inum, &cfp->dp)) < 0)
+		goto err;
+
+	if (cfp->dp->sp->flags & M_RO && !(mode & O_RO)) {
 		res = -EROFS;
 		goto err;
 	}
-
-	if ((res = inode_get(cfp->dep->sp, cfp->dep->inum, &cfp->dp)) < 0)
-		goto err;
 
 	if (!(cfp->dp->mode & I_DIR) && mode & O_DIR) {
 		res = -ENOTDIR;
@@ -98,7 +98,7 @@ int file_write(struct file *fp, const char *buf, off_t off, size_t n)
 
 	/* TODO */
 
-	return fp->dp->fop->write(fp, buf, off, n);
+	return fp->dp->op->write(fp, buf, off, n);
 }
 
 int file_readdir(struct file *fp, char *_name)
@@ -109,7 +109,7 @@ int file_readdir(struct file *fp, char *_name)
 	if (!(fp->dp->mode & I_DIR))
 		return -ENOTDIR;
 
-	return fp->dp->fop->readdir(fp, _name);
+	return fp->dp->op->readdir(fp, _name);
 }
 
 /* int file_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)

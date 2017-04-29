@@ -260,7 +260,7 @@ static struct file_ops vga_con_file_ops = {
 static struct driver vga_con_driver = {
 	.name	= devname,
 
-	.fop	= &vga_con_file_ops,
+	.op	= &vga_con_file_ops,
 	.probe	= &vga_con_probe,
 	.fini	= &vga_con_fini
 };

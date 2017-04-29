@@ -61,12 +61,12 @@ struct device {
 struct driver {
 	struct list_head l;
 
-	char *name;			/* Driver name */
+	const char *name;		/* Driver name */
 
 	//struct interface	*ifp;	/* Associated interface pointer */
 	//struct bus		*busp;	/* Associated bus pointer */
 
-	struct file_ops	*fop;		/* Driver operations */
+	struct file_ops	*op;		/* Driver operations */
 	/* Probe device: dp */
 	int (*probe) (struct device *);
 	/* Finalize device: dp */

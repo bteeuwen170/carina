@@ -67,7 +67,7 @@ struct fs_driver {
 	const char	*name;	/* File system name */
 	u8		flags;	/* Mount flags */
 
-	struct fs_ops *fop;	/* File system operations */
+	struct fs_ops *op;	/* File system operations */
 };
 
 struct superblock {
@@ -111,7 +111,7 @@ struct inode {
 	struct superblock	*sp;	/* Associated superblock */
 	struct list_head	del;	/* List of children */
 
-	struct file_ops *fop;		/* File operations */
+	struct file_ops *op;		/* File operations */
 };
 
 struct dirent {
@@ -178,8 +178,8 @@ struct file_ops {
 extern struct dirent *fs_root;
 
 int sb_get(struct fs_driver *fsdp, dev_t dev, u8 flags, struct superblock **sp);
-int sb_put(struct superblock *sp);
-struct superblock *sb_lookup(struct dirent *dep);
+int sb_put(struct dirent *dep);
+int sb_lookup(struct inode *dp, const char *name, struct superblock **sp);
 
 int inode_get(struct superblock *sp, ino_t inum, struct inode **ip);
 void inode_put(struct inode *ip);
@@ -187,6 +187,7 @@ int inode_dirisempty(struct inode *ip); /* XXX Keep this? */
 
 int dir_get(const char *path, struct dirent **dep);
 void dir_put(struct dirent *dep);
+int dir_lookup(struct inode *dp, const char *name, struct dirent **dep);
 
 /* int fs_mkreg(const char *path, mode_t mode); */
 int fs_mkdir(const char *path, mode_t mode);

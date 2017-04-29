@@ -145,7 +145,7 @@ static int devfs_alloc(struct inode *ip)
 
 	if (!ip->inum) {
 		ip->mode = I_DIR;
-		ip->fop = &devfs_file_ops;
+		ip->op = &devfs_file_ops;
 
 		return 0;
 	}
@@ -154,7 +154,7 @@ static int devfs_alloc(struct inode *ip)
 		if (devp->dev == (ino_t) ip->inum) {
 			ip->mode = I_DEV;
 			ip->rdev = devp->dev;
-			ip->fop = devp->drip->fop;
+			ip->op = devp->drip->op;
 
 			return 0;
 		}
@@ -248,14 +248,14 @@ static struct fs_ops devfs_fs_ops = {
 };
 
 static struct file_ops devfs_file_ops = {
-	.readdir	= &devfs_readdir,
+	.readdir	= &devfs_readdir
 };
 
 static struct fs_driver devfs_driver = {
 	.name	= devname,
 	.flags	= M_RO,
 
-	.fop	= &devfs_fs_ops
+	.op	= &devfs_fs_ops
 };
 
 int devfs_init(void)

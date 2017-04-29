@@ -118,7 +118,7 @@ int fs_cwdir(char *_path)
 int fs_mount(dev_t dev, const char *path, const char *fs, u8 flags)
 {
 	struct fs_driver *fsdp;
-	struct superblock *sp = NULL;
+	struct superblock *sp;
 	struct inode *dp = NULL;
 	struct dirent *dep = NULL;
 	int res;
@@ -177,17 +177,16 @@ foundfs:
 
 	dprintf(devname, "%s (%s) has been successfully mounted on %s\n",
 			sp->name, fs, path);
-	if (!dev)
+	if (MAJOR(dev) != MAJOR_DSK && MAJOR(dev) != MAJOR_OPT)
 		return 0;
 
-	dprintf(devname, "%d blocks, %d MB (%d bytes per block)\n", sp->blocks,
+	dprintf(devname, KP_CON "%d blocks, %d MB (%d bytes per block)\n",
+			sp->blocks,
 			(sp->blocks * sp->block_size) / 1024, sp->block_size);
 
 	return 0;
 
 err:
-	if (sp)
-		sb_put(sp);
 	if (dp)
 		inode_put(dp);
 	if (dep)
@@ -198,21 +197,18 @@ err:
 
 int fs_unmount(const char *path)
 {
-	struct superblock *sp;
 	struct dirent *dep;
 	int res;
 
-	/* TODO Run some checks first */
+	/* TODO Run some more checks first */
+
+	if (strcmp(path, "/") == 0)
+		panic("attempted to unmount root", 0, 0);
 
 	if ((res = dir_get(path, &dep)))
 		return res;
 
-	if (!(sp = sb_lookup(dep))) {
-		res = -EINVAL;
-		goto err;
-	}
-
-	if ((res = sb_put(sp)) < 0)
+	if ((res = sb_put(dep)) < 0)
 		goto err;
 
 	dir_put(dep);
@@ -286,7 +282,7 @@ int fs_mkdir(const char *path, mode_t mode)
 		goto err;
 	}
 
-	if (!ddep->sp->fsdp->fop->mkdir) {
+	if (!ddep->sp->fsdp->op->mkdir) {
 		res = -EPERM;
 		goto err;
 	}
@@ -305,7 +301,7 @@ int fs_mkdir(const char *path, mode_t mode)
 	dep->sp = dp->sp;
 	dep->pdep = ddep;
 
-	if ((res = ddep->sp->fsdp->fop->mkdir(dp, dep, mode | I_DIR)) < 0)
+	if ((res = ddep->sp->fsdp->op->mkdir(dp, dep, mode | I_DIR)) < 0)
 		goto err;
 
 	dir_put(dep);

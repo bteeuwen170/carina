@@ -139,7 +139,7 @@ static struct file_ops serial_con_file_ops = {
 static struct driver serial_con_driver = {
 	.name	= devname,
 
-	.fop	= &serial_con_file_ops,
+	.op	= &serial_con_file_ops,
 	.probe	= &serial_con_probe,
 	.fini	= &serial_con_fini
 };

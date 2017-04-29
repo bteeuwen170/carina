@@ -55,7 +55,7 @@ static int memfs_sb_put(struct superblock *sp)
 
 static int memfs_alloc(struct inode *ip)
 {
-	ip->fop = &memfs_file_ops;
+	ip->op = &memfs_file_ops;
 
 	return 0;
 }
@@ -142,7 +142,7 @@ static struct fs_driver memfs_driver = {
 	.name	= devname,
 	.flags	= M_KEEP,
 
-	.fop	= &memfs_fs_ops
+	.op	= &memfs_fs_ops
 };
 
 int memfs_init(void)

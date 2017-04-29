@@ -81,8 +81,24 @@ void kernel_main(void)
 
 	/* FIXME Memory map cannot be printed before console initialization */
 	mm_init(mboot->mmap_addr, mboot->mmap_len);
-
 #endif
+
+	memfs_init();
+	devfs_init();
+
+	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_ROOT),
+			"/", "memfs", 0)) < 0)
+		panic("mem (memfs) failed to mount on /", res, 0);
+
+	if ((res = fs_mkdir("/sys", 0)) < 0)
+		panic("failed to create /sys", res, 0);
+
+	if ((res = fs_mkdir("/sys/dev", 0)) < 0)
+		panic("failed to create /sys/dev", res, 0);
+
+	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_DEV),
+			"/sys/dev", "devfs", 0)) < 0)
+		panic("dev (devfs) failed to mount on /sys/dev", res, 0);
 
 #ifdef CONFIG_CONSOLE
 
@@ -108,23 +124,6 @@ void kernel_main(void)
 			mboot->boot_loader_name);
 	kprintf("cmdline: %s\n", cmdline);
 	cpu_info();
-
-	memfs_init();
-	devfs_init();
-
-	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_ROOT),
-			"/", "memfs", 0)) < 0)
-		panic("mem (memfs) failed to mount on /", res, 0);
-
-	if ((res = fs_mkdir("/sys", 0)) < 0)
-		panic("failed to create /sys", res, 0);
-
-	if ((res = fs_mkdir("/sys/dev", 0)) < 0)
-		panic("failed to create /sys/dev", res, 0);
-
-	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_DEV),
-			"/sys/dev", "devfs", 0)) < 0)
-		panic("dev (devfs) failed to mount on /sys/dev", res, 0);
 
 #ifdef CONFIG_ISO9660
 	iso9660_init();
@@ -223,12 +222,12 @@ void kernel_main(void)
 
 	/* TODO Start init */
 
-	panic("Init was killed", 0, 0);
+	panic("attempted to kill init", 0, 0);
 #else
-	fs_unmount("/sys/dev");
-	/* fs_unmount("/"); */
-	/* fs_mount(DEV(MAJOR_OPT, 0), "/", "iso9660", 0); */
-	/* fs_mount(0, "/sys/dev", "devfs", 0); */
+	fs_unmount("/");
+	/* fs_mount(DEV(MAJOR_OPT, 0), "/", "iso9660", 0);
+	fs_mount(DEV(MAJOR_MEM, MINOR_MEM_DEV), "/sys/dev", "devfs", 0); */
+	/* fs_unmount("/sys/dev"); */
 
 	char cmd[64];
 	u8 p = 0;

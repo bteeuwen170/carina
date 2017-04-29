@@ -54,7 +54,7 @@ int inode_get(struct superblock *sp, ino_t inum, struct inode **ip)
 
 	list_init(&cip->del);
 
-	if ((res = sp->fsdp->fop->alloc(cip)) < 0)
+	if ((res = sp->fsdp->op->alloc(cip)) < 0)
 		goto err;
 
 	list_add(&sp->il, &cip->l);
