@@ -41,7 +41,7 @@ static void _dir_put(struct dirent *dep)
 	dep->refs--;
 
 	if (dep->refs < 0)
-		dprintf(KP_WARN "'%s', pointing to inode %d on %s "
+		dprintf(KP_WARN "'%s', pointing to inode %lu on %s "
 				"has an invalid reference count: %d\n",
 				dep->name, dep->inum, dep->sp->name, dep->refs);
 
@@ -119,10 +119,8 @@ int dir_get(const char *path, struct dirent **dep)
 			cdep->pdep = pdep;
 
 			inode_put(dp);
+			dp = NULL;
 		}
-
-		dp = NULL;
-		pdep = NULL;
 	}
 
 	for (tdep = cdep; tdep != fs_root; tdep = tdep->pdep)
@@ -133,7 +131,7 @@ int dir_get(const char *path, struct dirent **dep)
 	return 0;
 
 err:
-	if (pdep && pdep != ((fc == '/') ? fs_root : cproc->cwd)) {
+	if (pdep != ((fc == '/') ? fs_root : cproc->cwd)) {
 		for (tdep = cdep; tdep != fs_root; tdep = tdep->pdep)
 			tdep->refs++;
 

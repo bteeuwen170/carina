@@ -72,6 +72,8 @@ int fs_chdir(const char *path)
 		goto err;
 	}
 
+	inode_put(dp);
+
 	cproc->cwd = dep;
 
 	return 0;

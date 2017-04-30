@@ -24,8 +24,11 @@
 
 #include <errno.h>
 #include <fs.h>
+#include <kernel.h>
 
 #include <stdlib.h>
+
+static const char devname[] = "fs";
 
 int inode_get(struct superblock *sp, ino_t inum, struct inode **ip)
 {
@@ -71,7 +74,15 @@ err:
 
 void inode_put(struct inode *ip)
 {
-	/* TODO */
+	if (!ip)
+		return;
+
+	ip->refs--;
+
+	if (ip->refs < 0)
+		dprintf(KP_WARN "inode %lu on %s "
+				"has an invalid reference count: %d\n",
+				ip->inum, ip->sp->name, ip->refs);
 
 	if (!(ip->sp->flags & M_KEEP) && !ip->refs)
 		kfree(ip);
