@@ -22,6 +22,7 @@
  *
  */
 
+#include <block.h>
 #include <dev.h>
 #include <errno.h>
 #include <fs.h>
@@ -33,7 +34,7 @@
 
 static const char devname[] = "iso9660";
 
-#define ISO9660_DF_DIR	0x02
+#define ISO9660_DF_DIR	0x01
 
 struct iso9660_time {
 	u8	year;
@@ -109,18 +110,20 @@ static struct file_ops iso9660_file_ops;
 
 static int iso9660_sb_get(struct superblock *sp)
 {
+	struct block *bp = NULL;
 	struct iso9660_sb *dev_sp;
 	int res, i;
 
-	if (!(dev_sp = kmalloc(sizeof(struct iso9660_sb))))
-		return -ENOMEM;
-
 	for (i = 16; i < 32; i++) {
-		/* XXX TEMP XXX */ atapi_read(MINOR(sp->dev), dev_sp, i, 2048);
+		if ((res = block_get(sp->dev, i, &bp)) < 0)
+			goto err;
+		dev_sp = (struct iso9660_sb *) &bp->buffer;
 
 		if (strncmp(dev_sp->signature, "CD001", 5) != 0 ||
-				dev_sp->version != 1)
-			return -EINVAL;
+				dev_sp->version != 1) {
+			res = -EINVAL;
+			goto err;
+		}
 
 		if (dev_sp->type == 1)
 			break;
@@ -144,96 +147,109 @@ static int iso9660_sb_get(struct superblock *sp)
 	return 0;
 
 err:
-	kfree(dev_sp);
+	if (bp)
+		block_put(bp);
 
 	return res;
 }
 
 static int iso9660_alloc(struct inode *ip)
 {
+	struct block *bp;
 	struct iso9660_dirent *ddep;
-	char *buf;
+	int res;
 
-	/* XXX TEMP */
-	ip->size = 2048;
-
-	/* FIXME How do we clean this crap up? */
-	if (!(buf = kmalloc(ip->size)))
-		return -ENOMEM;
-
-	/* XXX TEMP XXX */ atapi_read(MINOR(ip->sp->dev), buf, (off_t) ip->inum / ip->sp->block_size, ip->size);
-
+	if ((res = block_get(ip->sp->dev, (off_t) ip->inum / ip->sp->block_size,
+			&bp)) < 0)
+		return res;
 	ddep = (struct iso9660_dirent *)
-			(buf + ip->inum % ip->sp->block_size);
+			(bp->buffer + ip->inum % ip->sp->block_size);
+
+	/* FIXME Root is apparently not a dir?! */
+	/* if (ddep->flags & ISO9660_DF_DIR) */
+		ip->mode = I_DIR;
+	/* else
+		ip->mode = I_REG; */
 
 	ip->block = ddep->addr;
 	ip->size = ddep->size;
 
-	/* XXX TEMP XXX */
-	ip->mode = I_DIR;
 	ip->op = &iso9660_file_ops;
-	/* TODO */
+
+	block_put(bp);
+
 	return 0;
 }
 
 static int iso9660_lookup(struct inode *dp, const char *name,
 		struct dirent **dep)
 {
-	struct dirent *cdep;
+	struct dirent *cdep = NULL;
+	struct block *bp;
 	struct iso9660_dirent *ddep;
-	char *buf, nbuf[NAME_MAX + 1];
+	char buf[NAME_MAX + 1];
 	off_t p;
+	int res;
 
-	if (!(buf = kmalloc(dp->size)))
-		return -ENOMEM;
-
-	/* XXX TEMP XXX */ atapi_read(MINOR(dp->sp->dev), buf, (off_t) dp->block, dp->size);
+	if ((res = block_get(dp->sp->dev, (off_t) dp->block, &bp)) < 0)
+		return res;
 
 	for (p = 0; p < dp->size; p += ddep->length) {
-		ddep = (struct iso9660_dirent *) (buf + p);
+		ddep = (struct iso9660_dirent *) (bp->buffer + p);
 
 		if (!ddep->length)
 			break;
 
-		memcpy(nbuf, ddep->name, ddep->name_len);
-		nbuf[ddep->name_len] = '\0';
-		*strchr(nbuf, ';') = '\0';
+		memcpy(buf, ddep->name, ddep->name_len);
+		buf[ddep->name_len] = '\0';
+		*strchr(buf, ';') = '\0';
 
-		if (strcmp(nbuf, name) != 0)
+		if (strcmp(buf, name) != 0)
 			continue;
 
 		/* TODO put_block here */
 
-		if (!(cdep = kmalloc(sizeof(struct dirent))))
-			return -ENOMEM;
+		if (!(cdep = kmalloc(sizeof(struct dirent)))) {
+			res = -ENOMEM;
+			goto err;
+		}
 
 		cdep->inum = dp->block * dp->sp->block_size + p;
-		strcpy(cdep->name, nbuf);
+		strcpy(cdep->name, buf);
 
 		cdep->sp = dp->sp;
 		cdep->pdep = NULL;
 
 		*dep = cdep;
 
+		block_put(bp);
+
 		return 0;
 	}
 
-	return -ENOENT;
+	res = -ENOENT;
+
+err:
+	if (cdep)
+		kfree(cdep);
+	block_put(bp);
+
+	return res;
 }
 
 static int iso9660_readdir(struct file *fp, char *_name)
 {
+	struct block *bp;
 	struct iso9660_dirent *ddep;
 	char *buf;
 	off_t p, i;
+	int res;
 
-	if (!(buf = kmalloc(fp->dp->size)))
-		return -ENOMEM;
-
-	/* XXX TEMP XXX */ atapi_read(MINOR(fp->dp->sp->dev), buf, (off_t) fp->dp->block, fp->dp->size);
+	if ((res = block_get(fp->dp->sp->dev, (off_t) fp->dp->block, &bp)) < 0)
+		return res;
 
 	for (p = 0, i = 0; p < fp->dp->size; p += ddep->length, i++) {
-		ddep = (struct iso9660_dirent *) (buf + p);
+		ddep = (struct iso9660_dirent *) (bp->buffer + p);
 
 		if (!ddep->length)
 			break;
@@ -261,8 +277,12 @@ static int iso9660_readdir(struct file *fp, char *_name)
 
 		fp->off++;
 
+		block_put(bp);
+
 		return 0;
 	}
+
+	block_put(bp);
 
 	return -EFAULT;
 }

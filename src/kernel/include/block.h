@@ -35,9 +35,13 @@ struct block {
 	struct list_head l;
 	int refs;
 
+	dev_t	dev;			/* Device ID */
 	off_t	block;			/* Block number */
 	char	buffer[BLOCK_SIZE];	/* Block number */
 	u8	flags;			/* Block cache flags */
 };
+
+int block_get(dev_t dev, off_t block, struct block **bp);
+void block_put(struct block *bp);
 
 #endif
