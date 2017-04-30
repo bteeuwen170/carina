@@ -43,7 +43,7 @@ void pic_remap(void)
 	io_outb(PIC_M_IO, ICW1_8086);
 	io_outb(PIC_S_IO, ICW1_8086);
 
-	dprintf(devname, KP_NOTICE "remapped\n");
+	/* dprintf(KP_NOTICE "remapped\n"); */
 }
 
 void pic_disable(void)
@@ -51,13 +51,13 @@ void pic_disable(void)
 	io_outb(PIC_M_IO, 0xFF);
 	io_outb(PIC_S_IO, 0xFF);
 
-	dprintf(devname, KP_NOTICE "disabled\n");
+	/* dprintf(KP_NOTICE "disabled\n"); */
 }
 
 void irq_mask(u8 irq)
 {
 	u16 port;
-	
+
 	if (irq < IRQ_ENTRIES / 2) {
 		port = PIC_M_IO;
 	} else {

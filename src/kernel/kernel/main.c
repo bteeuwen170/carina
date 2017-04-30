@@ -106,7 +106,6 @@ void kernel_main(void)
 	cpu_info();
 
 	asm volatile ("sti");
-	dprintf("cpu0", KP_DBG "interrupts enabled\n");
 	/* TODO Actually get starting cpu */
 
 	timer_init();
@@ -347,12 +346,4 @@ void kernel_main(void)
 		p = 0;
 	}
 #endif
-}
-
-void usermode_main(void)
-{
-	asm volatile ("cli");
-	dprintf("cpu0", KP_DBG "User mode\n");
-	for (;;)
-		asm volatile ("hlt");
 }

@@ -234,10 +234,10 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 	else
 		goto ret;
 
-	dprintf(devname, "%s, %s drive @ IRQ %u\n",
+	dprintf("%s, %s drive @ IRQ %u\n",
 			strtrm(dev->ident.model), (dev->type ? "ATAPI": "ATA"),
 			card->cfg->int_line);
-	dprintf(devname, KP_CON "%u sectors (%u MB)\n",
+	dprintf(KP_CON "%u sectors (%u MB)\n",
 			dev->size, dev->size * ATA_SECTOR_SIZE / 1024 / 1024);
 
 	/* device_reg(DEV((dev->type ? MAJOR_OPTICAL: MAJOR_DISK), ide_minor_last)); */
@@ -246,7 +246,7 @@ static void ide_config(struct pci_dev *card, u8 ch, u8 drv)
 
 	/* TODO Provide error information */
 err:
-	dprintf(devname, KP_ERR "drive error (%u, %u)\n", drv, ch);
+	dprintf(KP_ERR "drive error (%u, %u)\n", drv, ch);
 
 ret:
 	return;
@@ -287,7 +287,7 @@ static int ide_probe(struct pci_dev *card)
 
 	/* TODO Provide error information */
 err:
-	dprintf(devname, KP_ERR "err\n");
+	dprintf(KP_ERR "err\n");
 	return -1;
 }
 

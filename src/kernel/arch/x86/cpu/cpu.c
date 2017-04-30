@@ -56,5 +56,5 @@ void cpu_info(void)
 	while (*name == ' ')
 		++name; /* TODO Right and left justify function */
 
-	dprintf("cpu0", KP_DBG "%s\n", name);
+	kprintf(KP_DBG "%s\n", name);
 }

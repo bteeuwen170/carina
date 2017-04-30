@@ -97,15 +97,14 @@ void mm_init(u32 addr, u32 len)
 {
 	struct mboot_mmap *mmap = (void *) (uintptr_t) addr;
 
-	dprintf(devname, "Physical memory map:\n");
+	/* dprintf("Physical memory map:\n"); */
 
 	while ((uintptr_t) mmap < addr + len) {
 		uintptr_t maddr = mmap->addr_lo | (mmap->addr_hi >> 16);
 		uintptr_t mlen = mmap->len_lo | (mmap->len_hi >> 16);
 
-		dprintf(devname,
-				KP_CON "%#018lx - %#018lx (%s)\n",
-				maddr, maddr + mlen, mmap_types[mmap->type]);
+		/* dprintf(KP_CON "%#018lx - %#018lx (%s)\n",
+				maddr, maddr + mlen, mmap_types[mmap->type]); */
 
 		mem += mlen;
 
@@ -114,7 +113,7 @@ void mm_init(u32 addr, u32 len)
 				 mmap + mmap->size + sizeof(mmap->size));
 	}
 
-	dprintf(devname, "%u MB memory\n", mem / 1024 / 1024 + 1);
+	/* dprintf("%u MB memory\n", mem / 1024 / 1024 + 1); */
 
 	/* FIXME How much padding is really required? */
 	/* position = ((uintptr_t) &kern_end) + 0x10000; */

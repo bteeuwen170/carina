@@ -148,7 +148,7 @@ static void pci_dev_reg(struct pci_dev *card)
 		if ((pci_device_table[i].base_class == card->cfg->base_class &&
 				pci_device_table[i].sub_class ==
 				card->cfg->sub_class)) {
-			dprintf(devname, "detected %#x %#x %s\n",
+			dprintf("detected %#x %#x %s\n",
 					card->cfg->vendor, card->cfg->device,
 					pci_device_table[i].name);
 
@@ -253,7 +253,7 @@ static struct pci_dev *pci_config(u16 bus, u16 dev, u16 func)
 
 	/* TODO Provide error information */
 err:
-	dprintf(devname, KP_ERR "out of memory\n");
+	dprintf(KP_ERR "out of memory\n");
 
 	return NULL;
 }

@@ -91,7 +91,7 @@ static int int_handler(struct int_stack *regs)
 		io_outb(dev->nabmbar + 0x15, 32);
 		io_outw(dev->nabmbar + 0x16, 0b1000);
 
-		/* dprintf(devname, KP_DBG "sc: %u\n",
+		/* dprintf(KP_DBG "sc: %u\n",
 				io_inw(dev->nabmbar + 0x16)); */
 	} else {
 		asm volatile ("cli");
@@ -122,7 +122,7 @@ void ac97_play(void)
 
 	io_outd(dev->nabmbar + 0x10, (uintptr_t) dev->buf);
 
-	dprintf(devname, KP_DBG "wav playing\n");
+	dprintf(KP_DBG "wav playing\n");
 
 	/* X_LVI */ io_outb(dev->nabmbar + 0x15, 32);
 	/* XXX Use LVBIE or CELV for interrupt? */
@@ -167,7 +167,7 @@ static int ac97_probe(struct pci_dev *card)
 	volume_set(1);
 
 	/* TODO Detect vendor */
-	dprintf(devname, "initialized, %u Hz @ IRQ %u\n",
+	dprintf("initialized, %u Hz @ IRQ %u\n",
 			io_inw(dev->nambar + 0x2C), card->cfg->int_line);
 
 	return res;
@@ -175,7 +175,7 @@ static int ac97_probe(struct pci_dev *card)
 err:
 	irq_handler_unreg(card->cfg->int_line);
 
-	dprintf(devname, KP_ERR "unable to intialize ac97 card\n");
+	dprintf(KP_ERR "unable to intialize ac97 card\n");
 
 	return res;
 }

@@ -176,13 +176,12 @@ foundfs:
 		sp->pdep = dep;
 	}
 
-	dprintf(devname, "%s (%s) has been successfully mounted on %s\n",
-			sp->name, fs, path);
+	dprintf("%s (%s) has been successfully mounted on %s\n", sp->name, fs,
+			path);
 	if (MAJOR(dev) != MAJOR_HDD && MAJOR(dev) != MAJOR_ODD)
 		return 0;
 
-	dprintf(devname, KP_CON "%d blocks, %d MB (%d bytes per block)\n",
-			sp->blocks,
+	dprintf(KP_CON "%d blocks, %d MB (%d bytes per block)\n", sp->blocks,
 			(sp->blocks * sp->block_size) / 1024, sp->block_size);
 
 	return 0;
@@ -390,13 +389,12 @@ void fs_init(void)
 		goto fallback;
 
 	if ((res = cmdline_str_get("rootfs", buf)) != 0) {
-		dprintf(devname, KP_ERR
-				"missing/invalid cmdline parameter: rootfs (%d)"
-				, res);
+		dprintf(KP_ERR "missing/invalid cmdline parameter: rootfs (%d)",
+				res);
 		goto fallback;
 	}
 	if ((res = fs_mount(root_dev, "/", buf, 0)) < 0) {
-		dprintf(devname, KP_ERR "failed to mount root (%d)", res);
+		dprintf(KP_ERR "failed to mount root (%d)", res);
 		goto fallback;
 	}
 

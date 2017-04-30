@@ -116,7 +116,7 @@ void idt_init(void)
 
 	idt_load(&idt, IDT_ENTRIES * sizeof(struct idt_desc) - 1);
 
-	dprintf(devname, KP_NOTICE "%d entries entered\n", i);
+	/* dprintf(KP_NOTICE "%d entries entered\n", i); */
 }
 
 void _isr(struct int_stack *regs)
@@ -171,8 +171,7 @@ int isr_handler_reg(const u8 int_no, int (*handler) (struct int_stack *))
 void isr_handler_unreg(const u8 int_no)
 {
 	if (int_no < SINT_ENTRIES)
-		dprintf(devname, KP_WARN
-				"removing exception handler for int. %d\n",
+		dprintf(KP_WARN "removing exception handler for int. %d\n",
 				int_no);
 
 	isr_handlers[int_no] = NULL;

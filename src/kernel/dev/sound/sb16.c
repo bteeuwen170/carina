@@ -41,14 +41,14 @@ static int int_handler(struct int_stack *regs)
 {
 	(void) regs;
 
-	dprintf(devname, "!\n");
+	dprintf("!\n");
 
 	return 1;
 }
 
 void sb16_play(void)
 {
-	dprintf(devname, "wav playing\n");
+	dprintf("wav playing\n");
 }
 
 static int sb16_probe(struct device *card)
@@ -80,10 +80,10 @@ static int sb16_probe(struct device *card)
 	io_outb(0x220 + 0x04, 0x80);
 	io_outb(0x220 + 0x05, (1 << 2));
 
-	dprintf(devname, "initialized, %u Hz @ IRQ %u\n",
+	dprintf("initialized, %u Hz @ IRQ %u\n",
 			0, 10);
 
-	dprintf(devname, KP_DBG "DSP %d.%d\n",
+	dprintf(KP_DBG "DSP %d.%d\n",
 			io_inb(0x220 + 0x0A), io_inb(0x220 + 0x0A));
 
 	return res;
@@ -91,7 +91,7 @@ static int sb16_probe(struct device *card)
 err:
 	irq_handler_unreg(10);
 
-	dprintf(devname, KP_ERR "unable to intialize sb16 card\n");
+	dprintf(KP_ERR "unable to intialize sb16 card\n");
 
 	return res;
 }
