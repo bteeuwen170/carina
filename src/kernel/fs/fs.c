@@ -57,6 +57,13 @@ int fs_chdir(const char *path)
 	if ((res = dir_get(path, &dep)) < 0)
 		goto err;
 
+	if (dep == cproc->cwd) {
+		res = 0;
+		goto err;
+	}
+
+	dir_put(cproc->cwd);
+
 	if ((res = inode_get(dep->sp, dep->inum, &dp)) < 0)
 		goto err;
 
@@ -64,8 +71,6 @@ int fs_chdir(const char *path)
 		res = -ENOTDIR;
 		goto err;
 	}
-
-	/* FIXME More check 'n stuff */
 
 	cproc->cwd = dep;
 
@@ -202,6 +207,9 @@ int fs_unmount(const char *path)
 
 	/* TODO Run some more checks first */
 
+	if (!path || *path == '\0')
+		return -EINVAL;
+
 	if (strcmp(path, "/") == 0)
 		panic("attempted to unmount root", 0, 0);
 
@@ -299,7 +307,8 @@ int fs_mkdir(const char *path, mode_t mode)
 
 	dir_put(dep);
 	inode_put(dp);
-	dir_put(ddep);
+	/* XXX Why not? */
+	/* dir_put(ddep); */
 
 	return 0;
 
@@ -389,12 +398,12 @@ void fs_init(void)
 		goto fallback;
 
 	if ((res = cmdline_str_get("rootfs", buf)) != 0) {
-		dprintf(KP_ERR "missing/invalid cmdline parameter: rootfs (%d)",
-				res);
+		dprintf(KP_ERR "missing/invalid cmdline parameter: rootfs (%d)"
+				"\n", res);
 		goto fallback;
 	}
 	if ((res = fs_mount(root_dev, "/", buf, 0)) < 0) {
-		dprintf(KP_ERR "failed to mount root (%d)", res);
+		dprintf(KP_ERR "failed to mount root (%d)\n", res);
 		goto fallback;
 	}
 

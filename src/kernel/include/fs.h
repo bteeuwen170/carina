@@ -127,8 +127,6 @@ struct dirent {
 };
 
 struct file {
-	int refs;
-
 	off_t off;		/* Current offset */
 
 	struct dirent *dep;	/* Associated directory entry pointer */
@@ -192,7 +190,7 @@ int dir_basepath(char *path);
 int dir_basename(char *path);
 
 int file_open(const char *path, mode_t mode, struct file **fp);
-int file_close(struct file *fp);
+void file_close(struct file *fp);
 /* int file_read(struct file *fp, char *buf, off_t off, size_t n); */
 int file_write(struct file *fp, const char *buf, off_t off, size_t n);
 int file_readdir(struct file *fp, char *_name);

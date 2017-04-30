@@ -77,10 +77,15 @@ err:
 	return res;
 }
 
-int file_close(struct file *fp)
+void file_close(struct file *fp)
 {
-	/* TODO */
-	return 0;
+	if (!fp)
+		return;
+
+	inode_put(fp->dp);
+	dir_put(fp->dep);
+
+	kfree(fp);
 }
 
 /* int file_read(struct file *fp, char *buf, off_t off, size_t n)

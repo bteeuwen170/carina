@@ -207,9 +207,6 @@ static int iso9660_lookup(struct inode *dp, const char *name,
 		if (!(cdep = kmalloc(sizeof(struct dirent))))
 			return -ENOMEM;
 
-		list_init(&cdep->l);
-		cdep->refs = 1;
-
 		cdep->inum = dp->block * dp->sp->block_size + p;
 		strcpy(cdep->name, nbuf);
 

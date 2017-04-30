@@ -227,11 +227,6 @@ static int devfs_lookup(struct inode *dp, const char *name, struct dirent **dep)
 		if (!(cdep = kmalloc(sizeof(struct dirent))))
 			return -ENOMEM;
 
-		list_init(&cdep->l);
-		list_add(&dp->del, &cdep->l);
-
-		cdep->refs = 1;
-
 		cdep->inum = (ino_t) devp->dev;
 		strcpy(cdep->name, nbuf);
 

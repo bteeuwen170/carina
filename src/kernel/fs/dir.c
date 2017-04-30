@@ -24,21 +24,51 @@
 
 #include <errno.h>
 #include <fs.h>
+#include <kernel.h>
 #include <list.h>
 #include <proc.h>
 
 #include <stdlib.h>
 #include <string.h>
 
+static const char devname[] = "fs";
+
+static void _dir_put(struct dirent *dep)
+{
+	if (!dep)
+		return;
+
+	dep->refs--;
+
+	if (dep->refs < 0)
+		dprintf(KP_WARN "'%s', pointing to inode %d on %s "
+				"has an invalid reference count: %d\n",
+				dep->name, dep->inum, dep->sp->name, dep->refs);
+
+	/* TODO Also do reverse sb_lookup to free */
+
+	if (!(dep->sp->flags & M_KEEP) && !dep->refs)
+		kfree(dep);
+}
+
+void dir_put(struct dirent *dep)
+{
+	struct dirent *cdep;
+
+	/* FIXME Not thread safe */
+	for (cdep = dep; cdep != fs_root; cdep = cdep->pdep)
+		_dir_put(cdep);
+}
+
 int dir_get(const char *path, struct dirent **dep)
 {
 	struct superblock *sp;
 	struct inode *dp = NULL;
-	struct dirent *cdep = NULL, *pdep, *tdep;
-	char name[NAME_MAX + 1];
+	struct dirent *cdep = NULL, *pdep, *tdep = NULL;
+	char fc, name[NAME_MAX + 1];
 	int res, i;
 
-	if (*path == '/')
+	if ((fc = *path) == '/')
 		cdep = fs_root;
 	else
 		cdep = cproc->cwd;
@@ -52,10 +82,16 @@ int dir_get(const char *path, struct dirent **dep)
 		name[i] = '\0';
 
 		if (strcmp(name, "..") == 0) {
+			if (cdep == cdep->pdep)
+				continue;
+
 			pdep = cdep;
 			cdep = cdep->pdep;
 
-			dir_put(pdep);
+			if (!*path) {
+				pdep->refs++;
+				_dir_put(pdep);
+			}
 		} else if (name[0] && strcmp(name, ".") != 0) {
 			if ((res = inode_get(cdep->sp, cdep->inum, &dp)) < 0)
 				return res;
@@ -72,7 +108,6 @@ int dir_get(const char *path, struct dirent **dep)
 					goto err;
 				memcpy(tdep, cdep, sizeof(struct dirent));
 
-				dir_put(cdep);
 				cdep = tdep;
 
 				cdep->inum = sp->root->inum;
@@ -84,38 +119,30 @@ int dir_get(const char *path, struct dirent **dep)
 			cdep->pdep = pdep;
 
 			inode_put(dp);
-
-			dp = NULL;
 		}
+
+		dp = NULL;
+		pdep = NULL;
 	}
+
+	for (tdep = cdep; tdep != fs_root; tdep = tdep->pdep)
+		tdep->refs++;
 
 	*dep = cdep;
 
 	return 0;
 
 err:
-	if (cdep)
-		dir_put(cdep);
+	if (pdep && pdep != ((fc == '/') ? fs_root : cproc->cwd)) {
+		for (tdep = cdep; tdep != fs_root; tdep = tdep->pdep)
+			tdep->refs++;
+
+		dir_put(pdep);
+	}
 	if (dp)
 		inode_put(dp);
 
 	return res;
-}
-
-void dir_put(struct dirent *dep)
-{
-	if (!dep)
-		return;
-
-	if (dep->pdep != fs_root)
-		dir_put(dep->pdep);
-
-	/* if (!dep->refs < 0)
-		panic("dirent %d (%s) has a invalid reference count",
-				dep->inum, dep->name); */
-
-	if (!(dep->sp->flags & M_KEEP) && !dep->refs)
-		kfree(dep);
 }
 
 int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
@@ -125,8 +152,6 @@ int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
 
 	list_for_each(cdep, &dp->del, l) {
 		if (strcmp(cdep->name, name) == 0) {
-			cdep->refs++;
-
 			*dep = cdep;
 
 			return 0;
@@ -136,7 +161,10 @@ int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
 	if ((res = dp->sp->fsdp->op->lookup(dp, name, &cdep)) < 0)
 		return res;
 
+	list_init(&cdep->l);
 	list_add(&dp->del, &cdep->l);
+
+	cdep->refs = 0;
 
 	*dep = cdep;
 
