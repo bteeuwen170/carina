@@ -38,7 +38,7 @@ ARCHFLAGS	= -D ARCH_$(ARCH)
 ifneq ($(ARCH),$(ARCHT))
 ARCHFLAGS	+= -D ARCH_$(ARCHT)
 endif
-MAKEFLAGS	= -s --no-print-directory
+MAKEFLAGS	:= -s --no-print-directory
 
 #CONFIGFLAGS	= $(shell sed -e '/\#.*$$/d;/^$$/d;s/^/-D /g;s/$$/=o/g' .config)
 CONFIGFLAGS	= $(shell sed -e '/\#.*$$/d;/^$$/d;s/^/-D /g;s/$$/=o/g' .config)

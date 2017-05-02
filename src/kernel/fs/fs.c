@@ -133,8 +133,7 @@ int fs_mount(dev_t dev, const char *path, const char *fs, u8 flags)
 
 	/* TODO Check if already mounted elsewhere */
 
-	if ((MAJOR(dev) != MAJOR_MEM &&
-			MAJOR(dev) != MAJOR_HDD && MAJOR(dev) != MAJOR_ODD))
+	if ((MAJOR(dev) != MAJOR_MEM && MAJOR(dev) != MAJOR_DSK))
 		return -EINVAL;
 
 	if (strlen(path) > PATH_MAX)
@@ -185,10 +184,10 @@ foundfs:
 
 	dprintf("%s (%s) has been successfully mounted on %s\n", sp->name, fs,
 			path);
-	if (MAJOR(dev) != MAJOR_HDD && MAJOR(dev) != MAJOR_ODD)
+	if (MAJOR(dev) != MAJOR_DSK)
 		return 0;
 
-	dprintf(KP_CON "%d blocks, %d MB (%d bytes per block)\n", sp->blocks,
+	dprintf(KP_CON "%d blocks, %d KB (%d bytes per block)\n", sp->blocks,
 			(sp->blocks * sp->block_size) / 1024, sp->block_size);
 
 	return 0;
@@ -417,7 +416,7 @@ fallback:
 		panic("failed to mount fallback root", res, 0);
 
 mountdev:
-	res = fs_mkdir("/sys", 0);
+	/* res = fs_mkdir("/sys", 0);
 	if (res == 0 || res == -EEXIST) {
 		res = fs_mkdir("/sys/dev", 0);
 		if (res < 0 && res != -EEXIST)
@@ -428,7 +427,7 @@ mountdev:
 
 	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_DEV),
 			"/sys/dev", "devfs", 0)) < 0)
-		panic("dev (devfs) failed to mount on /sys/dev", res, 0);
+		panic("dev (devfs) failed to mount on /sys/dev", res, 0); */
 
 	return;
 }

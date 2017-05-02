@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/dev/block/ide/atapi.c
+ * src/kernel/dev/block/atapi.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,49 +22,28 @@
  *
  */
 
+#include <ata.h>
+#include <dev.h>
 #include <errno.h>
 #include <fs.h>
 #include <dev.h>
 #include <kernel.h>
 #include <module.h>
 
-#include <asm/cpu.h>
-#include <timer/pit.h>
+static const char devname[] = "atapi";
 
-#include "ide.h"
-
-static const char devname[] = "opt";
-
-/* static int atapi_read(struct file *fp, char *buf, off_t off, size_t n) */
-int atapi_read(u32 minor, char *buf, off_t off, size_t n)
+static int atapi_read(struct file *fp, char *buf, off_t off, size_t n)
+/* int atapi_read(u32 minor, char *buf, off_t off, size_t n) */
 {
-	struct ata_dev *dev;
-	u32 i;
-	u8 packet[12];
+	struct device *devp;
+	char packet[12];
+	int res;
 
-	/* dev = &ide_devices[fp->dep->ip->dev.minor]; */
-	dev = &ide_devices[minor];
+	if (!(devp = device_get(fp->ip->rdev)))
+		return -ENODEV;
 
-	if (dev->type != ATA_DEV_TYPE_ATAPI)
+	if (n != 1)
 		return -EINVAL;
-
-	/* XXX Only allow ATAPI_SECTOR_SIZE? */
-	if (n % ATAPI_SECTOR_SIZE != 0)
-		return -EINVAL;
-
-	/* Enable interrupts */
-	ide_outb(dev->ch, ATA_REG_CTRL, 0);
-
-	/* Select the drive */
-	ide_outb(dev->ch, ATA_REG_DRVSEL, 0xA0 | (dev->drv << 4));
-	sleep(1);
-
-	/* Set PIO mode */
-	ide_outb(dev->ch, ATA_REG_FEATURES, 0);
-
-	/* Set buffer size */
-	ide_outb(dev->ch, ATA_REG_LBA1, ATAPI_SECTOR_SIZE & 0xFF);
-	ide_outb(dev->ch, ATA_REG_LBA2, ATAPI_SECTOR_SIZE >> 8);
 
 	packet[0] = ATAPI_CMD_READ;
 	packet[1] = 0;
@@ -75,33 +54,17 @@ int atapi_read(u32 minor, char *buf, off_t off, size_t n)
 	packet[6] = 0;
 	packet[7] = 0;
 	packet[8] = 0;
-	packet[9] = n / ATAPI_SECTOR_SIZE;
+	packet[9] = n;
 	packet[10] = 0;
 	packet[11] = 0;
 
-	/* Send the packet */
-	ide_outb(dev->ch, ATA_REG_CMD, ATA_CMD_PACKET);
+	if ((res = atapi_out(devp, &packet)) < 0)
+		return res;
 
-	if (ide_poll(dev->ch) != 0)
-		return -1;
-
-	for (i = 0; i < 11; i += 2)
-		io_outw(ide_channels[dev->ch].base, ((packet[i] & 0xFF) |
-					(packet[i + 1] & 0xFF) << 8));
-
-	for (i = 0; i < n / ATAPI_SECTOR_SIZE; i++) {
-		if (ide_poll(dev->ch) != 0)
-			return -1;
-
-		asm volatile ("rep insw" :: "D" (buf), "c" (n / 2),
-				"d" (ide_channels[dev->ch].base) : "memory");
-	}
-
-	while (ide_inb(dev->ch, ATA_REG_STATUS) & (ATA_CMD_BUSY | ATA_CMD_DDR));
-
-	return 0;
+	return atapi_in(devp, buf);
 }
 
+#if 0
 /* TODO Using ioctl */
 static int ide_eject(struct ata_dev *dev)
 {
@@ -152,20 +115,67 @@ static int ide_eject(struct ata_dev *dev)
 
 	return 0;
 }
+#endif
+
+#if 0
+int atapi_identify()
+{
+#if 0
+	ide_outb(dev->ch, ATA_REG_FEATURES, 0);
+
+	ide_outb(dev->ch, ATA_REG_LBA1, ATAPI_SECTOR_SIZE >> 8);
+	ide_outb(dev->ch, ATA_REG_LBA2, ATAPI_SECTOR_SIZE >> 8);
+
+	packet[0] = ATAPI_CMD_READ_CAPACITY;
+	packet[1] = 0;
+	packet[2] = 0;
+	packet[3] = 0;
+	packet[4] = 0;
+	packet[5] = 0;
+	packet[6] = 0;
+	packet[7] = 0;
+	packet[8] = 0;
+	packet[9] = 0;
+	packet[10] = 0;
+	packet[11] = 0;
+
+	ide_outb(dev->ch, ATA_REG_CMD, ATA_CMD_PACKET);
+
+	if (ide_poll(dev->ch) != 0)
+		return -1;
+
+	for (i = 0; i < 11; i += 2)
+		io_outw(ide_channels[dev->ch].base, ((packet[i] & 0xFF) |
+					(packet[i + 1] & 0xFF) << 8));
+
+	for (i = 0; i < n / ATAPI_SECTOR_SIZE; i++) {
+		if (ide_poll(dev->ch) != 0)
+			return -1;
+
+		asm volatile ("rep insw" :: "D" (buf), "c" (8 / 2),
+				"d" (ide_channels[dev->ch].base) : "memory");
+	}
+
+	while (ide_inb(dev->ch, ATA_REG_STATUS) & (ATA_CMD_BUSY | ATA_CMD_DDR));
+#endif
+}
+#endif
 
 static struct file_ops atapi_file_ops = {
-	.read	= &atapi_read
+	.read	= &atapi_read/* ,
+	.ioctl	= &atapi_ioctl */
 };
+
+int atapi_probe(struct device *devp)
+{
+	devp->op = &atapi_file_ops;
+
+	return 0;
+}
 
 int atapi_init(void)
 {
-	int res;
-
-	/* if ((res = dev_reg(MAJOR_OPTICAL, devname, &atapi_file_ops)) < 0)
-		kprintf("%s: unable to register atapi driver (%d)",
-				devname, res); */
-
-	return res;
+	return 0;
 }
 
 void atapi_exit(void)

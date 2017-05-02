@@ -31,4 +31,6 @@ extern char cmdline[];
 /* int cmdline_long_get(char *param, long *val); */
 int cmdline_str_get(char *param, char *val);
 
+void cmdline_init(const char *str);
+
 #endif

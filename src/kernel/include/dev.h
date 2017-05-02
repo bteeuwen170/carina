@@ -32,15 +32,19 @@
 #define MAJOR(d)	((u32) ((d) >> 8))
 #define MINOR(d)	((u32) ((d) & ((1U << 8) - 1)))
 
+#define D_CONTROLLER	1	/* Device is a controller */
+
+#define BUS_NONE	0
+#define BUS_PCI		1
+
 #define MAJOR_ZERO	1	/* Zero devices */
 #define MAJOR_MEM	2	/* RAM devices */
 #define MAJOR_CON	3	/* Consoles */
 #define MAJOR_KBD	4	/* Keyboards */
 #define MAJOR_MCE	5	/* Mice */
-#define MAJOR_HDD	6	/* Disk devices */
-#define MAJOR_ODD	7	/* Optical disc devices */
-#define MAJOR_SND	8	/* Sound hardware */
-#define MAJOR_RTC	9	/* Real time clock */
+#define MAJOR_DSK	6	/* Disk devices */
+#define MAJOR_SND	7	/* Sound hardware */
+#define MAJOR_RTC	8	/* Real time clock */
 #define MAJOR_ETC	63	/* Misc. */
 #define MAJOR_MAX	64
 
@@ -50,38 +54,48 @@
 struct device {
 	struct list_head l;
 
-	dev_t	dev;	/* Device ID */
-	//char	bus_id;
+	const char	*name;	/* Device name */
+	dev_t		dev;	/* Device ID */
+	u8		flags;	/* Device flags */
 
-	void *device;		/* Device specific */
+	void	*bus;		/* Bus specific */
+	void	*device;	/* Device specific */
 
 	struct driver *drip;	/* Associated driver pointer */
+
+	struct file_ops	*op;	/* Device operations */
 };
 
 struct driver {
 	struct list_head l;
 
-	const char *name;		/* Driver name */
+	const char	*name;	/* Driver name */
+	u32		major;	/* Major */
 
-	//struct interface	*ifp;	/* Associated interface pointer */
-	//struct bus		*busp;	/* Associated bus pointer */
+	int		busid;	/* Bus type */
+	const void	*bus;	/* Bus specific */
 
-	struct file_ops	*op;		/* Driver operations */
 	/* Probe device: dp */
 	int (*probe) (struct device *);
 	/* Finalize device: dp */
 	void (*fini) (struct device *);
 };
 
+extern const char *dev_names[];
+
+extern struct list_head drivers;
+extern struct list_head devices;
+
 int driver_reg(struct driver *drip);
 void driver_unreg(struct driver *drip);
 
-int device_reg(u32 major, struct driver *drip, struct device **devp);
+int device_reg(struct driver *drip, struct device **devp, u8 flags);
 void device_unreg(struct device *devp);
 struct device *device_get(dev_t dev);
 dev_t device_getbyname(const char *name);
+void devices_probe(void);
 
-int devfs_init(void);
-void devfs_exit(void);
+int dev_init(void);
+void dev_exit(void);
 
 #endif

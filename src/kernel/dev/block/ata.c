@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/dev/block/ide/ata.c
+ * src/kernel/dev/block/ata.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -38,6 +38,11 @@
 #include "ide.h"
 
 static const char devname[] = "ata";
+
+int ata_probe(struct device *devp)
+{
+	return -1;
+}
 
 static int ata_read(struct file *fp, char *buf, off_t off, size_t n)
 {

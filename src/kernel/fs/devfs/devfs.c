@@ -22,8 +22,6 @@
  *
  */
 
-/* TODO Split this file into dev.c and devfs.c */
-
 #include <dev.h>
 #include <errno.h>
 #include <fs.h>
@@ -32,146 +30,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const char devname[] = "dev";
-
-static const char *major_names[] = {
-	NULL,
-	"zero", "mem", "con", "kbd", "mce", "hdd", "odd", "snd", "rtc",
-	[63] = "etc"
-};
-
-static u32 minor_last[MAJOR_MAX] = { 0 };
-
-static LIST_HEAD(drivers);
-static LIST_HEAD(devices);
+static const char devname[] = "devfs";
 
 static struct file_ops devfs_file_ops;
-
-int driver_reg(struct driver *drip)
-{
-	struct driver *cdrip;
-
-	list_for_each(cdrip, &drivers, l)
-		if (strcmp(cdrip->name, drip->name) == 0)
-			return -EEXIST;
-
-	list_add(&drivers, &drip->l);
-
-	return 0;
-}
-
-void driver_unreg(struct driver *drip)
-{
-	struct device *devp;
-
-	if (!drip)
-		return;
-
-	list_for_each(devp, &devices, l)
-		if (devp->drip == drip)
-			device_unreg(devp);
-
-	list_rm(&drip->l);
-	kfree(drip);
-}
-
-int device_reg(u32 major, struct driver *drip, struct device **devp)
-{
-	struct device *cdevp;
-
-	if (!major | !drip)
-		return -EINVAL;
-
-	if (!(cdevp = kmalloc(sizeof(struct device))))
-		return -ENOMEM;
-
-	list_init(&cdevp->l);
-	list_add(&devices, &cdevp->l);
-
-	cdevp->device = NULL;
-	cdevp->dev = DEV(major, minor_last[major]++);
-	cdevp->drip = drip;
-
-	if (devp)
-		*devp = cdevp;
-
-	return 0;
-}
-
-void device_unreg(struct device *devp)
-{
-	if (!devp)
-		return;
-
-	devp->drip->fini(devp);
-
-	list_rm(&devp->l);
-	kfree(devp);
-}
-
-struct device *device_get(dev_t dev)
-{
-	struct device *devp;
-
-	list_for_each(devp, &devices, l)
-		if (devp->dev == dev)
-			return devp;
-
-	return NULL;
-}
-
-dev_t device_getbyname(const char *name)
-{
-	char *mn;
-	unsigned int i;
-
-	for (i = 0; i < sizeof(major_names) / sizeof(major_names[0]); i++)
-		if (major_names[i] && (mn = strstr(name, major_names[i])))
-			return DEV(i, strtol(mn + strlen(mn), NULL, 10));
-
-	return 0;
-}
-
-/* TODO Verbose */
-void devices_probe(void)
-{
-	struct device *devp;
-
-	list_for_each(devp, &devices, l)
-		devp->drip->probe(devp);
-}
-
-static int dev_probe(struct device *dp)
-{
-	(void) dp;
-
-	return 0;
-}
-
-static void dev_fini(struct device *dp)
-{
-	(void) dp;
-
-	/* TODO */
-}
-
-static struct driver dev_driver = {
-	.name	= devname,
-
-	.op	= NULL,
-	.probe	= &dev_probe,
-	.fini	= &dev_fini
-};
-
-int dev_init(void)
-{
-	return driver_reg(&dev_driver);
-}
-
-void dev_exit(void)
-{
-
-}
 
 static int devfs_sb_get(struct superblock *sp)
 {
@@ -199,10 +60,13 @@ static int devfs_alloc(struct inode *ip)
 	}
 
 	list_for_each(devp, &devices, l) {
-		if (devp->dev == (ino_t) ip->inum) {
+		if (devp->flags & D_CONTROLLER)
+			continue;
+
+		if ((ino_t) devp->dev == ip->inum) {
 			ip->mode = I_DEV;
 			ip->rdev = devp->dev;
-			ip->op = devp->drip->op;
+			ip->op = devp->op;
 
 			return 0;
 		}
@@ -218,7 +82,10 @@ static int devfs_lookup(struct inode *dp, const char *name, struct dirent **dep)
 	char nbuf[NAME_MAX + 1];
 
 	list_for_each(devp, &devices, l) {
-		sprintf(nbuf, "%s%d", major_names[MAJOR(devp->dev)],
+		if (devp->flags & D_CONTROLLER)
+			continue;
+
+		sprintf(nbuf, "%s%d", dev_names[MAJOR(devp->dev)],
 				MINOR(devp->dev));
 
 		if (strcmp(nbuf, name) != 0)
@@ -255,9 +122,12 @@ static int devfs_readdir(struct file *fp, char *_name)
 		_name[2] = '\0';
 	} else {
 		list_for_each(devp, &devices, l) {
+			if (devp->flags & D_CONTROLLER)
+				continue;
+
 			if (i++ == fp->off) {
 				sprintf(_name, "%s%d",
-						major_names[MAJOR(devp->dev)],
+						dev_names[MAJOR(devp->dev)],
 						MINOR(devp->dev));
 
 				fp->off++;

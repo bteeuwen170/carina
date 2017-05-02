@@ -99,7 +99,7 @@ static int memfs_readdir(struct file *fp, char *_name)
 		_name[1] = '.';
 		_name[2] = '\0';
 	} else {
-		list_for_each(cdep, &fp->dp->del, l) {
+		list_for_each(cdep, &fp->ip->del, l) {
 			if (i++ != fp->off)
 				continue;
 

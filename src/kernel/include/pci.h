@@ -31,7 +31,20 @@
 #define PCI_DEVICES	32
 #define PCI_FUNCTIONS	8
 
-struct pci_config_space {
+#define PCI_ID_ANY	~(0)
+
+#define PCI_ID(v, sv, d, sd, c, sc, pi) \
+	{ \
+		.vendor = (v), \
+		.sub_vendor = (sv), \
+		.device = (d), \
+		.sub_device = (sd), \
+		.class = (c), \
+		.sub_class = (sc), \
+		.prog_if = (pi) \
+	}
+
+struct pci_cfg {
 	u16	vendor;
 	u16	device;
 	u16	cmd;
@@ -39,7 +52,7 @@ struct pci_config_space {
 	u8	revision;
 	u8	prog_if;
 	u8	sub_class;
-	u8	base_class;
+	u8	class;
 	u8	cache_line_size;
 	u8	latency_timer;
 	u8	header_type;
@@ -60,49 +73,11 @@ struct pci_config_space {
 	u8	max_lat;
 } __attribute__ ((packed));
 
-struct pci_dev {
-	struct list_head l;
-
-	u16			bus, dev, func;
-
-	struct pci_driver	*driver;
-	struct pci_config_space	*cfg;
+struct pci_id {
+	u16	vendor, sub_vendor;
+	u16	device, sub_device;
+	u8	class, sub_class;
+	u8	prog_if;
 };
-
-#define PCI_ANY_ID	~(0)
-
-#define PCI_DEV_ID(v, d, sv, sd, bc, sc, pi) \
-	{ \
-		.vendor = (v), \
-		.device = (d), \
-		.sub_vendor = (sv), \
-		.sub_device = (sd), \
-		.base_class = (bc), \
-		.sub_class = (sc), \
-		.prog_if = (pi) \
-	}
-
-struct pci_dev_id {
-	u16	vendor, device;
-	u16	sub_vendor, sub_device;
-
-	u8	base_class, sub_class, prog_if;
-};
-
-struct pci_driver {
-	struct list_head l;
-
-	const char		*name;
-	const struct pci_dev_id	*ids;
-
-	int (*probe) (struct pci_dev *);
-	void (*fini) (struct pci_dev *);
-};
-
-u32 pci_ind(struct pci_dev *dev, u32 reg);
-void pci_outd(struct pci_dev *dev, u32 reg, u32 val);
-
-int pci_driver_reg(struct pci_driver *driver);
-void pci_driver_unreg(struct pci_driver *driver);
 
 #endif

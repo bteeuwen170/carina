@@ -45,19 +45,19 @@ int file_open(const char *path, mode_t mode, struct file **fp)
 		goto err;
 	/* TODO Handle O_CREATE */
 
-	if ((res = inode_get(cfp->dep->sp, cfp->dep->inum, &cfp->dp)) < 0)
+	if ((res = inode_get(cfp->dep->sp, cfp->dep->inum, &cfp->ip)) < 0)
 		goto err;
 
-	if (!cfp->dp->op) {
+	if (!cfp->ip->op) {
 		res = -EPERM;
 	}
 
-	if (cfp->dp->sp->flags & M_RO && !(mode & O_RO)) {
+	if (cfp->ip->sp->flags & M_RO && !(mode & O_RO)) {
 		res = -EROFS;
 		goto err;
 	}
 
-	if (!(cfp->dp->mode & I_DIR) && mode & O_DIR) {
+	if (!(cfp->ip->mode & I_DIR) && mode & O_DIR) {
 		res = -ENOTDIR;
 		goto err;
 	}
@@ -67,8 +67,8 @@ int file_open(const char *path, mode_t mode, struct file **fp)
 	return 0;
 
 err:
-	if (cfp->dp)
-		inode_put(cfp->dp);
+	if (cfp->ip)
+		inode_put(cfp->ip);
 	if (cfp->dep)
 		dir_put(cfp->dep);
 	if (cfp)
@@ -82,7 +82,7 @@ void file_close(struct file *fp)
 	if (!fp)
 		return;
 
-	inode_put(fp->dp);
+	inode_put(fp->ip);
 	dir_put(fp->dep);
 
 	kfree(fp);
@@ -93,7 +93,7 @@ void file_close(struct file *fp)
 	if (!fp)
 		return -EBADF;
 
-	if (!fp->dp->op->read)
+	if (!fp->ip->op->read)
 		return -EPERM;
 
 	if (!n)
@@ -105,7 +105,7 @@ int file_write(struct file *fp, const char *buf, off_t off, size_t n)
 	if (!fp)
 		return -EBADF;
 
-	if (!fp->dp->op->write)
+	if (!fp->ip->op->write)
 		return -EPERM;
 
 	if (!n)
@@ -113,7 +113,7 @@ int file_write(struct file *fp, const char *buf, off_t off, size_t n)
 
 	/* TODO */
 
-	return fp->dp->op->write(fp, buf, off, n);
+	return fp->ip->op->write(fp, buf, off, n);
 }
 
 int file_readdir(struct file *fp, char *_name)
@@ -121,13 +121,13 @@ int file_readdir(struct file *fp, char *_name)
 	if (!fp)
 		return -EBADF;
 
-	if (!fp->dp->op->readdir)
+	if (!fp->ip->op->readdir)
 		return -EPERM;
 
-	if (!(fp->dp->mode & I_DIR))
+	if (!(fp->ip->mode & I_DIR))
 		return -ENOTDIR;
 
-	return fp->dp->op->readdir(fp, _name);
+	return fp->ip->op->readdir(fp, _name);
 }
 
 /* int file_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
@@ -135,7 +135,7 @@ int file_readdir(struct file *fp, char *_name)
 	if (!fp)
 		return -EBADF;
 
-	if (!fp->dp->op->ioctl)
+	if (!fp->ip->op->ioctl)
 		return -EPERM;
 } */
 
@@ -144,6 +144,6 @@ int file_readdir(struct file *fp, char *_name)
 	if (!fp)
 		return -EBADF;
 
-	if (!fp->dp->op->stat)
+	if (!fp->ip->op->stat)
 		return -EPERM;
 } */

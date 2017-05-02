@@ -35,11 +35,11 @@ static LIST_HEAD(blocks);
 int block_get(dev_t dev, off_t block, struct block **bp)
 {
 	struct block *cbp;
-	/* struct device *devp;
-	struct file *fp;
+	struct device *devp;
+	int res;
 
 	if (!(devp = device_get(dev)))
-		return NULL; */
+		return -ENODEV;
 
 	if (!(cbp = kmalloc(sizeof(struct block))))
 		return -ENOMEM;
@@ -52,13 +52,23 @@ int block_get(dev_t dev, off_t block, struct block **bp)
 	cbp->block = block;
 	cbp->flags = 0;
 
-	/* XXX TEMP XXX */ atapi_read(MINOR(dev), &cbp->buffer, cbp->block, 2048);
+#if 1
+	struct file *fp = kmalloc(sizeof(struct file));
+	fp->ip = kmalloc(sizeof(struct inode));
+	fp->ip->rdev = dev;
+#endif
 
-	/* devp->drip->op->read(fp, &cbp->buffer, cbp->block, BLOCK_SIZE); */
+	if ((res = devp->op->read(fp, cbp->buffer, cbp->block, 1)) < 0)
+		goto err;
 
 	*bp = cbp;
 
-	return 0;
+	return res;
+
+err:
+	kfree(cbp);
+
+	return res;
 }
 
 void block_put(struct block *bp)

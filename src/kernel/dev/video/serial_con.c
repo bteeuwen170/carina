@@ -121,12 +121,12 @@ static int serial_con_ioctl(struct file *fp, unsigned int cmd, unsigned long arg
 	return 0;
 }
 
-static int serial_con_probe(struct device *dp)
+static int serial_con_probe(struct device *devp)
 {
 	return 0;
 }
 
-static void serial_con_fini(struct device *dp)
+static void serial_con_fini(struct device *devp)
 {
 	/* TODO */
 }

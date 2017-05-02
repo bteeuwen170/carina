@@ -22,7 +22,11 @@
  *
  */
 
+#include <kernel.h>
+
 #include <string.h>
+
+static const char devname[] = "cmdline";
 
 /* XXX How big should this buffer be? */
 char cmdline[4096];
@@ -56,4 +60,10 @@ int cmdline_str_get(char *param, char *val)
 			*val++ = *p;
 
 	return 0;
+}
+
+void cmdline_init(const char *str)
+{
+	strncpy(cmdline, str, 4096);
+	dprintf("%s\n", cmdline);
 }

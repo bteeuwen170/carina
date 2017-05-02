@@ -32,8 +32,6 @@
 
 static const char devname[] = "vga_con";
 
-static struct driver vga_con_driver;
-
 #define VGA_WIDTH	80
 #define VGA_HEIGHT	25
 
@@ -232,47 +230,58 @@ static int vga_con_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
 	return 0;
 }
 
-static int vga_con_probe(struct device *dp)
+static struct file_ops vga_con_file_ops = {
+	.write	= &vga_con_write,
+	.ioctl	= &vga_con_ioctl
+};
+
+static int vga_con_probe(struct device *devp)
 {
 	/*
 	 * TODO Detect if present
 	 * NOTE Disable vga in qemu using "-vga none"
 	 */
 
+	devp->op = &vga_con_file_ops;
+
 	return 0;
 }
 
-static void vga_con_fini(struct device *dp)
+static void vga_con_fini(struct device *devp)
 {
 	/* TODO */
 }
 
-static struct file_ops vga_con_file_ops = {
-	.write	= &vga_con_write,
-	.ioctl	= &vga_con_ioctl
-};
-
 static struct driver vga_con_driver = {
 	.name	= devname,
+	.major	= MAJOR_CON,
 
-	.op	= &vga_con_file_ops,
+	.busid	= BUS_NONE,
+	.bus	= NULL,
+
 	.probe	= &vga_con_probe,
 	.fini	= &vga_con_fini
 };
 
 int vga_con_init(void)
 {
+	struct device *devp;
 	int res;
 
 	if ((res = driver_reg(&vga_con_driver)) < 0)
 		return res;
 
-	return device_reg(MAJOR_CON, &vga_con_driver, NULL);
+	if ((res = device_reg(&vga_con_driver, &devp, 0)) < 0)
+		return res;
+
+	return 0;
 }
 
 void vga_con_exit(void)
 {
-	/* TODO */
+	/* TODO unreg all devices */
+
+	driver_unreg(&vga_con_driver);
 }
 
 MODULE(vga_con, &vga_con_init, &vga_con_exit);

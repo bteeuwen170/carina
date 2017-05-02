@@ -130,7 +130,7 @@ struct file {
 	off_t off;		/* Current offset */
 
 	struct dirent *dep;	/* Associated directory entry pointer */
-	struct inode *dp;	/* Associated inode pointer */ /* XXX Should be ip? */
+	struct inode *ip;	/* Associated inode pointer */
 };
 
 struct fs_ops {
@@ -214,5 +214,12 @@ int fs_reg(struct fs_driver *fsdp);
 void fs_unreg(struct fs_driver *fsdp);
 
 void fs_init(void);
+
+/* TODO Find a proper place for these non-modular file systems */
+int memfs_init(void);
+void memfs_exit(void);
+
+int devfs_init(void);
+void devfs_exit(void);
 
 #endif

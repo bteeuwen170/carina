@@ -34,7 +34,7 @@
 
 static const char devname[] = "iso9660";
 
-#define ISO9660_DF_DIR	0x01
+#define ISO9660_DF_DIR	0b10
 
 struct iso9660_time {
 	u8	year;
@@ -194,7 +194,9 @@ static int iso9660_lookup(struct inode *dp, const char *name,
 	if ((res = block_get(dp->sp->dev, (off_t) dp->block, &bp)) < 0)
 		return res;
 
-	for (p = 0; p < dp->size; p += ddep->length) {
+	/* FIXME What if data is bigger than one block? */
+
+	for (p = 0; p < dp->sp->block_size; p += ddep->length) {
 		ddep = (struct iso9660_dirent *) (bp->buffer + p);
 
 		if (!ddep->length)
@@ -245,10 +247,12 @@ static int iso9660_readdir(struct file *fp, char *_name)
 	off_t p, i;
 	int res;
 
-	if ((res = block_get(fp->dp->sp->dev, (off_t) fp->dp->block, &bp)) < 0)
+	if ((res = block_get(fp->ip->sp->dev, (off_t) fp->ip->block, &bp)) < 0)
 		return res;
 
-	for (p = 0, i = 0; p < fp->dp->size; p += ddep->length, i++) {
+	/* FIXME What if data is bigger than one block? */
+
+	for (p = 0, i = 0; p < fp->ip->sp->block_size; p += ddep->length, i++) {
 		ddep = (struct iso9660_dirent *) (bp->buffer + p);
 
 		if (!ddep->length)

@@ -72,15 +72,14 @@ void kernel_main(void)
 	/* lapic_init(); */
 	/* ioapic_init(); */
 
-	/* FIXME Avoid warning */
-	strncpy(cmdline, (const char *) mboot->cmdline, 4096);
-
 	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
 	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
 
 	/* FIXME Memory map cannot be printed before console initialization */
 	mm_init(mboot->mmap_addr, mboot->mmap_len);
 #endif
+
+	dev_init();
 
 	/* Initialize consoles */
 #ifdef CONFIG_CONSOLE
@@ -102,13 +101,20 @@ void kernel_main(void)
 	/* TODO Move */
 	kprintf(KP_CON "Elarix has been loaded by %s\n",
 			mboot->boot_loader_name);
-	kprintf("cmdline: %s\n", cmdline);
+	cmdline_init((const char *) (uintptr_t) mboot->cmdline);
+
 	cpu_info();
+
+	timer_init();
+
+	memfs_init();
+	devfs_init();
+#ifdef CONFIG_ISO9660
+	iso9660_init();
+#endif
 
 	asm volatile ("sti");
 	/* TODO Actually get starting cpu */
-
-	timer_init();
 
 	/* TODO Modules */
 	/* acpi_init(); */
@@ -133,17 +139,11 @@ void kernel_main(void)
 #ifdef CONFIG_SB16
 	sb16_init();
 #endif
+
 #ifdef CONFIG_PCI
 	pci_init();
 #endif
-
-	/* Initialize file systems */
-	memfs_init();
-	devfs_init();
-#ifdef CONFIG_ISO9660
-	iso9660_init();
-#endif
-
+	devices_probe();
 	fs_init();
 
 #if 0
