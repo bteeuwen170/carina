@@ -34,12 +34,12 @@ menu "Bus devices"
 
 menu "Char devices"
 {
-	if (ARCH_x86) {
-		config CONFIG_CMOS
-			"CMOS support";
-
-		config CONFIG_PCSPK
-			"PC Speaker support";
+	menu "Real Time Clock"
+	{
+		if (ARCH_x86) {
+			config CONFIG_CMOS
+				"CMOS support";
+		}
 	}
 
 	menuconfig CONFIG_KEYBOARD
