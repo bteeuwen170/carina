@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/dev/pci/pci.c
+ * src/kernel/dev/bus/pci.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -135,7 +135,7 @@ static void pci_dev_reg(struct pci_dev *card)
 
 static u32 pci_ind(u16 bus, u16 dev, u16 func, u32 reg)
 {
-	io_outd(0xCF8, 0x80000000L | ((u32) bus << 16) | ((u32) dev << 11) |
+	io_outd(0xCF8, 0x80000000 | ((u32) bus << 16) | ((u32) dev << 11) |
 			((u32) func << 8) | (reg & ~3));
 
 	return io_ind(0xCFC + (reg & 3));
@@ -143,7 +143,7 @@ static u32 pci_ind(u16 bus, u16 dev, u16 func, u32 reg)
 
 static void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val)
 {
-	io_outd(0xCF8, 0x80000000L | ((u32) bus << 16) | ((u32) dev << 11) |
+	io_outd(0xCF8, 0x80000000 | ((u32) bus << 16) | ((u32) dev << 11) |
 			((u32) func << 8) | (reg & ~3));
 
 	io_outd(0xCFC, val);
