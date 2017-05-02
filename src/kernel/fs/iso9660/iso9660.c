@@ -112,7 +112,8 @@ static int iso9660_sb_get(struct superblock *sp)
 {
 	struct block *bp = NULL;
 	struct iso9660_sb *dev_sp;
-	int res, i;
+	struct iso9660_dirent *dev_dep;
+	int res = -EINVAL, i;
 
 	for (i = 16; i < 32; i++) {
 		if ((res = block_get(sp->dev, i, &bp)) < 0)
@@ -120,14 +121,17 @@ static int iso9660_sb_get(struct superblock *sp)
 		dev_sp = (struct iso9660_sb *) &bp->buffer;
 
 		if (strncmp(dev_sp->signature, "CD001", 5) != 0 ||
-				dev_sp->version != 1) {
-			res = -EINVAL;
+				dev_sp->version != 1)
 			goto err;
-		}
 
 		if (dev_sp->type == 1)
-			break;
+			goto found;
 	}
+
+	goto err;
+
+found:
+	dev_dep = (struct iso9660_dirent *) dev_sp->root;
 
 	strncpy(sp->name, dev_sp->vol_ident, NAME_MAX);
 	strtrm(sp->name);
@@ -135,14 +139,13 @@ static int iso9660_sb_get(struct superblock *sp)
 	sp->blocks = dev_sp->blocks;
 	sp->block_size = dev_sp->block_size;
 
-	if ((res = inode_get(sp, ((struct iso9660_dirent *)
-			dev_sp->root)->addr, &sp->root)) < 0)
+	if ((res = inode_get(sp, dev_dep->addr, &sp->root)) < 0)
 		goto err;
 
 	sp->root->inum = i * sp->block_size + 156;
 
-	sp->root->block = ((struct iso9660_dirent *) dev_sp->root)->addr;
-	sp->root->size = ((struct iso9660_dirent *) dev_sp->root)->size;
+	sp->root->block = dev_dep->addr;
+	sp->root->size = dev_dep->size;
 
 	return 0;
 
@@ -184,8 +187,8 @@ static int iso9660_alloc(struct inode *ip)
 static int iso9660_lookup(struct inode *dp, const char *name,
 		struct dirent **dep)
 {
-	struct dirent *cdep = NULL;
 	struct block *bp;
+	struct dirent *cdep = NULL;
 	struct iso9660_dirent *ddep;
 	char buf[NAME_MAX + 1];
 	off_t p;

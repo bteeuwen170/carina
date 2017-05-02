@@ -53,12 +53,13 @@ int block_get(dev_t dev, off_t block, struct block **bp)
 	cbp->flags = 0;
 
 #if 1
-	struct file *fp = kmalloc(sizeof(struct file));
-	fp->ip = kmalloc(sizeof(struct inode));
-	fp->ip->rdev = dev;
+	struct file fp;
+	struct inode ip;
+	fp.ip = &ip;
+	fp.ip->rdev = dev;
 #endif
 
-	if ((res = devp->op->read(fp, cbp->buffer, cbp->block, 1)) < 0)
+	if ((res = devp->op->read(&fp, cbp->buffer, cbp->block, 1)) < 0)
 		goto err;
 
 	*bp = cbp;

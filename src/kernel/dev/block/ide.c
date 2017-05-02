@@ -82,20 +82,14 @@ static u8 ide_inb(struct ide_device *idevp, u8 reg)
 	return res;
 }
 
-static void ide_sleep(struct ide_device *idevp)
-{
-	int i;
-
-	for (i = 0; i < 4; i++)
-		ide_inb(idevp, ATA_REG_STATUS_ALT);
-}
-
-/* XXX Correct? */
 static int ide_poll(struct ide_device *idevp)
 {
 	u8 status;
+	int i;
 
-	ide_sleep(idevp);
+	/* FIXME Why do we need such an enormous delay?! */
+	for (i = 0; i < 1024; i++)
+		ide_inb(idevp, ATA_REG_STATUS_ALT);
 
 	while (status & ATA_CMD_BUSY && !(status & ATA_CMD_DDR))
 		status = ide_inb(idevp, ATA_REG_STATUS);
@@ -116,20 +110,17 @@ int atapi_out(struct device *devp, const char *buf)
 		return -EINVAL;
 
 	ide_outb(devp->device, ATA_REG_CTRL, 0);
-	ide_sleep(devp->device);
 
 	ide_outb(devp->device, ATA_REG_SELECT, 0xA0 | (idevp->drive << 4));
-	ide_sleep(devp->device);
+	sleep(1);
 
 	ide_outb(devp->device, ATA_REG_FEATURES, 0);
-	ide_sleep(devp->device);
 
 	ide_outb(devp->device, ATA_REG_LBA0_LO, ATAPI_SECTOR_SIZE & 0xFF);
-	ide_sleep(devp->device);
 	ide_outb(devp->device, ATA_REG_LBA0_MED, ATAPI_SECTOR_SIZE >> 8);
-	ide_sleep(devp->device);
 
 	ide_outb(devp->device, ATA_REG_CMD, ATA_CMD_PACKET);
+
 	if ((res = ide_poll(idevp)) < 0)
 		return res;
 
@@ -176,43 +167,49 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 		idevp->base = pcp->bar_0;
 		idevp->ctrl = pcp->bar_1;
 
-		pcp->int_line = 14;
+		if (drive == 0) {
+			pcp->int_line = 14;
+
+			ide_outb(idevp, ATA_REG_CTRL, 0x02);
+			sleep(1);
+
+			irq_unmask(pcp->int_line);
+		}
 	} else if (ch == 1) {
 		idevp->base = pcp->bar_2;
 		idevp->ctrl = pcp->bar_3;
 
-		pcp->int_line = 15;
+		if (drive == 0) {
+			pcp->int_line = 15;
+
+			ide_outb(idevp, ATA_REG_CTRL, 0x02);
+			sleep(1);
+
+			irq_unmask(pcp->int_line);
+		}
 	}
-
-	ide_outb(idevp, ATA_REG_CTRL, 0x02);
-	ide_sleep(idevp);
-
-	irq_unmask(pcp->int_line);
 
 	idevp->bus_master = (pcp->bar_4 & 0xFFFFFFFC) + (ch ? 0 : 8);
 
 	ide_outb(idevp, ATA_REG_SELECT, 0xA0 | (drive << 4));
-	ide_sleep(idevp);
+	sleep(1);
 
 	ide_outb(idevp, ATA_REG_CMD, ATA_CMD_IDENT);
-	ide_sleep(idevp);
+	sleep(1);
 
 	/* FIXME Not all drives are detected! */
 	if (!(status = ide_inb(idevp, ATA_REG_STATUS))) {
 		res = 0;
 		goto err;
 	}
-	ide_sleep(idevp);
+	sleep(10);
 
 	if ((res = ide_poll(idevp)) < 0)
 		goto err;
 
 	lba0_lo = ide_inb(idevp, ATA_REG_LBA0_LO);
-	ide_sleep(idevp);
 	lba0_med = ide_inb(idevp, ATA_REG_LBA0_MED);
-	ide_sleep(idevp);
 	lba0_hi = ide_inb(idevp, ATA_REG_LBA0_HI);
-	ide_sleep(idevp);
 	/* kprintf("%#x %#x %#x\n", lba0_lo, lba0_med, lba0_hi); */
 
 	if ((res = device_reg(&ide_driver, &devp, 0)) < 0)
@@ -235,7 +232,7 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 			goto err;
 
 		ide_outb(idevp, ATA_REG_CMD, ATAPI_CMD_IDENT);
-		ide_sleep(idevp);
+		sleep(1);
 	} else
 #endif
 	{

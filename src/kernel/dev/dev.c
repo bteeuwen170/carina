@@ -91,7 +91,7 @@ int device_reg(struct driver *drip, struct device **devp, u8 flags)
 
 	cdevp->name = "Generic device";
 	cdevp->dev = DEV(drip->major,
-			flags & D_CONTROLLER ? 0 : minor_last[drip->major]++);
+			(flags & D_CONTROLLER) ? 0 : minor_last[drip->major]++);
 	cdevp->flags = flags;
 
 	cdevp->drip = drip;
@@ -116,14 +116,9 @@ struct device *device_get(dev_t dev)
 {
 	struct device *devp;
 
-	list_for_each(devp, &devices, l) {
-		if (devp->dev == dev) {
-			if (devp->flags & D_CONTROLLER)
-				return NULL;
-			else
-				return devp;
-		}
-	}
+	list_for_each(devp, &devices, l)
+		if (devp->dev == dev && !(devp->flags & D_CONTROLLER))
+			return devp;
 
 	return NULL;
 }

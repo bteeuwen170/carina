@@ -33,7 +33,6 @@
 static const char devname[] = "atapi";
 
 static int atapi_read(struct file *fp, char *buf, off_t off, size_t n)
-/* int atapi_read(u32 minor, char *buf, off_t off, size_t n) */
 {
 	struct device *devp;
 	char packet[12];
