@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/arch/x86/cpu/int-64.s
+ * src/kernel/arch/x86/cpu/int-64.S
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *

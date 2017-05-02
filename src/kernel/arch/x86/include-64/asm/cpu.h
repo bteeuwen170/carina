@@ -73,5 +73,3 @@ struct tss_entry {
 	u16	reserved2[5];
 	u16	iomap_base;
 } __attribute__ ((packed));
-
-void cpu_info(void);

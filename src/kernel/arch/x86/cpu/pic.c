@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/arch/x86/include/asm/8259.h
+ * src/kernel/arch/x86/cpu/pic.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef _X86_8259_H
-#define _X86_8259_H
+#include <asm/cpu.h>
+#include <asm/pic.h>
 
 #define PIC_M_CMD	0x20
 #define PIC_M_IO	0x21
@@ -41,8 +41,52 @@
 #define ICW1_INIT	0x11
 #define ICW1_8086	0x01
 
-void pic_remap(void);
+void irq_mask(u8 irq)
+{
+	u16 port;
 
-void pic_disable(void);
+	if (irq < IRQ_ENTRIES / 2) {
+		port = PIC_M_IO;
+	} else {
+		port = PIC_S_IO;
+		irq -= IRQ_ENTRIES / 2;
+	}
 
-#endif
+	io_outb(port, io_inb(port) | (1 << irq));
+}
+
+void irq_unmask(u8 irq)
+{
+	u16 port;
+
+	if (irq < IRQ_ENTRIES / 2) {
+		port = PIC_M_IO;
+	} else {
+		port = PIC_S_IO;
+		irq -= IRQ_ENTRIES / 2;
+	}
+
+	io_outb(port, io_inb(port) & ~(1 << irq));
+}
+
+void pic_eoi(u8 int_no)
+{
+	if (int_no >= SINT_ENTRIES + (IRQ_ENTRIES / 2))
+		io_outb(PIC_S_CMD, PIC_EOI);
+	io_outb(PIC_M_CMD, PIC_EOI);
+}
+
+void pic_init(void)
+{
+	io_outb(PIC_M_CMD, ICW1_INIT);
+	io_outb(PIC_S_CMD, ICW1_INIT);
+
+	io_outb(PIC_M_IO, PIC_M_OFF);
+	io_outb(PIC_S_IO, PIC_S_OFF);
+
+	io_outb(PIC_M_IO, ICW1_PIC_S);
+	io_outb(PIC_S_IO, ICW1_PIC_M);
+
+	io_outb(PIC_M_IO, ICW1_8086);
+	io_outb(PIC_S_IO, ICW1_8086);
+}

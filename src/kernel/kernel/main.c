@@ -38,7 +38,6 @@
 #include <reboot.h>
 #include <sys/time.h>
 
-#include <asm/8259.h>
 #include <asm/cpu.h>
 
 #include <char/pcspk.h>
@@ -57,28 +56,15 @@ extern struct mboot_info *mboot;
 /* void kernel_main(struct mboot_info *mboot) */
 void kernel_main(void)
 {
-#if 1 /* XXX MOVE XXX Arch init */
 	/* SPINLOCK(main);
+	 * spin_lock(main);
+	 */
 
-	spin_lock(main); */
-
-	/* for (;;)
-		asm volatile ("hlt"); */
-
-	/* Initialize mandatory hardware */
-	pic_remap();
-	idt_init();
-	/* tss_init(); */
-	/* lapic_init(); */
-	/* ioapic_init(); */
-
+	/* FIXME Early VGA */
+	cpu_init();
 	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
 	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
-
-	/* FIXME Memory map cannot be printed before console initialization */
 	mm_init(mboot->mmap_addr, mboot->mmap_len);
-#endif
-
 	dev_init();
 
 	/* Initialize consoles */
@@ -87,7 +73,6 @@ void kernel_main(void)
 	vga_con_init();
 #endif
 #ifdef CONFIG_CONSOLE_SERIAL
-	/* serial_init(COM0); */
 	serial_con_init();
 #endif
 	kprint_init();
@@ -95,15 +80,13 @@ void kernel_main(void)
 #endif
 
 	/* TODO Other format (UTC) */
-	kprintf("\033[1;34mWelcome to Elarix %d.%d! (compiled on %s %s)\033[0;37m\n",
+	kprintf("\033[1;34mWelcome to Elarix %d.%d! "
+			"(compiled on %s %s)\033[0;37m\n",
 			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
-
-	/* TODO Move */
 	kprintf(KP_CON "Elarix has been loaded by %s\n",
 			mboot->boot_loader_name);
-	cmdline_init((const char *) (uintptr_t) mboot->cmdline);
 
-	cpu_info();
+	cmdline_init((const char *) (uintptr_t) mboot->cmdline);
 
 	timer_init();
 

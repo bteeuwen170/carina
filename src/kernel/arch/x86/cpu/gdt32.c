@@ -22,11 +22,7 @@
  *
  */
 
-/* #include <kernel.h> */
-
 #include <asm/cpu.h>
-
-/* static const char devname[] = "gdt"; */
 
 static struct segment_desc gdt[GDT_ENTRIES - 1];
 
@@ -46,43 +42,29 @@ void gdt_init(void)
 {
 	u32 tss_base, tss_limit;
 
-#ifdef ARCH_i386
-	/* 0x08 - Code SV */
-	gdt_set(1, 0, 0, 0b0011000, 0);
-#endif
-#ifdef ARCH_x86_64
-	/* 0x08 - Code SV */
-	gdt_set(1, 0, 0, 0b0011000, 1);
-#endif
-	/* 0x10 - Data SV */
-	gdt_set(2, 0, 0, 0b0010000, 0);
-#ifdef ARCH_i386
-	/* 0x18 - Code USR */
-	gdt_set(3, 0, 0, 0b1111000, 0);
-#endif
-#ifdef ARCH_x86_64
-	/* 0x18 - Code USR */
-	gdt_set(3, 0, 0, 0b1111000, 1);
-#endif
-	/* 0x20 - Data USR */
-	gdt_set(4, 0, 0, 0b1110010, 0);
-
 	tss_init(&tss_base, &tss_limit);
 
 #ifdef ARCH_i386
 	/* 0x28 - TSS */
 	gdt_set(5, tss_base, tss_limit, 0b0001001, 0);
+	/* 0x08 - Code SV */
+	gdt_set(1, 0, 0, 0b0011000, 0);
+	/* 0x18 - Code USR */
+	gdt_set(3, 0, 0, 0b1111000, 0);
 #endif
 #ifdef ARCH_x86_64
 	/* 0x28 - TSS */
 	gdt_set(5, tss_base, tss_limit, 0b0001001, 1);
+	/* 0x08 - Code SV */
+	gdt_set(1, 0, 0, 0b0011000, 1);
+	/* 0x18 - Code USR */
+	gdt_set(3, 0, 0, 0b1111000, 1);
 #endif
+	/* 0x10 - Data SV */
+	gdt_set(2, 0, 0, 0b0010000, 0);
+	/* 0x20 - Data USR */
+	gdt_set(4, 0, 0, 0b1110010, 0);
 
 	gdt_load(&gdt, GDT_ENTRIES * sizeof(struct segment_desc) - 1);
 	gdt_load(&gdt, 5 * sizeof(struct segment_desc) - 1);
-
-	/* tss_load(); */
-
-	/* kprintf32(KP_INFO, devname,
-	"%d entries entered (FIXME hardcoded lies)\n", IDT_ENTRIES); */
 }

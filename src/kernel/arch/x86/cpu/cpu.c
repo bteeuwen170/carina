@@ -25,11 +25,11 @@
 #include <kernel.h>
 
 #include <asm/cpu.h>
+#include <asm/pic.h>
 
 #include <string.h>
 
-/* CRAP */
-void cpu_info(void)
+static void cpu_info(void)
 {
 	u32 eax, ebx, ecx, edx;
 	char brand[48], *name;
@@ -57,4 +57,12 @@ void cpu_info(void)
 		++name; /* TODO Right and left justify function */
 
 	kprintf(KP_DBG "%s\n", name);
+}
+
+void cpu_init(void)
+{
+	/* cpu_info() */
+
+	pic_init();
+	idt_init();
 }

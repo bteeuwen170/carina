@@ -160,4 +160,6 @@ void tss_init(u32 *limit, u32 *base);
 void svmode_enter(void);
 void usrmode_enter(void);
 
+void cpu_init(void);
+
 #endif

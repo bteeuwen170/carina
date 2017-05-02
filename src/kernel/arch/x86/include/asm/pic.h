@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/arch/x86/cpu/lapic.c
+ * src/kernel/arch/x86/include/asm/pic.h
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,40 +22,10 @@
  *
  */
 
-#include <lapic.h>
-#include <kernel.h>
+#ifndef _X86_PIC_H
+#define _X86_PIC_H
 
-#include <string.h>
+void pic_eoi(u8 int_no);
+void pic_init(void);
 
-static i8 lapic_avail(void) {
-	u32 eax, edx;
-	cpuid(1, &eax, NULL, NULL, &edx);
-
-	return edx & 0x200;
-}
-
-void lapic_eoi(void)
-{
-	/* TODO */
-}
-
-i8 lapic_init(void)
-{
-	/* TODO Check if LAPICs are present */
-
-	u64 flags = msr_in(0x1B) & 0x0F00;
-	flags |= (u64) lapic_avail() << 10;
-	flags |= 1 << 11;
-	msr_out(0x1B, 0xFEE00000 | flags);
-
-	return OK;
-}
-
-/* static i8 lapic_timer_calibrate(u64  */
-
-i8 lapic_timer_init(void *master)
-{
-	asm volatile ("sti");
-
-	asm volatile ("cli");
-}
+#endif

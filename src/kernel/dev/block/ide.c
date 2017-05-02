@@ -32,6 +32,7 @@
 #include <pci.h>
 
 #include <asm/cpu.h>
+#include <timer/pit.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -87,12 +88,12 @@ static int ide_poll(struct ide_device *idevp)
 	u8 status;
 	int i;
 
-	/* FIXME Why do we need such an enormous delay?! */
-	for (i = 0; i < 1024; i++)
+	for (i = 0; i < 5; i++)
 		ide_inb(idevp, ATA_REG_STATUS_ALT);
 
-	while (status & ATA_CMD_BUSY && !(status & ATA_CMD_DDR))
+	do {
 		status = ide_inb(idevp, ATA_REG_STATUS);
+	} while (status & ATA_CMD_BUSY && !(status & ATA_CMD_DDR));
 
 	if (status & ATA_CMD_ERR)
 		return -EIO;
@@ -112,17 +113,16 @@ int atapi_out(struct device *devp, const char *buf)
 	ide_outb(devp->device, ATA_REG_CTRL, 0);
 
 	ide_outb(devp->device, ATA_REG_SELECT, 0xA0 | (idevp->drive << 4));
-	sleep(1);
 
 	ide_outb(devp->device, ATA_REG_FEATURES, 0);
 
 	ide_outb(devp->device, ATA_REG_LBA0_LO, ATAPI_SECTOR_SIZE & 0xFF);
 	ide_outb(devp->device, ATA_REG_LBA0_MED, ATAPI_SECTOR_SIZE >> 8);
 
-	ide_outb(devp->device, ATA_REG_CMD, ATA_CMD_PACKET);
-
 	if ((res = ide_poll(idevp)) < 0)
 		return res;
+
+	ide_outb(devp->device, ATA_REG_CMD, ATA_CMD_PACKET);
 
 	for (i = 0; i < 11; i += 2)
 		io_outw(idevp->base, ((buf[i] & 0xFF) |
@@ -156,9 +156,9 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 {
 	struct device *devp = NULL;
 	struct ide_device *idevp;
-	u8 status, lba0_lo, lba0_med, lba0_hi;
+	u8 lba0_lo, lba0_med, lba0_hi;
 	size_t i;
-	int res = -EIO;
+	int res;
 
 	if (!(idevp = kmalloc(sizeof(struct ide_device))))
 		return -ENOMEM;
@@ -171,7 +171,6 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 			pcp->int_line = 14;
 
 			ide_outb(idevp, ATA_REG_CTRL, 0x02);
-			sleep(1);
 
 			irq_unmask(pcp->int_line);
 		}
@@ -183,7 +182,6 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 			pcp->int_line = 15;
 
 			ide_outb(idevp, ATA_REG_CTRL, 0x02);
-			sleep(1);
 
 			irq_unmask(pcp->int_line);
 		}
@@ -192,20 +190,14 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 	idevp->bus_master = (pcp->bar_4 & 0xFFFFFFFC) + (ch ? 0 : 8);
 
 	ide_outb(idevp, ATA_REG_SELECT, 0xA0 | (drive << 4));
-	sleep(1);
 
-	ide_outb(idevp, ATA_REG_CMD, ATA_CMD_IDENT);
-	sleep(1);
-
-	/* FIXME Not all drives are detected! */
-	if (!(status = ide_inb(idevp, ATA_REG_STATUS))) {
-		res = 0;
-		goto err;
-	}
-	sleep(10);
-
+	/* FIXME Detection fails on VirtualBox (and possibly also on real
+	 * hardware
+	 */
 	if ((res = ide_poll(idevp)) < 0)
 		goto err;
+
+	ide_outb(idevp, ATA_REG_CMD, ATA_CMD_IDENT);
 
 	lba0_lo = ide_inb(idevp, ATA_REG_LBA0_LO);
 	lba0_med = ide_inb(idevp, ATA_REG_LBA0_MED);
@@ -216,8 +208,7 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 		goto err;
 
 #ifdef CONFIG_ATA
-	if ((lba0_lo == 0x01 && lba0_med == 0 && lba0_hi == 0) ||
-			(lba0_lo == 0 && lba0_med == 0 && lba0_hi == 0x08)) {
+	if ((lba0_lo == 0x01 && lba0_med == 0 && lba0_hi == 0)) {
 		idevp->type = IDE_ATA;
 
 		/* if ((res = ata_probe(devp)) < 0)
@@ -232,7 +223,6 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 			goto err;
 
 		ide_outb(idevp, ATA_REG_CMD, ATAPI_CMD_IDENT);
-		sleep(1);
 	} else
 #endif
 	{
@@ -253,8 +243,7 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 	devp->bus = pcp;
 	devp->device = idevp;
 
-	/* XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX */
-	/* XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX */
+	/* FIXME Not for ATAPI*/
 	if (idevp->ident.cmdset.lba48 && idevp->ident.cmdset_active.lba48)
 		idevp->size = idevp->ident.lba48_max;
 	else if (idevp->ident.features.lba28)
@@ -262,10 +251,9 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 	else
 		goto err;
 
-	/* XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX */
-	/* XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX */
 	dprintf(KP_CON "%s, %s drive @ IRQ %u\n", devp->name,
 			(idevp->type ? "ATAPI": "ATA"), pcp->int_line);
+	/* FIXME Not for ATAPI*/
 	dprintf(KP_CON "%u sectors (%u MB)\n", idevp->size,
 			idevp->size * 512 / 1024 / 1024);
 

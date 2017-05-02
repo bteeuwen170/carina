@@ -23,13 +23,10 @@
  */
 
 #include <kernel.h>
-#include <syscall.h>
 
-#include <asm/8259.h>
 #include <asm/cpu.h>
 #include <asm/int.h>
-
-#include <string.h>
+#include <asm/pic.h>
 
 static const char devname[] = "idt";
 
@@ -79,7 +76,7 @@ static char *exceptions[SINT_ENTRIES] = {
 };
 
 static struct idt_desc idt[IDT_ENTRIES];
-static void *isr_handlers[IDT_ENTRIES];
+static int (*isr_handlers[IDT_ENTRIES]) (struct int_stack *regs);
 
 /*
  * Valid values for type are:
@@ -115,15 +112,10 @@ void idt_init(void)
 	}
 
 	idt_load(&idt, IDT_ENTRIES * sizeof(struct idt_desc) - 1);
-
-	/* dprintf(KP_NOTICE "%d entries entered\n", i); */
 }
 
 void _isr(struct int_stack *regs)
 {
-	int (*handler) (struct int_stack *regs);
-
-	/* TEMP */
 	if (regs->int_no < SINT_ENTRIES) {
 #ifdef ARCH_i386
 		panic(exceptions[regs->int_no],
@@ -133,26 +125,14 @@ void _isr(struct int_stack *regs)
 		panic(exceptions[regs->int_no],
 				regs->err_code, regs->rip);
 #endif
-
-		return;
 	}
 
-	handler = isr_handlers[regs->int_no];
+	if (isr_handlers[regs->int_no])
+		isr_handlers[regs->int_no](regs);
 
-	if (handler)
-		handler(regs);
-
-	if (regs->int_no >= SINT_ENTRIES &&
-			regs->int_no < SINT_ENTRIES + IRQ_ENTRIES - 1) {
-
-		/* TODO Handle spurious interrupts */
-		/* if (!irq_active(SINT_ENTRIES - regs->int_no))
-			return; */
-
-		if (regs->int_no >= SINT_ENTRIES + (IRQ_ENTRIES / 2))
-			io_outb(PIC_S_CMD, PIC_EOI);
-		io_outb(PIC_M_CMD, PIC_EOI);
-	}
+	/* TODO Handle spurious interrupts */
+	if (regs->int_no < SINT_ENTRIES + IRQ_ENTRIES - 1)
+		pic_eoi(regs->int_no);
 }
 
 int isr_handler_reg(const u8 int_no, int (*handler) (struct int_stack *))

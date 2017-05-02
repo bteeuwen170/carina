@@ -31,12 +31,9 @@
 #define KEYMAP_SIZE 128
 
 #define PS2_KEYUP	0x80
-
 #define PS2_CMD		0x64
 #define PS2_IO		0x60
-
 #define PS2_RESET	0xFE
-
 #define PS2_EXT		0xE0
 
 /* Modifiers */
@@ -182,9 +179,13 @@ char getch(void)
 
 int ps2kbd_init(void)
 {
+	int res;
+
+	if ((res = irq_handler_reg(IRQ_KBD, &int_handler)) < 0)
+		return res;
 	/* TODO Numlock and such */
 
-	return irq_handler_reg(IRQ_KBD, &int_handler);
+	return 0;
 }
 
 void ps2kbd_exit(void)
