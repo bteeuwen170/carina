@@ -3,10 +3,10 @@
 #
 
 kernel-o += src/kernel/arch/x86/cpu/cpu.o \
-	    src/kernel/arch/x86/cpu/early_kprint.o \
 	    src/kernel/arch/x86/cpu/idt.o \
 	    src/kernel/arch/x86/cpu/pic.o \
-	    src/kernel/arch/x86/cpu/reboot.o
+	    src/kernel/arch/x86/cpu/reboot.o# \
+	    src/kernel/arch/x86/cpu/early_kprint.o
 
 kernel-o32 += src/kernel/arch/x86/cpu/gdt32.o \
 	      src/kernel/arch/x86/cpu/paging32.o \
