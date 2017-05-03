@@ -25,22 +25,22 @@
 #ifndef _ERRNO_H
 #define _ERRNO_H
 
-#define EPERM		1	/* Operation not permitted */
-#define ENOENT		2	/* No such file or directory */
-#define EIO		5	/* I/O error */
-#define EBADF		9	/* Invalid file descriptor */
+#define EACCES		1	/* Permission denied */
+#define EBADF		2	/* Invalid file descriptor */
+#define EBUSY		3	/* Device or resource busy */
+#define EEXIST		4	/* File exists */
+#define EFAULT		5	/* Invalid address */
+#define EINVAL		6	/* Invalid argument */
+#define EIO		7	/* I/O error */
+#define EMFILE		8	/* Too many open files */
+#define ENAMETOOLONG	9	/* File name too long */
+#define ENODEV		10	/* No such device */
+#define ENOENT		11	/* No such file or directory */
 #define ENOMEM		12	/* Out of memory */
-#define EACCES		13	/* Permission denied */
-#define EFAULT		14	/* Invalid address */
-#define EBUSY		16	/* Device or resource busy */
-#define EEXIST		17	/* File exists */
-#define ENODEV		19	/* No such device */
-#define ENOTDIR		20	/* Not a directory */
-#define EINVAL		22	/* Invalid argument */
-#define EMFILE		24	/* Too many open files */
-#define ENOSPC		28	/* No space left on device */
-#define EROFS		30	/* Read-only file system */
-#define ENAMETOOLONG	36	/* File name too long */
+#define ENOSPC		13	/* No space left on device */
+#define ENOTDIR		14	/* Not a directory */
+#define EPERM		15	/* Operation not permitted */
+#define EROFS		16	/* Read-only file system */
 
 /* static inline void *__attribute__((warn_unused_result)) ERR_PTR(intptr_t errno)
 {
