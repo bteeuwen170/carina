@@ -42,19 +42,4 @@
 #define EPERM		15	/* Operation not permitted */
 #define EROFS		16	/* Read-only file system */
 
-/* static inline void *__attribute__((warn_unused_result)) ERR_PTR(intptr_t errno)
-{
-	return (void *) errno;
-}
-
-static inline intptr_t __attribute__((warn_unused_result)) PTR_ERR(const void *ptr)
-{
-	return (intptr_t) (void *) ptr;
-}
-
-static inline int __attribute__((warn_unused_result)) IS_ERR(const void *ptr)
-{
-	return (PTR_ERR(ptr) < 0) && (PTR_ERR(ptr) > -(ERRNO_MAX));
-} */
-
 #endif
