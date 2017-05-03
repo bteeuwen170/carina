@@ -92,7 +92,7 @@ void file_close(struct file *fp)
 
 int file_read(struct file *fp, char *buf, size_t n)
 {
-	if (!fp || fp->mode & F_DIR)
+	if (!fp || fp->ip->mode & I_DIR)
 		return -EBADF;
 
 	if (!fp->ip->op->read)
@@ -108,7 +108,7 @@ int file_read(struct file *fp, char *buf, size_t n)
 
 int file_write(struct file *fp, const char *buf, size_t n)
 {
-	if (!fp || fp->mode & F_RO || fp->mode & F_DIR)
+	if (!fp || fp->mode & F_RO || fp->ip->mode & I_DIR)
 		return -EBADF;
 
 	if (!fp->ip->op->write)
@@ -127,7 +127,7 @@ int file_readdir(struct file *fp, char *_name)
 	if (!fp)
 		return -EBADF;
 
-	if (!(fp->mode & F_DIR))
+	if (!(fp->ip->mode & I_DIR))
 		return -ENOTDIR;
 
 	if (!fp->ip->op->readdir)

@@ -261,8 +261,11 @@ void kernel_main(void)
 				res = file_open(cmd + 4, F_RO, &fp);
 
 			if (res == 0) {
-				kprintf("%s", file_read(fp, buf,
-						0, BLOCK_SIZE));
+				res = file_read(fp, buf, BLOCK_SIZE);
+				if (res > 0)
+					kprintf("%s", buf);
+				else
+					kprintf("%d", res);
 
 				file_close(fp);
 			}

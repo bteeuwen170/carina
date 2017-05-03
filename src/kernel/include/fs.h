@@ -192,7 +192,7 @@ int dir_basename(char *path);
 
 int file_open(const char *path, mode_t mode, struct file **fp);
 void file_close(struct file *fp);
-/* int file_read(struct file *fp, char *buf, size_t n); */
+int file_read(struct file *fp, char *buf, size_t n);
 int file_write(struct file *fp, const char *buf, size_t n);
 int file_readdir(struct file *fp, char *_name);
 /* int file_ioctl(struct file *fp, unsigned int cmd, unsigned long arg); */

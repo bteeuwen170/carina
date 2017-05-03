@@ -187,7 +187,7 @@ static int iso9660_lookup(struct inode *dp, const char *name,
 	struct block *bp;
 	struct dirent *cdep = NULL;
 	struct iso9660_dirent *ddep;
-	char buf[NAME_MAX + 1];
+	char buf[NAME_MAX + 1], *nbuf;
 	off_t p;
 	int res;
 
@@ -204,7 +204,12 @@ static int iso9660_lookup(struct inode *dp, const char *name,
 
 		memcpy(buf, ddep->name, ddep->name_len);
 		buf[ddep->name_len] = '\0';
-		*strchr(buf, ';') = '\0';
+
+		if ((nbuf = strrchr(buf, ';'))) {
+			*--nbuf = '\0';
+			if (*--nbuf == '.')
+				*nbuf = '\0';
+		}
 
 		if (strcmp(buf, name) != 0)
 			continue;
@@ -242,6 +247,18 @@ err:
 static int iso9660_read(struct file *fp, char *buf, off_t off, size_t n)
 {
 	struct block *bp;
+	int res;
+
+	if ((res = block_get(fp->ip->sp->dev, (off_t) fp->ip->block, &bp)) < 0)
+		return res;
+
+	/* FIXME What if data is bigger than one block? */
+
+	memcpy(buf, bp->buffer, fp->ip->sp->block_size);
+
+	block_put(bp);
+
+	return fp->ip->size;
 }
 
 static int iso9660_readdir(struct file *fp, char *_name)

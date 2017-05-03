@@ -415,7 +415,7 @@ fallback:
 		panic("failed to mount fallback root", res, 0);
 
 mountdev:
-	res = fs_mkdir("/sys", 0);
+	/* res = fs_mkdir("/sys", 0);
 	if (res == 0 || res == -EEXIST) {
 		res = fs_mkdir("/sys/dev", 0);
 		if (res < 0 && res != -EEXIST)
@@ -426,7 +426,7 @@ mountdev:
 
 	if ((res = fs_mount(DEV(MAJOR_MEM, MINOR_MEM_DEV),
 			"/sys/dev", "devfs", 0)) < 0)
-		panic("dev (devfs) failed to mount on /sys/dev", res, 0);
+		panic("dev (devfs) failed to mount on /sys/dev", res, 0); */
 
 	return;
 }
