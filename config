@@ -42,6 +42,14 @@ menu "Char devices"
 		}
 	}
 
+	menu "System timers"
+	{
+		if (ARCH_x86) {
+			config CONFIG_PIT
+				"PIT support";
+		}
+	}
+
 	menuconfig CONFIG_KEYBOARD
 		"Keyboard support"
 	{

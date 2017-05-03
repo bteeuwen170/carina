@@ -336,20 +336,22 @@ void kprint(const char *prefix, char *fmt, ...)
 
 	if (con_dev)
 		device_write(con_dev, fmtbuf, strlen(fmtbuf));
-	/* else
-		early_kprint(fmtbuf, strlen(fmtbuf)); */
+	else
+		early_kprint(fmtbuf, strlen(fmtbuf));
 }
 
 void kprint_init(void)
 {
 	char buf[PATH_MAX + 1];
 
-	/* for(;;); */
-	strcpy(buf, "con0");
-	if (cmdline_str_get("console", buf) != 0)
-		goto err;
-	dir_basename(buf);
+	if (cmdline_str_get("console", buf) == 0)
+		dir_basename(buf);
+	else
+		strcpy(buf, "con0");
+
 	if (!(con_dev = device_getbyname(buf)))
+		goto err;
+	if (!device_get(con_dev))
 		goto err;
 
 	return;

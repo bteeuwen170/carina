@@ -23,6 +23,7 @@
  */
 
 #include <cmdline.h>
+#include <delay.h>
 #include <dev.h>
 #include <errno.h>
 #include <fs.h>
@@ -30,9 +31,9 @@
 #include <issue.h>
 #include <kbd.h>
 #include <kernel.h>
-#include <module.h>
 #include <lock.h>
 #include <mboot.h>
+#include <module.h>
 #include <pci.h>
 #include <proc.h>
 #include <reboot.h>
@@ -42,13 +43,10 @@
 
 #include <sound/ac97.h>
 #include <sound/sb16.h>
-#include <timer/pit.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-extern void usrmode_enter();
 
 extern struct mboot_info *mboot;
 
@@ -62,11 +60,15 @@ void kernel_main(void)
 	 */
 
 	cpu_init();
+
 	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
 	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
 	mm_init(mboot->mmap_addr, mboot->mmap_len);
 
-	/* Initialize consoles */
+#ifdef CONFIG_PIT
+	pit_init();
+#endif
+
 #ifdef CONFIG_CONSOLE
 #ifdef CONFIG_CONSOLE_VGA
 	vga_con_init();
@@ -74,25 +76,21 @@ void kernel_main(void)
 #ifdef CONFIG_CONSOLE_SERIAL
 	serial_con_init();
 #endif
+#endif
+
 	devices_probe();
-	kprint_init();
 
 	/* TODO Other format (UTC) */
+	kprint_init();
 	kprintf("\033[1;34mWelcome to Elarix %d.%d! "
 			"(compiled on %s %s)\033[0;37m\n",
 			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
-#endif
-
-	timer_init();
 
 	memfs_init();
 	devfs_init();
 #ifdef CONFIG_ISO9660
 	iso9660_init();
 #endif
-
-	asm volatile ("sti");
-	/* TODO Actually get starting cpu */
 
 #ifdef CONFIG_IDE
 	ide_init();
@@ -115,6 +113,9 @@ void kernel_main(void)
 #ifdef CONFIG_SB16
 	sb16_init();
 #endif
+
+	asm volatile ("sti");
+	timer_init();
 
 #ifdef CONFIG_PCI
 	pci_init();
@@ -298,12 +299,6 @@ void kernel_main(void)
 		} else if (strcmp(cmd, "psb") == 0) {
 			sb16_play();
 #endif
-#ifdef CONFIG_PCSPK
-		} else if (strcmp(cmd, "beep") == 0) {
-			pcspk_play(835);
-			sleep(10);
-			pcspk_stop();
-#endif
 
 		/* Other */
 		} else if (strcmp(cmd, "reboot") == 0) {
@@ -312,8 +307,6 @@ void kernel_main(void)
 			panic(NULL, 0, 0);
 		} else if (strcmp(cmd, "clear") == 0) {
 			kprintf("\033[2J");
-		} else if (strcmp(cmd, "uptime") == 0) {
-			kprintf("uptime: %d seconds\n", uptime());
 		} else if (cmd[0] != '\0') {
 			kprintf("shell: command not found: %s\n", cmd);
 		}

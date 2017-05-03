@@ -275,22 +275,16 @@ static struct driver vga_con_driver = {
 
 int vga_con_init(void)
 {
-	struct device *devp;
 	int res;
 
 	if ((res = driver_reg(&vga_con_driver)) < 0)
 		return res;
 
-	if ((res = device_reg(&vga_con_driver, &devp, 0)) < 0)
-		return res;
-
-	return 0;
+	return device_reg(&vga_con_driver, NULL, 0);
 }
 
 void vga_con_exit(void)
 {
-	/* TODO unreg all devices */
-
 	driver_unreg(&vga_con_driver);
 }
 

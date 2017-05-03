@@ -23,6 +23,7 @@
  */
 
 #include <ata.h>
+#include <delay.h>
 #include <dev.h>
 #include <errno.h>
 #include <fs.h>
@@ -32,7 +33,6 @@
 #include <pci.h>
 
 #include <asm/cpu.h>
-#include <timer/pit.h>
 
 #include <stdlib.h>
 #include <string.h>

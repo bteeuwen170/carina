@@ -33,6 +33,7 @@
 #define MINOR(d)	((u32) ((d) & ((1U << 8) - 1)))
 
 #define D_CONTROLLER	1	/* Device is a controller */
+#define D_READY		2	/* Device has already been intialized */
 
 #define BUS_NONE	0
 #define BUS_PCI		1
@@ -44,7 +45,8 @@
 #define MAJOR_MCE	5	/* Mice */
 #define MAJOR_DSK	6	/* Disk devices */
 #define MAJOR_SND	7	/* Sound hardware */
-#define MAJOR_RTC	8	/* Real time clock */
+#define MAJOR_RTC	8	/* Real time clocks */
+#define MAJOR_TMR	9	/* System timers */
 #define MAJOR_ETC	63	/* Misc. */
 #define MAJOR_MAX	64
 

@@ -22,25 +22,25 @@
  *
  */
 
+#include <dev.h>
+#include <fs.h>
+#include <kernel.h>
+#include <module.h>
+
 #include <asm/cpu.h>
 
-#include <kernel.h>
+static const char devname[] = "pit";
 
-#include "pit.h"
+#define PIT_RATE	0b00110110
+#define PIT_SPKR	0b10110110
 
-/* TODO Should store as 10ms */
+#define PIT_FREQ	0x1234DE
+
+#define PIT_CMD		0x43
+#define PIT_CH0_IO	0x40
+#define PIT_CH2_IO	0x42
+
 volatile u64 ticks;
-
-time_t uptime(void)
-{
-#ifdef ARCH_i386
-	/* XXX TEMP XXX */
-	return ((u32) ticks) / 1000;
-#endif
-#ifdef ARCH_x86_64
-	return ticks / 1000;
-#endif
-}
 
 static int int_handler(struct int_stack *regs)
 {
@@ -51,31 +51,68 @@ static int int_handler(struct int_stack *regs)
 	return 1;
 }
 
-void sleep(const u64 delay)
+static int pit_read(struct file *fp, char *buf, off_t off, size_t n)
 {
-	u64 target = ticks + delay;
+	(void) fp, (void) off;
 
-	while (ticks < target)
-		asm volatile ("hlt");
+	*((u64 *) buf) = ticks;
+
+	return n;
 }
 
-int timer_init(void)
+static struct file_ops pit_file_ops = {
+	.read = &pit_read
+};
+
+static int pit_probe(struct device *devp)
 {
+	u32 freq;
 	int res;
-	u32 val;
 
-	res = irq_handler_reg(IRQ_PIT, &int_handler);
-
-	if (res < 0)
+	if ((res = irq_handler_reg(IRQ_PIT, &int_handler)) < 0)
 		return res;
 
-	/* val = PIT_FREQ / 100; */
-	val = PIT_FREQ / 1000;
 	ticks = 0;
+	freq = PIT_FREQ / 1000;
 
 	io_outb(PIT_CMD, PIT_RATE);
-	io_outb(PIT_CH0_IO, val & 0xFF);
-	io_outb(PIT_CH0_IO, (val >> 8) & 0xFF);
+	io_outb(PIT_CH0_IO, freq & 0xFF);
+	io_outb(PIT_CH0_IO, (freq >> 8) & 0xFF);
 
-	return res;
+	devp->op = &pit_file_ops;
+
+	return 0;
 }
+
+static void pit_fini(struct device *devp)
+{
+	(void) devp;
+}
+
+static struct driver pit_driver = {
+	.name	= devname,
+	.major	= MAJOR_TMR,
+
+	.busid	= BUS_NONE,
+	.bus	= NULL,
+
+	.probe	= &pit_probe,
+	.fini	= &pit_fini
+};
+
+int pit_init(void)
+{
+	int res;
+
+	if ((res = driver_reg(&pit_driver)) < 0)
+		return res;
+
+	return device_reg(&pit_driver, NULL, 0);
+}
+
+void pit_exit(void)
+{
+	driver_unreg(&pit_driver);
+}
+
+MODULE(pit, &pit_init, &pit_exit);

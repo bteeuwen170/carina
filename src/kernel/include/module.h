@@ -31,6 +31,18 @@
 #define MODULE_BEFORE(n)
 
 #if 1
+int serial_con_init(void);
+void serial_con_exit(void);
+
+int vga_con_init(void);
+void vga_con_exit(void);
+
+int iso9660_init(void);
+void iso9660_exit(void);
+
+int pit_init(void);
+void pit_exit(void);
+
 int ide_init(void);
 void ide_exit(void);
 
@@ -46,28 +58,14 @@ void cmos_exit(void);
 int ps2kbd_init(void);
 void ps2kbd_exit(void);
 
-/* int serial_init(void);
-void serial_exit(void); */
-
 int pci_init(void);
 void pci_exit(void);
 
 int ac97_init(void);
 void ac97_exit(void);
 
-/* pcspk */
-
 int sb16_init(void);
 void sb16_exit(void);
-
-int serial_con_init(void);
-void serial_con_exit(void);
-
-int vga_con_init(void);
-void vga_con_exit(void);
-
-int iso9660_init(void);
-void iso9660_exit(void);
 #endif
 
 #endif

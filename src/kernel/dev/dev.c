@@ -38,7 +38,7 @@ static u32 minor_last[MAJOR_MAX] = { 0 };
 
 const char *dev_names[] = {
 	NULL,
-	"zero", "mem", "con", "kbd", "mce", "dsk", "snd", "rtc",
+	"zero", "mem", "con", "kbd", "mce", "dsk", "snd", "rtc", "tmr",
 	[63] = "etc"
 };
 
@@ -141,6 +141,9 @@ void devices_probe(void)
 	int res;
 
 	list_for_each(devp, &devices, l) {
+		if (devp->flags & D_READY)
+			continue;
+
 		if (devp->flags & D_CONTROLLER)
 			dprintf("%s (dev %d) (%s)\n",
 					devp->name, MAJOR(devp->dev),
@@ -151,11 +154,11 @@ void devices_probe(void)
 					MAJOR(devp->dev), MINOR(devp->dev),
 					devp->drip->name);
 
-		if ((res = devp->drip->probe(devp)) < 0) {
+		if ((res = devp->drip->probe(devp)) < 0)
 			dprintf(KP_ERR KP_CON
 					" failed to initialize (%d)\n", res);
-			continue;
-		}
+		else
+			devp->flags |= D_READY;
 	}
 }
 

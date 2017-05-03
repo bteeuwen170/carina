@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/dev/timer/pit.h
+ * src/kernel/dev/timer/timer.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,24 +22,47 @@
  *
  */
 
-#ifndef _PIT_H
-#define _PIT_H
+#include <cmdline.h>
+#include <dev.h>
+#include <errno.h>
+#include <fs.h>
+#include <kernel.h>
 
-#include <sys/time.h>
+#include <string.h>
 
-#define PIT_RATE	0b00110110
-#define PIT_SPKR	0b10110110
+dev_t tmr_dev;
 
-#define PIT_FREQ	0x1234DE
+void sleep(const u64 delay)
+{
+	u64 ticks = 0, target;
 
-#define PIT_CMD		0x43
-#define PIT_CH0_IO	0x40
-#define PIT_CH2_IO	0x42
+	device_read(tmr_dev, &ticks, sizeof(u64));
 
-time_t uptime(void);
+	target = ticks + delay;
 
-void sleep(const u64 delay);
+	while (ticks < target) {
+		asm volatile ("hlt");
 
-int timer_init(void);
+		device_read(tmr_dev, (char *) &ticks, sizeof(u64));
+	}
+}
 
-#endif
+void timer_init(void)
+{
+	char buf[PATH_MAX + 1];
+
+	if (cmdline_str_get("timer", buf) == 0)
+		dir_basename(buf);
+	else
+		strcpy(buf, "tmr0");
+
+	if (!(tmr_dev = device_getbyname(buf)))
+		goto err;
+	if (!device_get(tmr_dev))
+		goto err;
+
+	return;
+
+err:
+	panic("unable to initialize a system timer", -ENODEV, 0);
+}

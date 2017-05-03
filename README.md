@@ -77,6 +77,7 @@ file system hierarchy layout:
 
 The following cmdline options are supported:
 
-	console=[path]          specify the system console
-	root=[path]             specify the root partition
-	rootfs=[fs]             specify the root file system
+	console=[path]          specify the system console device path
+	root=[path]             specify the root partition device path
+	rootfs=[fs]             specify the root file system type
+	timer=[path]			specify the system device path

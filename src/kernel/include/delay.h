@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/arch/x86/cpu/early_kprint.c
+ * src/kernel/include/delay.h
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,20 +22,10 @@
  *
  */
 
-static u16 *vga = (u16 *) 0xB8000;
-static u8 x, y;
+#ifndef _DELAY_H
+#define _DELAY_H
 
-/* FIXME Needs a better eco system */
-void early_kprint(const char *buf, size_t n)
-{
-	while (n--) {
-		if (*buf == '\n') {
-			x = 0;
-			y++;
-			buf++;
-			continue;
-		}
+void sleep(const u64 delay);
+void timer_init(void);
 
-		vga[y * 80 + x++] = ((u16) *buf++) | ((u16) 0x07) << 8;
-	}
-}
+#endif
