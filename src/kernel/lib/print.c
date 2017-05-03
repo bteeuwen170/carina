@@ -15,14 +15,17 @@
  */
 
 #include <cmdline.h>
-#include <fs.h>
 #include <dev.h>
+#include <errno.h>
+#include <fs.h>
 #include <kbd.h>
 #include <kernel.h>
 
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+
+static dev_t con_dev;
 
 /* we use this so that we can do without the ctype library */
 #define isdigit(c)	((c) >= '0' && (c) <= '9')
@@ -304,8 +307,6 @@ int sprintf(char *str, const char *fmt, ...)
 	return res;
 }
 
-struct file *fp;
-
 /* This function is a mess */
 void kprint(const char *prefix, char *fmt, ...)
 {
@@ -333,18 +334,26 @@ void kprint(const char *prefix, char *fmt, ...)
 
 	va_end(args);
 
-	vga_con_write(fp, fmtbuf, 0, strlen(fmtbuf));
-	/* if (fp)
-		file_write(fp, fmtbuf, strlen(fmtbuf)); */
+	if (con_dev)
+		device_write(con_dev, fmtbuf, strlen(fmtbuf));
+	/* else
+		early_kprint(fmtbuf, strlen(fmtbuf)); */
 }
 
 void kprint_init(void)
 {
-	char path[PATH_MAX];
+	char buf[PATH_MAX + 1];
 
-	/* if (cmdline_str_get("console", path) != 0) */
-		/* strncpy(path, "/con0", PATH_MAX);
+	/* for(;;); */
+	strcpy(buf, "con0");
+	if (cmdline_str_get("console", buf) != 0)
+		goto err;
+	dir_basename(buf);
+	if (!(con_dev = device_getbyname(buf)))
+		goto err;
 
-	if (file_open(path, 0, &fp) < 0)
-		panic("unable to mount initialize kprint", 0, 0); */
+	return;
+
+err:
+	panic("unable to initialize kprint", -ENODEV, 0);
 }

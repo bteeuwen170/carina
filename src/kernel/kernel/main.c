@@ -55,16 +55,16 @@ extern struct mboot_info *mboot;
 /* void kernel_main(struct mboot_info *mboot) */
 void kernel_main(void)
 {
+	cmdline_init((const char *) (uintptr_t) mboot->cmdline);
+
 	/* SPINLOCK(main);
 	 * spin_lock(main);
 	 */
 
-	/* FIXME Early VGA */
 	cpu_init();
 	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
 	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
 	mm_init(mboot->mmap_addr, mboot->mmap_len);
-	dev_init();
 
 	/* Initialize consoles */
 #ifdef CONFIG_CONSOLE
@@ -74,18 +74,14 @@ void kernel_main(void)
 #ifdef CONFIG_CONSOLE_SERIAL
 	serial_con_init();
 #endif
+	devices_probe();
 	kprint_init();
-	kprintf("\033[2J");
-#endif
 
 	/* TODO Other format (UTC) */
 	kprintf("\033[1;34mWelcome to Elarix %d.%d! "
 			"(compiled on %s %s)\033[0;37m\n",
 			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
-	kprintf(KP_CON "Elarix has been loaded by %s\n",
-			mboot->boot_loader_name);
-
-	cmdline_init((const char *) (uintptr_t) mboot->cmdline);
+#endif
 
 	timer_init();
 
@@ -98,8 +94,6 @@ void kernel_main(void)
 	asm volatile ("sti");
 	/* TODO Actually get starting cpu */
 
-	/* TODO Modules */
-	/* acpi_init(); */
 #ifdef CONFIG_IDE
 	ide_init();
 #endif

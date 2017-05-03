@@ -214,7 +214,7 @@ static void vga_con_put(const char c)
 	vga_con_move(x, y);
 }
 
-int vga_con_write(struct file *fp, const char *buf, off_t off, size_t n)
+static int vga_con_write(struct file *fp, const char *buf, off_t off, size_t n)
 {
 	size_t i;
 
@@ -237,10 +237,20 @@ static struct file_ops vga_con_file_ops = {
 
 static int vga_con_probe(struct device *devp)
 {
+	u16 off;
+
 	/*
-	 * TODO Detect if present
+	 * TODO Detect if present (using pci perhaps?)
 	 * NOTE Disable vga in qemu using "-vga none"
 	 */
+
+	io_outb(0x3D4, 0x0E);
+	off = io_inb(0x3D5) << 8;
+	io_outb(0x3D4, 0x0F);
+	off |= io_inb(0x3D5);
+
+	y = off / 80;
+	x = off % 80;
 
 	devp->op = &vga_con_file_ops;
 

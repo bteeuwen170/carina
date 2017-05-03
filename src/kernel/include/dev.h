@@ -95,7 +95,7 @@ struct device *device_get(dev_t dev);
 dev_t device_getbyname(const char *name);
 void devices_probe(void);
 
-int dev_init(void);
-void dev_exit(void);
+int device_read(dev_t dev, char *buf, size_t n);
+int device_write(dev_t dev, const char *buf, size_t n);
 
 #endif

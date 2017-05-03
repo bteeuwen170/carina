@@ -57,7 +57,7 @@ static int atapi_read(struct file *fp, char *buf, off_t off, size_t n)
 	packet[10] = 0;
 	packet[11] = 0;
 
-	if ((res = atapi_out(devp, &packet)) < 0)
+	if ((res = atapi_out(devp, packet)) < 0)
 		return res;
 
 	return atapi_in(devp, buf);

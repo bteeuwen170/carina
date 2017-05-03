@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/dev/block/buf.c
+ * src/kernel/arch/x86/cpu/early_kprint.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,55 +22,22 @@
  *
  */
 
-#include <block.h>
-#include <dev.h>
-#include <errno.h>
-#include <fs.h>
-#include <list.h>
+static u16 *vga = (u16 *) 0xB8000;
+static u8 x, y;
 
-#include <stdlib.h>
-
-static LIST_HEAD(blocks);
-
-int block_get(dev_t dev, off_t block, struct block **bp)
+/* FIXME Needs a better eco system */
+void early_kprint(const char *buf, size_t n)
 {
-	struct block *cbp;
-	struct device *devp;
-	struct inode ip;
-	struct file fp;
-	int res;
+	return;
 
-	if (!(devp = device_get(dev)))
-		return -ENODEV;
+	while (n--) {
+		if (*buf == '\n') {
+			x = 0;
+			y++;
+			buf++;
+			continue;
+		}
 
-	if (!(cbp = kmalloc(sizeof(struct block))))
-		return -ENOMEM;
-
-	list_init(&cbp->l);
-	list_add(&blocks, &cbp->l);
-	cbp->refs = 1;
-
-	cbp->dev = dev;
-	cbp->block = block;
-	cbp->flags = 0;
-
-	fp.ip = &ip;
-	fp.ip->rdev = dev;
-
-	if ((res = devp->op->read(&fp, cbp->buffer, cbp->block, 1)) < 0)
-		goto err;
-
-	*bp = cbp;
-
-	return res;
-
-err:
-	kfree(cbp);
-
-	return res;
-}
-
-void block_put(struct block *bp)
-{
-	/* TODO */
+		vga[y * 80 + x++] = ((u16) *buf++) | ((u16) 0x07) << 8;
+	}
 }

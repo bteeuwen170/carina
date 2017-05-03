@@ -159,37 +159,50 @@ void devices_probe(void)
 	}
 }
 
-#if 0
-static int dev_probe(struct device *devp)
+int device_read(dev_t dev, char *buf, size_t n)
 {
-	(void) devp;
+	struct device *devp;
+	struct inode ip;
+	struct file fp;
 
-	return 0;
+	if (!dev)
+		return -EINVAL;
+
+	if (!(devp = device_get(dev)))
+		return -ENODEV;
+
+	if (!devp->op->read)
+		return -EPERM;
+
+	if (!n)
+		return 0;
+
+	fp.ip = &ip;
+	fp.ip->rdev = dev;
+
+	return devp->op->read(&fp, buf, 0, n);
 }
 
-static void dev_fini(struct device *devp)
+int device_write(dev_t dev, const char *buf, size_t n)
 {
-	(void) devp;
+	struct device *devp;
+	struct inode ip;
+	struct file fp;
 
-	/* TODO */
-}
+	if (!dev)
+		return -EINVAL;
 
-static struct driver dev_driver = {
-	.name	= devname,
+	if (!(devp = device_get(dev)))
+		return -ENODEV;
 
-	.op	= NULL,
-	.probe	= &dev_probe,
-	.fini	= &dev_fini
-};
-#endif
+	if (!devp->op->write)
+		return -EPERM;
 
-int dev_init(void)
-{
-	/* return driver_reg(&dev_driver); */
-	return 0;
-}
+	if (!n)
+		return 0;
 
-void dev_exit(void)
-{
+	fp.ip = &ip;
+	fp.ip->rdev = dev;
 
+	return devp->op->write(&fp, buf, 0, n);
 }
