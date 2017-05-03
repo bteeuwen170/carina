@@ -43,7 +43,7 @@ int file_open(const char *path, mode_t mode, struct file **fp)
 
 	if ((res = dir_get(path, &cfp->dep)) < 0)
 		goto err;
-	/* TODO Handle O_CREATE */
+	/* TODO Handle F_CREATE */
 
 	if ((res = inode_get(cfp->dep->sp, cfp->dep->inum, &cfp->ip)) < 0)
 		goto err;
@@ -52,15 +52,17 @@ int file_open(const char *path, mode_t mode, struct file **fp)
 		res = -EPERM;
 	}
 
-	if (cfp->ip->sp->flags & M_RO && !(mode & O_RO)) {
+	if (cfp->ip->sp->flags & M_RO && !(mode & F_RO)) {
 		res = -EROFS;
 		goto err;
 	}
 
-	if (!(cfp->ip->mode & I_DIR) && mode & O_DIR) {
+	if (!(cfp->ip->mode & I_DIR) && mode & F_DIR) {
 		res = -ENOTDIR;
 		goto err;
 	}
+
+	cfp->mode = mode;
 
 	*fp = cfp;
 
@@ -88,9 +90,9 @@ void file_close(struct file *fp)
 	kfree(fp);
 }
 
-/* int file_read(struct file *fp, char *buf, off_t off, size_t n)
+int file_read(struct file *fp, char *buf, size_t n)
 {
-	if (!fp)
+	if (!fp || fp->mode & F_DIR)
 		return -EBADF;
 
 	if (!fp->ip->op->read)
@@ -98,11 +100,15 @@ void file_close(struct file *fp)
 
 	if (!n)
 		return 0;
-} */
 
-int file_write(struct file *fp, const char *buf, off_t off, size_t n)
+	/* TODO */
+
+	return fp->ip->op->read(fp, buf, 0, n);
+}
+
+int file_write(struct file *fp, const char *buf, size_t n)
 {
-	if (!fp)
+	if (!fp || fp->mode & F_RO || fp->mode & F_DIR)
 		return -EBADF;
 
 	if (!fp->ip->op->write)
@@ -113,7 +119,7 @@ int file_write(struct file *fp, const char *buf, off_t off, size_t n)
 
 	/* TODO */
 
-	return fp->ip->op->write(fp, buf, off, n);
+	return fp->ip->op->write(fp, buf, 0, n);
 }
 
 int file_readdir(struct file *fp, char *_name)
@@ -121,11 +127,11 @@ int file_readdir(struct file *fp, char *_name)
 	if (!fp)
 		return -EBADF;
 
+	if (!(fp->mode & F_DIR))
+		return -ENOTDIR;
+
 	if (!fp->ip->op->readdir)
 		return -EPERM;
-
-	if (!(fp->ip->mode & I_DIR))
-		return -ENOTDIR;
 
 	return fp->ip->op->readdir(fp, _name);
 }

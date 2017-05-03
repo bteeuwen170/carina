@@ -139,10 +139,8 @@ found:
 	sp->blocks = dev_sp->blocks;
 	sp->block_size = dev_sp->block_size;
 
-	if ((res = inode_get(sp, dev_dep->addr, &sp->root)) < 0)
+	if ((res = inode_get(sp, i * sp->block_size + 156, &sp->root)) < 0)
 		goto err;
-
-	sp->root->inum = i * sp->block_size + 156;
 
 	sp->root->block = dev_dep->addr;
 	sp->root->size = dev_dep->size;
@@ -168,11 +166,10 @@ static int iso9660_alloc(struct inode *ip)
 	ddep = (struct iso9660_dirent *)
 			(bp->buffer + ip->inum % ip->sp->block_size);
 
-	/* FIXME Root is apparently not a dir?! */
-	/* if (ddep->flags & ISO9660_DF_DIR) */
+	if (ddep->flags & ISO9660_DF_DIR)
 		ip->mode = I_DIR;
-	/* else
-		ip->mode = I_REG; */
+	else
+		ip->mode = I_REG;
 
 	ip->block = ddep->addr;
 	ip->size = ddep->size;
@@ -242,6 +239,11 @@ err:
 	return res;
 }
 
+static int iso9660_read(struct file *fp, char *buf, off_t off, size_t n)
+{
+	struct block *bp;
+}
+
 static int iso9660_readdir(struct file *fp, char *_name)
 {
 	struct block *bp;
@@ -303,7 +305,7 @@ static struct fs_ops iso9660_fs_ops = {
 };
 
 static struct file_ops iso9660_file_ops = {
-	.read		= NULL,
+	.read		= &iso9660_read,
 	.write		= NULL,
 	.readdir	= &iso9660_readdir,
 	.ioctl		= NULL

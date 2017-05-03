@@ -40,7 +40,6 @@
 
 #include <asm/cpu.h>
 
-#include <char/pcspk.h>
 #include <sound/ac97.h>
 #include <sound/sb16.h>
 #include <timer/pit.h>
@@ -240,9 +239,9 @@ void kernel_main(void)
 			int res;
 
 			if (strcmp(cmd, "ls") == 0)
-				res = file_open(".", O_RO, &fp);
+				res = file_open(".", F_RO | F_DIR, &fp);
 			else
-				res = file_open(cmd + 3, O_RO, &fp);
+				res = file_open(cmd + 3, F_RO | F_DIR, &fp);
 
 			if (res == 0) {
 				while (file_readdir(fp, nbuf) == 0)
@@ -251,22 +250,22 @@ void kernel_main(void)
 
 				file_close(fp);
 			}
-			/* struct usr_dirent udep;
+		} else if (strncmp(cmd, "cat", 3) == 0) {
 			struct file *fp;
+			char buf[BLOCK_SIZE];
+			int res;
 
-			if (strcmp(cmd, "ls") == 0) {
-				fp = fs_open(".", 0, 0);
-			} else {
-				fp = fs_open(cmd + 3, 0, 0);
+			if (strcmp(cmd, "cat") == 0)
+				res = file_open(".", F_RO, &fp);
+			else
+				res = file_open(cmd + 4, F_RO, &fp);
+
+			if (res == 0) {
+				kprintf("%s", file_read(fp, buf,
+						0, BLOCK_SIZE));
+
+				file_close(fp);
 			}
-
-			if (fp) {
-				while (fs_readdir(fp, &udep) > 0)
-					kprintf("%s ", udep.name);
-				kprintf("\n");
-
-				fs_close(fp);
-			} */
 		} else if (strncmp(cmd, "cd", 2) == 0) {
 			fs_chdir(cmd + 3);
 		} else if (strcmp(cmd, "cwd") == 0) {

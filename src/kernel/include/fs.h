@@ -56,10 +56,10 @@
 #define I_OW		0000002	/* Other write */
 #define I_OE		0000001	/* Other execute */
 
-/* Open modes */
-#define O_DIR		04	/* File is a directory */
-#define O_CREATE	02	/* Create file if doesn't exist */
-#define O_RO		01	/* Read-only access */
+/* File modes */
+#define F_DIR		04	/* File is a directory */
+#define F_CREATE	02	/* Create file if doesn't exist */
+#define F_RO		01	/* Read-only access */
 
 struct fs_driver {
 	struct list_head l;
@@ -127,7 +127,8 @@ struct dirent {
 };
 
 struct file {
-	off_t off;		/* Current offset */
+	off_t	off;		/* Current offset */
+	mode_t	mode;		/* File mode */
 
 	struct dirent *dep;	/* Associated directory entry pointer */
 	struct inode *ip;	/* Associated inode pointer */
@@ -191,8 +192,8 @@ int dir_basename(char *path);
 
 int file_open(const char *path, mode_t mode, struct file **fp);
 void file_close(struct file *fp);
-/* int file_read(struct file *fp, char *buf, off_t off, size_t n); */
-int file_write(struct file *fp, const char *buf, off_t off, size_t n);
+/* int file_read(struct file *fp, char *buf, size_t n); */
+int file_write(struct file *fp, const char *buf, size_t n);
 int file_readdir(struct file *fp, char *_name);
 /* int file_ioctl(struct file *fp, unsigned int cmd, unsigned long arg); */
 /* int file_stat(struct file *fp, struct stat *sp); */

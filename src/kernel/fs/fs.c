@@ -62,8 +62,6 @@ int fs_chdir(const char *path)
 		goto err;
 	}
 
-	dir_put(cproc->cwd);
-
 	if ((res = inode_get(dep->sp, dep->inum, &dp)) < 0)
 		goto err;
 
@@ -72,6 +70,7 @@ int fs_chdir(const char *path)
 		goto err;
 	}
 
+	dir_put(cproc->cwd);
 	inode_put(dp);
 
 	cproc->cwd = dep;

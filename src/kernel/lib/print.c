@@ -335,7 +335,7 @@ void kprint(const char *prefix, char *fmt, ...)
 
 	vga_con_write(fp, fmtbuf, 0, strlen(fmtbuf));
 	/* if (fp)
-		file_write(fp, fmtbuf, 0, strlen(fmtbuf)); */
+		file_write(fp, fmtbuf, strlen(fmtbuf)); */
 }
 
 void kprint_init(void)
