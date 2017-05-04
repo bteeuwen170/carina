@@ -59,7 +59,7 @@ export HOSTCFLAGS
 
 BOCHSFLAGS	:= -f cfg/bochs.rc -q
 KVMFLAGS	:= -enable-kvm
-QEMUFLAGS	:= -m 8M --serial vc -soundhw pcspk,ac97,sb16 #-vga none #-curses #-cpu qemu32 # To test no long mode message
+QEMUFLAGS	:= -m 4M --serial vc -soundhw pcspk,ac97,sb16 #-vga none #-curses #-cpu qemu32 # To test no long mode message
 QEMUDBGFLAGS	:= -s -d cpu_reset,int#,cpu,exec,in_asm
 WGETFLAGS	:= -q --show-progress
 
@@ -77,13 +77,12 @@ debug: kernel iso qemu
 
 CLEAN_FILES	+= root/grub.img \
 		   root/boot/kernel \
-		   util/menuconfig/menuconfig
+		   util/menuconfig/menuconfig \
+		   .config.tmp
 
 PHONY += clean
-# TODO Clean toolchain TODO Not POSIX complient apperently
+# TODO Clean toolchain TODO Not POSIX complient apparently
 clean:
-	echo "  RM      .config.tmp"
-	rm .config.tmp
 	find bin/ -type f -not -path '*/\.*' -delete -exec echo "  RM      {}" \;
 	find dbg/ -type f -not -path '*/\.*' -delete -exec echo "  RM      {}" \;
 	find root/ -type d -empty -delete -exec echo "  RMDIR   {}" \;
@@ -109,8 +108,6 @@ root/tmp/:
 	mkdir -p root/app/lib/
 	mkdir -p root/app/shr/
 	mkdir -p root/app/tmp/
-	#mkdir -p root/boot/
-	#mkdir -p root/boot/grub/
 	mkdir -p root/cfg/
 	mkdir -p root/sys/
 	mkdir -p root/sys/dev/
@@ -136,7 +133,7 @@ bin/elarix.iso: bin/kernel
 	echo -e "\033[1m> Copying kernel to system root...\033[0m"
 	cp bin/kernel root/boot/.
 	echo -e "\033[1m> Creating GRUB image...\033[0m"
-	grub-mkimage -p root/boot/grub -c root/boot/grub/grub.cfg -o bin/grub.img -O i386-pc biosdisk iso9660 normal multiboot ext2 boot
+	grub-mkimage -p root/boot/grub -c root/boot/grub/grub.cfg -o bin/grub.img -O i386-pc biosdisk boot ext2 iso9660 multiboot normal
 	cat /usr/lib/grub/i386-pc/cdboot.img bin/grub.img > root/grub.img
 	echo -e "\033[1m> Creating Elarix iso...\033[0m"
 	#genisoimage -A "Elarix" -input-charset "utf-8" -R -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/elarix.iso root

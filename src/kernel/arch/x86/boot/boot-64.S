@@ -32,6 +32,7 @@ kernel_start:
 	xor %ax, %ax
 	mov %ax, %ss
 
+	mov mboot, %rdi
 	call kernel_main
 
 /* Just in case */

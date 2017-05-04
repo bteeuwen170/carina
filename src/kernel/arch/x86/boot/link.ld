@@ -45,7 +45,6 @@ SECTIONS
 		*(.bss)
 	}
 
-	/* XXX Do we need any padding or alternative alignment? */
 	kern_end = .;
 
 	/DISCARD/ : {

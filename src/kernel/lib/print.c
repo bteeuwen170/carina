@@ -336,8 +336,8 @@ void kprint(const char *prefix, char *fmt, ...)
 
 	if (con_dev)
 		device_write(con_dev, fmtbuf, strlen(fmtbuf));
-	/* else
-		early_kprint(fmtbuf, strlen(fmtbuf)); */
+	else
+		early_kprint(fmtbuf, strlen(fmtbuf));
 }
 
 void kprint_init(void)

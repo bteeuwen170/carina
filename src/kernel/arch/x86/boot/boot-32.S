@@ -30,6 +30,7 @@
 kernel_start:
 	/* XXX Do we have to load the segment registers as well? */
 
+	push mboot
 	call kernel_main
 
 /* Just in case */

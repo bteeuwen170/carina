@@ -66,7 +66,8 @@ void paging_init(struct mboot_info *mboot)
 	ac = mboot->mem_lo + mboot->mem_hi;
 
 	/* XXX TEMP XXX */
-	pages = ((ac > (1 << 22)) ? 1 << 20 : ac >> 2) + 0x100;
+	/* pages = ((ac > (1 << 22)) ? 1 << 20 : ac >> 2) + 0x100; */
+	pages = 0x80000;
 	pte = PTE(pages);
 	pdte = PDTE(pages);
 #ifdef CONFIG_X86_PAE

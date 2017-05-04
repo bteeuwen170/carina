@@ -48,10 +48,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern struct mboot_info *mboot;
-
-/* void kernel_main(struct mboot_info *mboot) */
-void kernel_main(void)
+void kernel_main(struct mboot_info *mboot)
 {
 	cmdline_init((const char *) (uintptr_t) mboot->cmdline);
 
