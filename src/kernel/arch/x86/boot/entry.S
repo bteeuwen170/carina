@@ -24,6 +24,8 @@
 
 .code32
 
+.set VM_ADDR,		0xFFFFFFFF80000000
+
 .section .mboot
 
 .set MB_MAGIC,		0x1BADB002
@@ -53,7 +55,7 @@ entry:
 	jne nomboot */
 
 	/* Save the Multiboot info struct pointer */
-	mov %ebx, mboot
+	mov %ebx, (mboot - VM_ADDR)
 
 #ifdef CONFIG_X86_PAE
 	/* Check if CPUID is available */
@@ -101,7 +103,10 @@ entry:
 	mov %eax, %cr4
 
 	/* Load paging base address */
-	call paging_init
+	/* call paging_init */
+	lea paging_init, %eax
+	hlt
+	call *%eax
 	mov $0x200000, %eax
 	mov %eax, %cr3
 
@@ -113,6 +118,7 @@ entry:
 	wrmsr
 #endif
 
+	hlt
 	/* Enable paging */
 	mov %cr0, %eax
 	bts $31, %eax /* CR0.PG */
@@ -125,31 +131,31 @@ entry:
 	jmp kernel_start
 #endif
 #ifdef ARCH_x86_64
-	ljmp $0x08, $kernel_start
+	ljmp $0x08, $(kernel_start - VM_ADDR)
 #endif
 
 nomboot:
-	mov $msg_nomboot, %esi
+	mov $(msg_nomboot - VM_ADDR), %esi
 	jmp early_panic
 
 nocpuid:
-	mov $msg_nocpuid, %esi
+	mov $(msg_nocpuid - VM_ADDR), %esi
 	jmp early_panic
 
 nopae:
-	mov $msg_nopae, %esi
+	mov $(msg_nopae - VM_ADDR), %esi
 	jmp early_panic
 
 nolm:
-	mov $msg_nolm, %esi
+	mov $(msg_nolm - VM_ADDR), %esi
 	jmp early_panic
 
 nosse:
-	mov $msg_nosse, %esi
+	mov $(msg_nosse - VM_ADDR), %esi
 	jmp early_panic
 
 nosse2:
-	mov $msg_nosse2, %esi
+	mov $(msg_nosse2 - VM_ADDR), %esi
 	jmp early_panic
 
 early_panic:

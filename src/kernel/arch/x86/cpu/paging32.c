@@ -37,7 +37,7 @@
 #define PDPE(x)		get_parent(PDTE(x), ENTRIES)
 #define PML4E(x)	get_parent(PDPE(x), ENTRIES)
 
-static u32 get_parent(u32 entry, u32 size)
+static __attribute__ ((section(".init"))) u32 get_parent(u32 entry, u32 size)
 {
 	u32 res = entry / size;
 
@@ -48,8 +48,9 @@ static u32 get_parent(u32 entry, u32 size)
 }
 
 /* TODO Only identity map the kernel binary itself */
-void paging_init(struct mboot_info *mboot)
+void __attribute__ ((section(".init"))) paging_init(struct mboot_info *mboot)
 {
+	return;
 	u32 pml4e = 0, pdpte = 0, pdte, pte, pages;
 #if defined(ARCH_i386) && defined(CONFIG_X86_PAE)
 	u64 *pdpt, *pdt, *pt;

@@ -24,9 +24,10 @@
 
 #include <asm/cpu.h>
 
-static struct tss_entry tss[TSS_ENTRIES];
+static struct tss_entry tss[TSS_ENTRIES]
+		__attribute__ ((section(".gdt")));
 
-void tss_init(u32 *base, u32 *limit)
+void __attribute__ ((section(".init"))) tss_init(u32 *base, u32 *limit)
 {
 	/* TODO Fill in the TSS for user mode */
 

@@ -24,10 +24,11 @@
 
 #include <asm/cpu.h>
 
-static struct segment_desc gdt[GDT_ENTRIES - 1];
+static struct segment_desc gdt[GDT_ENTRIES - 1]
+		__attribute__ ((section(".gdt")));
 
-static void gdt_set(const u8 gate, const u32 base, const u32 limit,
-		const u8 type, const u8 lm)
+static void __attribute__ ((section(".init"))) gdt_set(const u8 gate,
+		const u32 base, const u32 limit, const u8 type, const u8 lm)
 {
 	gdt[gate].limit_lo	= limit & 0xFFFF;
 	gdt[gate].base_lo[0]	= base & 0xFF;
@@ -38,9 +39,12 @@ static void gdt_set(const u8 gate, const u32 base, const u32 limit,
 	gdt[gate].base_hi	= (base >> 24) & 0xFF;
 }
 
-void gdt_init(void)
+void __attribute__ ((section(".init"))) gdt_init(void)
 {
 	u32 tss_base, tss_limit;
+
+	u16 *vga = (u16 *) 0xB80000;
+	vga[81] = ((u16) 'm') | ((u16) 0x07) << 8;
 
 	tss_init(&tss_base, &tss_limit);
 

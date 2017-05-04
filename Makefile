@@ -49,9 +49,9 @@ include .config.tmp
 TYPES		= src/kernel/include/sys/types.h
 # TEMP
 ASFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS)
-CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fomit-frame-pointer
-CFLAGS32	:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -Werror=implicit-function-declaration -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fno-omit-frame-pointer
-LDFLAGS		:= -nostdlib -z max-page-size=4096
+CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -include $(TYPES) -mcmodel=kernel -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fomit-frame-pointer
+CFLAGS32	:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -Werror=implicit-function-declaration -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g0 #-fno-omit-frame-pointer
+LDFLAGS		:= -nostdlib -z max-page-size=4096 -s
 export ASFLAGS CFLAGS CFLAGS32 LDFLAGS
 
 HOSTCFLAGS	:= -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -g #-Os

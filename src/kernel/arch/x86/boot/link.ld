@@ -22,6 +22,8 @@
  *
  */
 
+VM_ADDR = 0xFFFFFFFF80000000;
+
 SECTIONS
 {
 	. = 0x100000;
@@ -31,16 +33,23 @@ SECTIONS
 		. = ALIGN(4096);
 	}
 
-	.text ALIGN(4096) : AT(ADDR(.text)) {
+	.init ALIGN(4096) : {
+		*(.init)
+		*(.gdt)
+	}
+
+	. += VM_ADDR;
+
+	.text ALIGN(4096) : AT(ADDR(.text) - VM_ADDR) {
 		*(.text)
 	}
 
-	.data ALIGN(4096) : AT(ADDR(.data)) {
+	.data ALIGN(4096) : AT(ADDR(.data) - VM_ADDR) {
 		*(.data)
 		*(.rodata)
 	}
 
-	.bss ALIGN(4096) : AT(ADDR(.bss)) {
+	.bss ALIGN(4096) : AT(ADDR(.bss) - VM_ADDR) {
 		*(COMMON)
 		*(.bss)
 	}

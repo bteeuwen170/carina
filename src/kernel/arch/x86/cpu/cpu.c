@@ -29,6 +29,7 @@
 
 #include <string.h>
 
+#if 0
 static void cpu_info(void)
 {
 	u32 eax, ebx, ecx, edx;
@@ -58,6 +59,7 @@ static void cpu_info(void)
 
 	kprintf(KP_DBG "%s\n", name);
 }
+#endif
 
 void cpu_init(void)
 {
