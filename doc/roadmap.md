@@ -49,12 +49,20 @@
 		* Unmounting... (nearly done)
 		* ~~Inode caching~~
 		* ~~Dirent caching~~
+	* Reading ELF...
 	* ~~devfs~~
+	* ext2
+		* Reading
+		* Writing
+	* vfat(12/16/32)
+		* Reading
+		* Writing
 	* iso9660... (nearly done)
 	* memfs...
 	* sysfs
 * Inter Process Communication
 	* Pipes
+	* Signals
 * klibc...
 * Memory Management
 	* Proper paging...
@@ -62,6 +70,8 @@
 	* Physical memory manager
 	* Virtual memory manager
 	* kmalloc...
+* Multitasking
+	* Preemptive scheduling
 * Userspace
 	* System calls
 	* libc
