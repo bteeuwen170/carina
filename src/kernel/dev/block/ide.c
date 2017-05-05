@@ -243,19 +243,9 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 	devp->bus = pcp;
 	devp->device = idevp;
 
-	/* FIXME Not for ATAPI*/
-	if (idevp->ident.cmdset.lba48 && idevp->ident.cmdset_active.lba48)
-		idevp->size = idevp->ident.lba48_max;
-	else if (idevp->ident.features.lba28)
-		idevp->size = idevp->ident.lba28_max;
-	else
-		goto err;
-
-	dprintf(KP_CON "%s, %s drive @ IRQ %u\n", devp->name,
+	dprintf(KP_CON "%u: %s, %s drive @ IRQ %u\n",
+			MINOR(devp->dev), devp->name,
 			(idevp->type ? "ATAPI": "ATA"), pcp->int_line);
-	/* FIXME Not for ATAPI*/
-	dprintf(KP_CON "%u sectors (%u MB)\n", idevp->size,
-			idevp->size * 512 / 1024 / 1024);
 
 	return 0;
 

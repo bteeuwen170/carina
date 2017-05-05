@@ -33,10 +33,10 @@
 #define IDE_CHANNELS	2	/* Number of IDE channels */
 #define IDE_DRIVES	2	/* Number of drives per IDE channel */
 
-#define IDE_CH0_CMD		0x3F6
-#define IDE_CH0_IO		0x1F0
-#define IDE_CH1_CMD		0x376
-#define IDE_CH1_IO		0x170
+#define IDE_CH0_CMD	0x3F6
+#define IDE_CH0_IO	0x1F0
+#define IDE_CH1_CMD	0x376
+#define IDE_CH1_IO	0x170
 
 struct ata_ident {
 	u16		type;
@@ -89,7 +89,6 @@ struct ide_device {
 	u8	nint;
 
 	u8	drive, type;
-	u64	size;
 
 	struct ata_ident ident;
 };
