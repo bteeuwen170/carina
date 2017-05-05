@@ -249,6 +249,8 @@ static int iso9660_read(struct file *fp, char *buf, off_t off, size_t n)
 	struct block *bp;
 	int res;
 
+	/* TODO Respect n */
+
 	if ((res = block_get(fp->ip->sp->dev, (off_t) fp->ip->block, &bp)) < 0)
 		return res;
 

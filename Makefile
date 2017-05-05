@@ -63,7 +63,7 @@ export HOSTCFLAGS
 BOCHSFLAGS	:= -f cfg/bochs.rc -q
 KVMFLAGS	:= -enable-kvm
 QEMUFLAGS	:= -m 32M --serial vc -soundhw pcspk,ac97,sb16 #-vga none #-curses #-cpu qemu32 # To test no long mode message
-QEMUDBGFLAGS	:= -s -d cpu_reset#,int,cpu,exec,in_asm -no-reboot
+QEMUDBGFLAGS	:= -s #-d cpu_reset#,int,cpu,exec,in_asm -no-reboot
 WGETFLAGS	:= -q --show-progress
 
 include src/kernel/Makefile

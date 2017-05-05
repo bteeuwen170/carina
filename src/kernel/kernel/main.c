@@ -242,9 +242,15 @@ void kernel_main(struct mboot_info *mboot)
 
 				file_close(fp);
 			}
+		} else if (strcmp(cmd, "uptime") == 0) {
+			u64 crap;
+			struct file *fp;
+			file_open("/sys/dev/tmr0", F_RO, &fp);
+			file_read(fp, &crap, 1);
+			kprintf("%d\n", crap);
 		} else if (strncmp(cmd, "cat", 3) == 0) {
 			struct file *fp;
-			char buf[BLOCK_SIZE];
+			char buf[4096];
 			int res;
 
 			if (strcmp(cmd, "cat") == 0)
@@ -253,11 +259,11 @@ void kernel_main(struct mboot_info *mboot)
 				res = file_open(cmd + 4, F_RO, &fp);
 
 			if (res == 0) {
-				res = file_read(fp, buf, BLOCK_SIZE);
+				res = file_read(fp, buf, 4096);
 				if (res > 0)
 					kprintf("%s", buf);
 				else
-					kprintf("%d", res);
+					kprintf("%d\n", res);
 
 				file_close(fp);
 			}
