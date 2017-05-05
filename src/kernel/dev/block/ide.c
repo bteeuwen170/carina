@@ -284,6 +284,8 @@ static int ide_probe(struct device *devp)
 
 static void ide_fini(struct device *devp)
 {
+	(void) devp;
+
 	/* TODO */
 }
 

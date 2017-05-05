@@ -36,7 +36,7 @@ void sleep(const u64 delay)
 {
 	u64 ticks = 0, target;
 
-	device_read(tmr_dev, &ticks, sizeof(u64));
+	device_read(tmr_dev, (char *) &ticks, sizeof(u64));
 
 	target = ticks + delay;
 

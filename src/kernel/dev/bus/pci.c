@@ -122,17 +122,6 @@ struct {
 };
 #endif
 
-#if 0
-static void pci_dev_reg(struct pci_dev *card)
-{
-	u8 i;
-
-
-	list_init(&card->l);
-	list_add(&pci_devices, &card->l);
-}
-#endif
-
 static u32 pci_ind(u16 bus, u16 dev, u16 func, u32 reg)
 {
 	io_outd(0xCF8, 0x80000000 | ((u32) bus << 16) | ((u32) dev << 11) |
@@ -141,6 +130,7 @@ static u32 pci_ind(u16 bus, u16 dev, u16 func, u32 reg)
 	return io_ind(0xCFC + (reg & 3));
 }
 
+#if 0
 static void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val)
 {
 	io_outd(0xCF8, 0x80000000 | ((u32) bus << 16) | ((u32) dev << 11) |
@@ -148,6 +138,7 @@ static void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val)
 
 	io_outd(0xCFC, val);
 }
+#endif
 
 static int pci_config(u16 bus, u16 dev, u16 func)
 {

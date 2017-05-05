@@ -72,5 +72,9 @@ err:
 
 void block_put(struct block *bp)
 {
-	/* TODO */
+	if (!bp)
+		return;
+
+	list_rm(&bp->l);
+	kfree(bp);
 }
