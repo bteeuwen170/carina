@@ -246,7 +246,7 @@ void kernel_main(struct mboot_info *mboot)
 			u64 crap;
 			struct file *fp;
 			file_open("/sys/dev/tmr0", F_RO, &fp);
-			file_read(fp, &crap, 1);
+			file_read(fp, (char *) &crap, 1);
 			kprintf("%d\n", crap);
 		} else if (strncmp(cmd, "cat", 3) == 0) {
 			struct file *fp;

@@ -27,6 +27,7 @@
 
 static inline void spin_lock(spinlock_t *lock)
 {
+	(void) lock;
 	/* if (lock)
 		panic("attempted to lock a locked spinlock");
 
@@ -37,6 +38,7 @@ static inline void spin_lock(spinlock_t *lock)
 
 static inline void spin_unlock(spinlock_t *lock)
 {
+	(void) lock;
 	/* if (!lock)
 		panic("attempted to unlock a unlocked spinlock");
 

@@ -27,6 +27,7 @@
 #include <kernel.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 static const char devname[] = "fs";
 
@@ -90,6 +91,22 @@ void inode_put(struct inode *ip)
 
 int inode_dirisempty(struct inode *dp)
 {
-	/* TODO */
-	return 1;
+	struct file fp;
+	char buf[NAME_MAX + 1];
+	size_t cnt = 0;
+
+	if (!(dp->mode & I_DIR))
+		return -ENOTDIR;
+
+	if (!dp->op->readdir)
+		return -EPERM;
+
+	fp.mode = F_RO | F_DIR;
+	fp.ip = dp;
+
+	while (dp->op->readdir(&fp, buf) == 0)
+		if (strcmp(buf, ".") == 0 || strcmp(buf, "..") == 0)
+			cnt++;
+
+	return (!cnt || cnt == 2) ? 1 : 0;
 }

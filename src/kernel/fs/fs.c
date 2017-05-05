@@ -157,8 +157,9 @@ foundfs:
 			goto err;
 		}
 
-		if (!inode_dirisempty(dp)) {
-			res = -EBUSY;
+		if ((res = inode_dirisempty(dp)) != 1) {
+			if (!res)
+				res = -EBUSY;
 			goto err;
 		}
 
