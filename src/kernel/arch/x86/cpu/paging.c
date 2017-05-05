@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/arch/x86/boot/link.ld
+ * kernel/arch/x86/boot/paging.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,42 +22,7 @@
  *
  */
 
-VM_ADDR = 0xFFFFFFFF80000000;
-
-SECTIONS
+void paging_init(void)
 {
-	. = 0x100000;
-
-	.mboot ALIGN(4096) : {
-		*(.mboot)
-		. = ALIGN(4096);
-	}
-
-	.init ALIGN(4096) : {
-		*(.init)
-		*(.gdt)
-	}
-
-	. += VM_ADDR;
-
-	.text ALIGN(4096) : AT(ADDR(.text) - VM_ADDR) {
-		*(.text)
-	}
-
-	.data ALIGN(4096) : AT(ADDR(.data) - VM_ADDR) {
-		*(.data)
-		*(.rodata)
-	}
-
-	.bss ALIGN(4096) : AT(ADDR(.bss) - VM_ADDR) {
-		*(COMMON)
-		*(.bss)
-	}
-
-	kern_end = .;
-
-	/DISCARD/ : {
-		*(.eh_frame)
-		*(.comment)
-	}
+	/* TODO Undo kernel 1 - 6 MB identity mapping */
 }

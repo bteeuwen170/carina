@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/arch/x86/cpu/tss32.c
+ * src/kernel/arch/x86/boot/link.ld
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,15 +22,37 @@
  *
  */
 
-#include <asm/cpu.h>
+VM_ADDR = 0xC0000000;
 
-static struct tss_entry tss[TSS_ENTRIES]
-		__attribute__ ((section(".gdt")));
-
-void __attribute__ ((section(".init"))) tss_init(u32 *base, u32 *limit)
+SECTIONS
 {
-	/* TODO Fill in the TSS for user mode */
+	. = 0x100000;
 
-	*base = (u32) &tss;
-	*limit = TSS_ENTRIES * sizeof(struct tss_entry);
+	.mboot ALIGN(4096) : {
+		*(.mboot)
+		. = ALIGN(4096);
+	}
+
+	. += VM_ADDR;
+
+	.text ALIGN(4096) : AT(ADDR(.text) - VM_ADDR) {
+		*(.text)
+	}
+
+	.data ALIGN(4096) : AT(ADDR(.data) - VM_ADDR) {
+		*(.data)
+		*(.rodata)
+	}
+
+	.bss ALIGN(4096) : AT(ADDR(.bss) - VM_ADDR) {
+		*(COMMON)
+		*(.bss)
+	}
+
+	kern_end = .;
+
+	/DISCARD/ : {
+		*(.eh_frame)
+		*(.comment)
+	}
 }

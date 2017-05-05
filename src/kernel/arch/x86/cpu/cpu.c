@@ -65,6 +65,8 @@ void cpu_init(void)
 {
 	/* cpu_info() */
 
+	paging_init();
+
 	pic_init();
 	idt_init();
 }

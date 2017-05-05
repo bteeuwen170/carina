@@ -14,14 +14,6 @@ kernel-i += -I src/kernel/dev
 kernel-i += -I src/kernel/include
 kernel-i += -I src/kernel/lib
 
-%32.o: %32.c
-	echo -e "  CC32    $<"
-	$(CC32) $(CFLAGS32) -c $< $(kernel-i) -o $@
-ifeq ($(ARCH),x86_64)
-	objcopy -O elf64-x86-64 $@ $@.64
-	mv $@.64 $@
-endif
-
 %.o: %.c
 	echo -e "  CC      $<"
 	$(CC) $(CFLAGS) -c $< $(kernel-i) -o $@
@@ -33,6 +25,10 @@ endif
 
 PHONY += kernel
 kernel: bin/kernel
-bin/kernel: $(kernel-o) $(kernel-o32)
+bin/kernel: $(kernel-o)
 	echo -e "  LD      $<"
-	$(LD) $(LDFLAGS) -T src/kernel/arch/$(ARCHT)/boot/link.ld -o bin/kernel $(kernel-o) $(kernel-o32) -lgcc
+ifeq ($(ARCH),x86_64)
+	$(LD) $(LDFLAGS) -T src/kernel/arch/$(ARCHT)/boot/link-64.ld -o bin/kernel $(kernel-o) -lgcc
+else
+	$(LD) $(LDFLAGS) -T src/kernel/arch/$(ARCHT)/boot/link-32.ld -o bin/kernel $(kernel-o) -lgcc
+endif

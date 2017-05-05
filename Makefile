@@ -49,9 +49,12 @@ include .config.tmp
 TYPES		= src/kernel/include/sys/types.h
 # TEMP
 ASFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS)
-CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -include $(TYPES) -mcmodel=kernel -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fomit-frame-pointer
+CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fomit-frame-pointer
+ifeq ($(ARCH),x86_64)
+CFLAGS		+= -mcmodel=kernel
+endif
 CFLAGS32	:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -Werror=implicit-function-declaration -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g0 #-fno-omit-frame-pointer
-LDFLAGS		:= -nostdlib -z max-page-size=4096 -s
+LDFLAGS		:= -nostdlib -z max-page-size=4096# -s
 export ASFLAGS CFLAGS CFLAGS32 LDFLAGS
 
 HOSTCFLAGS	:= -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -g #-Os
@@ -59,8 +62,8 @@ export HOSTCFLAGS
 
 BOCHSFLAGS	:= -f cfg/bochs.rc -q
 KVMFLAGS	:= -enable-kvm
-QEMUFLAGS	:= -m 4M --serial vc -soundhw pcspk,ac97,sb16 #-vga none #-curses #-cpu qemu32 # To test no long mode message
-QEMUDBGFLAGS	:= -s -d cpu_reset,int#,cpu,exec,in_asm
+QEMUFLAGS	:= -m 32M --serial vc -soundhw pcspk,ac97,sb16 #-vga none #-curses #-cpu qemu32 # To test no long mode message
+QEMUDBGFLAGS	:= -s -d cpu_reset#,int,cpu,exec,in_asm -no-reboot
 WGETFLAGS	:= -q --show-progress
 
 include src/kernel/Makefile
@@ -73,7 +76,7 @@ release: CFLAGS+=-Os -s
 release: LDFLAGS+=-Os -s
 release: kernel iso
 debug: CFLAGS+=-g
-debug: kernel iso qemu
+debug: kernel iso qemud
 
 CLEAN_FILES	+= root/grub.img \
 		   root/boot/kernel \
@@ -156,7 +159,7 @@ qemu: iso
 PHONY += qemud
 qemud: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -cdrom bin/elarix.iso 2>/dev/null
+	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -cdrom bin/elarix.iso
 
 PHONY += kvm
 kvm: iso

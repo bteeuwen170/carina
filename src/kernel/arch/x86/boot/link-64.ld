@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/arch/x86/boot/boot-64.S
+ * src/kernel/arch/x86/boot/link.ld
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,23 +22,37 @@
  *
  */
 
-.code64
+VM_ADDR = 0xFFFFFFFF80000000;
 
-.set VM_ADDR,		0xFFFFFFFF80000000
+SECTIONS
+{
+	. = 0x100000;
 
-.section .text
+	.mboot ALIGN(4096) : {
+		*(.mboot)
+		. = ALIGN(4096);
+	}
 
-.global kernel_start
-kernel_start:
-	/* Intel Software Developer's Manual V3 6.14.3 */
-	xor %ax, %ax
-	mov %ax, %ss
+	. += VM_ADDR;
 
-	mov mboot, %rdi
-	call kernel_main
+	.text ALIGN(4096) : AT(ADDR(.text) - VM_ADDR) {
+		*(.text)
+	}
 
-/* Just in case */
-	cli
-halt:
-	hlt
-	jmp halt
+	.data ALIGN(4096) : AT(ADDR(.data) - VM_ADDR) {
+		*(.data)
+		*(.rodata)
+	}
+
+	.bss ALIGN(4096) : AT(ADDR(.bss) - VM_ADDR) {
+		*(COMMON)
+		*(.bss)
+	}
+
+	kern_end = .;
+
+	/DISCARD/ : {
+		*(.eh_frame)
+		*(.comment)
+	}
+}

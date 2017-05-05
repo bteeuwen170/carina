@@ -24,7 +24,11 @@
 
 .code32
 
+#ifdef ARCH_x86_64
 .set VM_ADDR,		0xFFFFFFFF80000000
+#else
+.set VM_ADDR,		0xC0000000
+#endif
 
 .section .mboot
 
@@ -38,9 +42,11 @@ mboot_header:
 	.long MB_FLAGS
 	.long -(MB_MAGIC + MB_FLAGS)
 
+
 .section .bss
-.global mboot
+
 .align 4
+.global mboot
 .lcomm mboot, 8
 
 
@@ -97,17 +103,19 @@ entry:
 #ifdef CONFIG_X86_PAE
 	bts $5, %eax /* CR4.PAE */
 #endif
-	bts $7, %eax /* CR4.PGE */ /* TEMP */
+	bts $7, %eax /* CR4.PGE */
 	#bts $9, %eax /* CR4.OSFXSR */
 	#bts $10, %eax /* CR4.OSXMMEXCPT */
 	mov %eax, %cr4
 
 	/* Load paging base address */
-	/* call paging_init */
-	lea paging_init, %eax
-	hlt
-	call *%eax
-	mov $0x200000, %eax
+	#if ARCH_x86_64
+	mov $(pml4 - VM_ADDR), %eax
+	#elif defined(CONFIG_X86_PAE)
+	mov $(pdpt - VM_ADDR), %eax
+	#else
+	mov $(pdt - VM_ADDR), %eax
+	#endif
 	mov %eax, %cr3
 
 #ifdef ARCH_x86_64
@@ -118,14 +126,13 @@ entry:
 	wrmsr
 #endif
 
-	hlt
 	/* Enable paging */
 	mov %cr0, %eax
 	bts $31, %eax /* CR0.PG */
 	bts $16, %eax /* CR0.WP */
 	mov %eax, %cr0
 
-	call gdt_init
+	lgdt (gdtp - VM_ADDR)
 
 #ifdef ARCH_i386
 	jmp kernel_start
@@ -197,6 +204,99 @@ print_loop:
 halt:
 	hlt
 	jmp halt
+
+
+.section .data
+
+#ifdef ARCH_x86_64
+gdt:
+	.quad 0				/* 0x00 */
+	.quad 0x002098000000FFFF	/* 0x08 - Code SV */
+	.quad 0x000090000000FFFF	/* 0x10 - Data SV */
+	.quad 0x0020F8000000FFFF	/* 0x18 - Code USR */
+	.quad 0x0000F2000000FFFF	/* 0x20 - Data USR */
+	/* .quad 0x00FFFF000000FFFF */	/* 0x28 - TSS */
+gdtp:
+	.word . - gdt - 1
+	.quad gdt - VM_ADDR
+#else
+gdt:
+	.quad 0				/* 0x00 */
+	.long 0x0000FFFF		/* 0x08 - Code SV */
+	.long 0x00009800
+	.long 0x0000FFFF		/* 0x10 - Data SV */
+	.long 0x00009000
+	.long 0x0000FFFF		/* 0x18 - Code USR */
+	.long 0x0000F800
+	.long 0x0000FFFF		/* 0x20 - Data USR */
+	.long 0x0000F200
+	/* .long 0x00FFFF0000FF */	/* 0x28 - TSS */
+
+gdtp:
+	.word . - gdt - 1
+	.long gdt - VM_ADDR
+#endif
+
+/* FIXME Don't hardcode 6/8 MB */
+.align 4096
+#ifdef ARCH_x86_64
+pml4:
+	.quad pdpt_lo - VM_ADDR + 0b000011
+	.fill 510, 8, 0
+	.quad pdpt_hi - VM_ADDR + 0b000011
+pdpt_lo:
+	.quad pdt - VM_ADDR + 0b00000011
+	.fill 511, 8, 0
+pdpt_hi:
+	.fill 510, 8, 0
+	.quad pdt - VM_ADDR + 0b00000011
+	.quad 0
+pdt:
+	.quad pt_0 - VM_ADDR + 0b00000011
+	.quad pt_1 - VM_ADDR + 0b00000011
+	.quad pt_2 - VM_ADDR + 0b00000011
+	.fill 509, 8, 0
+pt_0:
+	i = 0
+	.rept 512
+		.quad i * 4096 + 0b100000011
+		i = i + 1
+	.endr
+pt_1:
+	i = 512
+	.rept 512
+		.quad i * 4096 + 0b100000011
+		i = i + 1
+	.endr
+pt_2:
+	i = 1024
+	.rept 512
+		.quad i * 4096 + 0b100000011
+		i = i + 1
+	.endr
+#elif defined(CONFIG_X86_PAE)
+/* TODO */
+#else
+pdt:
+	.long pt_0 - VM_ADDR + 0b00000011
+	.long pt_1 - VM_ADDR + 0b00000011
+	.fill 766, 4, 0
+	.long pt_0 - VM_ADDR + 0b00000011
+	.long pt_1 - VM_ADDR + 0b00000011
+	.fill 254, 4, 0
+pt_0:
+	i = 0
+	.rept 1024
+		.long i * 4096 + 0b100000011
+		i = i + 1
+	.endr
+pt_1:
+	i = 1024
+	.rept 1024
+		.long i * 4096 + 0b100000011
+		i = i + 1
+	.endr
+#endif
 
 
 .section .rodata
