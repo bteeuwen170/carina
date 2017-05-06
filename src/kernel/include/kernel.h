@@ -68,4 +68,6 @@ i8 get_kp();
 
 void panic(char *reason, i64 err_code, uintptr_t ip);
 
+void kernel_main(void);
+
 #endif

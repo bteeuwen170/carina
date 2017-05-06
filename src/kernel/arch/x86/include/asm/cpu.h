@@ -162,6 +162,4 @@ void usrmode_enter(void);
 
 void paging_init(void);
 
-void cpu_init(void);
-
 #endif

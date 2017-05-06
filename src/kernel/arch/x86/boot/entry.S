@@ -135,10 +135,10 @@ entry:
 	lgdt (gdtp - VM_ADDR)
 
 #ifdef ARCH_i386
-	jmp kernel_start
+	jmp _cpu_init
 #endif
 #ifdef ARCH_x86_64
-	ljmp $0x08, $(kernel_start - VM_ADDR)
+	ljmp $0x08, $(_cpu_init - VM_ADDR)
 #endif
 
 nomboot:

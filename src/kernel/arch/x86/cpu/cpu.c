@@ -23,6 +23,7 @@
  */
 
 #include <kernel.h>
+#include <mboot.h>
 
 #include <asm/cpu.h>
 #include <asm/pic.h>
@@ -61,12 +62,22 @@ static void cpu_info(void)
 }
 #endif
 
-void cpu_init(void)
+void cpu_init(struct mboot_info *_mboot)
 {
-	/* cpu_info() */
+	struct mboot_info mboot;
+
+	memcpy(&mboot, _mboot, sizeof(struct mboot_info));
 
 	paging_init();
 
 	pic_init();
 	idt_init();
+
+	cmdline_init((const char *) (uintptr_t) mboot.cmdline);
+
+	/* cpu_info() */
+
+	mm_init(mboot.mmap_addr, mboot.mmap_len);
+
+	kernel_main();
 }

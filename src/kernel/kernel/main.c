@@ -32,14 +32,11 @@
 #include <kbd.h>
 #include <kernel.h>
 #include <lock.h>
-#include <mboot.h>
 #include <module.h>
 #include <pci.h>
 #include <proc.h>
 #include <reboot.h>
 #include <sys/time.h>
-
-#include <asm/cpu.h>
 
 #include <sound/ac97.h>
 #include <sound/sb16.h>
@@ -48,47 +45,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-void kernel_main(struct mboot_info *mboot)
+void kernel_main(void)
 {
-	cmdline_init((const char *) (uintptr_t) mboot->cmdline);
+	/* SPINLOCK(main); */
+	/* spin_lock(main); */
 
-	/* SPINLOCK(main);
-	 * spin_lock(main);
-	 */
-
-	cpu_init();
-
-	/* struct mboot_info *mboot = kmalloc(sizeof(struct mboot_info)); */
-	/* memcpy(mboot, _mboot, sizeof(struct mboot_info)); */
-	mm_init(mboot->mmap_addr, mboot->mmap_len);
-
-#ifdef CONFIG_PIT
-	pit_init();
-#endif
-
-#ifdef CONFIG_CONSOLE
-#ifdef CONFIG_CONSOLE_VGA
-	vga_con_init();
-#endif
 #ifdef CONFIG_CONSOLE_SERIAL
 	serial_con_init();
 #endif
+#ifdef CONFIG_CONSOLE_VGA
+	vga_con_init();
 #endif
-
-	devices_probe();
-
-	/* TODO Other format (UTC) */
-	kprint_init();
-	kprintf("\033[1;34mWelcome to Elarix %d.%d! "
-			"(compiled on %s %s)\033[0;37m\n",
-			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
-
-	memfs_init();
-	devfs_init();
 #ifdef CONFIG_ISO9660
 	iso9660_init();
 #endif
-
+#ifdef CONFIG_PIT
+	pit_init();
+#endif
 #ifdef CONFIG_IDE
 	ide_init();
 #endif
@@ -118,6 +91,9 @@ void kernel_main(struct mboot_info *mboot)
 	pci_init();
 #endif
 	devices_probe();
+
+	memfs_init();
+	devfs_init();
 	fs_init();
 
 #if 0
@@ -171,17 +147,22 @@ void kernel_main(struct mboot_info *mboot)
 	}
 #endif
 
-	/* Temporary and crappy code */
+	/* TODO Other format (UTC) */
+	kprint_init();
+	kprintf("\033[1;34mWelcome to Elarix %d.%d! "
+			"(compiled on %s %s)\033[0;37m\n",
+			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
+
 #if 0
 	usrmode_enter();
-
-	for (;;)
-		asm volatile ("hlt");
 
 	/* TODO Start init */
 
 	panic("attempted to kill init", 0, 0);
-#else
+#endif
+
+	/* Temporary and crappy code */
+#if 1
 
 	char cmd[64];
 	u8 p = 0;

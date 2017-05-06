@@ -28,16 +28,16 @@
 
 .section .text
 
-.global kernel_start
-kernel_start:
+.global _cpu_init
+_cpu_init:
 	/* Intel Software Developer's Manual V3 6.14.3 */
 	xor %ax, %ax
 	mov %ax, %ss
 
 	mov mboot, %rdi
-	call kernel_main
+	call cpu_init
 
-/* Just in case */
+	/* Just in case */
 	cli
 halt:
 	hlt

@@ -26,14 +26,14 @@
 
 .section .text
 
-.global kernel_start
-kernel_start:
+.global _cpu_init
+_cpu_init:
 	/* XXX Do we have to load the segment registers as well? */
 
 	push mboot
-	call kernel_main
+	call cpu_init
 
-/* Just in case */
+	/* Just in case */
 	cli
 halt:
 	hlt
