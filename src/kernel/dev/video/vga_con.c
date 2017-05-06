@@ -55,17 +55,17 @@ static void vga_con_putc(char c, u8 x, u8 y)
 
 static void vga_con_move(int _x, int _y)
 {
-	u16 l;
+	u16 off;
 
 	x = _x;
 	y = _y;
 
-	l = y * VGA_WIDTH + x;
+	off = y * VGA_WIDTH + x;
 
 	io_outb(0x3D4, 0x0E);
-	io_outb(0x3D5, l >> 8);
+	io_outb(0x3D5, off >> 8);
 	io_outb(0x3D4, 0x0F);
-	io_outb(0x3D5, l);
+	io_outb(0x3D5, off);
 }
 
 static void vga_con_scroll(int n)
