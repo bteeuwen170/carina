@@ -38,7 +38,7 @@ The device structure consists of the following items:
 __dev__, __bus__ and __drip__ are automatically filled by
 the device manager. These fields are therefore recommended not to be modified as
 this may result in undefined behavior. Fields that can (and should) be modified,
-preferably during the *devname(_probe routine are __name__, __flags__,
+preferably during the *devname*\_probe routine are __name__, __flags__,
 __device__ and __op__.
 
 The __name__ field will be either "Generic device" by default (if the the device
