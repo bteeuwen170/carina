@@ -139,8 +139,8 @@ bin/elarix.iso: bin/kernel
 	grub-mkimage -p root/boot/grub -c root/boot/grub/grub.cfg -o bin/grub.img -O i386-pc biosdisk boot ext2 iso9660 multiboot normal
 	cat /usr/lib/grub/i386-pc/cdboot.img bin/grub.img > root/grub.img
 	echo -e "\033[1m> Creating Elarix iso...\033[0m"
-	#genisoimage -A "Elarix" -input-charset "utf-8" -R -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/elarix.iso root
-	genisoimage -A "Elarix" -input-charset "utf-8" -l -allow-leading-dots -allow-multidot -no-iso-translate -relaxed-filenames -allow-lowercase -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/elarix.iso root
+	#genisoimage -A "Elarix" -input-charset "utf-8" -R -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/elarix.iso root/
+	genisoimage -A "Elarix" -input-charset "utf-8" -l -allow-leading-dots -allow-multidot -no-iso-translate -relaxed-filenames -allow-lowercase -b grub.img -no-emul-boot -boot-load-size 4 -boot-info-table -o bin/elarix.iso root/
 
 ifeq ($(ARCHT),x86)
 PHONY += bochs
@@ -154,21 +154,21 @@ endif
 PHONY += qemu
 qemu: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) -cdrom bin/elarix.iso 2>/dev/null
+	$(QEMU) $(QEMUFLAGS) -boot d -cdrom bin/elarix.iso 2>/dev/null
 
 PHONY += qemud
 qemud: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -cdrom bin/elarix.iso
+	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -boot d -cdrom bin/elarix.iso
 
 PHONY += kvm
 kvm: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) $(KVMFLAGS) -cdrom bin/elarix.iso 2>/dev/null
+	$(QEMU) $(QEMUFLAGS) $(KVMFLAGS) -boot d -cdrom bin/elarix.iso 2>/dev/null
 
 PHONY += kvmd
 kvmd: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) $(KVMFLAGS) -cdrom bin/elarix.iso 2>/dev/null
+	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) $(KVMFLAGS) -boot d -cdrom bin/elarix.iso 2>/dev/null
 
 .PHONY: $(PHONY)

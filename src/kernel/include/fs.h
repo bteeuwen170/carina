@@ -28,6 +28,8 @@
 #include <limits.h>
 #include <list.h>
 
+#include <stdarg.h>
+
 /* Mount flags */
 #define M_KEEP		02	/* Keep inodes and dirents cached */
 #define M_RO		01	/* Mount read-only */
@@ -169,8 +171,8 @@ struct file_ops {
 	int (*write) (struct file *, const char *, off_t, size_t);
 	/* Read next directory: fp, _name */
 	int (*readdir) (struct file *, char *);
-	/* I/O control: fp, cmd, arg */
-	int (*ioctl) (struct file *, unsigned int, unsigned long);
+	/* I/O control: fp, cmd, args */
+	int (*ioctl) (struct file *, unsigned int, va_list);
 	/* TODO (sync / fsync) */
 };
 
@@ -195,7 +197,7 @@ void file_close(struct file *fp);
 int file_read(struct file *fp, char *buf, size_t n);
 int file_write(struct file *fp, const char *buf, size_t n);
 int file_readdir(struct file *fp, char *_name);
-/* int file_ioctl(struct file *fp, unsigned int cmd, unsigned long arg); */
+int file_ioctl(struct file *fp, unsigned int cmd, ...);
 /* int file_stat(struct file *fp, struct stat *sp); */
 
 /* int fs_mkreg(const char *path, mode_t mode); */

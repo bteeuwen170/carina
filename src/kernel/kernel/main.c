@@ -227,7 +227,7 @@ void kernel_main(void)
 			u64 crap;
 			struct file *fp;
 			file_open("/sys/dev/tmr0", F_RO, &fp);
-			file_read(fp, (char *) &crap, 1);
+			file_ioctl(fp, IO_UPTIME, &crap);
 			kprintf("%d\n", crap);
 		} else if (strncmp(cmd, "cat", 3) == 0) {
 			struct file *fp;

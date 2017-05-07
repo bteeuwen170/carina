@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <fs.h>
 
+#include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -136,14 +137,26 @@ int file_readdir(struct file *fp, char *_name)
 	return fp->ip->op->readdir(fp, _name);
 }
 
-/* int file_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
+int file_ioctl(struct file *fp, unsigned int cmd, ...)
 {
+	va_list args;
+	int res;
+
 	if (!fp)
 		return -EBADF;
 
+	if (!(fp->ip->mode & I_DEV))
+		return -ENODEV;
+
 	if (!fp->ip->op->ioctl)
 		return -EPERM;
-} */
+
+	va_start(args, cmd);
+	res = fp->ip->op->ioctl(fp, cmd, args);
+	va_end(args);
+
+	return res;
+}
 
 /* int file_stat(struct file *fp. struct stat *sp)
 {

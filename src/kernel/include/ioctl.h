@@ -25,6 +25,8 @@
 #ifndef _IOCTL_H
 #define _IOCTL_H
 
-#define IO_CLEAR	1
+/* TODO Define these in the modules themselves */
+
+#define IO_UPTIME	0x01
 
 #endif

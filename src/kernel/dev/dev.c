@@ -29,6 +29,7 @@
 #include <list.h>
 #include <pci.h>
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -208,4 +209,31 @@ int device_write(dev_t dev, const char *buf, size_t n)
 	fp.ip->rdev = dev;
 
 	return devp->op->write(&fp, buf, 0, n);
+}
+
+int device_ioctl(dev_t dev, unsigned int cmd, ...)
+{
+	struct device *devp;
+	struct inode ip;
+	struct file fp;
+	va_list args;
+	int res;
+
+	if (!dev)
+		return -EINVAL;
+
+	if (!(devp = device_get(dev)))
+		return -ENODEV;
+
+	if (!devp->op->ioctl)
+		return -EPERM;
+
+	fp.ip = &ip;
+	fp.ip->rdev = dev;
+
+	va_start(args, cmd);
+	res = devp->op->ioctl(&fp, cmd, args);
+	va_end(args);
+
+	return res;
 }

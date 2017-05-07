@@ -26,6 +26,7 @@
 #include <dev.h>
 #include <errno.h>
 #include <fs.h>
+#include <ioctl.h>
 #include <kernel.h>
 
 #include <string.h>
@@ -36,14 +37,14 @@ void sleep(const u64 delay)
 {
 	u64 ticks = 0, target;
 
-	device_read(tmr_dev, (char *) &ticks, sizeof(u64));
+	device_ioctl(tmr_dev, IO_UPTIME, &ticks);
 
 	target = ticks + delay;
 
 	while (ticks < target) {
 		asm volatile ("hlt");
 
-		device_read(tmr_dev, (char *) &ticks, sizeof(u64));
+		device_ioctl(tmr_dev, IO_UPTIME, &ticks);
 	}
 }
 

@@ -23,11 +23,15 @@
  */
 
 #include <dev.h>
+#include <errno.h>
 #include <fs.h>
+#include <ioctl.h>
 #include <kernel.h>
 #include <module.h>
 
 #include <asm/cpu.h>
+
+#include <stdarg.h>
 
 static const char devname[] = "pit";
 
@@ -51,17 +55,24 @@ static int int_handler(struct int_stack *regs)
 	return 1;
 }
 
-static int pit_read(struct file *fp, char *buf, off_t off, size_t n)
+static int pit_ioctl(struct file *fp, unsigned int cmd, va_list args)
 {
-	(void) fp, (void) off;
+	(void) fp;
+	u64 *ptr;
 
-	*((u64 *) buf) = ticks;
+	ptr = va_arg(args, u64 *);
 
-	return n;
+	switch (cmd) {
+	case IO_UPTIME:
+		*ptr = ticks;
+		return 0;
+	default:
+		return -EINVAL;
+	}
 }
 
 static struct file_ops pit_file_ops = {
-	.read = &pit_read
+	.ioctl = &pit_ioctl
 };
 
 static int pit_probe(struct device *devp)

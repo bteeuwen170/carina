@@ -99,5 +99,6 @@ void devices_probe(void);
 
 int device_read(dev_t dev, char *buf, size_t n);
 int device_write(dev_t dev, const char *buf, size_t n);
+int device_ioctl(dev_t dev, unsigned int cmd, ...);
 
 #endif
