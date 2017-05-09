@@ -22,14 +22,14 @@
 		* ~~PCI~~
 		* PS/2...
 	* Character device drivers
-		* Real Time Clocks
-			* CMOS...
 		* AT keyboard...
 	* Networking
 		* TCP/IP
 			* Ethernet
 			* TCP
 			* UDP
+	* Real Time Clocks
+		* ~~CMOS~~
 	* Sound
 		* AC97
 			* Playback...
