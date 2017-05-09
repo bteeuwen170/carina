@@ -311,7 +311,7 @@ int sprintf(char *str, const char *fmt, ...)
 /* This function is a mess */
 void kprint(const char *prefix, char *fmt, ...)
 {
-	char printbuf[1024], fmtbuf[1024], prefixbuf[1024];
+	char printbuf[4096], fmtbuf[1024], prefixbuf[1024];
 	va_list args;
 
 	/* FIXME Nah man, what a mess */

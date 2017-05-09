@@ -246,7 +246,7 @@ void kernel_main(void)
 			kprintf("%d\n", crap);
 		} else if (strncmp(cmd, "cat", 3) == 0) {
 			struct file *fp;
-			char buf[4096];
+			char *buf;
 			int res;
 
 			if (strcmp(cmd, "cat") == 0)
@@ -254,8 +254,13 @@ void kernel_main(void)
 			else
 				res = file_open(cmd + 4, F_RO, &fp);
 
+			buf = kcalloc(1, fp->ip->size);
+			if (!buf)
+				kprintf("OUT OF MEM!");
+
 			if (res == 0) {
-				res = file_read(fp, buf, 4096);
+				res = file_read(fp, buf, fp->ip->size);
+
 				if (res > 0)
 					kprintf("%s", buf);
 				else

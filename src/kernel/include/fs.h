@@ -108,7 +108,7 @@ struct inode {
 	time_t	mtime;			/* Modification time */
 
 	off_t	block;			/* Block number */
-	off_t	size;			/* File size */
+	size_t	size;			/* File size */
 
 	struct superblock	*sp;	/* Associated superblock */
 	struct list_head	del;	/* List of children */

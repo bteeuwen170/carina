@@ -188,51 +188,55 @@ static int iso9660_lookup(struct inode *dp, const char *name,
 	struct dirent *cdep = NULL;
 	struct iso9660_dirent *ddep;
 	char buf[NAME_MAX + 1], *nbuf;
-	off_t p;
+	size_t boff = 0;
+	off_t doff;
 	int res;
 
-	if ((res = block_get(dp->sp->dev, (off_t) dp->block, &bp)) < 0)
-		return res;
+	do {
+		if ((res = block_get(dp->sp->dev, dp->block + boff, &bp)) < 0)
+			return res;
 
-	/* FIXME What if data is bigger than one block? */
+		for (doff = 0; doff < dp->sp->block_size; doff += ddep->length)
+		{
+			ddep = (struct iso9660_dirent *) (bp->buffer + doff);
 
-	for (p = 0; p < dp->sp->block_size; p += ddep->length) {
-		ddep = (struct iso9660_dirent *) (bp->buffer + p);
+			if (!ddep->length)
+				break;
 
-		if (!ddep->length)
-			break;
+			memcpy(buf, ddep->name, ddep->name_len);
+			buf[ddep->name_len] = '\0';
 
-		memcpy(buf, ddep->name, ddep->name_len);
-		buf[ddep->name_len] = '\0';
+			if ((nbuf = strrchr(buf, ';'))) {
+				*--nbuf = '\0';
+				if (*--nbuf == '.')
+					*nbuf = '\0';
+			}
 
-		if ((nbuf = strrchr(buf, ';'))) {
-			*--nbuf = '\0';
-			if (*--nbuf == '.')
-				*nbuf = '\0';
+			if (strcmp(buf, name) != 0)
+				continue;
+
+			/* TODO put_block here */
+
+			if (!(cdep = kmalloc(sizeof(struct dirent)))) {
+				res = -ENOMEM;
+				goto err;
+			}
+
+			cdep->inum = dp->block * dp->sp->block_size + doff;
+			strcpy(cdep->name, buf);
+
+			cdep->sp = dp->sp;
+			cdep->pdep = NULL;
+
+			*dep = cdep;
+
+			block_put(bp);
+
+			return 0;
 		}
-
-		if (strcmp(buf, name) != 0)
-			continue;
-
-		/* TODO put_block here */
-
-		if (!(cdep = kmalloc(sizeof(struct dirent)))) {
-			res = -ENOMEM;
-			goto err;
-		}
-
-		cdep->inum = dp->block * dp->sp->block_size + p;
-		strcpy(cdep->name, buf);
-
-		cdep->sp = dp->sp;
-		cdep->pdep = NULL;
-
-		*dep = cdep;
 
 		block_put(bp);
-
-		return 0;
-	}
+	} while (boff++ < dp->size / dp->sp->block_size);
 
 	res = -ENOENT;
 
@@ -247,18 +251,25 @@ err:
 static int iso9660_read(struct file *fp, char *buf, off_t off, size_t n)
 {
 	struct block *bp;
+	size_t boff = 0;
 	int res;
+	(void) off; /* XXX Will off ever be used? */
 
-	/* TODO Respect n */
+	if (n > fp->ip->size)
+		return -EINVAL;
 
-	if ((res = block_get(fp->ip->sp->dev, (off_t) fp->ip->block, &bp)) < 0)
-		return res;
+	do {
+		if ((res = block_get(fp->ip->sp->dev, fp->ip->block + boff,
+				&bp)) < 0)
+			return res;
 
-	/* FIXME What if data is bigger than one block? */
+		memcpy(buf + boff * fp->ip->sp->block_size, bp->buffer,
+				(boff < n / fp->ip->sp->block_size) ?
+				fp->ip->sp->block_size :
+				n % fp->ip->sp->block_size);
 
-	memcpy(buf, bp->buffer, fp->ip->sp->block_size);
-
-	block_put(bp);
+		block_put(bp);
+	} while (boff++ < n / fp->ip->sp->block_size);
 
 	return fp->ip->size;
 }
@@ -268,49 +279,50 @@ static int iso9660_readdir(struct file *fp, char *_name)
 	struct block *bp;
 	struct iso9660_dirent *ddep;
 	char *buf;
-	off_t p, i;
+	size_t boff = 0;
+	off_t i, doff;
 	int res;
 
-	if ((res = block_get(fp->ip->sp->dev, (off_t) fp->ip->block, &bp)) < 0)
-		return res;
+	do {
+		if ((res = block_get(fp->ip->sp->dev, fp->ip->block + boff,
+				&bp)) < 0)
+			return res;
 
-	/* FIXME What if data is bigger than one block? */
+		for (doff = 0, i = 0; doff < fp->ip->sp->block_size;
+				doff += ddep->length, i++) {
+			ddep = (struct iso9660_dirent *) (bp->buffer + doff);
 
-	for (p = 0, i = 0; p < fp->ip->sp->block_size; p += ddep->length, i++) {
-		ddep = (struct iso9660_dirent *) (bp->buffer + p);
+			if (!ddep->length)
+				break;
+			else if (i != fp->off)
+				continue;
 
-		if (!ddep->length)
-			break;
-		else if (i != fp->off)
-			continue;
+			if (ddep->name[0] == 0) {
+				_name[0] = '.';
+				_name[1] = '\0';
+			} else if (ddep->name[0] == 1) {
+				_name[0] = _name[1] = '.';
+				_name[2] = '\0';
+			} else {
+				memcpy(_name, ddep->name, ddep->name_len);
+				_name[ddep->name_len] = '\0';
 
-		/* TODO put_block here */
-
-		if (ddep->name[0] == 0) {
-			_name[0] = '.';
-			_name[1] = '\0';
-		} else if (ddep->name[0] == 1) {
-			_name[0] = _name[1] = '.';
-			_name[2] = '\0';
-		} else {
-			memcpy(_name, ddep->name, ddep->name_len);
-			_name[ddep->name_len] = '\0';
-
-			if ((buf = strrchr(_name, ';'))) {
-				*--buf = '\0';
-				if (*--buf == '.')
-					*buf = '\0';
+				if ((buf = strrchr(_name, ';'))) {
+					*--buf = '\0';
+					if (*--buf == '.')
+						*buf = '\0';
+				}
 			}
+
+			fp->off++;
+
+			block_put(bp);
+
+			return 0;
 		}
 
-		fp->off++;
-
 		block_put(bp);
-
-		return 0;
-	}
-
-	block_put(bp);
+	} while (boff++ < fp->ip->size / fp->ip->sp->block_size);
 
 	return -EFAULT;
 }
@@ -325,9 +337,7 @@ static struct fs_ops iso9660_fs_ops = {
 
 static struct file_ops iso9660_file_ops = {
 	.read		= &iso9660_read,
-	.write		= NULL,
-	.readdir	= &iso9660_readdir,
-	.ioctl		= NULL
+	.readdir	= &iso9660_readdir
 };
 
 static struct fs_driver iso9660_driver = {

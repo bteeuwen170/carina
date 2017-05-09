@@ -57,7 +57,8 @@
 	* vfat(12/16/32)
 		* Reading
 		* Writing
-	* iso9660... (nearly done)
+	* ~~iso9660~~
+		* Rockridge
 	* memfs...
 	* sysfs
 * Inter Process Communication
