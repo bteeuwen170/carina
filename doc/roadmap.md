@@ -21,8 +21,8 @@
 	* Bus drivers
 		* ~~PCI~~
 		* PS/2...
-	* Character device drivers
-		* AT keyboard...
+	* Keyboard drivers
+		* ~~PS/2 keyboard~~
 	* Networking
 		* TCP/IP
 			* Ethernet
@@ -37,7 +37,7 @@
 	* System timers
 		* ~~Timer interface~~
 		* ~~PIT~~
-	* Video device
+	* Video devices
 		* Console
 			* Serial...
 			* ~~VGA~~
