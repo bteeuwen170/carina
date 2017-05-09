@@ -22,6 +22,7 @@
  *
  */
 
+#include <cmdline.h>
 #include <kernel.h>
 #include <mboot.h>
 
@@ -29,6 +30,9 @@
 #include <asm/pic.h>
 
 #include <string.h>
+
+extern void early_kprint_init(void);
+extern void mm_init(uintptr_t addr, off_t len);
 
 #if 0
 static void cpu_info(void)

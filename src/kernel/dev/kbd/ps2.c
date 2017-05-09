@@ -234,7 +234,7 @@ int ps2kbd_init(void)
 	if ((res = driver_reg(&ps2kbd_driver)) < 0)
 		return res;
 
-	if ((res = device_reg(&ps2kbd_driver, NULL, 0)) < 0)
+	if ((res = device_reg(&ps2kbd_driver, &devp, 0)) < 0)
 		return res;
 	devp->name = "PS/2 keyboard";
 

@@ -93,9 +93,9 @@ void kfree(void *ptr)
 	return;
 }
 
-void mm_init(u32 addr, u32 len)
+void mm_init(uintptr_t addr, uintptr_t len)
 {
-	struct mboot_mmap *mmap = (void *) (uintptr_t) addr;
+	struct mboot_mmap *mmap = (void *) addr;
 
 	dprintf("Physical memory map:\n");
 

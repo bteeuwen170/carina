@@ -26,6 +26,8 @@
 
 static dev_t con_dev;
 
+extern void early_kprint(const char *buf, size_t n);
+
 /* we use this so that we can do without the ctype library */
 #define isdigit(c)	((c) >= '0' && (c) <= '9')
 
