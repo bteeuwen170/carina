@@ -18,7 +18,6 @@
 #include <dev.h>
 #include <errno.h>
 #include <fs.h>
-#include <kbd.h>
 #include <kernel.h>
 
 #include <stdarg.h>

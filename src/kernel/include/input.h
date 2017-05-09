@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/include/kbd.h
+ * src/kernel/include/input.h
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,12 +22,16 @@
  *
  */
 
-#ifndef _KBD_H
-#define _KBD_H
+#ifndef _INPUT_H
+#define _INPUT_H
 
-#define MOD_SHIFT	0b0001
-#define MOD_CTRL	0b0010
-#define MOD_ALT		0b0100
-#define MOD_SUPER	0b1000
+#define KEY_NONE	0x00
+#define KEY_RELEASE	0x01
+#define KEY_PRESS	0x02
+
+struct input_event {
+	u8	code;
+	u32	value;
+};
 
 #endif

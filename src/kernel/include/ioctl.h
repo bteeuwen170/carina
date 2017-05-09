@@ -33,4 +33,7 @@
 /* RTC */
 #define IO_TIME		0x02
 
+/* Keyboard */
+#define IO_KEYEV	0x03
+
 #endif

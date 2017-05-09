@@ -58,7 +58,6 @@ static int int_handler(struct int_stack *regs)
 static int pit_ioctl(struct file *fp, unsigned int cmd, va_list args)
 {
 	u64 *ptr;
-
 	(void) fp;
 
 	if (cmd != IO_UPTIME)
@@ -97,6 +96,8 @@ static int pit_probe(struct device *devp)
 static void pit_fini(struct device *devp)
 {
 	(void) devp;
+
+	irq_handler_unreg(IRQ_PIT);
 }
 
 static struct driver pit_driver = {

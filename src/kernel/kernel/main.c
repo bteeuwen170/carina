@@ -27,9 +27,9 @@
 #include <dev.h>
 #include <errno.h>
 #include <fs.h>
+#include <input.h>
 #include <ioctl.h>
 #include <issue.h>
-#include <kbd.h>
 #include <kernel.h>
 #include <lock.h>
 #include <module.h>
@@ -172,17 +172,24 @@ void kernel_main(void)
 	/* Temporary and crappy code */
 #if 1
 
-	char cmd[64];
+	struct file *fpkbd;
+	struct input_event iep;
+	char cmd[64], c;
 	u8 p = 0;
 
 	fs_cwdir(cmd);
 	kprintf("SV Shell:\n%s $ ", cmd);
 
+	if (file_open("/sys/dev/kbd0", F_RO, &fpkbd) < 0)
+		return;
+
 	cmd[0] = '\0';
 
 	for (;;) {
-		char c;
-		c = getch();
+		file_ioctl(fpkbd, IO_KEYEV, &iep);
+		if (iep.code == KEY_RELEASE)
+			continue;
+		c = iep.value;
 
 		if (c == '\b') {
 			if (p < 1)
