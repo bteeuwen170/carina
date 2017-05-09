@@ -57,18 +57,17 @@ static int int_handler(struct int_stack *regs)
 
 static int pit_ioctl(struct file *fp, unsigned int cmd, va_list args)
 {
-	(void) fp;
 	u64 *ptr;
 
-	ptr = va_arg(args, u64 *);
+	(void) fp;
 
-	switch (cmd) {
-	case IO_UPTIME:
-		*ptr = ticks;
-		return 0;
-	default:
+	if (cmd != IO_UPTIME)
 		return -EINVAL;
-	}
+
+	ptr = va_arg(args, u64 *);
+	*ptr = ticks;
+
+	return 0;
 }
 
 static struct file_ops pit_file_ops = {
@@ -113,12 +112,17 @@ static struct driver pit_driver = {
 
 int pit_init(void)
 {
+	struct device *devp;
 	int res;
 
 	if ((res = driver_reg(&pit_driver)) < 0)
 		return res;
 
-	return device_reg(&pit_driver, NULL, 0);
+	if ((res = device_reg(&pit_driver, &devp, 0)) < 0)
+		return res;
+	devp->name = "PIT system timer";
+
+	return 0;
 }
 
 void pit_exit(void)

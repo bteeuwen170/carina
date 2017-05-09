@@ -36,7 +36,7 @@
 #include <pci.h>
 #include <proc.h>
 #include <reboot.h>
-#include <sys/time.h>
+#include <time.h>
 
 #include <sound/ac97.h>
 #include <sound/sb16.h>
@@ -47,6 +47,8 @@
 
 void kernel_main(void)
 {
+	struct tm tm;
+
 	/* SPINLOCK(main); */
 	/* spin_lock(main); */
 
@@ -85,11 +87,13 @@ void kernel_main(void)
 #endif
 
 	asm volatile ("sti");
-	timer_init();
 
+	timer_init();
+	rtc_init();
 #ifdef CONFIG_PCI
 	pci_init();
 #endif
+
 	devices_probe();
 
 	memfs_init();
@@ -152,6 +156,10 @@ void kernel_main(void)
 	kprintf("\033[1;34mWelcome to Elarix %d.%d! "
 			"(compiled on %s %s)\033[0;37m\n",
 			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
+
+	rtc_gettm(&tm);
+	kprintf("Starting up at %04d-%02d-%02d %02d:%02d:%02d UTC\n", tm.year,
+			tm.mon, tm.mday, tm.hour, tm.min, tm.sec);
 
 #if 0
 	usrmode_enter();

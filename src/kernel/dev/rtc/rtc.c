@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/include/ioctl.h
+ * src/kernel/dev/rtc/rtc.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,15 +22,54 @@
  *
  */
 
-#ifndef _IOCTL_H
-#define _IOCTL_H
+#include <cmdline.h>
+#include <dev.h>
+#include <errno.h>
+#include <fs.h>
+#include <ioctl.h>
+#include <kernel.h>
+#include <time.h>
 
-/* TODO Define these in the modules themselves */
+#include <string.h>
 
-/* Timer */
-#define IO_UPTIME	0x01
+dev_t rtc_dev;
 
-/* RTC */
-#define IO_TIME		0x02
+int rtc_gettime(time_t *tp)
+{
+	struct tm tm;
+	int res;
 
-#endif
+	if ((res = device_ioctl(rtc_dev, IO_TIME, &tm)) < 0)
+		return res;
+
+	/* TODO */
+
+	*tp = 0;
+
+	return 0;
+}
+
+int rtc_gettm(struct tm *tmp)
+{
+	return device_ioctl(rtc_dev, IO_TIME, tmp);
+}
+
+void rtc_init(void)
+{
+	char buf[PATH_MAX + 1];
+
+	if (cmdline_str_get("rtc", buf) == 0)
+		dir_basename(buf);
+	else
+		strcpy(buf, "rtc0");
+
+	if (!(rtc_dev = device_getbyname(buf)))
+		goto err;
+	if (!device_get(rtc_dev))
+		goto err;
+
+	return;
+
+err:
+	panic("unable to initialize a real time clock", -ENODEV, 0);
+}

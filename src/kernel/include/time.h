@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/include/sys/time.h
+ * src/kernel/include/time.h
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -25,8 +25,22 @@
 #ifndef _TIME_H
 #define _TIME_H
 
-i8 time_init(void);
+struct tm {
+	int sec;
+	int min;
+	int hour;
 
-void time_nice(void *str);
+	int wday;
+	int mday;
+	int mon;
+
+	int yday;
+	long year;
+};
+
+int rtc_gettime(time_t *tp);
+int rtc_gettm(struct tm *tmp);
+
+void rtc_init(void);
 
 #endif
