@@ -76,6 +76,6 @@
 	* System calls
 	* libc
 
-<sub<b>Notes</b></sub>
+<sub><b>Notes</b></sub>
 * <sub>Three dots indicate that this goal is currently being worked on.</sub>
 * <sub>Strikethrough indicates that this goals has been completed.</sub>
