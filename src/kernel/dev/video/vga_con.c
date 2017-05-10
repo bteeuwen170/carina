@@ -217,6 +217,7 @@ static void vga_con_put(const char c)
 static int vga_con_write(struct file *fp, const char *buf, off_t off, size_t n)
 {
 	size_t i;
+	(void) fp, (void) off;
 
 	for (i = 0; i < n; i++)
 		vga_con_put(buf[i]);
@@ -224,15 +225,15 @@ static int vga_con_write(struct file *fp, const char *buf, off_t off, size_t n)
 	return n;
 }
 
-static int vga_con_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
+/* static int vga_con_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
 {
-	/* TODO */
+	[>TODO<]
 	return 0;
-}
+} */
 
 static struct file_ops vga_con_file_ops = {
-	.write	= &vga_con_write,
-	.ioctl	= &vga_con_ioctl
+	.write	= &vga_con_write/* ,
+	.ioctl	= &vga_con_ioctl */
 };
 
 static int vga_con_probe(struct device *devp)
@@ -259,7 +260,7 @@ static int vga_con_probe(struct device *devp)
 
 static void vga_con_fini(struct device *devp)
 {
-	/* TODO */
+	(void) devp;
 }
 
 static struct driver vga_con_driver = {
@@ -275,12 +276,18 @@ static struct driver vga_con_driver = {
 
 int vga_con_init(void)
 {
+	struct device *devp;
 	int res;
 
 	if ((res = driver_reg(&vga_con_driver)) < 0)
 		return res;
 
-	return device_reg(&vga_con_driver, NULL, 0);
+	if ((res = device_reg(&vga_con_driver, &devp, 0)) < 0)
+		return res;
+
+	devp->name = "VGA display device";
+
+	return 0;
 }
 
 void vga_con_exit(void)
