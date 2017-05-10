@@ -202,15 +202,13 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 	lba0_lo = ide_inb(idevp, ATA_REG_LBA0_LO);
 	lba0_med = ide_inb(idevp, ATA_REG_LBA0_MED);
 	lba0_hi = ide_inb(idevp, ATA_REG_LBA0_HI);
-	/* kprintf("%#x %#x %#x\n", lba0_lo, lba0_med, lba0_hi); */
-
-	if ((res = device_reg(&ide_driver, &devp, 0)) < 0)
-		goto err;
 
 #ifdef CONFIG_ATA
 	if ((lba0_lo == 0x01 && lba0_med == 0 && lba0_hi == 0)) {
 		idevp->type = IDE_ATA;
 
+		if ((res = device_reg(&ide_driver, &devp, 0)) < 0)
+			goto err;
 		/* if ((res = ata_probe(devp)) < 0)
 			goto err; */
 	} else
@@ -219,6 +217,8 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 	if (lba0_lo == 0x01 && lba0_med == 0x14 && lba0_hi == 0xEB) {
 		idevp->type = IDE_ATAPI;
 
+		if ((res = device_reg(&ide_driver, &devp, 0)) < 0)
+			goto err;
 		if ((res = atapi_probe(devp)) < 0)
 			goto err;
 
@@ -273,7 +273,7 @@ static int ide_probe(struct device *devp)
 	((struct pci_cfg *) devp->bus)->bar_2 = IDE_CH1_IO;
 	((struct pci_cfg *) devp->bus)->bar_3 = IDE_CH1_CMD;
 
-	for (ch = 1; ch < IDE_CHANNELS; ch++) {
+	for (ch = 0; ch < IDE_CHANNELS; ch++) {
 		for (drive = 0; drive < IDE_DRIVES; drive++)
 			if ((res = ide_config(devp->bus, ch, drive)) < 0)
 				return res;
