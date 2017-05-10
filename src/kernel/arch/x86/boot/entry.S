@@ -109,13 +109,13 @@ entry:
 	mov %eax, %cr4
 
 	/* Load paging base address */
-	#if ARCH_x86_64
+#if ARCH_x86_64
 	mov $(pml4 - VM_ADDR), %eax
-	#elif defined(CONFIG_X86_PAE)
+#elif defined(CONFIG_X86_PAE)
 	mov $(pdpt - VM_ADDR), %eax
-	#else
+#else
 	mov $(pdt - VM_ADDR), %eax
-	#endif
+#endif
 	mov %eax, %cr3
 
 #ifdef ARCH_x86_64

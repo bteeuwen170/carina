@@ -157,7 +157,7 @@ void devices_probe(void)
 
 		if ((res = devp->drip->probe(devp)) < 0)
 			dprintf(KP_ERR KP_CON
-					" failed to initialize (%d)\n", res);
+					"failed to initialize (%d)\n", res);
 		else
 			devp->flags |= D_READY;
 	}
