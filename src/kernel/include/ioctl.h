@@ -36,4 +36,7 @@
 /* Keyboard */
 #define IO_KEYEV	0x03
 
+/* Block devices */
+#define IO_EJECT	0x04
+
 #endif

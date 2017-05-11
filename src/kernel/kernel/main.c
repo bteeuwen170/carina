@@ -305,6 +305,12 @@ void kernel_main(void)
 #endif
 
 		/* Other */
+#ifdef CONFIG_ATAPI
+		} else if (strcmp(cmd, "eject") == 0) {
+			struct file *fp;
+			file_open("/sys/dev/dsk0", F_RO, &fp);
+			file_ioctl(fp, IO_EJECT);
+#endif
 		} else if (strcmp(cmd, "reboot") == 0) {
 			reboot();
 		} else if (strcmp(cmd, "halt") == 0) {

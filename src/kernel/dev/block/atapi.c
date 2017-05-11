@@ -24,9 +24,10 @@
 
 #include <ata.h>
 #include <dev.h>
+#include <dev.h>
 #include <errno.h>
 #include <fs.h>
-#include <dev.h>
+#include <ioctl.h>
 #include <kernel.h>
 #include <module.h>
 
@@ -63,6 +64,34 @@ static int atapi_read(struct file *fp, char *buf, off_t off, size_t n)
 	return atapi_in(devp, buf);
 }
 
+static int atapi_ioctl(struct file *fp, unsigned int cmd, va_list args)
+{
+	struct device *devp;
+	char packet[12];
+	(void) args;
+
+	if (cmd != IO_EJECT)
+		return -EINVAL;
+
+	if (!(devp = device_get(fp->ip->rdev)))
+		return -ENODEV;
+
+	packet[0] = ATAPI_CMD_EJECT;
+	packet[1] = 0;
+	packet[2] = 0;
+	packet[3] = 0;
+	packet[4] = 0x02;
+	packet[5] = 0;
+	packet[6] = 0;
+	packet[7] = 0;
+	packet[8] = 0;
+	packet[9] = 0;
+	packet[10] = 0;
+	packet[11] = 0;
+
+	return atapi_out(devp, packet);
+}
+
 #if 0
 /* TODO Using ioctl */
 static int ide_eject(struct ata_dev *dev)
@@ -89,18 +118,6 @@ static int ide_eject(struct ata_dev *dev)
 	if (status & ATA_CMD_ERR)
 		return -1;
 
-	packet[0] = ATAPI_CMD_EJECT;
-	packet[1] = 0;
-	packet[2] = 0;
-	packet[3] = 0;
-	packet[4] = 0x02;
-	packet[5] = 0;
-	packet[6] = 0;
-	packet[7] = 0;
-	packet[8] = 0;
-	packet[9] = 0;
-	packet[10] = 0;
-	packet[11] = 0;
 
 	for (i = 0; i < 11; i += 2)
 		io_outw(ide_channels[dev->ch].base, ((packet[i] & 0xFF) |
@@ -161,8 +178,8 @@ int atapi_identify()
 #endif
 
 static struct file_ops atapi_file_ops = {
-	.read	= &atapi_read/* ,
-	.ioctl	= &atapi_ioctl */
+	.read	= &atapi_read,
+	.ioctl	= &atapi_ioctl
 };
 
 int atapi_probe(struct device *devp)

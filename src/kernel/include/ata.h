@@ -96,7 +96,7 @@
 
 #define ATAPI_CMD_READ		0xA8	/* ATAPI read */
 //#define ATAPI_CMD_READ_CAPACITY	0x25	/* ATAPI read capacity */
-//#define ATAPI_CMD_EJECT		0x1B	/* ATAPI eject */
+#define ATAPI_CMD_EJECT		0x1B	/* ATAPI eject */
 #define ATAPI_CMD_IDENT		0xA1	/* ATAPI identify */
 
 int atapi_out(struct device *devp, const char *buf);
