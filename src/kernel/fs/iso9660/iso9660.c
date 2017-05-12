@@ -188,16 +188,17 @@ static int iso9660_lookup(struct inode *dp, const char *name,
 	struct dirent *cdep = NULL;
 	struct iso9660_dirent *ddep;
 	char buf[NAME_MAX + 1], *nbuf;
-	size_t boff = 0;
-	off_t doff;
+	size_t boff = 0, doff;
 	int res;
 
 	do {
 		if ((res = block_get(dp->sp->dev, dp->block + boff, &bp)) < 0)
 			return res;
 
-		for (doff = 0; doff < dp->sp->block_size; doff += ddep->length)
-		{
+		for (doff = 0; doff < ((boff < dp->size / dp->sp->block_size) ?
+				dp->sp->block_size :
+				dp->size % dp->sp->block_size);
+				doff += ddep->length) {
 			ddep = (struct iso9660_dirent *) (bp->buffer + doff);
 
 			if (!ddep->length)
@@ -279,8 +280,8 @@ static int iso9660_readdir(struct file *fp, char *_name)
 	struct block *bp;
 	struct iso9660_dirent *ddep;
 	char *buf;
-	size_t boff = 0;
-	off_t i, doff;
+	size_t boff = 0, doff;
+	off_t i;
 	int res;
 
 	do {
@@ -288,7 +289,10 @@ static int iso9660_readdir(struct file *fp, char *_name)
 				&bp)) < 0)
 			return res;
 
-		for (doff = 0, i = 0; doff < fp->ip->sp->block_size;
+		for (doff = 0, i = 0; doff < ((boff < fp->ip->size /
+				fp->ip->sp->block_size) ?
+				fp->ip->sp->block_size :
+				fp->ip->size % fp->ip->sp->block_size);
 				doff += ddep->length, i++) {
 			ddep = (struct iso9660_dirent *) (bp->buffer + doff);
 
