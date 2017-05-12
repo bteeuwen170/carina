@@ -101,6 +101,7 @@ static int ide_poll(struct ide_device *idevp)
 	return 0;
 }
 
+#ifdef CONFIG_ATAPI
 int atapi_out(struct device *devp, const char *buf)
 {
 	struct ide_device *idevp;
@@ -113,6 +114,7 @@ int atapi_out(struct device *devp, const char *buf)
 	ide_outb(devp->device, ATA_REG_CTRL, 0);
 
 	ide_outb(devp->device, ATA_REG_SELECT, 0xA0 | (idevp->drive << 4));
+	sleep(10);
 
 	ide_outb(devp->device, ATA_REG_FEATURES, 0);
 
@@ -151,6 +153,7 @@ int atapi_in(struct device *devp, char *buf)
 
 	return 0;
 }
+#endif
 
 static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 {
@@ -162,6 +165,8 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 
 	if (!(idevp = kmalloc(sizeof(struct ide_device))))
 		return -ENOMEM;
+
+	idevp->bus_master = (pcp->bar_4 & 0xFFFFFFFC) + (ch ? 8 : 0);
 
 	if (ch == 0) {
 		idevp->base = pcp->bar_0;
@@ -185,9 +190,8 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 		}
 	}
 
-	idevp->bus_master = (pcp->bar_4 & 0xFFFFFFFC) + (ch ? 0 : 8);
-
 	ide_outb(idevp, ATA_REG_SELECT, 0xA0 | (drive << 4));
+	sleep(10);
 
 	/* FIXME Detection fails on VirtualBox (and possibly also on real
 	 * hardware
@@ -196,6 +200,7 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 		goto err;
 
 	ide_outb(idevp, ATA_REG_CMD, ATA_CMD_IDENT);
+	sleep(10);
 
 	lba0_lo = ide_inb(idevp, ATA_REG_LBA0_LO);
 	lba0_med = ide_inb(idevp, ATA_REG_LBA0_MED);
@@ -221,6 +226,7 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 			goto err;
 
 		ide_outb(idevp, ATA_REG_CMD, ATAPI_CMD_IDENT);
+		sleep(10);
 	} else
 #endif
 	{

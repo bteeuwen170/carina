@@ -24,11 +24,13 @@ menu "File systems"
 	}
 }
 
-menu "Bus devices"
-{
-	if (ARCH_x86) {
-		config CONFIG_PCI
-			"PCI bus support";
+if (CONFIG_BLOCK) {
+	menu "Bus devices"
+	{
+		if (ARCH_x86) {
+			config CONFIG_PCI
+				"PCI bus support";
+		}
 	}
 }
 
@@ -82,6 +84,9 @@ menuconfig CONFIG_SOUND
 	if (CONFIG_PCI) {
 		config CONFIG_AC97
 			"Intel AC97 support";
+
+		config CONFIG_ES1370
+			"Ensoniq AudioPCI 1370 support"
 	}
 
 	if (ARCH_x86) {

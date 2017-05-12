@@ -79,6 +79,9 @@ void kernel_main(void)
 #ifdef CONFIG_AC97
 	ac97_init();
 #endif
+#ifdef CONFIG_ES1370
+	es1370_init();
+#endif
 #ifdef CONFIG_SB16
 	sb16_init();
 #endif
@@ -294,6 +297,10 @@ void kernel_main(void)
 #ifdef CONFIG_AC97
 		} else if (strcmp(cmd, "pac") == 0) {
 			ac97_play();
+#endif
+#ifdef CONFIG_ES1370
+		} else if (strcmp(cmd, "pes") == 0) {
+			es1370_play();
 #endif
 #ifdef CONFIG_SB16
 		} else if (strcmp(cmd, "psb") == 0) {

@@ -190,7 +190,7 @@ found:
 		if (device_names[i].class == pcp->class &&
 				device_names[i].sub_class == pcp->sub_class) {
 			devp->name = device_names[i].name;
-			kprintf("%s: %d %d %d\n", devp->name, bus, dev, func);
+			kprintf("%s: %u %u %u\n", devp->name, bus, dev, func);
 
 			break;
 		}

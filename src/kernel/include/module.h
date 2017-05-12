@@ -64,6 +64,9 @@ void pci_exit(void);
 int ac97_init(void);
 void ac97_exit(void);
 
+int es1370_init(void);
+void es1370_exit(void);
+
 int sb16_init(void);
 void sb16_exit(void);
 #endif

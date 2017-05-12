@@ -22,6 +22,8 @@
  *
  */
 
+/* FIXME Interrupts are not working */
+
 #include <errno.h>
 #include <fs.h>
 #include <dev.h>
@@ -34,31 +36,30 @@
 
 #include <stdlib.h>
 
-#include "ac97.h"
-
 static const char devname[] = "ac97";
 
-#define AC97_NAMBBAR_RESET	0x00
-#define AC97_NAMBBAR_POWER	0x26
+#define AC97_NAMBAR_RESET	0x00
+#define AC97_NAMBAR_POWER	0x26
 
-#define AC97_NAMBBAR_VOL_MASTER	0x02
-#define AC97_NAMBBAR_VOL_PO	0x18
+#define AC97_NAMBAR_VOL_MASTER	0x02
+#define AC97_NAMBAR_VOL_PO	0x18
 
-#define AC97_NAMBBAR_AUDIO_EXT		0x28
-#define AC97_NAMBBAR_AUDIO_EXT_CR	0x2A
+#define AC97_NAMBAR_AUDIO_EXT		0x28
+#define AC97_NAMBAR_AUDIO_EXT_CR	0x2A
 
-#define AC97_NAMBBAR_RATE_PO_FRONT	0x2C
-#define AC97_NAMBBAR_RATE_PO_SURROUND	0x2E
-#define AC97_NAMBBAR_RATE_PO_LFE	0x30
-#define AC97_NAMBBAR_RATE_PO_LR	0x32
+#define AC97_NAMBAR_SRATE_PO_FRONT	0x2C
+#define AC97_NAMBAR_SRATE_PO_SURROUND	0x2E
+#define AC97_NAMBAR_SRATE_PO_LFE	0x30
+#define AC97_NAMBAR_SRATE_PO_LR		0x32
 
-#define AC97_NAMMBAR_PO_BDBAR	0x10
+#define AC97_NABMBAR_PO_BDBAR	0x10
+#define AC97_NABMBAR_GLOB_STA	0x30
 
-#define AC97_NAMMBAR_PO_LVI	0x15
-#define AC97_NAMMBAR_PO_SR	0x16
-#define AC97_NAMMBAR_PO_CR	0x1B
+#define AC97_NABMBAR_PO_LVI	0x15
+#define AC97_NABMBAR_PO_SR	0x16
+#define AC97_NABMBAR_PO_CR	0x1B
 
-struct buffer {
+struct bdl {
 	u32	addr;
 	u16	len;
 	u16	reserved:14;
@@ -67,24 +68,25 @@ struct buffer {
 } __attribute__ ((packed));
 
 struct ac97_dev {
-	u16	nambbar;	/* Native Audio Mixer base address */
-	u16	nammbar;	/* Native Audio Bus Mastering base address */
+	u16	nambar;	/* Native Audio Mixer base address */
+	u16	nabmbar;	/* Native Audio Bus Mastering base address */
 	/* u16	sample_rate; */
 
-	struct buffer *buf;
+	struct bdl *buf;
 	u32	index;
 	u32	prev;
 };
 
 /* TEMP */
-struct ac97_dev deva;
-struct ac97_dev *dev = &deva;
+static struct ac97_dev deva;
+static struct ac97_dev *dev = &deva;
 
 char *audio;
 
-static void buffer_fill(char *data, u32 n, u32 off)
+static void bdl_fill(char *data, u32 n, u32 off)
 {
-	dev->buf[n].addr = (uintptr_t) (data - 0xFFFFFFFF80000000 + (32 * 2 * off));
+	/* TODO Physical address */
+	dev->buf[n].addr = (uintptr_t) data + off * 32 * 2;
 	dev->buf[n].len = 32;
 	dev->buf[n].bup = 0;
 	dev->buf[n].ioc = 1;
@@ -96,20 +98,20 @@ static int int_handler(struct int_stack *regs)
 	u32 buf;
 	(void) regs;
 
-	status = io_inw(dev->nammbar + AC97_NAMMBAR_PO_SR);
+	/* kprintf("!"); */
 
-	if (status & 0b100) {
-		io_outw(dev->nammbar + AC97_NAMMBAR_PO_SR, 0b100);
-	} else if (status & 0b1000) {
+	status = io_inw(dev->nabmbar + AC97_NABMBAR_PO_SR);
+
+	if (status & 0b1000) {
 		buf = (dev->index + 1) % 32;
-		buffer_fill(audio, dev->prev, ++dev->index);
+		bdl_fill(audio, dev->prev, ++dev->index);
 		dev->prev = buf;
 
-		io_outb(dev->nammbar + AC97_NAMMBAR_PO_LVI, 32);
-		io_outw(dev->nammbar + AC97_NAMMBAR_PO_SR, 0b1000);
+		io_outb(dev->nabmbar + AC97_NABMBAR_PO_LVI, 32);
+		io_outw(dev->nabmbar + AC97_NABMBAR_PO_SR, 0b1000);
 
-		dprintf(KP_DBG "sc: %u\n",
-				io_inw(dev->nammbar + AC97_NAMMBAR_PO_SR));
+		/* dprintf(KP_DBG "sc: %u\n",
+				io_inw(dev->nabmbar + AC97_NABMBAR_PO_SR)); */
 	}
 
 	return 1;
@@ -117,19 +119,21 @@ static int int_handler(struct int_stack *regs)
 
 static void volume_set(u8 volume)
 {
-	io_outw(dev->nambbar + AC97_NAMBBAR_VOL_MASTER, (volume << 8) | volume);
-	io_outw(dev->nambbar + AC97_NAMBBAR_VOL_PO, (volume << 8) | volume);
+	io_outw(dev->nambar + AC97_NAMBAR_VOL_MASTER, (volume << 8) | volume);
+	io_outw(dev->nambar + AC97_NAMBAR_VOL_PO, (volume << 8) | volume);
 
 	sleep(10);
 }
+
+#include "snd.h"
 
 void ac97_play(void)
 {
 	int i;
 
-	dev->index = 2;
-	dev->prev = 0;
-
+#if 1
+	audio = snd_wav - 0x80000000;
+#else
 	struct file *fp = NULL;
 	file_open("/snd.pcm", F_RO, &fp);
 	if (!fp)
@@ -137,18 +141,20 @@ void ac97_play(void)
 	audio = kmalloc(fp->ip->size);
 	if (!file_read(fp, audio, fp->ip->size))
 		dprintf("CRAP READ\n");
+#endif
 
 	for (i = 0; i < 32; i++)
-		buffer_fill(audio, i, i);
+		bdl_fill(audio, i, i);
 
-	dprintf(KP_DBG "playing\n");
+	dev->index = 32 - 1;
+	dev->prev = 0;
 
-	io_outb(dev->nammbar + AC97_NAMMBAR_PO_LVI, 32);
+	io_outb(dev->nabmbar + AC97_NABMBAR_PO_LVI, 32);
 	/* Set IOCE, FEIE and RPBM */
-	io_outb(dev->nammbar + AC97_NAMMBAR_PO_CR, 0b11001);
+	io_outb(dev->nabmbar + AC97_NABMBAR_PO_CR, 0b11001);
 
-	/* sleep(1000); */
-	kprintf("status: %d\n", io_inw(dev->nammbar + AC97_NAMMBAR_PO_SR));
+	dprintf(KP_DBG "playing @ %#x\n", audio);
+	kprintf("status: %d\n", io_inw(dev->nabmbar + AC97_NABMBAR_PO_SR));
 }
 
 static int ac97_probe(struct device *devp)
@@ -158,77 +164,73 @@ static int ac97_probe(struct device *devp)
 
 	cfgp = devp->bus;
 
-	/* Check codec ID before assuming it is 0 */
-	dev->nambbar = cfgp->bar_0 & ~1;
-	dev->nammbar = cfgp->bar_1 & ~1;
+	/* TODO Check codec ID before assuming it is 0 */
+	dev->nambar = cfgp->bar_0 & ~1;
+	dev->nabmbar = cfgp->bar_1 & ~1;
 
-	if (!dev->nambbar || !dev->nammbar)
-		return -EBUSY;
-
-	/* Set IOCE and FEIE */
-	io_outb(dev->nammbar + AC97_NAMMBAR_PO_CR, 0b11000);
-
-	/* Set BME and IOSE */
-	/* pci_outd(cfgp->bus, cfgp->dev, cfp->func, 0x04, 0x05); */
-	pci_outd(0, 4, 0, 0x04, 0x05);
-
-	/* Reset */
-	io_outw(dev->nambbar + AC97_NAMBBAR_POWER, 1);
-	io_outw(dev->nambbar + AC97_NAMBBAR_RESET, 1);
-	sleep(100);
-
-#if 0
-	/* Register Reset */
-	io_outb(dev->nammbar + AC97_NAMMBAR_PO_CR, 0b10);
-
-	/* Check if sample rate is set out of the box */
-	if (io_inw(dev->nambbar + AC97_NAMBBAR_AUDIO_EXT) & 1) {
-		/* XXX Right? */
-		io_outw(dev->nambbar + AC97_NAMBBAR_AUDIO_EXT_CR, 1);
-		sleep(10);
-
-		io_outw(dev->nambbar + AC97_NAMBBAR_RATE_PO_FRONT, 48000);
-		io_outw(dev->nambbar + AC97_NAMBBAR_RATE_PO_SURROUND, 48000);
-		io_outw(dev->nambbar + AC97_NAMBBAR_RATE_PO_LFE, 48000);
-		io_outw(dev->nambbar + AC97_NAMBBAR_RATE_PO_LR, 48000);
+	if (!dev->nambar || !dev->nabmbar) {
+		res = -EBUSY;
+		goto err;
 	}
 
-	char *feature[] = {
-		"mic channel",
-		"reserved",
-		"tone",
-		"stimulated stereo",
-		"headphone",
-		"bass boost",
-		"18 bit DAC",
-		"20 bit DAC",
-		"18 bit ADC",
-		"20 bit ADC"
-	};
-	u16 caps = io_inw(dev->nambbar + AC97_NAMBBAR_RESET);
-	int i, j;
-	for (i = j = 0; i < 10; i++)
-		if (caps & (1 << i))
-			kprintf("%s%s", j++ ? ", " : "", feature[i]);
+	/* Reset */
+	io_outw(dev->nambar + AC97_NAMBAR_POWER, 0);
+	io_outw(dev->nambar + AC97_NAMBAR_RESET, 0);
+	sleep(20);
+
+	/* Check if codec is ready */
+	/* if (!(io_ind(dev->nabmbar + AC97_NABMBAR_GLOB_STA) & 0b100000000)) {
+		res = -EIO;
+		goto err;
+	} */
+
+	/* XXX Not sure if right; Check if device is ready */
+	/* if (!(io_inw(dev->nambar + AC97_NAMBAR_POWER) & 0x03))
+		return -EIO; */
+
+	/* Set BME and IOSE */
+	/* FIXME pci_outd(cfgp->bus, cfgp->dev, cfp->func, 0x04, 0x05); */
+	pci_outd(0, 4, 0, 0x04, 0b00000000101);
+
+	if ((res = irq_handler_reg(cfgp->int_line, &int_handler)) < 0)
+		goto err;
+
+	/* Register Reset */
+	/* io_outb(dev->nabmbar + AC97_NABMBAR_PO_CR, 0b10); */
+	/* sleep(10); */
+
+	/* Set IOCE and FEIE */
+	io_outb(dev->nabmbar + AC97_NABMBAR_PO_CR, 0b11000);
+
+#if 1
+
+	/* Check if sample rate is set out of the box */
+	if (io_inw(dev->nambar + AC97_NAMBAR_AUDIO_EXT) & 1) {
+		/* XXX Right? */
+		io_outw(dev->nambar + AC97_NAMBAR_AUDIO_EXT_CR, 1);
+		sleep(10);
+
+		io_outw(dev->nambar + AC97_NAMBAR_SRATE_PO_FRONT, 48000);
+		io_outw(dev->nambar + AC97_NAMBAR_SRATE_PO_SURROUND, 48000);
+		io_outw(dev->nambar + AC97_NAMBAR_SRATE_PO_LFE, 48000);
+		io_outw(dev->nambar + AC97_NAMBAR_SRATE_PO_LR, 48000);
+	}
 #endif
 
 	volume_set(1);
 
-	if ((res = irq_handler_reg(cfgp->int_line, &int_handler)) < 0)
-		return res;
-
-	if (!(dev->buf = kmalloc(sizeof(struct buffer) * 32))) {
+	if (!(dev->buf = kcalloc(32, sizeof(struct bdl)))) {
 		res = -ENOMEM;
 		goto err;
 	}
 
-	io_outd(dev->nammbar + AC97_NAMMBAR_PO_BDBAR,
-			(uintptr_t) dev->buf - 0xFFFFFFFF80000000);
+	/* TODO Physical address */
+	io_outd(dev->nabmbar + AC97_NABMBAR_PO_BDBAR, (uintptr_t) dev->buf);
 
 	/* TODO Detect vendor and assign name */
 	/* FIXME Use new device minor instead of controller minor */
 	dprintf(KP_CON "%u: %u Hz @ IRQ %u\n", MINOR(devp->dev),
-			io_inw(dev->nambbar + AC97_NAMBBAR_RATE_PO_FRONT),
+			io_inw(dev->nambar + AC97_NAMBAR_SRATE_PO_FRONT),
 			cfgp->int_line);
 
 	return 0;
