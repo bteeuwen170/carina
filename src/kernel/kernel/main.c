@@ -195,25 +195,21 @@ void kernel_main(void)
 			if (p < 1)
 				continue;
 
+			cmd[--p] = '\0';
 			kprintf("%c", c);
-
-			cmd[strlen(cmd) - 1] = '\0';
-			p--;
 
 			continue;
 		} else if (c != '\n') {
-			char cur[2];
-
-			cur[0] = c;
-			cur[1] = '\0';
-			strcat(cmd, cur);
-
-			kprintf("%c", c);
+			int i;
 
 			if (c == '\t')
-				p += 8;
+				for (i = 0; i < 7; i++, p++)
+					cmd[p] = ' ';
 			else
-				p++;
+				cmd[p] = c;
+
+			cmd[++p] = '\0';
+			kprintf("%c", c);
 
 			continue;
 		}
