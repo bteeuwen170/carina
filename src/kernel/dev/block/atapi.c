@@ -93,47 +93,6 @@ static int atapi_ioctl(struct file *fp, unsigned int cmd, va_list args)
 }
 
 #if 0
-/* TODO Using ioctl */
-static int ide_eject(struct ata_dev *dev)
-{
-	u32 status, i;
-	u8 packet[12];
-
-	if (dev->type != ATA_DEV_TYPE_ATAPI)
-		return -1;
-
-	/* Enable interrupts */
-	ide_outb(dev->ch, ATA_REG_CTRL, 0x00);
-
-	/* Select the drive */
-	ide_outb(dev->ch, ATA_REG_DRVSEL, 0xA0 | (dev->drv << 4));
-	sleep(1);
-
-	/* Send the packet */
-	ide_outb(dev->ch, ATA_REG_CMD, ATA_CMD_PACKET);
-
-	while (status & ATA_CMD_BUSY)
-		status = ide_inb(dev->ch, ATA_REG_STATUS);
-
-	if (status & ATA_CMD_ERR)
-		return -1;
-
-
-	for (i = 0; i < 11; i += 2)
-		io_outw(ide_channels[dev->ch].base, ((packet[i] & 0xFF) |
-					(packet[i + 1] & 0xFF) << 8));
-
-	while (status & ATA_CMD_BUSY)
-		status = ide_inb(ide_channels[dev->ch].base, ATA_REG_STATUS);
-
-	if (status & ATA_CMD_ERR)
-		return -1;
-
-	return 0;
-}
-#endif
-
-#if 0
 int atapi_identify()
 {
 #if 0
@@ -194,10 +153,7 @@ int atapi_init(void)
 	return 0;
 }
 
-void atapi_exit(void)
-{
-	/* TODO */
-}
+void atapi_exit(void) { }
 
 MODULE(atapi, &atapi_init, &atapi_exit);
 MODULE_DEP(ide);

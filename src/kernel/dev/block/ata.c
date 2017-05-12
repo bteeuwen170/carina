@@ -22,20 +22,12 @@
  *
  */
 
+#include <ata.h>
 #include <dev.h>
 #include <fs.h>
 #include <kernel.h>
 #include <module.h>
 #include <pci.h>
-
-#include <asm/cpu.h>
-
-#include <timer/pit.h>
-
-#include <stdlib.h>
-#include <string.h>
-
-#include "ide.h"
 
 static const char devname[] = "ata";
 
@@ -61,19 +53,10 @@ static struct file_ops ata_file_ops = {
 
 int ata_init(void)
 {
-	int res;
-
-	/* if ((res = dev_reg(MAJOR_DISK, devname, &ata_file_ops)) < 0)
-		kprintf("%s: unable to register ata driver (%d)",
-				devname, res); */
-
-	return res;
+	return 0;
 }
 
-void ata_exit(void)
-{
-	/* TODO */
-}
+void ata_exit(void) { }
 
 MODULE(ata, &ata_init, &ata_exit);
 MODULE_DEP(ide);
