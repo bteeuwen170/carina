@@ -108,7 +108,7 @@ void idt_init(void)
 		idt_set(i, 0x0E, (uintptr_t) ints[i]);
 
 		if (i > SINT_ENTRIES && i < SINT_ENTRIES + IRQ_ENTRIES - 1)
-			irq_mask(SINT_ENTRIES - i);
+			irq_mask(i - SINT_ENTRIES);
 	}
 
 	idt_load(&idt, IDT_ENTRIES * sizeof(struct idt_desc) - 1);
@@ -143,7 +143,7 @@ int isr_handler_reg(const u8 int_no, int (*handler) (struct int_stack *))
 	isr_handlers[int_no] = handler;
 
 	if (int_no >= SINT_ENTRIES && int_no < SINT_ENTRIES + IRQ_ENTRIES - 1)
-		irq_unmask(SINT_ENTRIES - int_no);
+		irq_unmask(int_no - SINT_ENTRIES);
 
 	return 0;
 }

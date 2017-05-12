@@ -158,8 +158,8 @@ void kernel_main(void)
 			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
 
 	rtc_gettm(&tm);
-	kprintf("Starting up at %04d-%02d-%02d %02d:%02d:%02d UTC\n", tm.year,
-			tm.mon, tm.mday, tm.hour, tm.min, tm.sec);
+	kprintf("Starting up at %04d-%02d-%02d %02d:%02d:%02d UTC\n",
+			tm.year, tm.mon, tm.mday, tm.hour, tm.min, tm.sec);
 
 #if 0
 	usrmode_enter();
