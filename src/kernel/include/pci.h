@@ -80,4 +80,6 @@ struct pci_id {
 	u8	prog_if;
 };
 
+void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val);
+
 #endif

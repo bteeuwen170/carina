@@ -130,15 +130,13 @@ static u32 pci_ind(u16 bus, u16 dev, u16 func, u32 reg)
 	return io_ind(0xCFC + (reg & 3));
 }
 
-#if 0
-static void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val)
+void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val)
 {
 	io_outd(0xCF8, 0x80000000 | ((u32) bus << 16) | ((u32) dev << 11) |
 			((u32) func << 8) | (reg & ~3));
 
 	io_outd(0xCFC, val);
 }
-#endif
 
 static int pci_config(u16 bus, u16 dev, u16 func)
 {
@@ -192,6 +190,7 @@ found:
 		if (device_names[i].class == pcp->class &&
 				device_names[i].sub_class == pcp->sub_class) {
 			devp->name = device_names[i].name;
+			kprintf("%s: %d %d %d\n", devp->name, bus, dev, func);
 
 			break;
 		}

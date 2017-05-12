@@ -63,7 +63,7 @@ static void ide_outb(struct ide_device *idevp, u8 reg, u8 data)
 
 static u8 ide_inb(struct ide_device *idevp, u8 reg)
 {
-	u8 res;
+	u8 res = 0;
 
 	if (reg > ATA_REG_CMD && reg < ATA_REG_CTRL)
 		ide_outb(idevp, ATA_REG_CTRL, idevp->nint | ATA_CMD_BUSY);
@@ -168,22 +168,20 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 		idevp->ctrl = pcp->bar_1;
 
 		if (drive == 0) {
-			pcp->int_line = 14;
-
 			ide_outb(idevp, ATA_REG_CTRL, 0x02);
 
-			irq_unmask(pcp->int_line);
+			pcp->int_line = 14;
+			/* irq_unmask(pcp->int_line); */
 		}
 	} else if (ch == 1) {
 		idevp->base = pcp->bar_2;
 		idevp->ctrl = pcp->bar_3;
 
 		if (drive == 0) {
-			pcp->int_line = 15;
-
 			ide_outb(idevp, ATA_REG_CTRL, 0x02);
 
-			irq_unmask(pcp->int_line);
+			pcp->int_line = 15;
+			/* irq_unmask(pcp->int_line); */
 		}
 	}
 
@@ -313,8 +311,6 @@ int ide_init(void)
 
 void ide_exit(void)
 {
-	/* TODO unreg all devices */
-
 	driver_unreg(&ide_driver);
 }
 

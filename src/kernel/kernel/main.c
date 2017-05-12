@@ -61,9 +61,6 @@ void kernel_main(void)
 #ifdef CONFIG_ISO9660
 	iso9660_init();
 #endif
-#ifdef CONFIG_PIT
-	pit_init();
-#endif
 #ifdef CONFIG_IDE
 	ide_init();
 #endif
@@ -88,11 +85,14 @@ void kernel_main(void)
 
 	asm volatile ("sti");
 
-	timer_init();
-	rtc_init();
 #ifdef CONFIG_PCI
 	pci_init();
 #endif
+#ifdef CONFIG_PIT
+	pit_init();
+#endif
+	timer_init();
+	rtc_init();
 
 	devices_probe();
 
@@ -254,11 +254,11 @@ void kernel_main(void)
 			else
 				res = file_open(cmd + 4, F_RO, &fp);
 
-			buf = kcalloc(1, fp->ip->size);
-			if (!buf)
-				kprintf("OUT OF MEM!");
-
 			if (res == 0) {
+				buf = kcalloc(1, fp->ip->size);
+				if (!buf)
+					kprintf("OUT OF MEM!");
+
 				res = file_read(fp, buf, fp->ip->size);
 
 				if (res > 0)
