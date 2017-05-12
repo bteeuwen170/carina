@@ -16,8 +16,8 @@
 				* Reading
 				* Writing
 			* ATAPI
-				* ~~Reading~~
-				* Ejecting
+				* Reading...
+				* ~~Ejecting~~
 	* Bus drivers
 		* ~~PCI~~
 		* PS/2...
@@ -30,9 +30,9 @@
 			* UDP
 	* Real Time Clocks
 		* ~~CMOS~~
-	* Sound
-		* AC97
-			* Playback...
+	* Sound (playback only)
+		* Intel AC97..
+		* ES1370...
 		* SoundBlaster 16...
 	* System timers
 		* ~~Timer interface~~
