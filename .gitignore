@@ -2,12 +2,11 @@
 *.iso
 *.o
 *.swp
+*.pcm
 *.tmp
 
 bin/*
-!bin/.dummy
 dbg/*
-!dbg/.dummy
 root/boot/kernel
 toolchain/*
 !toolchain/Makefile
