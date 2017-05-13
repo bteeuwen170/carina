@@ -136,7 +136,7 @@ int atapi_out(struct device *devp, const char *buf)
 int atapi_in(struct device *devp, char *buf)
 {
 	struct ide_device *idevp;
-	int res;
+	int res, i;
 
 	idevp = devp->device;
 	if (!(idevp->type & IDE_ATAPI))
@@ -145,8 +145,8 @@ int atapi_in(struct device *devp, char *buf)
 	if ((res = ide_poll(idevp)) < 0)
 		return res;
 
-	asm volatile ("rep insw" :: "D" (buf), "c" (ATAPI_SECTOR_SIZE / 2),
-			"d" (idevp->base) : "memory");
+	for (i = 0; i < ATAPI_SECTOR_SIZE / 2; i++)
+		io_insw(idevp->base, buf + i * 2);
 
 	if ((res = ide_poll(idevp)) < 0)
 		return res;

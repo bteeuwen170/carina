@@ -91,6 +91,11 @@ static inline u32 io_ind(u16 port)
 	return val;
 }
 
+static inline void io_insw(u16 port, char *buf)
+{
+	asm volatile ("insw" : "+D" (buf) : "dN" (port) : "memory");
+}
+
 static inline void io_outb(u16 port, u8 val)
 {
 	asm volatile ("outb %0, %1" : : "a" (val), "dN" (port));
