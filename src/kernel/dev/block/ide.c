@@ -114,7 +114,7 @@ int atapi_out(struct device *devp, const char *buf)
 	ide_outb(devp->device, ATA_REG_CTRL, 0);
 
 	ide_outb(devp->device, ATA_REG_SELECT, 0xA0 | (idevp->drive << 4));
-	sleep(10);
+	sleep(2);
 
 	ide_outb(devp->device, ATA_REG_FEATURES, 0);
 
@@ -161,50 +161,42 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 	struct ide_device *idevp;
 	u8 lba0_lo, lba0_med, lba0_hi;
 	size_t i;
-	int res;
+	int res = 0;
 
 	if (!(idevp = kmalloc(sizeof(struct ide_device))))
 		return -ENOMEM;
 
-	idevp->bus_master = (pcp->bar_4 & 0xFFFFFFFC) + (ch ? 8 : 0);
+	idevp->bus_master = (pcp->bar_4 & ~1) + (ch ? 0x08 : 0);
+	idevp->nint = 1;
 
 	if (ch == 0) {
-		idevp->base = pcp->bar_0;
-		idevp->ctrl = pcp->bar_1;
+		idevp->base = pcp->bar_0 & ~1;
+		idevp->ctrl = pcp->bar_1 & ~1;
 
-		if (drive == 0) {
-			ide_outb(idevp, ATA_REG_CTRL, 0x02);
-
-			pcp->int_line = 14;
-			/* irq_unmask(pcp->int_line); */
-		}
+		pcp->int_line = 14;
+		/* irq_unmask(pcp->int_line); */
 	} else if (ch == 1) {
-		idevp->base = pcp->bar_2;
-		idevp->ctrl = pcp->bar_3;
+		idevp->base = pcp->bar_2 & ~1;
+		idevp->ctrl = pcp->bar_3 & ~1;
 
-		if (drive == 0) {
-			ide_outb(idevp, ATA_REG_CTRL, 0x02);
-
-			pcp->int_line = 15;
-			/* irq_unmask(pcp->int_line); */
-		}
+		pcp->int_line = 15;
+		/* irq_unmask(pcp->int_line); */
 	}
 
 	ide_outb(idevp, ATA_REG_SELECT, 0xA0 | (drive << 4));
-	sleep(10);
+	sleep(2);
 
 	/* FIXME Detection fails on VirtualBox (and possibly also on real
 	 * hardware
 	 */
-	if ((res = ide_poll(idevp)) < 0)
-		goto err;
-
-	ide_outb(idevp, ATA_REG_CMD, ATA_CMD_IDENT);
-	sleep(10);
 
 	lba0_lo = ide_inb(idevp, ATA_REG_LBA0_LO);
 	lba0_med = ide_inb(idevp, ATA_REG_LBA0_MED);
 	lba0_hi = ide_inb(idevp, ATA_REG_LBA0_HI);
+
+	/* FIXME Channel 1, master is bugged for some reason */
+	if (ch && !drive)
+		goto err;
 
 #ifdef CONFIG_ATA
 	if ((lba0_lo == 0x01 && lba0_med == 0 && lba0_hi == 0)) {
@@ -214,6 +206,9 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 			goto err;
 		/* if ((res = ata_probe(devp)) < 0)
 			goto err; */
+
+		ide_outb(idevp, ATA_REG_CMD, ATA_CMD_IDENT);
+		sleep(10);
 	} else
 #endif
 #ifdef CONFIG_ATAPI
@@ -266,16 +261,23 @@ static int ide_probe(struct device *devp)
 	u8 ch, drive;
 	int res;
 
-	/* io_outb(IDE_CH1_CMD, 0x04);
-	io_outb(IDE_CH1_CMD, 0x04);
-	io_outb(IDE_CH1_CMD, 0x04);
-	io_outb(IDE_CH1_CMD, 0x04);
-	io_outb(IDE_CH1_CMD, 0x00); */
-
 	((struct pci_cfg *) devp->bus)->bar_0 = IDE_CH0_IO;
 	((struct pci_cfg *) devp->bus)->bar_1 = IDE_CH0_CMD;
 	((struct pci_cfg *) devp->bus)->bar_2 = IDE_CH1_IO;
 	((struct pci_cfg *) devp->bus)->bar_3 = IDE_CH1_CMD;
+
+	/* Set BME and IOSE */
+	/* FIXME */
+	pci_outd(0, 1, 1, 0x04, 0b00000000101);
+
+	io_outb(IDE_CH0_CMD, 0x04);
+	sleep(2);
+	io_outb(IDE_CH0_CMD, 0x00);
+	sleep(2);
+	io_outb(IDE_CH1_CMD, 0x04);
+	sleep(2);
+	io_outb(IDE_CH1_CMD, 0x00);
+	sleep(2);
 
 	for (ch = 0; ch < IDE_CHANNELS; ch++) {
 		for (drive = 0; drive < IDE_DRIVES; drive++)

@@ -154,21 +154,21 @@ endif
 PHONY += qemu
 qemu: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) -boot d -cdrom bin/elarix.iso 2>/dev/null
+	$(QEMU) $(QEMUFLAGS) -boot d -drive file=bin/elarix.iso,if=ide,index=0,media=cdrom 2>/dev/null
 
 PHONY += qemud
 qemud: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -boot d -cdrom bin/elarix.iso
+	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) -boot d -drive file=bin/elarix.iso,if=ide,index=0,media=cdrom
 
 PHONY += kvm
 kvm: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) $(KVMFLAGS) -boot d -cdrom bin/elarix.iso 2>/dev/null
+	$(QEMU) $(QEMUFLAGS) $(KVMFLAGS) -boot d -drive file=bin/elarix.iso,if=ide,index=0,media=cdrom 2>/dev/null
 
 PHONY += kvmd
 kvmd: iso
 	echo -e "\033[1m> Starting QEMU...\033[0m"
-	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) $(KVMFLAGS) -boot d -cdrom bin/elarix.iso 2>/dev/null
+	$(QEMU) $(QEMUFLAGS) $(QEMUDBGFLAGS) $(KVMFLAGS) -boot d -drive file=bin/elarix.iso,if=ide,index=0,media=cdrom 2>/dev/null
 
 .PHONY: $(PHONY)
