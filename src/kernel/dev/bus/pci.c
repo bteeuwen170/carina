@@ -32,6 +32,7 @@
 #include <asm/cpu.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 static const char devname[] = "pci";
 
@@ -122,18 +123,22 @@ struct {
 };
 #endif
 
-static u32 pci_ind(u16 bus, u16 dev, u16 func, u32 reg)
+static u32 pci_ind(char busid[6], u32 reg)
 {
-	io_outd(0xCF8, 0x80000000 | ((u32) bus << 16) | ((u32) dev << 11) |
-			((u32) func << 8) | (reg & ~3));
+	io_outd(0xCF8, 0x80000000 |
+			((u32) (busid[0] | (busid[1] << 8)) << 16) |
+			((u32) (busid[2] | (busid[3] << 8)) << 11) |
+			((u32) (busid[4] | (busid[5] << 8)) << 8) | (reg & ~3));
 
 	return io_ind(0xCFC + (reg & 3));
 }
 
-void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val)
+void pci_outd(char busid[6], u32 reg, u32 val)
 {
-	io_outd(0xCF8, 0x80000000 | ((u32) bus << 16) | ((u32) dev << 11) |
-			((u32) func << 8) | (reg & ~3));
+	io_outd(0xCF8, 0x80000000 |
+			((u32) (busid[0] | (busid[1] << 8)) << 16) |
+			((u32) (busid[2] | (busid[3] << 8)) << 11) |
+			((u32) (busid[4] | (busid[5] << 8)) << 8) | (reg & ~3));
 
 	io_outd(0xCFC, val);
 }
@@ -144,10 +149,18 @@ static int pci_config(u16 bus, u16 dev, u16 func)
 	struct device *devp;
 	struct pci_cfg *pcp;
 	struct pci_id *pdip;
+	char busid[6];
 	size_t i;
 	int res = 0;
 
-	if ((pci_ind(bus, dev, func, 0) & 0xFFFF) == 0xFFFF)
+	busid[0] = bus & 0x00FF;
+	busid[1] = bus >> 8;
+	busid[2] = dev & 0x00FF;
+	busid[3] = dev >> 8;
+	busid[4] = func & 0x00FF;
+	busid[5] = func >> 8;
+
+	if ((pci_ind(busid, 0) & 0xFFFF) == 0xFFFF)
 		return 0;
 
 	if (!(pcp = kmalloc(sizeof(struct pci_cfg)))) {
@@ -157,13 +170,13 @@ static int pci_config(u16 bus, u16 dev, u16 func)
 
 	for (i = 0; i < 4; i++) {
 		*(uintptr_t *) ((uintptr_t) pcp + i * 16) =
-			pci_ind(bus, dev, func, i * 16);
+			pci_ind(busid, i * 16);
 		*(uintptr_t *) ((uintptr_t) pcp + i * 16 + 4) =
-			pci_ind(bus, dev, func, i * 16 + 4);
+			pci_ind(busid, i * 16 + 4);
 		*(uintptr_t *) ((uintptr_t) pcp + i * 16 + 8) =
-			pci_ind(bus, dev, func, i * 16 + 8);
+			pci_ind(busid, i * 16 + 8);
 		*(uintptr_t *) ((uintptr_t) pcp + i * 16 + 12) =
-			pci_ind(bus, dev, func, i * 16 + 12);
+			pci_ind(busid, i * 16 + 12);
 	}
 
 	list_for_each(drip, &drivers, l) {
@@ -190,12 +203,12 @@ found:
 		if (device_names[i].class == pcp->class &&
 				device_names[i].sub_class == pcp->sub_class) {
 			devp->name = device_names[i].name;
-			kprintf("%s: %u %u %u\n", devp->name, bus, dev, func);
 
 			break;
 		}
 	}
 
+	memcpy(devp->busid, busid, 6 * sizeof(char));
 	devp->bus = pcp;
 
 	return 0;

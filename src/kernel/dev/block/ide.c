@@ -267,8 +267,7 @@ static int ide_probe(struct device *devp)
 	((struct pci_cfg *) devp->bus)->bar_3 = IDE_CH1_CMD;
 
 	/* Set BME and IOSE */
-	/* FIXME */
-	pci_outd(0, 1, 1, 0x04, 0b00000000101);
+	pci_outd(devp->busid, 0x04, 0b00000000101);
 
 	io_outb(IDE_CH0_CMD, 0x04);
 	sleep(2);

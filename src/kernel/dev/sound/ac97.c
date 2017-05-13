@@ -189,8 +189,7 @@ static int ac97_probe(struct device *devp)
 		return -EIO; */
 
 	/* Set BME and IOSE */
-	/* FIXME pci_outd(cfgp->bus, cfgp->dev, cfp->func, 0x04, 0x05); */
-	pci_outd(0, 4, 0, 0x04, 0b00000000101);
+	pci_outd(devp->busid, 0x04, 0b00000000101);
 
 	if ((res = irq_handler_reg(cfgp->int_line, &int_handler)) < 0)
 		goto err;

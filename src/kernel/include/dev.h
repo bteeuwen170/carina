@@ -60,6 +60,7 @@ struct device {
 	dev_t		dev;	/* Device ID */
 	u8		flags;	/* Device flags */
 
+	char	busid[6];	/* Bus ID */
 	void	*bus;		/* Bus specific */
 	void	*device;	/* Device specific */
 

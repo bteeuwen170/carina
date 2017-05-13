@@ -31,7 +31,7 @@
 #define PCI_DEVICES	32
 #define PCI_FUNCTIONS	8
 
-#define PCI_ID_ANY	~(0)
+#define PCI_ID_ANY	~0
 
 #define PCI_ID(v, sv, d, sd, c, sc, pi) \
 	{ \
@@ -80,6 +80,6 @@ struct pci_id {
 	u8	prog_if;
 };
 
-void pci_outd(u16 bus, u16 dev, u16 func, u32 reg, u32 val);
+void pci_outd(char busid[8], u32 reg, u32 val);
 
 #endif
