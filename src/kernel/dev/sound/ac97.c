@@ -86,8 +86,8 @@ char *audio;
 static void bdl_fill(char *data, u32 n, u32 off)
 {
 	/* TODO Physical address */
-	dev->buf[n].addr = (uintptr_t) data + off * 32 * 2;
-	dev->buf[n].len = 32;
+	dev->buf[n].addr = (uintptr_t) data + off * 4096 * 2;
+	dev->buf[n].len = 4096;
 	dev->buf[n].bup = 0;
 	dev->buf[n].ioc = 1;
 }
@@ -98,8 +98,6 @@ static int int_handler(struct int_stack *regs)
 	u32 buf;
 	(void) regs;
 
-	/* kprintf("!"); */
-
 	status = io_inw(dev->nabmbar + AC97_NABMBAR_PO_SR);
 
 	if (status & 0b1000) {
@@ -109,9 +107,6 @@ static int int_handler(struct int_stack *regs)
 
 		io_outb(dev->nabmbar + AC97_NABMBAR_PO_LVI, 32);
 		io_outw(dev->nabmbar + AC97_NABMBAR_PO_SR, 0b1000);
-
-		/* dprintf(KP_DBG "sc: %u\n",
-				io_inw(dev->nabmbar + AC97_NABMBAR_PO_SR)); */
 	}
 
 	return 1;
@@ -125,15 +120,10 @@ static void volume_set(u8 volume)
 	sleep(10);
 }
 
-#include "snd.h"
-
 void ac97_play(void)
 {
 	int i;
 
-#if 1
-	audio = snd_wav - 0x80000000;
-#else
 	struct file *fp = NULL;
 	file_open("/snd.pcm", F_RO, &fp);
 	if (!fp)
@@ -141,7 +131,6 @@ void ac97_play(void)
 	audio = kmalloc(fp->ip->size);
 	if (!file_read(fp, audio, fp->ip->size))
 		dprintf("CRAP READ\n");
-#endif
 
 	for (i = 0; i < 32; i++)
 		bdl_fill(audio, i, i);
@@ -179,10 +168,10 @@ static int ac97_probe(struct device *devp)
 	sleep(20);
 
 	/* Check if codec is ready */
-	/* if (!(io_ind(dev->nabmbar + AC97_NABMBAR_GLOB_STA) & 0b100000000)) {
+	if (!(io_ind(dev->nabmbar + AC97_NABMBAR_GLOB_STA) & 0b100000000)) {
 		res = -EIO;
 		goto err;
-	} */
+	}
 
 	/* XXX Not sure if right; Check if device is ready */
 	/* if (!(io_inw(dev->nambar + AC97_NAMBAR_POWER) & 0x03))
