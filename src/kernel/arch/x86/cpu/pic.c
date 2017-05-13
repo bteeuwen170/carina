@@ -45,28 +45,24 @@ void irq_mask(u8 irq)
 {
 	u16 port;
 
-	if (irq < IRQ_ENTRIES / 2) {
+	if (irq < 8)
 		port = PIC_M_IO;
-	} else {
+	else
 		port = PIC_S_IO;
-		irq -= IRQ_ENTRIES / 2;
-	}
 
-	io_outb(port, io_inb(port) | (1 << irq));
+	io_outb(port, io_inb(port) & (1 << (irq % 8)));
 }
 
 void irq_unmask(u8 irq)
 {
 	u16 port;
 
-	if (irq < IRQ_ENTRIES / 2) {
+	if (irq < 8)
 		port = PIC_M_IO;
-	} else {
+	else
 		port = PIC_S_IO;
-		irq -= IRQ_ENTRIES / 2;
-	}
 
-	io_outb(port, io_inb(port) & ~(1 << irq));
+	io_outb(port, io_inb(port) & ~(1 << (irq % 8)));
 }
 
 void pic_eoi(u8 int_no)
