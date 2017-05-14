@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/arch/x86/include-32/asm/cpub.h
+ * src/kernel/include/mm.h
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,48 +22,12 @@
  *
  */
 
-#define VM_ADDR	0xC0000000
+#ifndef _MM_H
+#define _MM_H
 
-struct segment_desc {
-	u16	limit_lo;
-	u8	base_lo[3];
-	u16	flags;
-	u8	base_hi;
-} __attribute__ ((packed));
+void *kmalloc(size_t size);
+void *kcalloc(size_t nmemb, size_t size);
 
-struct desc_register {
-	u16	limit;
-	void	*base;
-} __attribute__ ((packed));
+void kfree(void *addr);
 
-struct idt_desc {
-	u16	offset_lo;
-	u16	segment;
-	u8	zero;
-	u8	flags;
-	u16	offset_hi;
-} __attribute__ ((packed));
-
-struct int_stack {
-	u16	ds;
-	u16	reserved0;
-	u32	eax, ecx, edx, ebx, ebp, esi, edi;
-	u32	int_no;
-	u32	err_code;
-	u32	eip;
-	u16	cs;
-	u16	reserved2;
-	u32	eflags;
-	u32	esp;
-	u16	ss;
-	u16	reserved3;
-} __attribute__ ((packed));
-
-struct tss_entry {
-	u32	reserved0;
-	u64	rsp0, rsp1, rsp2;
-	u64	reserved1;
-	u64	ist1, ist2, ist3, ist4, ist5, ist6, ist7;
-	u16	reserved2[5];
-	u16	iomap_base;
-} __attribute__ ((packed));
+#endif

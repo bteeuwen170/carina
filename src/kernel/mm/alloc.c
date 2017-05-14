@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/mm/malloc.c
+ * src/kernel/mm/alloc.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -29,7 +29,30 @@
 
 static const char devname[] = "mm";
 
-const char *mmap_types[5] = {
+#if 0
+void *kmalloc(size_t size)
+{
+
+}
+
+void *kcalloc(size_t nmemb, size_t size)
+{
+	void *p;
+
+	if (!(p = kmalloc(nmemb * size)))
+		return p;
+
+	memset(p, 0, nmemb * size);
+
+	return p;
+}
+
+void kfree(void *addr)
+{
+
+}
+#else
+static const char *mmap_types[5] = {
 	"rsvd",
 	"free",
 	"rsvd",
@@ -37,19 +60,39 @@ const char *mmap_types[5] = {
 	"rsvd"
 };
 
-extern uintptr_t kern_end;
-size_t mem;
-
 static uintptr_t position;
 
-struct mem_block {
-	u8			allocated;
-	struct mem_block	*prev;
-	struct mem_block	*next;
-} *blocks;
+struct addr {
+	uintptr_t	addr;
+	size_t		size;
+	char		present:1;
+
+	struct addr	*next;
+};
+
+static struct addr addresses;
+static struct addr *last_addr = &addresses;
 
 void *kmalloc(size_t size)
 {
+#if 1
+	if (!size)
+		return NULL;
+
+	last_addr->next = (struct addr *) position;
+	last_addr = (struct addr *) position;
+	position += sizeof(struct addr);
+
+	last_addr->addr = position;
+	last_addr->size = size;
+	last_addr->present = 1;
+
+	position += size;
+
+	/* kprintf("+"); */
+
+	return (void *) last_addr->addr;
+#else
 	void *p;
 
 	if (size == 0)
@@ -59,7 +102,10 @@ void *kmalloc(size_t size)
 
 	position += size;
 
+	kprintf("+");
+
 	return p;
+#endif
 }
 
 /* XXX an extemely crappy implementation of calloc */
@@ -88,14 +134,36 @@ void *kcalloc(size_t nmemb, size_t size)
 
 void kfree(void *ptr)
 {
-	(void) ptr;
+	struct addr *cap;
+
+	if (!ptr)
+		kprintf("attempted to free NULL ptr\n");
+
+	for (cap = &addresses; ; cap = cap->next) {
+		if (cap->addr == ptr) {
+			if (cap->present)
+				goto found;
+			else
+				break;
+		}
+	}
+
+	panic("attempted to free unallocated memory", 0, ptr);
+
+found:
+	/* XXX TEMP XXX */ memset(cap->addr, 0, cap->size);
+	cap->present = 0;
+
+	/* kprintf("-"); */
 
 	return;
 }
+#endif
 
-void mm_init(uintptr_t addr, uintptr_t len)
+void mm_init(uintptr_t addr, size_t len)
 {
 	struct mboot_mmap *mmap = (void *) addr;
+	size_t mem;
 
 	dprintf("Physical memory map:\n");
 
@@ -118,7 +186,7 @@ void mm_init(uintptr_t addr, uintptr_t len)
 
 	/* FIXME How much padding is really required? */
 	/* position = ((uintptr_t) &kern_end) + 0xE0000; */
-	position = 0x300000;
+	position = 0x300000 + 0xFFFFFFFF80000000;
 
 	/*u16 i;
 

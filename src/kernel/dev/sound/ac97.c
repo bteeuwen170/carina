@@ -85,8 +85,7 @@ char *audio;
 
 static void bdl_fill(char *data, u32 n, u32 off)
 {
-	/* TODO Physical address */
-	dev->buf[n].addr = (uintptr_t) data + off * 4096 * 2;
+	dev->buf[n].addr = (uintptr_t) data - VM_ADDR + off * 4096 * 2;
 	dev->buf[n].len = 4096;
 	dev->buf[n].bup = 0;
 	dev->buf[n].ioc = 1;
@@ -212,8 +211,8 @@ static int ac97_probe(struct device *devp)
 		goto err;
 	}
 
-	/* TODO Physical address */
-	io_outd(dev->nabmbar + AC97_NABMBAR_PO_BDBAR, (uintptr_t) dev->buf);
+	io_outd(dev->nabmbar + AC97_NABMBAR_PO_BDBAR,
+			(uintptr_t) dev->buf - VM_ADDR);
 
 	/* TODO Detect vendor and assign name */
 	/* FIXME Use new device minor instead of controller minor */

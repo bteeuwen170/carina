@@ -22,6 +22,8 @@
  *
  */
 
+#define VM_ADDR	0xFFFFFFFF80000000
+
 /*
  * Can't use the long mode version because we're lazy and don't load a seperate
  * GDT for long mode. This shouldn't be an issue however, as the address of the

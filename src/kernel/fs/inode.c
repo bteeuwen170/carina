@@ -85,8 +85,10 @@ void inode_put(struct inode *ip)
 				"has an invalid reference count: %d\n",
 				ip->inum, ip->sp->name, ip->refs);
 
-	if (!(ip->sp->flags & M_KEEP) && !ip->refs)
+	if (!(ip->sp->flags & M_KEEP) && !ip->refs) {
+		list_rm(&ip->l);
 		kfree(ip);
+	}
 }
 
 int inode_dirisempty(struct inode *dp)

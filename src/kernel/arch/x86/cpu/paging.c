@@ -22,7 +22,77 @@
  *
  */
 
+#include <kernel.h> /* XXX TEMP for printing */
+
+#include <asm/cpu.h>
+
+#define PAGE_MASK	0xFFFFFFFFFFFFF000
+
+extern uintptr_t _pml4;
+
+void *page_alloc_user(void)
+{
+	return NULL;
+}
+
+void *page_alloc_kernel(void)
+{
+
+}
+
+void page_free(void *page)
+{
+
+}
+
+void *virt_to_phys(void *addr)
+{
+	return (void *) ((uintptr_t) addr) - VM_ADDR;
+}
+
+void *phys_to_virt(void *addr)
+{
+	return (void *) ((uintptr_t) addr) + VM_ADDR;
+}
+
 void paging_init(void)
 {
+	uintptr_t *pml4, *pdpt, *pdt;
+	int i, j;
+
 	/* TODO Undo kernel 1 - 6 MB identity mapping */
+
+	pml4 = &_pml4;
+	pdpt = (*pml4 + VM_ADDR) & PAGE_MASK;
+	pdt = (*pdpt + VM_ADDR) & PAGE_MASK;
+
+	/* uintptr_t *ptr = *(pdt + (VM_ADDR & PAGE_MASK) + 3 * 8);
+
+	*(ptr */
+
+	/* uintptr_t *ptr = (uintptr_t *) (1536 * 4096);
+
+	kprintf("%#x\n", pdt);
+	*(pdt + 4) = ((uintptr_t) ptr) | 0b00000011;
+
+	for (j = 0; j < 512; j++)
+		*ptr++ = ((2048 + j) * 4096) | 0b00000011; */
+
+	kprintf("pml4: %#x\n", pml4);
+	kprintf("pdpt: %#x\n", pdpt);
+	kprintf("pdt: %#x\n", pdt);
+	kprintf("pte base: %#x\n", 1536 * 4096);
+	return;
+
+	for (i = 4; i < 10; i++) {
+		uintptr_t *ptr = (uintptr_t *) ((1536 + i - 4) * 4096);
+
+		*(pdt + i) = ((uintptr_t) ptr) + 0b00000011;
+
+		for (j = 0; j < 512; j++)
+			*ptr++ = ((2048 + j) * 4096) + 0b100000011;
+	}
+
+	/* *pdpt &= ~1;
+	*pml4 &= ~1; */
 }

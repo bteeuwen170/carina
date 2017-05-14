@@ -32,7 +32,7 @@
 #include <string.h>
 
 extern void early_kprint_init(void);
-extern void mm_init(uintptr_t addr, off_t len);
+extern void mm_init(uintptr_t addr, size_t len);
 
 #if 0
 static void cpu_info(void)
@@ -74,16 +74,16 @@ void cpu_init(struct mboot_info *_mboot)
 
 	early_kprint_init();
 
+	cmdline_init((const char *) (uintptr_t) mboot.cmdline + VM_ADDR);
+
 	paging_init();
 
 	pic_init();
 	idt_init();
 
-	cmdline_init((const char *) (uintptr_t) mboot.cmdline);
-
 	/* cpu_info() */
 
-	mm_init(mboot.mmap_addr, mboot.mmap_len);
+	mm_init(mboot.mmap_addr + VM_ADDR, mboot.mmap_len);
 
 	kernel_main();
 }

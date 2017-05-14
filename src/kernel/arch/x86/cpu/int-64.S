@@ -31,7 +31,7 @@
 .altmacro
 
 .macro INT i
-	.global  _int\i
+	.global _int\i
 	_int\i:
 		cli
 		push 0
@@ -40,7 +40,7 @@
 .endm
 
 .macro INT_ERR i
-	.global  _int\i
+	.global _int\i
 	_int\i:
 		cli
 		push $\i

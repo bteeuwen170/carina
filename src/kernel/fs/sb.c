@@ -106,14 +106,9 @@ int sb_put(struct dirent *dep)
 	return -EINVAL;
 }
 
-int sb_lookup(struct inode *dp, const char *name, struct superblock **sp)
+int sb_lookup(struct inode *dp, struct dirent *dep, struct superblock **sp)
 {
 	struct superblock *csp;
-	struct dirent *dep;
-	int res;
-
-	if ((res = dir_lookup(dp, name, &dep)) < 0)
-		return res;
 
 	list_for_each(csp, &superblocks, l) {
 		if (!csp->pdep)

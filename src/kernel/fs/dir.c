@@ -33,6 +33,32 @@
 
 static const char devname[] = "fs";
 
+static int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
+{
+	struct dirent *cdep;
+	int res;
+
+	list_for_each(cdep, &dp->del, l) {
+		if (strcmp(cdep->name, name) == 0) {
+			*dep = cdep;
+
+			return 0;
+		}
+	}
+
+	if ((res = dp->sp->fsdp->op->lookup(dp, name, &cdep)) < 0)
+		return res;
+
+	list_init(&cdep->l);
+	list_add(&dp->del, &cdep->l);
+
+	cdep->refs = 0;
+
+	*dep = cdep;
+
+	return 0;
+}
+
 static void _dir_put(struct dirent *dep)
 {
 	if (!dep)
@@ -47,17 +73,32 @@ static void _dir_put(struct dirent *dep)
 
 	/* TODO Also do reverse sb_lookup to free */
 
-	if (!(dep->sp->flags & M_KEEP) && !dep->refs)
+	if (!(dep->sp->flags & M_KEEP) && !dep->refs) {
+		list_rm(&dep->l);
 		kfree(dep);
+	}
 }
 
 void dir_put(struct dirent *dep)
 {
 	struct dirent *cdep;
+	int i, j, d;
 
-	/* FIXME Not thread safe */
-	for (cdep = dep; cdep != fs_root; cdep = cdep->pdep)
+	for (cdep = dep, d = -1; cdep != fs_root; cdep = cdep->pdep, d++);
+
+	if (d < 0)
+		return;
+
+	for (i = 0; i < d; i++) {
+		cdep = dep;
+
+		for (j = i; j < d; j++)
+			cdep = cdep->pdep;
+
 		_dir_put(cdep);
+	}
+
+	_dir_put(dep);
 }
 
 int dir_get(const char *path, struct dirent **dep)
@@ -94,16 +135,16 @@ int dir_get(const char *path, struct dirent **dep)
 			}
 		} else if (name[0] && strcmp(name, ".") != 0) {
 			if ((res = inode_get(cdep->sp, cdep->inum, &dp)) < 0)
-				return res;
+				goto err;
 
 			pdep = cdep;
 
 			if ((res = dir_lookup(dp, name, &cdep)) < 0)
 				goto err;
 
-			res = sb_lookup(dp, name, &sp);
+			res = sb_lookup(dp, cdep, &sp);
 			if (res == 0) {
-				/* TODO Check how safe this is */
+				/* FIXME This is probably creating a mess */
 				if (!(tdep = kmalloc(sizeof(struct dirent))))
 					goto err;
 				memcpy(tdep, cdep, sizeof(struct dirent));
@@ -112,6 +153,8 @@ int dir_get(const char *path, struct dirent **dep)
 
 				cdep->inum = sp->root->inum;
 				cdep->sp = sp;
+
+				/* kfree(cdep); */
 			} else if (res != -EINVAL) {
 				goto err;
 			}
@@ -141,32 +184,6 @@ err:
 		inode_put(dp);
 
 	return res;
-}
-
-int dir_lookup(struct inode *dp, const char *name, struct dirent **dep)
-{
-	struct dirent *cdep;
-	int res;
-
-	list_for_each(cdep, &dp->del, l) {
-		if (strcmp(cdep->name, name) == 0) {
-			*dep = cdep;
-
-			return 0;
-		}
-	}
-
-	if ((res = dp->sp->fsdp->op->lookup(dp, name, &cdep)) < 0)
-		return res;
-
-	list_init(&cdep->l);
-	list_add(&dp->del, &cdep->l);
-
-	cdep->refs = 0;
-
-	*dep = cdep;
-
-	return 0;
 }
 
 int dir_basepath(char *path)
