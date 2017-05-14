@@ -24,10 +24,10 @@
 
 #include <errno.h>
 #include <fs.h>
+#include <mm.h>
 
 #include <stdarg.h>
 #include <string.h>
-#include <stdlib.h>
 
 int file_open(const char *path, mode_t mode, struct file **fp)
 {

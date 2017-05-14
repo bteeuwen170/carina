@@ -26,10 +26,10 @@
 #include <dev.h>
 #include <errno.h>
 #include <fs.h>
+#include <mm.h>
 #include <module.h>
 
 #include <ctype.h>
-#include <stdlib.h>
 #include <string.h>
 
 static const char devname[] = "iso9660";

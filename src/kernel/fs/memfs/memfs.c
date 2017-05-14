@@ -26,8 +26,8 @@
 #include <errno.h>
 #include <fs.h>
 #include <limits.h>
+#include <mm.h>
 
-#include <stdlib.h>
 #include <string.h>
 
 static const char devname[] = "memfs";

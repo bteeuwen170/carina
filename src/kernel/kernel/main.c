@@ -32,6 +32,7 @@
 #include <issue.h>
 #include <kernel.h>
 #include <lock.h>
+#include <mm.h>
 #include <module.h>
 #include <pci.h>
 #include <proc.h>
@@ -42,7 +43,6 @@
 #include <sound/sb16.h>
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 void kernel_main(void)
@@ -252,6 +252,8 @@ void kernel_main(void)
 				res = file_open(".", F_RO, &fp);
 			else
 				res = file_open(cmd + 4, F_RO, &fp);
+
+			/* FIXME Returning 0 even though that's not the case */
 
 			if (res == 0) {
 				buf = kcalloc(1, fp->ip->size);

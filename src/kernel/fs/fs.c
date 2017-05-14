@@ -27,9 +27,9 @@
 #include <errno.h>
 #include <fs.h>
 #include <kernel.h>
+#include <mm.h>
 #include <proc.h>
 
-#include <stdlib.h>
 #include <string.h>
 
 static const char devname[] = "fs";

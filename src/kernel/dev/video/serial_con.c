@@ -25,12 +25,12 @@
 #include <errno.h>
 #include <dev.h>
 #include <fs.h>
+#include <mm.h>
 #include <module.h>
 
 #include <asm/cpu.h>
 
 #include <string.h>
-#include <stdlib.h>
 
 static const char devname[] = "serial_con";
 

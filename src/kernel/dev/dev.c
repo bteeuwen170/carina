@@ -27,10 +27,10 @@
 #include <kernel.h>
 #include <limits.h>
 #include <list.h>
+#include <mm.h>
 #include <pci.h>
 
 #include <stdarg.h>
-#include <stdlib.h>
 #include <string.h>
 
 static const char devname[] = "dev";

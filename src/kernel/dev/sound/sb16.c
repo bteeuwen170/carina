@@ -22,18 +22,13 @@
  *
  */
 
+#include <delay.h>
 #include <fs.h>
 #include <kernel.h>
+#include <mm.h>
 #include <module.h>
 
 #include <asm/cpu.h>
-
-#include <timer/pit.h>
-
-#include <stdlib.h>
-#include <string.h> /* TEMP */
-
-/* #include "snd.h" */
 
 static const char devname[] = "sb16";
 

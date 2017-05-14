@@ -26,12 +26,12 @@
 #include <errno.h>
 #include <kernel.h>
 #include <list.h>
+#include <mm.h>
 #include <module.h>
 #include <pci.h>
 
 #include <asm/cpu.h>
 
-#include <stdlib.h>
 #include <string.h>
 
 static const char devname[] = "pci";
@@ -163,10 +163,8 @@ static int pci_config(u16 bus, u16 dev, u16 func)
 	if ((pci_ind(busid, 0) & 0xFFFF) == 0xFFFF)
 		return 0;
 
-	if (!(pcp = kmalloc(sizeof(struct pci_cfg)))) {
-		res = -ENOMEM;
-		goto err;
-	}
+	if (!(pcp = kmalloc(sizeof(struct pci_cfg))))
+		return -ENOMEM;
 
 	for (i = 0; i < 4; i++) {
 		*(uintptr_t *) ((uintptr_t) pcp + i * 16) =

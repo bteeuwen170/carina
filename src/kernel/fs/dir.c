@@ -26,9 +26,9 @@
 #include <fs.h>
 #include <kernel.h>
 #include <list.h>
+#include <mm.h>
 #include <proc.h>
 
-#include <stdlib.h>
 #include <string.h>
 
 static const char devname[] = "fs";
@@ -105,7 +105,7 @@ int dir_get(const char *path, struct dirent **dep)
 {
 	struct superblock *sp;
 	struct inode *dp = NULL;
-	struct dirent *cdep = NULL, *pdep, *tdep = NULL;
+	struct dirent *cdep = NULL, *pdep = NULL, *tdep = NULL;
 	char fc, name[NAME_MAX + 1];
 	int res, i;
 
@@ -142,7 +142,7 @@ int dir_get(const char *path, struct dirent **dep)
 			if ((res = dir_lookup(dp, name, &cdep)) < 0)
 				goto err;
 
-			res = sb_lookup(dp, cdep, &sp);
+			res = sb_lookup(cdep, &sp);
 			if (res == 0) {
 				/* FIXME This is probably creating a mess */
 				if (!(tdep = kmalloc(sizeof(struct dirent))))

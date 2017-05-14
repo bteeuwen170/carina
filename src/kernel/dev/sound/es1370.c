@@ -24,17 +24,16 @@
 
 /* FIXME Interrupts are not working */
 
+#include <delay.h>
+#include <dev.h>
 #include <errno.h>
 #include <fs.h>
-#include <dev.h>
-#include <delay.h>
 #include <kernel.h>
+#include <mm.h>
 #include <module.h>
 #include <pci.h>
 
 #include <asm/cpu.h>
-
-#include <stdlib.h>
 
 static const char devname[] = "es1370";
 

@@ -29,12 +29,12 @@
 #include <fs.h>
 #include <kernel.h>
 #include <list.h>
+#include <mm.h>
 #include <module.h>
 #include <pci.h>
 
 #include <asm/cpu.h>
 
-#include <stdlib.h>
 #include <string.h>
 
 #include "ide.h"

@@ -22,19 +22,16 @@
  *
  */
 
-/* FIXME Interrupts are not working */
-
 #include <errno.h>
 #include <fs.h>
 #include <dev.h>
 #include <delay.h>
 #include <kernel.h>
 #include <module.h>
+#include <mm.h>
 #include <pci.h>
 
 #include <asm/cpu.h>
-
-#include <stdlib.h>
 
 static const char devname[] = "ac97";
 

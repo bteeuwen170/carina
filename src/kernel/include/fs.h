@@ -180,7 +180,7 @@ extern struct dirent *fs_root;
 
 int sb_get(struct fs_driver *fsdp, dev_t dev, u8 flags, struct superblock **sp);
 int sb_put(struct dirent *dep);
-int sb_lookup(struct inode *dp, struct dirent *dep, struct superblock **sp);
+int sb_lookup(struct dirent *dep, struct superblock **sp);
 
 int inode_get(struct superblock *sp, ino_t inum, struct inode **ip);
 void inode_put(struct inode *ip);

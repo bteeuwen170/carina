@@ -25,90 +25,110 @@
 #include <mboot.h>
 #include <kernel.h>
 
+#include <asm/cpu.h>
+
 #include <string.h>
 
 static const char devname[] = "mm";
 
-#if 0
-void *kmalloc(size_t size)
-{
+/* Minimum allocation size to always allocate at end of heap (0 to disable */
+#define NEW_MIN		4096
+/* Minimum size for split frames (+ sizeof(struct frame)) */
+#define SIZE_MIN	8
 
-}
-
-void *kcalloc(size_t nmemb, size_t size)
-{
-	void *p;
-
-	if (!(p = kmalloc(nmemb * size)))
-		return p;
-
-	memset(p, 0, nmemb * size);
-
-	return p;
-}
-
-void kfree(void *addr)
-{
-
-}
-#else
-static const char *mmap_types[5] = {
-	"rsvd",
-	"free",
-	"rsvd",
-	"ACPI",
-	"rsvd"
-};
-
-static uintptr_t position;
-
-struct addr {
-	uintptr_t	addr;
+struct frame {
+	uintptr_t	addr; /* XXX Don't really need this */
 	size_t		size;
 	char		present:1;
 
-	struct addr	*next;
+	struct frame	*next;
 };
+/* FIXME Option for page aligned */
+/* } __attribute__ ((packed)); */
 
-static struct addr addresses;
-static struct addr *last_addr = &addresses;
+extern uintptr_t kern_end;
+static void *start, *end, *max;
 
 void *kmalloc(size_t size)
 {
-#if 1
+	struct frame *cap, *nap, *oap;
+	off_t poff;
+	int free = 0;
+
 	if (!size)
 		return NULL;
 
-	last_addr->next = (struct addr *) position;
-	last_addr = (struct addr *) position;
-	position += sizeof(struct addr);
+	cap = start;
+	nap = end;
 
-	last_addr->addr = position;
-	last_addr->size = size;
-	last_addr->present = 1;
+	if (end + 2 * sizeof(struct frame) + nap->size + size - VM_ADDR < max)
+		free = 1;
 
-	position += size;
+	do {
+		if (cap->present || cap->size < size)
+			continue;
 
-	/* kprintf("+"); */
+		if (cap->size == size) {
+#ifdef CONFIG_ALLOC_VERBOSE
+			kprintf("* @ %#x (%u)\n", cap->addr, cap->size);
+#endif
+			goto ret;
+		} else if (free && size >= NEW_MIN) {
+			goto new;
+		}
 
-	return (void *) last_addr->addr;
-#else
-	void *p;
+		if (free && cap->size - size < sizeof(struct frame) + SIZE_MIN)
+			continue;
 
-	if (size == 0)
+		/* TODO
+		 * - Combine frames *
+		 * - Don't take first fit (to split),
+		 *   search certain offset for perfect fit.
+		 * - Also don't split if frame is significantly bigger
+		 */
+
+		nap = (struct frame *) (cap->addr + size);
+		nap->addr = (uintptr_t) nap + sizeof(struct frame);
+		nap->size = cap->size - sizeof(struct frame) - size;
+		nap->present = 0;
+		nap->next = cap->next;
+
+		cap->size = size;
+		cap->next = nap;
+
+#ifdef CONFIG_ALLOC_VERBOSE
+		kprintf("& @ %#x (%u)\n", cap->addr, cap->size);
+#endif
+
+		goto ret;
+	} while ((cap = cap->next));
+
+	/* TODO Allocate new page */
+	if (!free)
 		return NULL;
 
-	p = (void *) position;
+new:
+	if (nap->size) {
+		end += sizeof(struct frame) + nap->size;
+		nap->next = end;
+	}
 
-	position += size;
+	cap = end;
+	cap->addr = (uintptr_t) end + sizeof(struct frame);
+	cap->size = size;
+	cap->next = NULL;
 
-	kprintf("+");
-
-	return p;
+#ifdef CONFIG_ALLOC_VERBOSE
+	kprintf("+ @ %#x (%u)\n", cap->addr, cap->size);
 #endif
+
+ret:
+	cap->present = 1;
+
+	return (void *) cap->addr;
 }
 
-/* XXX an extemely crappy implementation of calloc */
+/* An extemely crappy implementation of calloc */
 void *kcalloc(size_t nmemb, size_t size)
 {
 	void *p = kmalloc(nmemb * size);
@@ -118,52 +138,47 @@ void *kcalloc(size_t nmemb, size_t size)
 	return p;
 }
 
-/*void *krealloc(void *ptr, size_t size)
-{
-	void *p = kmalloc(size);
-
-	if (!p)
-		return NULL;
-
-	memcpy(p, ptr,
-
-	kfree(ptr);
-
-	return p;
-}*/
-
 void kfree(void *ptr)
 {
-	struct addr *cap;
+	struct frame *cap;
 
-	if (!ptr)
-		kprintf("attempted to free NULL ptr\n");
+	if (!ptr) {
+#ifdef CONFIG_ALLOC_VERBOSE
+	kprintf("- @ NULL\n");
+#endif
+		return;
+	}
 
-	for (cap = &addresses; ; cap = cap->next) {
-		if (cap->addr == ptr) {
+	cap = start;
+
+	do {
+		if (cap->addr == (uintptr_t) ptr) {
 			if (cap->present)
 				goto found;
 			else
 				break;
 		}
-	}
+	} while ((cap = cap->next));
 
-	panic("attempted to free unallocated memory", 0, ptr);
+	panic("attempted to free unallocated memory", 0, (uintptr_t) ptr);
 
 found:
-	/* XXX TEMP XXX */ memset(cap->addr, 0, cap->size);
+#ifdef CONFIG_ALLOC_FREE_ZERO
+	memset((void *) cap->addr, 0, cap->size);
+#endif
 	cap->present = 0;
 
-	/* kprintf("-"); */
+#ifdef CONFIG_ALLOC_VERBOSE
+	kprintf("- @ %#x (%u)\n", cap->addr, cap->size);
+#endif
 
 	return;
 }
-#endif
 
+/* XXX How arch. specific is this? */
 void mm_init(uintptr_t addr, size_t len)
 {
 	struct mboot_mmap *mmap = (void *) addr;
-	size_t mem;
 
 	dprintf("Physical memory map:\n");
 
@@ -171,26 +186,24 @@ void mm_init(uintptr_t addr, size_t len)
 		uintptr_t maddr = mmap->addr_lo | (mmap->addr_hi >> 16);
 		uintptr_t mlen = mmap->len_lo | (mmap->len_hi >> 16);
 
-		dprintf(KP_CON "%#018lx - %#018lx (%s)\n",
-				maddr, maddr + mlen, mmap_types[mmap->type]);
+		dprintf(KP_CON "%#018lx - %#018lx",
+				maddr, maddr + mlen);
+		if (mmap->type == 1)
+			kprintf(" (free)");
+		else if (mmap->type == 3)
+			kprintf(" (acpi)");
+		kprintf("\n");
 
-		mem += mlen;
+		max += mlen;
 
 		mmap = (struct mboot_mmap *)
 				((uintptr_t)
 				 mmap + mmap->size + sizeof(mmap->size));
 	}
 
-	dprintf("%u MB memory\n", mem / 1024 / 1024 + 1);
-	/* dprintf("%u kernel size", &kern_end + 0x100000); */
+	dprintf("%u MB memory\n", (uintptr_t) max / 1024 / 1024 + 1);
 
-	/* FIXME How much padding is really required? */
-	/* position = ((uintptr_t) &kern_end) + 0xE0000; */
-	position = 0x300000 + 0xFFFFFFFF80000000;
-
-	/*u16 i;
-
-	for (i = 0; i < BLOCKS_MAX; i++) {
-		blocks->allocated = 0;
-	}*/
+	/* FIXME Get proper end of kernel */
+	start = end = (void *) ((uintptr_t) &kern_end + 0x30000);
+	((struct frame *) start)->size = 0;
 }

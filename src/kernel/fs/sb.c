@@ -24,8 +24,8 @@
 
 #include <errno.h>
 #include <fs.h>
+#include <mm.h>
 
-#include <stdlib.h>
 #include <string.h>
 
 static LIST_HEAD(superblocks);
@@ -106,7 +106,7 @@ int sb_put(struct dirent *dep)
 	return -EINVAL;
 }
 
-int sb_lookup(struct inode *dp, struct dirent *dep, struct superblock **sp)
+int sb_lookup(struct dirent *dep, struct superblock **sp)
 {
 	struct superblock *csp;
 
