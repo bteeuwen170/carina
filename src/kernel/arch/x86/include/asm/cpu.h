@@ -169,9 +169,6 @@ void *page_alloc_kernel(void);
 
 void page_free(void *page);
 
-void *virt_to_phys(void *addr);
-void *phys_to_virt(void *addr);
-
 void pm_init(void);
 
 #endif

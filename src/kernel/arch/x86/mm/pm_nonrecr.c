@@ -35,9 +35,9 @@
 #define PAGE_SIZE	4096
 
 #define PML4		0xFFFFFF7FBFDFE000
-#define PDTP(x)		(0xFFFF000000000000UL + (510UL << 39) + (510UL << 30) + (510UL << 21) + (((x) >> 27) & 0x00001FF000))
-#define PDT(x)		(0xFFFF000000000000UL + (510UL << 39) + (510UL << 30) + (((x) >> 18) & 0x003FFFF000))
-#define PT(x)		(0xFFFF000000000000UL + (510UL << 39) + (((x) >> 9) & 0x7FFFFFF000))
+/* #define PDTP(x)		(0xFFFF000000000000 + (510 << 39) + (510 << 30) + (510 << 21) + (((x) >> 27) & 0x00001FF000))
+#define PDT(x)		(0xFFFF000000000000 + (510 << 39) + (510 << 30) + (((x) >> 18) & 0x003FFFF000))
+#define PT(x)		(0xFFFF000000000000 + (510 << 39) + (((x) >> 9) & 0x7FFFFFF000)) */
 
 #define PML4E(x)	(((x) >> 39) & 511)
 #define PDTPE(x)	(((x) >> 30) & 511)
@@ -46,7 +46,7 @@
 #define PAGE(x)		((x) / PAGE_SIZE)
 
 extern uintptr_t kern_end;
-static uintptr_t end, tables, max, off;
+static uintptr_t end, tables, max;
 
 uintptr_t virt_to_phys(uintptr_t addr)
 {
@@ -66,9 +66,9 @@ uintptr_t phys_to_virt(uintptr_t addr)
 	/* return (void *) ((uintptr_t) addr) + VM_ADDR; */
 }
 
-static void pdtp_alloc(uintptr_t *pml4, uintptr_t addr)
+static uintptr_t *pdtp_alloc(uintptr_t *pml4, uintptr_t *addr)
 {
-	if (addr < VM_ADDR && !(pml4[PML4E(addr) + 1] & FLAGS_MASK))
+	if (*addr < VM_ADDR && !(pml4[PML4E(*addr) + 1] & FLAGS_MASK))
 		panic("TODO", 0, 0);
 
 #if 0
@@ -80,13 +80,15 @@ static void pdtp_alloc(uintptr_t *pml4, uintptr_t addr)
 		memset(pdtp[PDTPE(addr) + 1], 0, 512);
 	}
 #endif
+
+	return (pml4[PML4E(*addr)] & FLAGS_MASK) + VM_ADDR;
 }
 
-static void pdt_alloc(uintptr_t *pdtp, uintptr_t addr)
+static uintptr_t *pdt_alloc(uintptr_t *pdtp, uintptr_t *addr)
 {
 	uintptr_t *pdt;
 
-	pdt = pdtp[PDTPE(addr)] & FLAGS_MASK;
+	pdt = pdtp[PDTPE(*addr)] & FLAGS_MASK;
 	/* if (!pdt[PDTE(addr) + 1]) {
 		if (!(addr = page_get(end++)))
 			return NULL;
@@ -96,69 +98,71 @@ static void pdt_alloc(uintptr_t *pdtp, uintptr_t addr)
 		memset(pdt[PDTE(addr) + 1], 0, 512);
 		for(;;);
 	} */
-}
-static void page_alloc(uintptr_t *pt, uintptr_t vaddr, uintptr_t paddr);
 
-static void pt_alloc(uintptr_t *pdt, uintptr_t vaddr, uintptr_t paddr)
+	return (pdtp[PDTPE(*addr)] & FLAGS_MASK) + VM_ADDR;
+}
+static uintptr_t *page_alloc(uintptr_t *pt, uintptr_t vaddr, uintptr_t paddr);
+
+static uintptr_t *pt_alloc(uintptr_t *pdt, uintptr_t *addr)
 {
 	uintptr_t pt;
 
-	pt = paddr + 2 * PAGE_SIZE;
+	pt = *addr;
+	if (!(*addr = page_get(end++)))
+	return NULL;
+	*addr += VM_ADDR;
 
-	if (PTE(vaddr) == 510) {
-		page_alloc(pdt[PDTE(pt - PAGE_SIZE + VM_ADDR)], pt - PAGE_SIZE + VM_ADDR, pt - PAGE_SIZE);
-#if 0
-		/* pdt[PDTE(pt + VM_ADDR)] = pt | 0b00000011; */
-#else /* XXX... Basically the same */
-		uintptr_t *m;
-		m = PDT(pt + VM_ADDR);
-		m[PDTE(pt + VM_ADDR)] = pt | 0b00000011;
-#endif
-		memset(PT(pt + VM_ADDR), 0, 512);
+	if (!(pdt[PDTE(*addr)])) {
+		kprintf("new addr is %#lx\n", *addr);
+		kprintf("creating new pt %u @ %#lx\n", PDTE(*addr), pt);
+		kprintf("pt for new pt @ %#lx with index %u\n", (pdt[PDTE(pt)] & FLAGS_MASK) + VM_ADDR, PTE(pt));
+		page_alloc((uintptr_t *) (pdt[PDTE(pt)] & FLAGS_MASK), &pt, &pt - VM_ADDR);
+		memset(pt, 0, 512);
 
-		kprintf("pt:  %#lx > %#lx\n", pt + - PAGE_SIZE + VM_ADDR, pt - PAGE_SIZE);
-		kprintf("pdt: %#lx > %#lx\n", pdt, pt);
-		/* for(;;); */
-
-		off += 2;
+		pdt[PDTE(*addr)] = (pt - VM_ADDR) | 0b00000011;
+		/* kprintf("new pt! %u ptr to %#lx in %#lx\n", PDTE(addr) + 1, pt, pdt);
+		for(;;); */
+	} else {
+		end--;
+		*addr = pt;
 	}
+
+	return (uintptr_t *) (pdt[PDTE(*addr)] & FLAGS_MASK);
 }
 
-static void page_alloc(uintptr_t *pt, uintptr_t vaddr, uintptr_t paddr)
+static uintptr_t *page_alloc(uintptr_t *pt, uintptr_t vaddr, uintptr_t paddr)
 {
 	uintptr_t page;
 
-	if (!(pt[PTE(vaddr)]))
-		pt[PTE(vaddr)] = paddr | 0b000000011;
+	kprintf("pointing %#lx to %#lx\n", vaddr, paddr);
+	if (!(pt[PTE(vaddr)])) {
+		sleep(1000);
+		/* TEMP */
+		pt[PTE(vaddr)] = paddr | 0b100000011;
+		kprintf("addr to in pt: %#lx\n", pt);
+	}
+
+	return (pt[PTE(vaddr)] & FLAGS_MASK) + VM_ADDR;
 }
 
-static void *_page_alloc(uintptr_t vaddr, uintptr_t paddr)
+static void *_page_alloc(uintptr_t paddr, int kernel)
 {
-	paddr += off * PAGE_SIZE;
+	uintptr_t *pdtp, *pdt, *pt;
+	uintptr_t vaddr;
 
-#if 1
-	pdtp_alloc(PML4, vaddr);
-	pdt_alloc(PDTP(vaddr), vaddr);
-	pt_alloc(PDT(vaddr), vaddr, paddr);
-	page_alloc(PT(vaddr), vaddr, paddr);
-#else
-	if (!(pdtp_alloc(pml4, &vaddr)))
-		panic("out of virtual memory", -enomem, paddr);
+	vaddr = paddr + (kernel ? VM_ADDR : 0);
 
-	if (!(pdt_alloc(pdtp(vaddr), &vaddr)))
-		panic("out of virtual memory", -enomem, paddr);
+	if (!(pdtp = pdtp_alloc(PML4, &vaddr)))
+		panic("out of virtual memory", -ENOMEM, paddr);
 
-	if (!(pt_alloc(pdt(vaddr), &vaddr)))
-		panic("out of virtual memory", -enomem, paddr);
+	if (!(pdt = pdt_alloc(pdtp, &vaddr)))
+		panic("out of virtual memory", -ENOMEM, paddr);
 
-	if (!page_alloc(pt, pt(vaddr), vaddr - vm_addr))
-		panic("out of virtual memory", -enomem, paddr);
-#endif
+	if (!(pt = pt_alloc(PDT(vaddr), &vaddr)))
+		panic("out of virtual memory", -ENOMEM, paddr);
 
-/* #ifdef CONFIG_ALLOC_VERBOSE */
-	kprintf("O @ %#lx > %#lx < %u < %u < %u < %u\n", vaddr, paddr,
-			PTE(vaddr), PDTE(vaddr), PDTPE(vaddr), PML4E(vaddr));
-/* #endif */
+	if (!page_alloc(pt, vaddr, vaddr - VM_ADDR))
+		panic("out of virtual memory", -ENOMEM, paddr);
 
 	/* pt[PTE(addr)] = addr | 0b100000011; */
 
@@ -179,12 +183,15 @@ static void *_page_alloc(uintptr_t vaddr, uintptr_t paddr)
 
 	/* kprintf("pg: %#lx\n", page_get(addr / PAGE_SIZE)); */
 	if (vaddr != paddr + VM_ADDR) {
-		/* kprintf("%#lx > %#lx\n", 0xffffffff801ff000, virt_to_phys(0xffffffff801ff000));
+		kprintf("%#lx > %#lx\n", 0xffffffff801ff000, virt_to_phys(0xffffffff801ff000));
 		kprintf("%#lx > %#lx\n", 0xffffffff80200000, virt_to_phys(0xffffffff80200000));
-		kprintf("%#lx > %#lx\n", 0xffffffff80201000, virt_to_phys(0xffffffff80201000)); */
-		/* if (PDTE(vaddr + PAGE_SIZE) == 1)
-			sleep(2000); */
+		kprintf("%#lx > %#lx\n", 0xffffffff80201000, virt_to_phys(0xffffffff80201000));
 	}
+
+/* #ifdef CONFIG_ALLOC_VERBOSE */
+	kprintf("O @ %#lx > %#lx < %u < %u < %u < %u\n", vaddr, paddr,
+			PTE(vaddr), PDTE(vaddr), PDTPE(vaddr), PML4E(vaddr));
+/* #endif */
 
 	return (void *) vaddr;
 }
@@ -202,14 +209,12 @@ void *page_alloc_kernel(void)
 	if (end > max - tables)
 		return NULL;
 
-	/*
-	 * TODO / FIXME
-	 * Use this function when instead of incrementing paddr in this file
-	 */
 	if (!(addr = page_get(end++)))
 		return NULL;
 
-	return _page_alloc(addr + VM_ADDR, addr);
+	kprintf("%#lx\n", virt_to_phys(0x100000 + VM_ADDR));
+
+	return _page_alloc(addr, 1);
 #else
 	uintptr_t *pt, paddr, addr, _pt;
 	int i;

@@ -174,6 +174,7 @@ void kernel_main(void)
 
 	/* Temporary and crappy code */
 #if 1
+	ac97_play();
 
 	struct file *fpkbd;
 	struct input_event iep;

@@ -254,28 +254,12 @@ pdtp_hi:
 	.quad 0
 pdt_lo:
 	.quad pt_0 - VM_ADDR + 0b00000011
-	.quad pt_1 - VM_ADDR + 0b00000011
-	.quad pt_2 - VM_ADDR + 0b00000011
-	.fill 509, 8, 0
+	.fill 511, 8, 0
 pdt_hi:
 	.quad pt_0 - VM_ADDR + 0b00000011
-	.quad pt_1 - VM_ADDR + 0b00000011
-	.quad pt_2 - VM_ADDR + 0b00000011
-	.fill 509, 8, 0
+	.fill 511, 8, 0
 pt_0:
-	j = 0 * 512
-	.rept 512
-		.quad j * 4096 + 0b100000011
-		j = j + 1
-	.endr
-pt_1:
-	j = 1 * 512
-	.rept 512
-		.quad j * 4096 + 0b100000011
-		j = j + 1
-	.endr
-pt_2:
-	j = 2 * 512
+	j = 0
 	.rept 512
 		.quad j * 4096 + 0b100000011
 		j = j + 1
@@ -285,19 +269,11 @@ pt_2:
 #else
 pdt:
 	.long pt_0 - VM_ADDR + 0b00000011
-	.long pt_1 - VM_ADDR + 0b00000011
-	.fill 766, 4, 0
+	.fill 767, 4, 0
 	.long pt_0 - VM_ADDR + 0b00000011
-	.long pt_1 - VM_ADDR + 0b00000011
-	.fill 254, 4, 0
+	.fill 255, 4, 0
 pt_0:
 	i = 0
-	.rept 1024
-		.long i * 4096 + 0b100000011
-		i = i + 1
-	.endr
-pt_1:
-	i = 1024
 	.rept 1024
 		.long i * 4096 + 0b100000011
 		i = i + 1

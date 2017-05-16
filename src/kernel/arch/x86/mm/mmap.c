@@ -51,6 +51,11 @@ void *page_get(uintptr_t page)
 	return NULL;
 }
 
+size_t page_max(void)
+{
+	return mem_max / PAGE_SIZE;
+}
+
 void mmap_init(uintptr_t addr, size_t len)
 {
 	dprintf("Physical memory map\n");
@@ -62,7 +67,7 @@ void mmap_init(uintptr_t addr, size_t len)
 
 		if (mmap->type == 1) {
 			kprintf(" (free)\n");
-			mem_max = mmap->len;
+			mem_max += mmap->len;
 		} else if (mmap->type == 3) {
 			kprintf(" (acpi)\n");
 		} else {
