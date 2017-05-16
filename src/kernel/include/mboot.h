@@ -27,10 +27,8 @@
 
 struct mboot_mmap {
 	u32	size;
-	u32	addr_lo;
-	u32	addr_hi;
-	u32	len_lo;
-	u32	len_hi;
+	u64	addr;
+	u64	len;
 	u32	type;
 } __attribute__ ((packed));
 

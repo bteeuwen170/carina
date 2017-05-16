@@ -261,12 +261,14 @@ void kernel_main(void)
 					kprintf("OUT OF MEM!");
 
 				res = file_read(fp, buf, fp->ip->size);
+				buf[fp->ip->size] = '\0';
 
 				if (res > 0)
 					kprintf("%s", buf);
 				else
 					kprintf("%d\n", res);
 
+				kfree(buf);
 				file_close(fp);
 			}
 		} else if (strncmp(cmd, "cd", 2) == 0) {

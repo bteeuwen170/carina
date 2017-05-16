@@ -408,6 +408,7 @@ void fs_init(void)
 		goto fallback;
 	}
 
+	/* for(;;); */
 	goto mountdev;
 
 fallback:

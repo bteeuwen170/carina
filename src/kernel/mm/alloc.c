@@ -22,8 +22,9 @@
  *
  */
 
-#include <mboot.h>
+#include <errno.h>
 #include <kernel.h>
+#include <mboot.h>
 
 #include <asm/cpu.h>
 
@@ -46,25 +47,24 @@ struct frame {
 /* FIXME Option for page aligned */
 /* } __attribute__ ((packed)); */
 
-extern uintptr_t kern_end;
-static void *start, *end, *max;
+static void *start, *end;
+static uintptr_t max;
 
 void *kmalloc(size_t size)
 {
-	struct frame *cap, *nap, *oap;
-	off_t poff;
+	struct frame *cap, *nap;
+	size_t i;
 	int free = 0;
 
 	if (!size)
 		return NULL;
 
-	cap = start;
 	nap = end;
 
-	if (end + 2 * sizeof(struct frame) + nap->size + size - VM_ADDR < max)
+	if (end + 2 * sizeof(struct frame) + nap->size + size < max)
 		free = 1;
 
-	do {
+	for (cap = start; cap; cap = cap->next) {
 		if (cap->present || cap->size < size)
 			continue;
 
@@ -80,7 +80,8 @@ void *kmalloc(size_t size)
 		if (free && cap->size - size < sizeof(struct frame) + SIZE_MIN)
 			continue;
 
-		/* TODO
+		/*
+		 * TODO
 		 * - Combine frames *
 		 * - Don't take first fit (to split),
 		 *   search certain offset for perfect fit.
@@ -93,19 +94,24 @@ void *kmalloc(size_t size)
 		nap->present = 0;
 		nap->next = cap->next;
 
+#ifdef CONFIG_ALLOC_VERBOSE
+		kprintf("& @ %#x (%u), %#x (%u) < %u\n", cap->addr, size,
+				nap->addr, nap->size, cap->size);
+#endif
+
 		cap->size = size;
 		cap->next = nap;
 
-#ifdef CONFIG_ALLOC_VERBOSE
-		kprintf("& @ %#x (%u)\n", cap->addr, cap->size);
-#endif
-
 		goto ret;
-	} while ((cap = cap->next));
+	}
 
-	/* TODO Allocate new page */
-	if (!free)
-		return NULL;
+	if (!free) {
+		for (i = 0; i < size / PAGE_SIZE + ((size % PAGE_SIZE) ? 1 : 0); i++) {
+			if (!(page_alloc_kernel()))
+				return NULL;
+			max += PAGE_SIZE;
+		}
+	}
 
 new:
 	if (nap->size) {
@@ -114,7 +120,7 @@ new:
 	}
 
 	cap = end;
-	cap->addr = (uintptr_t) end + sizeof(struct frame);
+	cap->addr = (uintptr_t) (end + sizeof(struct frame));
 	cap->size = size;
 	cap->next = NULL;
 
@@ -176,34 +182,11 @@ found:
 }
 
 /* XXX How arch. specific is this? */
-void mm_init(uintptr_t addr, size_t len)
+void mm_init(void)
 {
-	struct mboot_mmap *mmap = (void *) addr;
+	if (!(start = end = page_alloc_kernel()))
+		panic("unable to allocate first page", -ENOMEM, 0);
+	max += end + PAGE_SIZE;
 
-	dprintf("Physical memory map:\n");
-
-	while ((uintptr_t) mmap < addr + len) {
-		uintptr_t maddr = mmap->addr_lo | (mmap->addr_hi >> 16);
-		uintptr_t mlen = mmap->len_lo | (mmap->len_hi >> 16);
-
-		dprintf(KP_CON "%#018lx - %#018lx",
-				maddr, maddr + mlen);
-		if (mmap->type == 1)
-			kprintf(" (free)");
-		else if (mmap->type == 3)
-			kprintf(" (acpi)");
-		kprintf("\n");
-
-		max += mlen;
-
-		mmap = (struct mboot_mmap *)
-				((uintptr_t)
-				 mmap + mmap->size + sizeof(mmap->size));
-	}
-
-	dprintf("%u MB memory\n", (uintptr_t) max / 1024 / 1024 + 1);
-
-	/* FIXME Get proper end of kernel */
-	start = end = (void *) ((uintptr_t) &kern_end + 0x30000);
-	((struct frame *) start)->size = 0;
+	memset(start, 0, sizeof(struct frame));
 }

@@ -32,13 +32,12 @@
 #   include "../../include-64/asm/cpu.h"
 #endif
 
-#define GDT_ENTRIES	6
+#define PAGE_SIZE	4096
 
-/* TODO IDT_ENTIRES to INT_ENTRIES */
+#define GDT_ENTRIES	6
 
 #define IDT_ENTRIES	256
 #define SINT_ENTRIES	32
-#define HINT_ENTRIES	(IDT_ENTRIES - SIN_ENTRIES)
 #define IRQ_ENTRIES	16
 
 #define TSS_ENTRIES	1
@@ -160,11 +159,19 @@ void irq_unmask(u8 irq);
 
 int irq_active(u8 irq);
 
-void tss_init(u32 *limit, u32 *base);
+/* void tss_init(u32 *limit, u32 *base);
 
 void svmode_enter(void);
-void usrmode_enter(void);
+void usrmode_enter(void); */
 
-void paging_init(void);
+void *page_alloc_user(void);
+void *page_alloc_kernel(void);
+
+void page_free(void *page);
+
+void *virt_to_phys(void *addr);
+void *phys_to_virt(void *addr);
+
+void pm_init(void);
 
 #endif
