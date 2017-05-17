@@ -260,10 +260,11 @@ pdt_hi:
 	.fill 511, 8, 0
 pt_0:
 	j = 0
-	.rept 512
+	.rept 511
 		.quad j * 4096 + 0b100000011
 		j = j + 1
 	.endr
+	.quad 0
 #elif defined(CONFIG_X86_PAE)
 /* TODO */
 #else

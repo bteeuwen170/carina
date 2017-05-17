@@ -32,7 +32,12 @@ static const char devname[] = "mmap";
 static struct mboot_mmap *mmap;
 static size_t mmap_len, mem_max;
 
-void *page_get(uintptr_t page)
+size_t mmap_max(void)
+{
+	return mem_max / PAGE_SIZE;
+}
+
+uintptr_t mmap_get(uintptr_t page)
 {
 	struct mboot_mmap *cmmap;
 	uintptr_t i, pi = 0;
@@ -49,11 +54,6 @@ void *page_get(uintptr_t page)
 	} while (++cmmap < mmap + mmap_len);
 
 	return NULL;
-}
-
-size_t page_max(void)
-{
-	return mem_max / PAGE_SIZE;
 }
 
 void mmap_init(uintptr_t addr, size_t len)
