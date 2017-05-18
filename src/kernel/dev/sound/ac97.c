@@ -124,7 +124,7 @@ void ac97_play(void)
 	file_open("/snd.pcm", F_RO, &fp);
 	if (!fp)
 		dprintf("CRAP OPEN\n");
-	audio = kmalloc(fp->ip->size);
+	audio = kmalloc(fp->ip->size, KM_CONT);
 	if (!file_read(fp, audio, fp->ip->size))
 		dprintf("CRAP READ\n");
 
@@ -203,10 +203,11 @@ static int ac97_probe(struct device *devp)
 
 	volume_set(1);
 
-	if (!(dev->buf = kcalloc(32, sizeof(struct bdl)))) {
+	if (!(dev->buf = kmalloc(32 * sizeof(struct bdl), KM_CONT))) {
 		res = -ENOMEM;
 		goto err;
 	}
+	memset(dev->buf, 0, 32 * sizeof(struct bdl));
 
 	io_outd(dev->nabmbar + AC97_NABMBAR_PO_BDBAR,
 			(uintptr_t) dev->buf - VM_ADDR);

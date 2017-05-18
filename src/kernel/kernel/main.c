@@ -256,7 +256,7 @@ void kernel_main(void)
 			/* FIXME Returning 0 even though that's not the case */
 
 			if (res == 0) {
-				buf = kcalloc(1, fp->ip->size);
+				buf = kmalloc(fp->ip->size, 0);
 				if (!buf)
 					kprintf("OUT OF MEM!");
 

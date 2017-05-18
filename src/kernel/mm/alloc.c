@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <kernel.h>
 #include <mboot.h>
+#include <mm.h>
 
 #include <asm/cpu.h>
 
@@ -50,7 +51,7 @@ struct frame {
 static void *start, *end;
 static uintptr_t max;
 
-void *kmalloc(size_t size)
+void *kmalloc(size_t size, int flags)
 {
 	struct frame *cap, *nap;
 	size_t i;
@@ -63,6 +64,15 @@ void *kmalloc(size_t size)
 
 	if (end + 2 * sizeof(struct frame) + nap->size + size < max)
 		free = 1;
+
+	if (flags & KM_CONT) {
+		nap->next = block_alloc_kernel(size);
+		end = nap->next;
+
+		kprintf("done!\n");
+
+		goto new;
+	}
 
 	for (cap = start; cap; cap = cap->next) {
 		if (cap->present || cap->size < size)
@@ -106,7 +116,8 @@ void *kmalloc(size_t size)
 	}
 
 	if (!free) {
-		for (i = 0; i < size / PAGE_SIZE + ((size % PAGE_SIZE) ? 1 : 0); i++) {
+		for (i = 0; i < size / PAGE_SIZE + ((size % PAGE_SIZE) ? 1 : 0);
+				i++) {
 			if (!(page_alloc_kernel()))
 				return NULL;
 			max += PAGE_SIZE;
@@ -114,13 +125,13 @@ void *kmalloc(size_t size)
 	}
 
 new:
-	if (nap->size) {
+	if (!(flags & KM_CONT) && nap->size) {
 		end += sizeof(struct frame) + nap->size;
 		nap->next = end;
 	}
 
 	cap = end;
-	cap->addr = (uintptr_t) (end + sizeof(struct frame));
+	cap->addr = (uintptr_t) cap + sizeof(struct frame);
 	cap->size = size;
 	cap->next = NULL;
 
@@ -132,16 +143,6 @@ ret:
 	cap->present = 1;
 
 	return (void *) cap->addr;
-}
-
-/* An extemely crappy implementation of calloc */
-void *kcalloc(size_t nmemb, size_t size)
-{
-	void *p = kmalloc(nmemb * size);
-
-	memset(p, 0, nmemb * size);
-
-	return p;
 }
 
 void kfree(void *ptr)

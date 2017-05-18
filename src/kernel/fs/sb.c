@@ -43,7 +43,7 @@ int sb_get(struct fs_driver *fsdp, dev_t dev, u8 flags, struct superblock **sp)
 		}
 	}
 
-	if (!(csp = kmalloc(sizeof(struct superblock))))
+	if (!(csp = kmalloc(sizeof(struct superblock), 0)))
 		return -ENOMEM;
 
 	list_init(&csp->l);

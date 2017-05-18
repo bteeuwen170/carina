@@ -25,9 +25,10 @@
 #ifndef _MM_H
 #define _MM_H
 
-void *kmalloc(size_t size);
-void *kcalloc(size_t nmemb, size_t size);
+#define KM_CONT	0x01
+/* #define KM_USER	0x02 */
 
+void *kmalloc(size_t size, int flags);
 void kfree(void *addr);
 
 #endif

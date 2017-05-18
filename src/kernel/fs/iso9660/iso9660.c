@@ -220,7 +220,7 @@ static int iso9660_lookup(struct inode *dp, const char *name,
 
 			/* TODO put_block here */
 
-			if (!(cdep = kmalloc(sizeof(struct dirent)))) {
+			if (!(cdep = kmalloc(sizeof(struct dirent), 0))) {
 				res = -ENOMEM;
 				goto err;
 			}

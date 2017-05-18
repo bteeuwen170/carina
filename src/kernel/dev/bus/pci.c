@@ -163,7 +163,7 @@ static int pci_config(u16 bus, u16 dev, u16 func)
 	if ((pci_ind(busid, 0) & 0xFFFF) == 0xFFFF)
 		return 0;
 
-	if (!(pcp = kmalloc(sizeof(struct pci_cfg))))
+	if (!(pcp = kmalloc(sizeof(struct pci_cfg), 0)))
 		return -ENOMEM;
 
 	for (i = 0; i < 4; i++) {

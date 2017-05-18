@@ -84,7 +84,7 @@ int device_reg(struct driver *drip, struct device **devp, u8 flags)
 	if (!drip)
 		return -EINVAL;
 
-	if (!(cdevp = kcalloc(1, sizeof(struct device))))
+	if (!(cdevp = kmalloc(sizeof(struct device), 0)))
 		return -ENOMEM;
 
 	list_init(&cdevp->l);
@@ -95,7 +95,13 @@ int device_reg(struct driver *drip, struct device **devp, u8 flags)
 			(flags & D_CONTROLLER) ? 0 : minor_last[drip->major]++);
 	cdevp->flags = flags;
 
+	cdevp->busid[0] = '\0';
+	cdevp->bus = NULL;
+	cdevp->device = NULL;
+
 	cdevp->drip = drip;
+
+	cdevp->op = NULL;
 
 	*devp = cdevp;
 

@@ -163,7 +163,7 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 	size_t i;
 	int res = 0;
 
-	if (!(idevp = kmalloc(sizeof(struct ide_device))))
+	if (!(idevp = kmalloc(sizeof(struct ide_device), 0)))
 		return -ENOMEM;
 
 	idevp->bus_master = (pcp->bar_4 & ~1) + (ch ? 0x08 : 0);

@@ -91,7 +91,7 @@ static int devfs_lookup(struct inode *dp, const char *name, struct dirent **dep)
 		if (strcmp(nbuf, name) != 0)
 			continue;
 
-		if (!(cdep = kmalloc(sizeof(struct dirent))))
+		if (!(cdep = kmalloc(sizeof(struct dirent), 0)))
 			return -ENOMEM;
 
 		cdep->inum = (ino_t) devp->dev;

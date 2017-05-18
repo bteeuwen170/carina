@@ -145,7 +145,7 @@ int dir_get(const char *path, struct dirent **dep)
 			res = sb_lookup(cdep, &sp);
 			if (res == 0) {
 				/* FIXME This is probably creating a mess */
-				if (!(tdep = kmalloc(sizeof(struct dirent))))
+				if (!(tdep = kmalloc(sizeof(struct dirent), 0)))
 					goto err;
 				memcpy(tdep, cdep, sizeof(struct dirent));
 

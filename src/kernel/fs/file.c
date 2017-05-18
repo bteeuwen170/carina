@@ -37,7 +37,7 @@ int file_open(const char *path, mode_t mode, struct file **fp)
 	if (strlen(path) > PATH_MAX)
 		return -ENAMETOOLONG;
 
-	if (!(cfp = kcalloc(1, sizeof(struct file))))
+	if (!(cfp = kmalloc(sizeof(struct file), 0)))
 		return -ENOMEM;
 
 	cfp->off = 0;

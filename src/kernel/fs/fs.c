@@ -289,7 +289,7 @@ int fs_mkdir(const char *path, mode_t mode)
 	strcpy(buf, path);
 	dir_basename(buf);
 
-	if (!(dep = kmalloc(sizeof(struct dirent)))) {
+	if (!(dep = kmalloc(sizeof(struct dirent), 0))) {
 		res = -ENOMEM;
 		goto err;
 	}

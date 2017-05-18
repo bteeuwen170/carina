@@ -176,7 +176,8 @@ int serial_con_init(void)
 				0)
 			return res;
 
-		if (!(devp->device = kmalloc(sizeof(u16)))) {
+		/* XXX ? */
+		if (!(devp->device = kmalloc(sizeof(u16), 0))) {
 			res = -ENOMEM;
 			goto err;
 		}

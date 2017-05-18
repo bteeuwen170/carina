@@ -45,7 +45,7 @@ int block_get(dev_t dev, off_t block, struct block **bp)
 	if (!(devp = device_get(dev)))
 		return -ENODEV;
 
-	if (!(cbp = kmalloc(sizeof(struct block))))
+	if (!(cbp = kmalloc(sizeof(struct block), 0)))
 		return -ENOMEM;
 
 	list_init(&cbp->l);
