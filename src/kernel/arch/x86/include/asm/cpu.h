@@ -137,6 +137,24 @@ static inline void tss_load(void)
 	asm volatile ("ltr %0" : : "r" (ax));
 }
 
+static inline void tlb_flush(void)
+{
+#ifdef ARCH_x86_64
+	asm volatile ("mov %0, %%cr3" : : "r" (0xFFFFFF7FBFDFE000) : "memory");
+#else
+	/* TODO */
+#endif
+}
+
+static inline void page_flush(uintptr_t addr)
+{
+#if 1
+	asm volatile ("invlpg (%0)" : : "r" (addr) : "memory");
+#else /* For i386 */
+	tlb_flush();
+#endif
+}
+
 /*static inline bool int_state(void)
 {
 	register u64 rflags = 0;

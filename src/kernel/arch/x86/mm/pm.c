@@ -35,7 +35,7 @@ static const char devname[] = "pm";
 #define FLAGS_MASK	0xFFFFFFFFFFFFF000
 
 #define PAGE_SIZE	4096
-#define FRAME_SIZE	(PAGE_SIZE / sizeof(uintptr_t))
+#define TABLE_SIZE	(PAGE_SIZE / sizeof(uintptr_t))
 
 #define PML4		(uintptr_t *) 0xFFFFFF7FBFDFE000
 #define PDTP(x)		(uintptr_t *) (0xFFFF000000000000UL + (510UL << 39) + \
@@ -53,6 +53,8 @@ static const char devname[] = "pm";
 #define PAGE(x)		((x) / PAGE_SIZE)
 
 extern uintptr_t kern_end;
+
+/* FIXME Probably not multitasking friendly */
 static uintptr_t end, off;
 
 uintptr_t virt_to_phys(uintptr_t vaddr)
@@ -69,24 +71,27 @@ uintptr_t virt_to_phys(uintptr_t vaddr)
 /* static void pdtp_alloc(uintptr_t *pml4, uintptr_t vaddr, uintptr_t paddr)
 {
 	pdtp[PML4E(vaddr)] = paddr | 0b00000011;
-	memset(PDTP(vaddr), 0, FRAME_SIZE);
+	memset(PDTP(vaddr), 0, TABLE_SIZE);
 } */
 
 static void pdt_alloc(uintptr_t *pdtp, uintptr_t vaddr, uintptr_t paddr)
 {
 	pdtp[PDTPE(vaddr)] = paddr | 0b00000011;
-	memset(PDT(vaddr), 0, FRAME_SIZE);
+	memset(PDT(vaddr), 0, TABLE_SIZE);
 }
 
 static void pt_alloc(uintptr_t *pdt, uintptr_t vaddr, uintptr_t paddr)
 {
 	pdt[PDTE(vaddr)] = paddr | 0b00000011;
-	memset(PT(vaddr), 0, FRAME_SIZE);
+	memset(PT(vaddr), 0, TABLE_SIZE);
 }
 
 static void page_alloc(uintptr_t *pt, uintptr_t vaddr, uintptr_t paddr)
 {
-	pt[PTE(vaddr)] = paddr | 0b000000011;
+	if (!pt[PTE(vaddr)]) {
+		pt[PTE(vaddr)] = paddr | 0b000000011;
+		page_flush(vaddr);
+	}
 }
 
 static void *_page_alloc(uintptr_t vaddr, uintptr_t paddr)
@@ -141,45 +146,60 @@ void *page_alloc_kernel(void)
 void *block_alloc_kernel(size_t size)
 {
 	uintptr_t pages, pts, pdts;
-	uintptr_t addr, caddr, taddr;
-	size_t i, j;
+	uintptr_t taddr, saddr, caddr;
+	uintptr_t send, tend;
+	size_t i, j, k;
 
 	if ((pages = PAGE(size) + (size % PAGE_SIZE ? 1 : 0)) == 1)
 		return page_alloc_kernel();
 
-	pts = pages / 512 + (pages % 512 ? 1 : 0);
-	pdts = pts / 512 + (pts % 512 ? 1 : 0);
+	pts = pages / TABLE_SIZE + (pages % TABLE_SIZE ? 1 : 0);
+	pdts = pts / TABLE_SIZE + (pts % TABLE_SIZE ? 1 : 0);
 
 	kprintf("(%u) %u < %u < %u < 1 < 1\n", size, pages, pts, pdts);
 
-	if (!(taddr = mmap_get(end)))
+	tend = end;
+	/*
+	 * FIXME We're wasting memory here, find a better way to calculate this
+	 */
+	end += (pages * TABLE_SIZE + pts * TABLE_SIZE + pdts * TABLE_SIZE) /
+			PAGE_SIZE + 1;
+	send = end;
+
+	if (!(saddr = mmap_get(end)))
 		return NULL;
+	saddr += off * PAGE_SIZE;
+	caddr = saddr;
+	taddr = PT(saddr + VM_ADDR);
+	end = tend;
 
-	/* FIXME We're wasting memory here */
-	off += pages + pts + pdts;
-
-	if (!(addr = mmap_get(end)))
-		return NULL;
-	addr += off * PAGE_SIZE;
-	caddr = addr;
-
-	for (i = 0; i < pts; i++) {
-		pt_alloc(PDT(caddr + VM_ADDR), caddr + VM_ADDR, taddr);
-
-		for (j = 0; j < pages / pts; j++) {
-			/* if (!(caddr = mmap_get(end++)))
+	for (i = 0; i < pages; i++) {
+		/* XXX Do we need to check for both? */
+		if (virt_to_phys(taddr) == 0 || PTE(caddr) == 0) {
+			if (!(taddr = page_alloc_kernel()))
 				return NULL;
-			caddr += off * PAGE_SIZE; */
 
-			page_alloc(taddr, caddr + VM_ADDR, caddr);
-
-			caddr += PAGE_SIZE;
+			pt_alloc(PDT(caddr + VM_ADDR), caddr + VM_ADDR,
+					virt_to_phys(taddr));
 		}
 
-		taddr += PAGE_SIZE;
+		page_alloc(taddr, caddr + VM_ADDR, caddr);
+
+		if (i >= pages)
+			goto ret;
+
+		caddr += PAGE_SIZE;
 	}
 
-	return addr;
+ret:
+	end = send;
+
+	dprintf("addr: %#lx\n", saddr);
+	dprintf("addr: %#lx\n", caddr);
+	dprintf("addr: %#lx\n", virt_to_phys(caddr));
+	dprintf("size: %#u should be %u\n", caddr - saddr, size);
+
+	return saddr + VM_ADDR;
 }
 
 void page_free(void *page)

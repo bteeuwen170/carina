@@ -161,7 +161,7 @@ void kernel_main(void)
 			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
 
 	rtc_gettm(&tm);
-	kprintf("Starting up at %04d-%02d-%02d %02d:%02d:%02d UTC\n",
+	kprintf("Starting up on %04d-%02d-%02d %02d:%02d:%02d UTC\n",
 			tm.year, tm.mon, tm.mday, tm.hour, tm.min, tm.sec);
 
 #if 0
@@ -174,7 +174,6 @@ void kernel_main(void)
 
 	/* Temporary and crappy code */
 #if 1
-
 	struct file *fpkbd;
 	struct input_event iep;
 	char cmd[64], c;

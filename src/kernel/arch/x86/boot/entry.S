@@ -103,7 +103,7 @@ entry:
 #ifdef CONFIG_X86_PAE
 	bts $5, %eax /* CR4.PAE */
 #endif
-	#bts $7, %eax /* CR4.PGE */
+	#bts $7, %eax /* CR4.PGE */ /* XXX Maybe? */
 	#bts $9, %eax /* CR4.OSFXSR */
 	#bts $10, %eax /* CR4.OSXMMEXCPT */
 	mov %eax, %cr4
