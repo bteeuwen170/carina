@@ -180,7 +180,7 @@ extern struct dirent *fs_root;
 
 int sb_get(struct fs_driver *fsdp, dev_t dev, u8 flags, struct superblock **sp);
 int sb_put(struct dirent *dep);
-int sb_lookup(struct inode *dp, const char *name, struct superblock **sp);
+int sb_lookup(struct dirent *dep, struct superblock **sp);
 
 int inode_get(struct superblock *sp, ino_t inum, struct inode **ip);
 void inode_put(struct inode *ip);
@@ -188,7 +188,6 @@ int inode_dirisempty(struct inode *ip); /* XXX Keep this? */
 
 int dir_get(const char *path, struct dirent **dep);
 void dir_put(struct dirent *dep);
-int dir_lookup(struct inode *dp, const char *name, struct dirent **dep);
 int dir_basepath(char *path);
 int dir_basename(char *path);
 

@@ -22,19 +22,16 @@
  *
  */
 
-/* FIXME Interrupts are not working */
-
 #include <errno.h>
 #include <fs.h>
 #include <dev.h>
 #include <delay.h>
 #include <kernel.h>
 #include <module.h>
+#include <mm.h>
 #include <pci.h>
 
 #include <asm/cpu.h>
-
-#include <stdlib.h>
 
 static const char devname[] = "ac97";
 
@@ -85,8 +82,7 @@ char *audio;
 
 static void bdl_fill(char *data, u32 n, u32 off)
 {
-	/* TODO Physical address */
-	dev->buf[n].addr = (uintptr_t) data + off * 4096 * 2;
+	dev->buf[n].addr = (uintptr_t) data - VM_ADDR + off * 4096 * 2;
 	dev->buf[n].len = 4096;
 	dev->buf[n].bup = 0;
 	dev->buf[n].ioc = 1;
@@ -128,7 +124,7 @@ void ac97_play(void)
 	file_open("/snd.pcm", F_RO, &fp);
 	if (!fp)
 		dprintf("CRAP OPEN\n");
-	audio = kmalloc(fp->ip->size);
+	audio = kmalloc(fp->ip->size, KM_CONT);
 	if (!file_read(fp, audio, fp->ip->size))
 		dprintf("CRAP READ\n");
 
@@ -207,13 +203,14 @@ static int ac97_probe(struct device *devp)
 
 	volume_set(1);
 
-	if (!(dev->buf = kcalloc(32, sizeof(struct bdl)))) {
+	if (!(dev->buf = kmalloc(32 * sizeof(struct bdl), KM_CONT))) {
 		res = -ENOMEM;
 		goto err;
 	}
+	memset(dev->buf, 0, 32 * sizeof(struct bdl));
 
-	/* TODO Physical address */
-	io_outd(dev->nabmbar + AC97_NABMBAR_PO_BDBAR, (uintptr_t) dev->buf);
+	io_outd(dev->nabmbar + AC97_NABMBAR_PO_BDBAR,
+			(uintptr_t) dev->buf - VM_ADDR);
 
 	/* TODO Detect vendor and assign name */
 	/* FIXME Use new device minor instead of controller minor */

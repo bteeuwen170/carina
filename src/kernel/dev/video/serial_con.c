@@ -25,12 +25,12 @@
 #include <errno.h>
 #include <dev.h>
 #include <fs.h>
+#include <mm.h>
 #include <module.h>
 
 #include <asm/cpu.h>
 
 #include <string.h>
-#include <stdlib.h>
 
 static const char devname[] = "serial_con";
 
@@ -176,7 +176,8 @@ int serial_con_init(void)
 				0)
 			return res;
 
-		if (!(devp->device = kmalloc(sizeof(u16)))) {
+		/* XXX ? */
+		if (!(devp->device = kmalloc(sizeof(u16), 0))) {
 			res = -ENOMEM;
 			goto err;
 		}

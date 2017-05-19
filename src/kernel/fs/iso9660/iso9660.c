@@ -26,10 +26,10 @@
 #include <dev.h>
 #include <errno.h>
 #include <fs.h>
+#include <mm.h>
 #include <module.h>
 
 #include <ctype.h>
-#include <stdlib.h>
 #include <string.h>
 
 static const char devname[] = "iso9660";
@@ -191,6 +191,8 @@ static int iso9660_lookup(struct inode *dp, const char *name,
 	size_t boff = 0, doff;
 	int res;
 
+	/* TODO More efficient algorithm */
+
 	do {
 		if ((res = block_get(dp->sp->dev, dp->block + boff, &bp)) < 0)
 			return res;
@@ -218,7 +220,7 @@ static int iso9660_lookup(struct inode *dp, const char *name,
 
 			/* TODO put_block here */
 
-			if (!(cdep = kmalloc(sizeof(struct dirent)))) {
+			if (!(cdep = kmalloc(sizeof(struct dirent), 0))) {
 				res = -ENOMEM;
 				goto err;
 			}
@@ -244,7 +246,6 @@ static int iso9660_lookup(struct inode *dp, const char *name,
 err:
 	if (cdep)
 		kfree(cdep);
-	block_put(bp);
 
 	return res;
 }
@@ -272,7 +273,7 @@ static int iso9660_read(struct file *fp, char *buf, off_t off, size_t n)
 		block_put(bp);
 	} while (boff++ < n / fp->ip->sp->block_size);
 
-	return fp->ip->size;
+	return n;
 }
 
 static int iso9660_readdir(struct file *fp, char *_name)
@@ -283,6 +284,8 @@ static int iso9660_readdir(struct file *fp, char *_name)
 	size_t boff = 0, doff;
 	off_t i;
 	int res;
+
+	/* TODO More efficient algorithm */
 
 	do {
 		if ((res = block_get(fp->ip->sp->dev, fp->ip->block + boff,

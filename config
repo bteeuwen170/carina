@@ -2,6 +2,14 @@
  * config
  */
 
+menu "Kernel"
+{
+	config CONFIG_ALLOC_VERBOSE
+		"Show verbose kernel space allocation messages";
+	config CONFIG_ALLOC_FREE_ZERO
+		"Zero out freed memory";
+}
+
 menu "CPU"
 {
 	if (ARCH_i386) {
@@ -24,13 +32,11 @@ menu "File systems"
 	}
 }
 
-if (CONFIG_BLOCK) {
-	menu "Bus devices"
-	{
-		if (ARCH_x86) {
-			config CONFIG_PCI
-				"PCI bus support";
-		}
+menu "Bus devices"
+{
+	if (ARCH_x86) {
+		config CONFIG_PCI
+			"PCI bus support";
 	}
 }
 
@@ -65,6 +71,9 @@ menu "Char devices"
 menuconfig CONFIG_BLOCK
 	"Block devices"
 {
+	config CONFIG_BLOCK_VERBOSE
+		"Show verbose block buffer allocation messages";
+
 	if (CONFIG_PCI) {
 		menuconfig CONFIG_IDE
 			"IDE support"

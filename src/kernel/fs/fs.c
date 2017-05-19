@@ -27,9 +27,9 @@
 #include <errno.h>
 #include <fs.h>
 #include <kernel.h>
+#include <mm.h>
 #include <proc.h>
 
-#include <stdlib.h>
 #include <string.h>
 
 static const char devname[] = "fs";
@@ -289,7 +289,7 @@ int fs_mkdir(const char *path, mode_t mode)
 	strcpy(buf, path);
 	dir_basename(buf);
 
-	if (!(dep = kmalloc(sizeof(struct dirent)))) {
+	if (!(dep = kmalloc(sizeof(struct dirent), 0))) {
 		res = -ENOMEM;
 		goto err;
 	}
@@ -408,6 +408,7 @@ void fs_init(void)
 		goto fallback;
 	}
 
+	/* for(;;); */
 	goto mountdev;
 
 fallback:

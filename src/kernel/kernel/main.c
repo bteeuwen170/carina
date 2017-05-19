@@ -32,6 +32,7 @@
 #include <issue.h>
 #include <kernel.h>
 #include <lock.h>
+#include <mm.h>
 #include <module.h>
 #include <pci.h>
 #include <proc.h>
@@ -41,7 +42,6 @@
 #include <sound/ac97.h>
 #include <sound/sb16.h>
 
-#include <stdlib.h>
 #include <string.h>
 
 void kernel_main(void)
@@ -160,7 +160,7 @@ void kernel_main(void)
 			RELEASE_MAJOR, RELEASE_MINOR, __DATE__, __TIME__);
 
 	rtc_gettm(&tm);
-	kprintf("Starting up at %04d-%02d-%02d %02d:%02d:%02d UTC\n",
+	kprintf("Starting up on %04d-%02d-%02d %02d:%02d:%02d UTC\n",
 			tm.year, tm.mon, tm.mday, tm.hour, tm.min, tm.sec);
 
 #if 0
@@ -173,7 +173,6 @@ void kernel_main(void)
 
 	/* Temporary and crappy code */
 #if 1
-
 	struct file *fpkbd;
 	struct input_event iep;
 	char cmd[64], c;
@@ -252,18 +251,22 @@ void kernel_main(void)
 			else
 				res = file_open(cmd + 4, F_RO, &fp);
 
+			/* FIXME Returning 0 even though that's not the case */
+
 			if (res == 0) {
-				buf = kcalloc(1, fp->ip->size);
+				buf = kmalloc(fp->ip->size, 0);
 				if (!buf)
 					kprintf("OUT OF MEM!");
 
 				res = file_read(fp, buf, fp->ip->size);
+				buf[fp->ip->size] = '\0';
 
 				if (res > 0)
 					kprintf("%s", buf);
 				else
 					kprintf("%d\n", res);
 
+				kfree(buf);
 				file_close(fp);
 			}
 		} else if (strncmp(cmd, "cd", 2) == 0) {

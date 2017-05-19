@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/lib/stdlib.h
+ * src/kernel/include/mm.h
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,22 +22,13 @@
  *
  */
 
-#ifndef _STDLIB_H
-#define _STDLIB_H
+#ifndef _MM_H
+#define _MM_H
 
-/* void *malloc(size_t size); */
-/* void *calloc(size_t src, size_t size); */
-/* void *realloc(void *ptr, size_t size); */
-/* void *free(void *ptr); */
-/* void *aligned_alloc(size_t align, size_t size); */
+#define KM_CONT	0x01
+/* #define KM_USER	0x02 */
 
-/* XXX TEMP */
-#define HEAP_SIZE (1 * 1024 * 1024)
-
-void *kmalloc(size_t size);
-void *kcalloc(size_t nbmd, size_t size);
-void *krealloc(void *ptr, size_t size);
-void kfree(void *ptr);
-/* XXX / TEMP */
+void *kmalloc(size_t size, int flags);
+void kfree(void *addr);
 
 #endif

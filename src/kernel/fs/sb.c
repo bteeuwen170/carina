@@ -24,8 +24,8 @@
 
 #include <errno.h>
 #include <fs.h>
+#include <mm.h>
 
-#include <stdlib.h>
 #include <string.h>
 
 static LIST_HEAD(superblocks);
@@ -43,7 +43,7 @@ int sb_get(struct fs_driver *fsdp, dev_t dev, u8 flags, struct superblock **sp)
 		}
 	}
 
-	if (!(csp = kmalloc(sizeof(struct superblock))))
+	if (!(csp = kmalloc(sizeof(struct superblock), 0)))
 		return -ENOMEM;
 
 	list_init(&csp->l);
@@ -106,14 +106,9 @@ int sb_put(struct dirent *dep)
 	return -EINVAL;
 }
 
-int sb_lookup(struct inode *dp, const char *name, struct superblock **sp)
+int sb_lookup(struct dirent *dep, struct superblock **sp)
 {
 	struct superblock *csp;
-	struct dirent *dep;
-	int res;
-
-	if ((res = dir_lookup(dp, name, &dep)) < 0)
-		return res;
 
 	list_for_each(csp, &superblocks, l) {
 		if (!csp->pdep)

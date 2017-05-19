@@ -27,12 +27,13 @@
 #include <mboot.h>
 
 #include <asm/cpu.h>
+#include <asm/mmap.h>
 #include <asm/pic.h>
 
 #include <string.h>
 
+/* TODO Move */
 extern void early_kprint_init(void);
-extern void mm_init(uintptr_t addr, off_t len);
 
 #if 0
 static void cpu_info(void)
@@ -72,18 +73,18 @@ void cpu_init(struct mboot_info *_mboot)
 
 	memcpy(&mboot, _mboot, sizeof(struct mboot_info));
 
-	early_kprint_init();
-
-	paging_init();
-
-	pic_init();
 	idt_init();
 
-	cmdline_init((const char *) (uintptr_t) mboot.cmdline);
+	early_kprint_init();
+	cmdline_init((const char *) (uintptr_t) mboot.cmdline + VM_ADDR);
+
+	mmap_init(mboot.mmap_addr + VM_ADDR, mboot.mmap_len);
+	pm_init();
+	mm_init();
+
+	pic_init();
 
 	/* cpu_info() */
-
-	mm_init(mboot.mmap_addr, mboot.mmap_len);
 
 	kernel_main();
 }

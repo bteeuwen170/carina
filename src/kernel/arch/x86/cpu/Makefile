@@ -5,7 +5,6 @@
 kernel-o += src/kernel/arch/x86/cpu/cpu.o \
 	    src/kernel/arch/x86/cpu/early_kprint.o \
 	    src/kernel/arch/x86/cpu/idt.o \
-	    src/kernel/arch/x86/cpu/paging.o \
 	    src/kernel/arch/x86/cpu/pic.o \
 	    src/kernel/arch/x86/cpu/reboot.o
 

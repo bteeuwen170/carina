@@ -32,13 +32,12 @@
 #   include "../../include-64/asm/cpu.h"
 #endif
 
-#define GDT_ENTRIES	6
+#define PAGE_SIZE	4096
 
-/* TODO IDT_ENTIRES to INT_ENTRIES */
+#define GDT_ENTRIES	6
 
 #define IDT_ENTRIES	256
 #define SINT_ENTRIES	32
-#define HINT_ENTRIES	(IDT_ENTRIES - SIN_ENTRIES)
 #define IRQ_ENTRIES	16
 
 #define TSS_ENTRIES	1
@@ -138,6 +137,24 @@ static inline void tss_load(void)
 	asm volatile ("ltr %0" : : "r" (ax));
 }
 
+static inline void tlb_flush(void)
+{
+#ifdef ARCH_x86_64
+	asm volatile ("mov %0, %%cr3" : : "r" (0xFFFFFF7FBFDFE000) : "memory");
+#else
+	/* TODO */
+#endif
+}
+
+static inline void page_flush(uintptr_t addr)
+{
+#if 1
+	asm volatile ("invlpg (%0)" : : "r" (addr) : "memory");
+#else /* For i386 */
+	tlb_flush();
+#endif
+}
+
 /*static inline bool int_state(void)
 {
 	register u64 rflags = 0;
@@ -160,11 +177,16 @@ void irq_unmask(u8 irq);
 
 int irq_active(u8 irq);
 
-void tss_init(u32 *limit, u32 *base);
+/* void tss_init(u32 *limit, u32 *base);
 
 void svmode_enter(void);
-void usrmode_enter(void);
+void usrmode_enter(void); */
 
-void paging_init(void);
+void *page_alloc_user(void);
+void *page_alloc_kernel(void);
+
+void page_free(void *page);
+
+void pm_init(void);
 
 #endif

@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * kernel/arch/x86/boot/paging.c
+ * src/kernel/mm/vm.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,7 +22,3 @@
  *
  */
 
-void paging_init(void)
-{
-	/* TODO Undo kernel 1 - 6 MB identity mapping */
-}

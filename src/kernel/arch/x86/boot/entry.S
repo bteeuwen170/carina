@@ -103,7 +103,7 @@ entry:
 #ifdef CONFIG_X86_PAE
 	bts $5, %eax /* CR4.PAE */
 #endif
-	bts $7, %eax /* CR4.PGE */
+	#bts $7, %eax /* CR4.PGE */ /* XXX Maybe? */
 	#bts $9, %eax /* CR4.OSFXSR */
 	#bts $10, %eax /* CR4.OSXMMEXCPT */
 	mov %eax, %cr4
@@ -237,61 +237,44 @@ gdtp:
 	.long gdt - VM_ADDR
 #endif
 
-/* FIXME Don't hardcode 6/8 MB */
+/* FIXME Don't do this statically */
 .align 4096
 #ifdef ARCH_x86_64
 pml4:
-	.quad pdpt_lo - VM_ADDR + 0b000011
-	.fill 510, 8, 0
-	.quad pdpt_hi - VM_ADDR + 0b000011
-pdpt_lo:
-	.quad pdt - VM_ADDR + 0b00000011
-	.fill 511, 8, 0
-pdpt_hi:
-	.fill 510, 8, 0
-	.quad pdt - VM_ADDR + 0b00000011
-	.quad 0
-pdt:
-	.quad pt_0 - VM_ADDR + 0b00000011
-	.quad pt_1 - VM_ADDR + 0b00000011
-	.quad pt_2 - VM_ADDR + 0b00000011
+	.quad pdtp_lo - VM_ADDR + 0b000011
 	.fill 509, 8, 0
+	.quad pml4 - VM_ADDR + 0b000011
+	.quad pdtp_hi - VM_ADDR + 0b000011
+pdtp_lo:
+	.quad pdt_lo - VM_ADDR + 0b00000011
+	.fill 511, 8, 0
+pdtp_hi:
+	.fill 510, 8, 0
+	.quad pdt_hi - VM_ADDR + 0b00000011
+	.quad 0
+pdt_lo:
+	.quad pt_0 - VM_ADDR + 0b00000011
+	.fill 511, 8, 0
+pdt_hi:
+	.quad pt_0 - VM_ADDR + 0b00000011
+	.fill 511, 8, 0
 pt_0:
-	i = 0
-	.rept 512
-		.quad i * 4096 + 0b100000011
-		i = i + 1
+	j = 0
+	.rept 511
+		.quad j * 4096 + 0b100000011
+		j = j + 1
 	.endr
-pt_1:
-	i = 512
-	.rept 512
-		.quad i * 4096 + 0b100000011
-		i = i + 1
-	.endr
-pt_2:
-	i = 1024
-	.rept 512
-		.quad i * 4096 + 0b100000011
-		i = i + 1
-	.endr
+	.quad 0
 #elif defined(CONFIG_X86_PAE)
 /* TODO */
 #else
 pdt:
 	.long pt_0 - VM_ADDR + 0b00000011
-	.long pt_1 - VM_ADDR + 0b00000011
-	.fill 766, 4, 0
+	.fill 767, 4, 0
 	.long pt_0 - VM_ADDR + 0b00000011
-	.long pt_1 - VM_ADDR + 0b00000011
-	.fill 254, 4, 0
+	.fill 255, 4, 0
 pt_0:
 	i = 0
-	.rept 1024
-		.long i * 4096 + 0b100000011
-		i = i + 1
-	.endr
-pt_1:
-	i = 1024
 	.rept 1024
 		.long i * 4096 + 0b100000011
 		i = i + 1

@@ -24,17 +24,16 @@
 
 /* FIXME Interrupts are not working */
 
+#include <delay.h>
+#include <dev.h>
 #include <errno.h>
 #include <fs.h>
-#include <dev.h>
-#include <delay.h>
 #include <kernel.h>
+#include <mm.h>
 #include <module.h>
 #include <pci.h>
 
 #include <asm/cpu.h>
-
-#include <stdlib.h>
 
 static const char devname[] = "es1370";
 
@@ -97,7 +96,7 @@ void es1370_play(void)
 	file_open("/snd.pcm", F_RO, &fp);
 	if (!fp)
 		dprintf("CRAP OPEN\n");
-	audio = kmalloc(fp->ip->size);
+	audio = kmalloc(fp->ip->size, KM_CONT);
 	if (!file_read(fp, audio, fp->ip->size))
 		dprintf("CRAP READ\n");
 
@@ -149,10 +148,11 @@ static int es1370_probe(struct device *devp)
 
 	io_outb(dev->addr + ES1370_REG_MEMPAGE, ES1370_REG_MEMPAGE);
 
-	if (!(dev->buf = kcalloc(59, sizeof(char)))) {
+	if (!(dev->buf = kmalloc(59 * sizeof(char), KM_CONT))) {
 		res = -ENOMEM;
 		goto err;
 	}
+	memset(dev->buf, 0, 39 * sizeof(char));
 
 	if ((res = irq_handler_reg(cfgp->int_line, &int_handler)) < 0)
 		return res;

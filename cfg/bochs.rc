@@ -18,7 +18,7 @@ keyboard: type=mf, serial_delay=250, paste_delay=100000, user_shortcut=none
 
 clock: sync=none, time0=local, rtc_sync=0
 speaker: enabled=1, mode=system
-vga: extension=vbe, update_freq=5, realtime=1
+vga: extension=vbe, update_freq=30, realtime=1
 
 ata0-master: type=cdrom, path="bin/elarix.iso", status=inserted, model="Generic 1234", biosdetect=auto
 

@@ -25,8 +25,8 @@
 #include <errno.h>
 #include <fs.h>
 #include <kernel.h>
+#include <mm.h>
 
-#include <stdlib.h>
 #include <string.h>
 
 static const char devname[] = "fs";
@@ -46,17 +46,35 @@ int inode_get(struct superblock *sp, ino_t inum, struct inode **ip)
 		}
 	}
 
-	if (!(cip = kcalloc(1, sizeof(struct inode))))
+	if (!(cip = kmalloc(sizeof(struct inode), 0)))
 		return -ENOMEM;
 
 	list_init(&cip->l);
 
+	cip->refs = 0;
+
 	cip->inum = inum;
 	cip->refs = 1;
 	cip->links = 1;
+
+	/* TODO Update */
+	cip->rdev = 0;
+	cip->uid = 0;
+	cip->gid = 0;
+
+	/* TODO Update */
+	cip->atime = 0;
+	cip->ctime = 0;
+	cip->mtime = 0;
+
+	cip->block = 0;
+	cip->size = 0;
+
 	cip->sp = sp;
 
 	list_init(&cip->del);
+
+	cip->op = NULL;
 
 	if ((res = sp->fsdp->op->alloc(cip)) < 0)
 		goto err;
@@ -85,8 +103,10 @@ void inode_put(struct inode *ip)
 				"has an invalid reference count: %d\n",
 				ip->inum, ip->sp->name, ip->refs);
 
-	if (!(ip->sp->flags & M_KEEP) && !ip->refs)
+	if (!(ip->sp->flags & M_KEEP) && !ip->refs) {
+		list_rm(&ip->l);
 		kfree(ip);
+	}
 }
 
 int inode_dirisempty(struct inode *dp)
