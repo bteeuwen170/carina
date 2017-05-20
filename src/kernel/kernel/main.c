@@ -46,10 +46,8 @@
 
 void kernel_main(void)
 {
+	SPINLOCK(kernel);
 	struct tm tm;
-
-	/* SPINLOCK(main); */
-	/* spin_lock(main); */
 
 #ifdef CONFIG_CONSOLE_SERIAL
 	serial_con_init();
@@ -86,6 +84,8 @@ void kernel_main(void)
 #endif
 
 	asm volatile ("sti");
+
+	spin_lock(kernel);
 
 #ifdef CONFIG_PCI
 	pci_init();
@@ -164,6 +164,8 @@ void kernel_main(void)
 			tm.year, tm.mon, tm.mday, tm.hour, tm.min, tm.sec);
 
 #if 0
+	spin_unlock(kernel);
+
 	usrmode_enter();
 
 	/* TODO Start init */

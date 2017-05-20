@@ -25,7 +25,7 @@
 #ifndef _LOCK_H
 #define _LOCK_H
 
-typedef volatile u8	spinlock_t;
+typedef volatile int	spinlock_t;
 
 #include <asm/lock.h>
 

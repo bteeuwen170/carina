@@ -25,26 +25,36 @@
 #ifndef _X86_LOCK_H
 #define _X86_LOCK_H
 
+#if 1
+#define spin_lock(name) \
+	while (!__sync_bool_compare_and_swap(&name, 0, 1)); \
+		__sync_synchronize();
+
+#define spin_unlock(name) \
+	__sync_synchronize(); \
+	name
+#else
 static inline void spin_lock(spinlock_t *lock)
 {
 	(void) lock;
-	/* if (lock)
-		panic("attempted to lock a locked spinlock");
+	if (lock)
+		panic("attempted to lock a locked spinlock", 0, 0);
 
 	asm volatile ("lock; xchgl %0, %1" : "+m" (*lock) : "1" (1) : "cc");
 
-	__sync_synchronize(); */
+	__sync_synchronize();
 }
 
 static inline void spin_unlock(spinlock_t *lock)
 {
 	(void) lock;
-	/* if (!lock)
-		panic("attempted to unlock a unlocked spinlock");
+	if (!lock)
+		panic("attempted to unlock a unlocked spinlock", 0, 0);
 
 	__sync_synchronize();
 
-	asm volatile ("movl $0, %0" : "+m" (lock) : ); */
+	asm volatile ("movl $0, %0" : "+m" (lock) : );
 }
+#endif
 
 #endif
