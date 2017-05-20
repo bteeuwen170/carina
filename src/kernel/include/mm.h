@@ -28,7 +28,17 @@
 #define KM_CONT	0x01
 /* #define KM_USER	0x02 */
 
+struct mem_info {
+	size_t total;
+	size_t allocated;
+	size_t free;
+	size_t used;
+};
+
 void *kmalloc(size_t size, int flags);
 void kfree(void *addr);
+
+struct mem_info *mm_mem_info(void);
+void mm_init(void);
 
 #endif

@@ -68,8 +68,9 @@ void *kmalloc(size_t size, int flags)
 	if (flags & KM_CONT) {
 		nap->next = block_alloc_kernel(size);
 		end = nap->next;
+		max = end + size;
 
-		kprintf("done!\n");
+		kprintf("done!, max = %#lx\n", max);
 
 		goto new;
 	}
@@ -156,16 +157,14 @@ void kfree(void *ptr)
 		return;
 	}
 
-	cap = start;
-
-	do {
+	for (cap = start; cap; cap = cap->next) {
 		if (cap->addr == (uintptr_t) ptr) {
 			if (cap->present)
 				goto found;
 			else
 				break;
 		}
-	} while ((cap = cap->next));
+	}
 
 	panic("attempted to free unallocated memory", 0, (uintptr_t) ptr);
 
@@ -182,12 +181,34 @@ found:
 	return;
 }
 
-/* XXX How arch. specific is this? */
+struct mem_info *mm_mem_info(void)
+{
+	struct mem_info *mip;
+	struct frame *cap;
+
+	if (!(mip = kmalloc(sizeof(struct mem_info), 0)))
+		return NULL;
+
+	mip->total = mmap_mem_max();
+
+	cap = end;
+	mip->allocated = max - (uintptr_t) start;
+
+	mip->free = mip->total - mip->allocated;
+	mip->used = 0;
+
+	for (cap = start; cap; cap = cap->next)
+		if (cap->present)
+			mip->used += cap->size;
+
+	return mip;
+}
+
 void mm_init(void)
 {
 	if (!(start = end = page_alloc_kernel()))
 		panic("unable to allocate first page", -ENOMEM, 0);
-	max += end + PAGE_SIZE;
+	max = end + PAGE_SIZE;
 
 	memset(start, 0, sizeof(struct frame));
 }

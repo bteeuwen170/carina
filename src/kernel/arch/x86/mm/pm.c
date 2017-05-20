@@ -52,6 +52,7 @@ static const char devname[] = "pm";
 #define PTE(x)		(((x) >> 12) & 511)
 #define PAGE(x)		((x) / PAGE_SIZE)
 
+#define kern_start 0x100000
 extern uintptr_t kern_end;
 
 /* FIXME Probably not multitasking friendly */
@@ -66,6 +67,19 @@ uintptr_t virt_to_phys(uintptr_t vaddr)
 	uintptr_t paddr = pt[PTE(vaddr)] & FLAGS_MASK;
 
 	return paddr;
+}
+
+static uintptr_t page_get(off_t page)
+{
+	uintptr_t addr;
+
+	/* FIXME */
+	/* do { */
+		if (!(addr = mmap_get(page)))
+			return NULL;
+	/* } while (addr >= kern_start && addr < (uintptr_t) &kern_end); */
+
+	return addr;
 }
 
 /* static void pdtp_alloc(uintptr_t *pml4, uintptr_t vaddr, uintptr_t paddr)
@@ -103,7 +117,7 @@ static void *_page_alloc(uintptr_t vaddr, uintptr_t paddr)
 	/* TODO Confirm that this works... */
 	if (PDTE(paddr) == 511) {
 		taddr = paddr;
-		if (!(paddr = mmap_get(end)))
+		if (!(paddr = page_get(end)))
 			return NULL;
 		paddr += off++ * PAGE_SIZE;
 		pdt_alloc(PDTP_KERN, paddr + VM_ADDR, taddr);
@@ -111,7 +125,7 @@ static void *_page_alloc(uintptr_t vaddr, uintptr_t paddr)
 
 	if (PTE(paddr) == 511) {
 		taddr = paddr;
-		if (!(paddr = mmap_get(end)))
+		if (!(paddr = page_get(end)))
 			return NULL;
 		paddr += off++ * PAGE_SIZE;
 
@@ -137,7 +151,7 @@ void *page_alloc_kernel(void)
 {
 	uintptr_t addr;
 
-	if (!(addr = mmap_get(end++)))
+	if (!(addr = page_get(end++)))
 		return NULL;
 
 	return _page_alloc(addr + VM_ADDR, addr);
@@ -162,7 +176,7 @@ void *block_alloc_kernel(size_t size)
 	end += pts + pdts;
 	send = end;
 
-	if (!(saddr = mmap_get(end)))
+	if (!(saddr = page_get(end)))
 		return NULL;
 	saddr += off * PAGE_SIZE;
 	caddr = saddr;
@@ -206,11 +220,12 @@ void page_free(void *page)
 
 void pm_init(void)
 {
+#if 0 /* FIXME Block alloc. still has problems with segments */
+	end = 1;
+#else
+	/* end = PAGE(((uintptr_t) &kern_end)) + 1; */
 	end = PAGE(((uintptr_t) &kern_end +
-			((uintptr_t) &kern_end % PAGE_SIZE) - VM_ADDR));
-
-#ifdef CONFIG_ALLOC_VERBOSE
-	dprintf("first page: %#x\n", end);
+				((uintptr_t) &kern_end % PAGE_SIZE) - VM_ADDR));
 #endif
 
 	/* TODO Only identity map 1st MB */

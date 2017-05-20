@@ -58,13 +58,10 @@
 #define LL_DBG		3 /* KP_BDG + */
 
 void kprint(const char *prefix, char *fmt, ...);
-
-void kprint_init(void); /* XXX TEMP XXX */
-
 #define dprintf(...) 	kprint(devname, __VA_ARGS__)
 #define kprintf(...) 	kprint(NULL, __VA_ARGS__)
 
-i8 get_kp();
+void kprint_init(void);
 
 void panic(char *reason, i64 err_code, uintptr_t ip);
 

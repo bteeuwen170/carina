@@ -311,6 +311,17 @@ void kernel_main(void)
 #endif
 
 		/* Other */
+		} else if (strcmp(cmd, "free") == 0) {
+			struct mem_info *mi;
+
+			mi = mm_mem_info();
+
+			kprintf("total: %u K\n", mi->total / 1024);
+			kprintf("allocated: %u K\n", mi->allocated / 1024);
+			kprintf("free: %u K\n", mi->free / 1024);
+			kprintf("used: %u K\n", mi->used / 1024);
+
+			kfree(mi);
 #ifdef CONFIG_ATAPI
 		} else if (strcmp(cmd, "eject") == 0) {
 			struct file *fp;
