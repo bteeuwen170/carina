@@ -159,11 +159,7 @@ void *block_alloc_kernel(size_t size)
 	kprintf("(%u) %u < %u < %u < 1 < 1\n", size, pages, pts, pdts);
 
 	tend = end;
-	/*
-	 * FIXME We're wasting memory here, find a better way to calculate this
-	 */
-	end += (pages * TABLE_SIZE + pts * TABLE_SIZE + pdts * TABLE_SIZE) /
-			PAGE_SIZE + 1;
+	end += pts + pdts;
 	send = end;
 
 	if (!(saddr = mmap_get(end)))
@@ -193,11 +189,12 @@ void *block_alloc_kernel(size_t size)
 
 ret:
 	end = send;
+	end += pages;
 
 	dprintf("addr: %#lx\n", saddr);
 	dprintf("addr: %#lx\n", caddr);
 	dprintf("addr: %#lx\n", virt_to_phys(caddr));
-	dprintf("size: %#u should be %u\n", caddr - saddr, size);
+	dprintf("size: %#u should be %u or %u\n", caddr - saddr, size, pages * PAGE_SIZE);
 
 	return saddr + VM_ADDR;
 }
