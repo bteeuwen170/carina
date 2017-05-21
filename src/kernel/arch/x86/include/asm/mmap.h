@@ -25,7 +25,7 @@
 #ifndef _MMAP_H
 #define _MMAP_H
 
-uintptr_t mmap_get(uintptr_t page);
+uintptr_t mmap_get(off_t page);
 void mmap_init(uintptr_t addr, size_t len);
 
 #endif
