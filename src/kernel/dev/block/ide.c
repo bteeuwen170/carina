@@ -42,6 +42,7 @@
 static const char devname[] = "ide";
 
 static struct driver ide_driver;
+static volatile char irq;
 
 static void ide_outb(struct ide_device *idevp, u8 reg, u8 data)
 {
@@ -101,6 +102,14 @@ static int ide_poll(struct ide_device *idevp)
 	return 0;
 }
 
+static void ide_irq(struct ide_device *idevp)
+{
+	while (!(irq & idevp->irq))
+		asm volatile ("hlt");
+
+	irq &= ~idevp->irq;
+}
+
 #ifdef CONFIG_ATAPI
 int atapi_out(struct device *devp, const char *buf)
 {
@@ -121,14 +130,16 @@ int atapi_out(struct device *devp, const char *buf)
 	ide_outb(devp->device, ATA_REG_LBA0_LO, ATAPI_SECTOR_SIZE & 0xFF);
 	ide_outb(devp->device, ATA_REG_LBA0_MED, ATAPI_SECTOR_SIZE >> 8);
 
+	ide_outb(devp->device, ATA_REG_CMD, ATA_CMD_PACKET);
+
 	if ((res = ide_poll(idevp)) < 0)
 		return res;
-
-	ide_outb(devp->device, ATA_REG_CMD, ATA_CMD_PACKET);
 
 	for (i = 0; i < 11; i += 2)
 		io_outw(idevp->base, ((buf[i] & 0xFF) |
 				(buf[i + 1] & 0xFF) << 8));
+
+	ide_irq(idevp);
 
 	return 0;
 }
@@ -155,6 +166,16 @@ int atapi_in(struct device *devp, char *buf)
 }
 #endif
 
+static int int_handler(struct int_stack *regs)
+{
+	if (regs->int_no == 14 + SINT_ENTRIES)
+		irq |= 0x01;
+	else
+		irq |= 0x02;
+
+	return 1;
+}
+
 static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 {
 	struct device *devp = NULL;
@@ -169,18 +190,24 @@ static int ide_config(struct pci_cfg *pcp, u8 ch, u8 drive)
 	idevp->bus_master = (pcp->bar_4 & ~1) + (ch ? 0x08 : 0);
 	idevp->nint = 1;
 
+	idevp->drive = drive;
+
 	if (ch == 0) {
 		idevp->base = pcp->bar_0 & ~1;
 		idevp->ctrl = pcp->bar_1 & ~1;
 
+		idevp->irq = 0x01;
 		pcp->int_line = 14;
-		/* irq_unmask(pcp->int_line); */
+		if (drive == 0)
+			irq_handler_reg(pcp->int_line, &int_handler);
 	} else if (ch == 1) {
 		idevp->base = pcp->bar_2 & ~1;
 		idevp->ctrl = pcp->bar_3 & ~1;
 
+		idevp->irq = 0x02;
 		pcp->int_line = 15;
-		/* irq_unmask(pcp->int_line); */
+		if (drive == 0)
+			irq_handler_reg(pcp->int_line, &int_handler);
 	}
 
 	ide_outb(idevp, ATA_REG_SELECT, 0xA0 | (drive << 4));

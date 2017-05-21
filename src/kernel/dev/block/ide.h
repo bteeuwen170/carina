@@ -86,7 +86,7 @@ struct ide_device {
 	struct list_head l;
 
 	u16	base, ctrl, bus_master;
-	u8	nint;
+	u8	nint, irq;
 
 	u8	drive, type;
 
