@@ -109,7 +109,7 @@ entry:
 	mov %eax, %cr4
 
 	/* Load paging base address */
-#if ARCH_x86_64
+#ifdef ARCH_x86_64
 	mov $(pml4 - VM_ADDR), %eax
 #elif defined(CONFIG_X86_PAE)
 	mov $(pdpt - VM_ADDR), %eax
@@ -208,6 +208,7 @@ halt:
 
 .section .data
 
+.global gdt
 #ifdef ARCH_x86_64
 gdt:
 	.quad 0				/* 0x00 */
@@ -215,7 +216,7 @@ gdt:
 	.quad 0x000090000000FFFF	/* 0x10 - Data SV */
 	.quad 0x0020F8000000FFFF	/* 0x18 - Code USR */
 	.quad 0x0000F2000000FFFF	/* 0x20 - Data USR */
-	/* .quad 0x00FFFF000000FFFF */	/* 0x28 - TSS */
+	.quad 0				/* 0x28 - TSS */
 gdtp:
 	.word . - gdt - 1
 	.quad gdt - VM_ADDR

@@ -9,7 +9,6 @@ RELEASE_MINOR	= 1
 RELEASEFLAGS	= -D RELEASE_MAJOR=$(RELEASE_MAJOR) -D RELEASE_MINOR=$(RELEASE_MINOR)
 
 ARCH		:= x86_64
-ARCH32		= $(ARCH)
 
 ifeq ($(ARCH),i386)
 ARCHT		= x86
@@ -17,7 +16,6 @@ endif
 
 ifeq ($(ARCH),x86_64)
 ARCHT		= x86
-ARCH32		= i386
 endif
 
 
@@ -26,7 +24,6 @@ HOSTLD		:= ld
 export HOSTCC HOSTLD
 
 CC		:= $(ARCH)-elf-elarix-gcc
-CC32		:= $(ARCH32)-elf-elarix-gcc
 AS		:= $(ARCH)-elf-elarix-as
 LD		:= $(ARCH)-elf-elarix-gcc
 
@@ -45,24 +42,20 @@ CONFIGFLAGS	= $(shell sed -e '/\#.*$$/d;/^$$/d;s/^/-D /g;s/$$/=o/g' .config)
 $(shell sed -e '/\#.*$$/d;/^$$/d;s/$$/=o/g' .config > .config.tmp)
 include .config.tmp
 
-# TEMP TODO Relocate in arch directory
-TYPES		= src/kernel/include/sys/types.h
-# TEMP
 ASFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS)
-CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fomit-frame-pointer
+CFLAGS		:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g #-fomit-frame-pointer
 ifeq ($(ARCH),x86_64)
 CFLAGS		+= -mcmodel=kernel
 endif
-CFLAGS32	:= $(RELEASEFLAGS) $(ARCHFLAGS) $(CONFIGFLAGS) -Wall -Wextra -Wcast-align -Werror=implicit-function-declaration -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -ffreestanding -include $(TYPES) -mno-red-zone -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -mno-avx -g0 #-fno-omit-frame-pointer
 LDFLAGS		:= -nostdlib -z max-page-size=4096# -s
-export ASFLAGS CFLAGS CFLAGS32 LDFLAGS
+export ASFLAGS CFLAGS LDFLAGS
 
 HOSTCFLAGS	:= -Wall -Wextra -Wcast-align -fdiagnostics-color=auto -fno-asynchronous-unwind-tables -std=gnu89 -g #-Os
 export HOSTCFLAGS
 
 BOCHSFLAGS	:= -f cfg/bochs.rc -q
 KVMFLAGS	:= -enable-kvm
-QEMUFLAGS	:= -m 64M --serial vc -soundhw ac97#,es1370 #-vga none #-curses #-cpu qemu32 # To test no long mode message
+QEMUFLAGS	:= -m 64M --serial vc -soundhw ac97#,es1370 #-vga none # To test no long mode message
 QEMUDBGFLAGS	:= -s #-d cpu_reset#,int,cpu,exec,in_asm -no-reboot
 WGETFLAGS	:= -q --show-progress
 

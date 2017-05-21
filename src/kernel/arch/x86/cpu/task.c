@@ -1,7 +1,7 @@
 /*
  *
  * Elarix
- * src/kernel/arch/x86/cpu/task-64.S
+ * src/kernel/arch/x86/cpu/task.c
  *
  * Copyright (C) 2016 - 2017 Bastiaan Teeuwen <bastiaan@mkcl.nl>
  *
@@ -22,29 +22,11 @@
  *
  */
 
-/* XXX This is temporary */
+#include <asm/cpu.h>
 
-.code64
+static struct tss_entry kern_tss;
 
-.section .text
-
-.global usermode_enter
-usermode_enter:
-	cli
-	mov $0x23, %ax
-	mov %ax, %dx
-	mov %ax, %es
-	mov %ax, %fs
-	mov %ax, %gs
-
-	mov %rsp, %rax
-	push $0x23		/* SS */
-	push %rax		/* RSP */
-	pushf			/* RFLAGS */
-	push $0x1B		/* CS */
-	push usermodes_main
-	iretq
-
-usermodes_main:
-	hlt
-	jmp usermodes_main
+void task_init(void)
+{
+	
+}

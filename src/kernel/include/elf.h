@@ -25,36 +25,48 @@
 #ifndef _ELF_H
 #define _ELF_H
 
-struct elf_header32 {
-	u8	magic[16];
+#define ELF_H_TYPE_REL	0x01
+#define ELF_H_TYPE_EXEC	0x02
+#define ELF_H_TYPE_SHR	0x03
+#define ELF_H_TYPE_CORE	0x04
+
+#define ELF_P_TYPE_LOAD	0x01
+
+struct elf_header {
+	char	magic[4];
+	u8	class;
+	u8	data;
+	u8	version0;
+	u8	abi;
+	u8	unused0[10];
 	u16	machine;
-	u16	version;
+	u32	version1;
+} __attribute__ ((packed));
+
+struct elf_header32 {
+	struct elf_header head;
+
 	u32	entry;
 	u32	program_off;
-	u32	section_off;
+	u8	unused0[4];
 	u32	flags;
 	u16	header_size;
 	u16	program_size;
 	u16	program_len;
-	u16	section_size;
-	u16	section_len;
-	u16	section_names;
+	u8	unused1[6];
 } __attribute__ ((packed));
 
 struct elf_header64 {
-	u8	magic[16];
-	u16	machine;
-	u16	version;
+	struct elf_header head;
+
 	u64	entry;
 	u64	program_off;
-	u64	section_off;
+	u8	unused0[8];
 	u32	flags;
 	u16	header_size;
 	u16	program_size;
 	u16	program_len;
-	u16	section_size;
-	u16	section_len;
-	u16	section_names;
+	u8	unused1[6];
 } __attribute__ ((packed));
 
 struct elf_program32 {
@@ -86,7 +98,9 @@ struct elf_section32 {
 	u32	vaddr;
 	u32	off;
 	u32	size;
-	u64	reserved0;
+	u8	unused0[8];
+	u32	align;
+	u8	unused1[4];
 } __attribute__ ((packed));
 
 struct elf_section64 {
@@ -96,7 +110,9 @@ struct elf_section64 {
 	u64	vaddr;
 	u64	off;
 	u64	size;
-	u64	reserved[3];
+	u8	unused0[8];
+	u64	align;
+	u8	unused1[8];
 } __attribute__ ((packed));
 
 #endif

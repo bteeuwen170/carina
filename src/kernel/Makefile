@@ -3,6 +3,7 @@
 #
 
 include src/kernel/arch/$(ARCHT)/Makefile
+include src/kernel/bin/Makefile
 include src/kernel/dev/Makefile
 include src/kernel/fs/Makefile
 include src/kernel/kernel/Makefile
@@ -13,9 +14,11 @@ kernel-i += -I src/kernel/dev
 kernel-i += -I src/kernel/include
 kernel-i += -I src/kernel/lib
 
+TYPES = src/kernel/include/sys/types.h
+
 %.o: %.c
 	echo -e "  CC      $<"
-	$(CC) $(CFLAGS) -c $< $(kernel-i) -o $@
+	$(CC) $(CFLAGS) -include $(TYPES) -c $< $(kernel-i) -o $@
 
 %.o: %.S
 	echo -e "  AS      $<"

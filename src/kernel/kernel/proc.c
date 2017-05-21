@@ -22,7 +22,47 @@
  *
  */
 
+#include <elf.h>
+#include <errno.h>
+#include <fs.h>
+#include <mm.h>
 #include <proc.h>
 
-struct process _cproc;
+extern void usermode_enter();
+
+static struct process _cproc;
 struct process *cproc = &_cproc;
+
+int proc_exec(const char *path, char **argv, char **envp)
+{
+	struct file *fp;
+	char *buf;
+	int res;
+
+	if ((res = file_open(path, F_RO, &fp)) < 0)
+		return res;
+
+	if (!fp->ip->size)
+		return -EINVAL;
+
+	if (!(buf = kmalloc(fp->ip->size, 0)))
+		return -ENOMEM;
+
+	if ((res = file_read(fp, buf, fp->ip->size)) < 0)
+		return res;
+
+	if ((res = elf_read_header((struct elf_header *) buf)) == 0)
+		return res;
+
+	if (res == 1)
+		res = elf32_load((struct elf_header64 *) buf);
+	else if (res == 2)
+		res = elf64_load((struct elf_header64 *) buf);
+
+	return res;
+}
+
+void proc_init(void)
+{
+
+}

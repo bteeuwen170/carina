@@ -44,9 +44,27 @@
 
 #include <string.h>
 
+static void init(void)
+{
+	char buf[PATH_MAX];
+	char *argv[1];
+	int res;
+
+	proc_init();
+
+	if (cmdline_str_get("init", buf) != 0)
+		strcpy(buf, "/app/bin/init");
+
+	argv[0] = buf;
+
+	if ((res = proc_exec(buf, argv, 0)) < 0)
+		panic("failed to execute init", res, 0);
+
+	panic("attempted to kill init", 0, 0);
+}
+
 void kernel_main(void)
 {
-	SPINLOCK(kernel);
 	struct tm tm;
 
 #ifdef CONFIG_CONSOLE_SERIAL
@@ -85,8 +103,6 @@ void kernel_main(void)
 
 	asm volatile ("sti");
 
-	spin_lock(kernel);
-
 #ifdef CONFIG_PCI
 	pci_init();
 #endif
@@ -98,8 +114,8 @@ void kernel_main(void)
 
 	devices_probe();
 
-	memfs_init();
 	devfs_init();
+	memfs_init();
 	fs_init();
 
 #if 0
@@ -163,18 +179,9 @@ void kernel_main(void)
 	kprintf("Starting up on %04d-%02d-%02d %02d:%02d:%02d UTC\n",
 			tm.year, tm.mon, tm.mday, tm.hour, tm.min, tm.sec);
 
-#if 0
-	spin_unlock(kernel);
+	init();
 
-	usrmode_enter();
-
-	/* TODO Start init */
-
-	panic("attempted to kill init", 0, 0);
-#endif
-
-	/* Temporary and crappy code */
-#if 1
+#if 0 /* Temporary and crappy code */
 	struct file *fpkbd;
 	struct input_event iep;
 	char cmd[64], c;

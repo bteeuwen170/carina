@@ -73,6 +73,7 @@ void cpu_init(struct mboot_info *_mboot)
 
 	memcpy(&mboot, _mboot, sizeof(struct mboot_info));
 
+	task_init();
 	idt_init();
 
 	early_kprint_init();

@@ -5,5 +5,4 @@
 kernel-o += src/kernel/kernel/cmdline.o \
 	    src/kernel/kernel/main.o \
 	    src/kernel/kernel/panic.o \
-	    src/kernel/kernel/proc.o \
-#	    src/kernel/kernel/time.o
+	    src/kernel/kernel/proc.o

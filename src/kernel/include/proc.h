@@ -27,12 +27,6 @@
 
 #include <fs.h>
 
-/* struct cpu {
-	int		id;
-
-	struct process	*proc;
-}; */
-
 struct process {
 	pid_t	pid;
 
@@ -46,9 +40,10 @@ struct process {
 	struct dirent	*cwd;
 };
 
-/* XXX TEMP until scheduler is working */
-extern struct process _cproc;
 extern struct process *cproc;
-/* XXX BAD */
+
+int proc_exec(const char *path, char **argv, char **envp);
+
+void proc_init(void);
 
 #endif

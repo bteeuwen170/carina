@@ -8,6 +8,8 @@ menu "Kernel"
 		"Show verbose kernel space allocation messages";
 	config CONFIG_ALLOC_FREE_ZERO
 		"Zero out freed memory";
+	config CONFIG_EXEC_VERBOSE
+		"Show verbose messages when loading executables";
 }
 
 menu "CPU"
