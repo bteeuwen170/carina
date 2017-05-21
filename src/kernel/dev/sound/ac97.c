@@ -33,6 +33,8 @@
 
 #include <asm/cpu.h>
 
+#include <string.h>
+
 static const char devname[] = "ac97";
 
 #define AC97_NAMBAR_RESET	0x00
