@@ -25,6 +25,7 @@
 #include <cmdline.h>
 #include <kernel.h>
 #include <mboot.h>
+#include <mm.h>
 
 #include <asm/cpu.h>
 #include <asm/mmap.h>

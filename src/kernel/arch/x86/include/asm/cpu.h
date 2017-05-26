@@ -182,6 +182,8 @@ int irq_active(u8 irq);
 void svmode_enter(void);
 void usrmode_enter(void); */
 
+uintptr_t page_get(uintptr_t page);
+
 void *page_alloc_user(void);
 void *page_alloc_kernel(void);
 

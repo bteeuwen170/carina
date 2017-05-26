@@ -36,7 +36,7 @@ void panic(char *reason, i64 err_code, uintptr_t ip)
 	/* TODO Hide cursor */
 
 	if (ip)
-		kprintf(KP_CRIT "%s @ %#x\n", reason, ip);
+		kprintf(KP_CRIT "%s @ %#lx\n", reason, ip);
 	else if (reason)
 		kprintf(KP_CRIT "%s\n", reason);
 

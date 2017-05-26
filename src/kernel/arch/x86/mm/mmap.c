@@ -31,9 +31,8 @@ static const char devname[] = "mmap";
 
 static struct mboot_mmap *mmap;
 static size_t mmap_len, mem_max;
-static uintptr_t kern_start, kern_end;
 
-uintptr_t mmap_get(off_t page)
+void *mmap_get(uintptr_t page)
 {
 	struct mboot_mmap *cmmap;
 	uintptr_t i, pi = 0;
@@ -81,11 +80,6 @@ void mmap_init(uintptr_t addr, size_t len)
 
 	mmap = (struct mboot_mmap *) addr;
 	mmap_len = len;
-
-	kern_start = 0x100000;
-	kern_end = (((uintptr_t) &kern_end +
-			((uintptr_t) &kern_end % PAGE_SIZE) - VM_ADDR)) /
-			PAGE_SIZE;
 
 	dprintf("%u MB memory\n", mem_max / 1024 / 1024 + 1);
 }

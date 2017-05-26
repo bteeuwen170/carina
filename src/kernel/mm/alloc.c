@@ -43,7 +43,7 @@ struct frame {
 	size_t		size;
 	char		present:1;
 
-	struct frame	*next;
+	struct frame *next;
 };
 /* FIXME Option for page aligned */
 /* } __attribute__ ((packed)); */
@@ -81,7 +81,7 @@ void *kmalloc(size_t size, int flags)
 
 		if (cap->size == size) {
 #ifdef CONFIG_ALLOC_VERBOSE
-			kprintf("* @ %#x (%u)\n", cap->addr, cap->size);
+			kprintf("* @ %#lx (%u)\n", cap->addr, cap->size);
 #endif
 			goto ret;
 		} else if (free && size >= NEW_MIN) {
@@ -106,7 +106,7 @@ void *kmalloc(size_t size, int flags)
 		nap->next = cap->next;
 
 #ifdef CONFIG_ALLOC_VERBOSE
-		kprintf("& @ %#x (%u), %#x (%u) < %u\n", cap->addr, size,
+		kprintf("& @ %#lx (%u), %#lx (%u) < %u\n", cap->addr, size,
 				nap->addr, nap->size, cap->size);
 #endif
 
@@ -137,7 +137,7 @@ new:
 	cap->next = NULL;
 
 #ifdef CONFIG_ALLOC_VERBOSE
-	kprintf("+ @ %#x (%u)\n", cap->addr, cap->size);
+	kprintf("+ @ %#lx (%u)\n", cap->addr, cap->size);
 #endif
 
 ret:
@@ -175,7 +175,7 @@ found:
 	cap->present = 0;
 
 #ifdef CONFIG_ALLOC_VERBOSE
-	kprintf("- @ %#x (%u)\n", cap->addr, cap->size);
+	kprintf("- @ %#lx (%u)\n", cap->addr, cap->size);
 #endif
 
 	return;
